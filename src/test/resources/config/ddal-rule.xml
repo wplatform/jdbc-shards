@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ddal-rule PUBLIC "-//suning.com//DTD ddal-rule//EN" "http://suning.com/dtd/ddal-rule.dtd">
+<ddal-rule>
+	<tableRouter id="partition4_with_id_mod">
+		<partition>shard1[_001-_004],shard2[_001-_004],shard3[_001-_004],shard4[_001-_004]</partition>
+		<shardRule>
+			<![CDATA[ (${F_STUDENT_ID} % 16 ) / 4]]>
+		</shardRule>
+		<tableRule>
+			<![CDATA[ ${F_STUDENT_ID} % 4]]>
+		</tableRule>
+	</tableRouter>
+</ddal-rule>
