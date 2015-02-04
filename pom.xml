@@ -31,8 +31,8 @@
 	</developers>
 
 	<scm>
-		<url>https://wenshao@github.com/alibaba/druid.git</url>
-		<connection>scm:git:https://wenshao@github.com/alibaba/druid.git</connection>
+		<url>https://github.com/wplatform/jdbc-shards</url>
+		<connection>scm:git:https://github.com/wplatform/jdbc-shards.git</connection>
 	</scm>
 
 	<licenses>
