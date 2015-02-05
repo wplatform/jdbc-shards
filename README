@@ -4,5 +4,5 @@
 # 2、jdbc-shards功能特点
 1. 小于1M的jar,基于jdbc实现，无server模式，无需单独部署
 2. 支持分库分表，支持跨结点的join,count,order by,group by以及聚合函数等的SQL持性
-3. 对前端应用透明，屏蔽分布式数据库的复杂逻辑，访问多个数据库像访问一个数据库那样，简化开发
+3. 对前端应用透明，屏蔽分布式数据库的复杂逻辑，使访问多个数据库像访问一个数据库那样
 4. 兼容主流的数据库MySql,Oracle,DB2,SQLServer,PostgreSQL的SQL语法
