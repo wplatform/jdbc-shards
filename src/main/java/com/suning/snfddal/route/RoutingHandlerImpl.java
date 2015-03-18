@@ -260,13 +260,11 @@ public class RoutingHandlerImpl implements RoutingHandler {
                 return null;
             }
             List<Value> enumValues = New.arrayList(10);
-            int enumCount = 0;
-            while (database.compare(firstV, listV) <= 0) {
-                long begin = firstV.getLong();
-                Value enumValue = ValueLong.get(begin + enumCount);
-                enumValue = enumValue.convertTo(firstV.getType());
+            Value enumValue = firstV;
+            while (database.compare(enumValue, listV) <= 0) {
                 enumValues.add(enumValue);
-                ++ enumCount;
+                Value increase = ValueLong.get(1).convertTo(enumValue.getType());
+                enumValue = enumValue.add(increase);
             }
             return enumValues;
 

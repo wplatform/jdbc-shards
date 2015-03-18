@@ -182,7 +182,7 @@ public class Database {
      */
     public synchronized void addSchemaObject(SchemaObject obj) {
         obj.getSchema().add(obj);
-        trace.debug("addSchemaObject: {0}", obj.getCreateSQL());
+        //trace.debug("addSchemaObject: {0}", obj.getCreateSQL());
     }
 
     /**

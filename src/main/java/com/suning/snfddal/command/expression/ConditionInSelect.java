@@ -16,6 +16,7 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.result.LocalResult;
+import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
@@ -32,6 +33,8 @@ public class ConditionInSelect extends Condition {
     private final boolean all;
     private final int compareType;
     private int queryLevel;
+    
+    private LocalResult cachedResult;
 
     public ConditionInSelect(Database database, Expression left, Query query,
             boolean all, int compareType) {
@@ -44,9 +47,7 @@ public class ConditionInSelect extends Condition {
 
     @Override
     public Value getValue(Session session) {
-        query.setSession(session);
-        query.setDistinct(true);
-        LocalResult rows = query.query(0);
+        LocalResult rows = query(session);
         try {
             Value l = left.getValue(session);
             if (rows.getRowCount() == 0) {
@@ -189,22 +190,52 @@ public class ConditionInSelect extends Condition {
 
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
-        StringBuilder buff = new StringBuilder();
-        buff.append('(').append(left.exportParameters(filter,container)).append(' ');
-        if (all) {
-            buff.append(Comparison.getCompareOperator(compareType)).
-                append(" ALL");
-        } else {
-            if (compareType == Comparison.EQUAL) {
-                buff.append("IN");
-            } else {
+        Session session = filter.getSession();
+        LocalResult rows = query(session);
+        if (rows.getRowCount() > 0) {
+            StatementBuilder buff = new StatementBuilder();
+            buff.append('(').append(left.exportParameters(filter,container)).append(' ');
+            if (all) {
+                //由于all代表全部，所以<all表示小于子查询中返回全部值中的最小值；
+                //>all表示大于子查询中返回全部值中的最大值。
                 buff.append(Comparison.getCompareOperator(compareType)).
-                    append(" ANY");
+                    append(" ALL");
+            } else {
+                if (compareType == Comparison.EQUAL) {
+                    buff.append("IN");
+                } else {
+                    //<any可以理解为小于子查询中返回的任意一个值，因此只要小于最大值即可
+                    //>any可以理解为大于子查询中返回的任意一个值，因此只要大于最小值即可
+                    buff.append(Comparison.getCompareOperator(compareType)).
+                        append(" ANY");
+                }
             }
+            buff.append("(");
+            while (rows.next()) {
+                buff.appendExceptFirst(",");
+                buff.append("?");
+                Value r = rows.currentRow()[0];
+                container.add(r);
+            }
+            buff.append("))");
+            return buff.toString();
+        } else {
+            return "1 = 0";
         }
-        buff.append("(\n").append(StringUtils.indent(query.getPlanSQL(), 4, false)).
-            append("))");
-        return buff.toString();
+        
+        
+    }
+    
+    
+    private LocalResult query(Session session) {
+        if(cachedResult == null) {
+            query.setSession(session);
+            query.setDistinct(true);
+            cachedResult = query.query(0);
+        } else {
+            cachedResult.reset();
+        }
+        return cachedResult;
     }
 
 }

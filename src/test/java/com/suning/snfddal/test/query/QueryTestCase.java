@@ -152,6 +152,17 @@ public class QueryTestCase extends BaseSampleCase{
         this.query_Sql(sql, null);
     }
     
+    @Test
+    public void testQuery_SubQueryEqAny(){
+        String sql = "SELECT * FROM t_student where f_student_id = any(select f_student_id from t_student_course where t_score > 80)";
+        this.query_Sql(sql, null);
+    }
+    
+    @Test
+    public void testQuery_SubQueryEq(){
+        String sql = "SELECT * FROM t_student where f_student_id = (select f_student_id from t_student_course where t_score = 80)";
+        this.query_Sql(sql, null);
+    }
     
     @Test
     public void testQuery_SubQueryExists(){
