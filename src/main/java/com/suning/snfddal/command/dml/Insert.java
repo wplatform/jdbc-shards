@@ -8,7 +8,6 @@ package com.suning.snfddal.command.dml;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
@@ -23,6 +22,7 @@ import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.ResultTarget;
 import com.suning.snfddal.result.Row;

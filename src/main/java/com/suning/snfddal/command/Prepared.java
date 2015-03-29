@@ -7,11 +7,11 @@ package com.suning.snfddal.command;
 
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.StatementBuilder;

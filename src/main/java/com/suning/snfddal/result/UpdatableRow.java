@@ -11,9 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.jdbc.JdbcConnection;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;

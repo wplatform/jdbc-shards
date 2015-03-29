@@ -8,8 +8,6 @@ package com.suning.snfddal.dbobject;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.suning.snfddal.api.Aggregate;
-import com.suning.snfddal.api.AggregateFunction;
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
@@ -94,7 +92,7 @@ public class UserAggregate extends DbObjectBase {
 
     /**
      * Wrap {@link AggregateFunction} in order to behave as
-     * {@link com.suning.snfddal.api.Aggregate}
+     * {@link com.suning.snfddal.dbobject.Aggregate}
      **/
     private static class AggregateWrapper implements Aggregate {
         private final AggregateFunction aggregateFunction;

@@ -8,8 +8,8 @@ package com.suning.snfddal.util;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 
 /**
  * A simple hash table with an optimization for the last recently used object.

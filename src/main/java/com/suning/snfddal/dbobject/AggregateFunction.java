@@ -3,7 +3,7 @@
  * and the EPL 1.0 (http://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
-package com.suning.snfddal.api;
+package com.suning.snfddal.dbobject;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,8 +11,13 @@ import java.sql.SQLException;
 /**
  * A user-defined aggregate function needs to implement this interface.
  * The class must be public and must have a public non-argument constructor.
+ * <p>
+ * Please note this interface only has limited support for data types.
+ * If you need data types that don't have a corresponding SQL type
+ * (for example GEOMETRY), then use the {@link Aggregate} interface.
+ * </p>
  */
-public interface Aggregate {
+public interface AggregateFunction {
 
     /**
      * This method is called when the aggregate function is used.
@@ -23,16 +28,14 @@ public interface Aggregate {
     void init(Connection conn) throws SQLException;
 
     /**
-     * This method must return the H2 data type, {@link com.suning.snfddal.value.Value},
-     * of the aggregate function, given the H2 data type of the input data.
-     * The method should check here if the number of parameters
+     * This method must return the SQL type of the method, given the SQL type of
+     * the input data. The method should check here if the number of parameters
      * passed is correct, and if not it should throw an exception.
      *
-     * @param inputTypes the H2 data type of the parameters,
-     * @return the H2 data type of the result
-     * @throws SQLException if the number/type of parameters passed is incorrect
+     * @param inputTypes the SQL type of the parameters, {@link java.sql.Types}
+     * @return the SQL type of the result
      */
-    int getInternalType(int[] inputTypes) throws SQLException;
+    int getType(int[] inputTypes) throws SQLException;
 
     /**
      * This method is called once for each row.

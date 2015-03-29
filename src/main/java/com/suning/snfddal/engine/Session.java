@@ -16,7 +16,6 @@ import java.util.Random;
 
 import javax.sql.DataSource;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Parser;
@@ -29,6 +28,7 @@ import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.jdbc.JdbcConnection;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.result.LocalResult;

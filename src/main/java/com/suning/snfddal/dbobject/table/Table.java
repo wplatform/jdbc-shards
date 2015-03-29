@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.ExpressionVisitor;
@@ -24,6 +23,7 @@ import com.suning.snfddal.dbobject.schema.Sequence;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.RowList;

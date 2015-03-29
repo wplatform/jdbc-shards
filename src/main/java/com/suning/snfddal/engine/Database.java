@@ -13,7 +13,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.dbobject.Comment;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
@@ -27,6 +26,7 @@ import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.route.RoutingHandler;

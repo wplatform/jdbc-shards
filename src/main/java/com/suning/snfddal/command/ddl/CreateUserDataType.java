@@ -5,7 +5,6 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.dbobject.UserDataType;
 import com.suning.snfddal.dbobject.table.Column;
@@ -13,6 +12,7 @@ import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.value.DataType;
 
 /**

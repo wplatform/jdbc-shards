@@ -13,7 +13,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.schema.Schema;
@@ -23,6 +22,7 @@ import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;

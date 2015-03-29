@@ -23,10 +23,9 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.sql.DataSource;
 
-import com.suning.snfddal.api.ErrorCode;
-import com.suning.snfddal.api.JavaObjectSerializer;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.Utils.ClassFactory;
 
 /**

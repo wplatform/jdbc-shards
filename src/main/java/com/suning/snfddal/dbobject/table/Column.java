@@ -7,7 +7,6 @@ package com.suning.snfddal.dbobject.table;
 
 import java.sql.ResultSetMetaData;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.expression.ConditionAndOr;
 import com.suning.snfddal.command.expression.Expression;
@@ -20,6 +19,7 @@ import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Mode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StringUtils;

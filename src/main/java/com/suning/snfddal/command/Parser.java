@@ -14,7 +14,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.ddl.AlterIndexRename;
 import com.suning.snfddal.command.ddl.AlterSchemaRename;
 import com.suning.snfddal.command.ddl.AlterTableAddConstraint;
@@ -123,6 +122,7 @@ import com.suning.snfddal.engine.Procedure;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.New;
