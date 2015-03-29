@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.suning.snfddal.api.ErrorCode;
-import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.expression.Comparison;
 import com.suning.snfddal.command.expression.ConditionAndOr;
@@ -951,14 +950,6 @@ public class Select extends Query {
             set.add(filter.getTable());
         }
         return set;
-    }
-
-    @Override
-    public void fireBeforeSelectTriggers() {
-        for (int i = 0, size = filters.size(); i < size; i++) {
-            TableFilter filter = filters.get(i);
-            filter.getTable().fire(session, Trigger.SELECT, true);
-        }
     }
 
     private double preparePlan() {

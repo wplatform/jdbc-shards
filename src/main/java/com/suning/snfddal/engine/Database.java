@@ -22,7 +22,6 @@ import com.suning.snfddal.dbobject.Setting;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.UserAggregate;
 import com.suning.snfddal.dbobject.UserDataType;
-import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
@@ -592,13 +591,6 @@ public class Database {
             Table table = index.getTable();
             if (table.isTemporary() && !table.isGlobalTemporary()) {
                 session.removeLocalTempTableIndex(index);
-                return;
-            }
-        } else if (type == DbObject.CONSTRAINT) {
-            Constraint constraint = (Constraint) obj;
-            Table table = constraint.getTable();
-            if (table.isTemporary() && !table.isGlobalTemporary()) {
-                session.removeLocalTempTableConstraint(constraint);
                 return;
             }
         }

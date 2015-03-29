@@ -193,11 +193,6 @@ public abstract class Query extends Prepared {
     public abstract void updateAggregate(Session s);
 
     /**
-     * Call the before triggers on all tables.
-     */
-    public abstract void fireBeforeSelectTriggers();
-
-    /**
      * Set the distinct flag.
      *
      * @param b the new value

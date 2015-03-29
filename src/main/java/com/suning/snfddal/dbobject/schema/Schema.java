@@ -16,10 +16,9 @@ import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.DbObjectBase;
 import com.suning.snfddal.dbobject.FunctionAlias;
 import com.suning.snfddal.dbobject.User;
-import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.MappedTable;
+import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
@@ -41,8 +40,6 @@ public class Schema extends DbObjectBase {
     private final HashMap<String, Table> tablesAndViews;
     private final HashMap<String, Index> indexes;
     private final HashMap<String, Sequence> sequences;
-    private final HashMap<String, TriggerObject> triggers;
-    private final HashMap<String, Constraint> constraints;
     private final HashMap<String, Constant> constants;
     private final HashMap<String, FunctionAlias> functions;
 
@@ -68,8 +65,6 @@ public class Schema extends DbObjectBase {
         tablesAndViews = database.newStringMap();
         indexes = database.newStringMap();
         sequences = database.newStringMap();
-        triggers = database.newStringMap();
-        constraints = database.newStringMap();
         constants = database.newStringMap();
         functions = database.newStringMap();
         initDbObjectBase(database, id, schemaName, Trace.SCHEMA);
@@ -112,14 +107,6 @@ public class Schema extends DbObjectBase {
 
     @Override
     public void removeChildrenAndResources(Session session) {
-        while (triggers != null && triggers.size() > 0) {
-            TriggerObject obj = (TriggerObject) triggers.values().toArray()[0];
-            database.removeSchemaObject(session, obj);
-        }
-        while (constraints != null && constraints.size() > 0) {
-            Constraint obj = (Constraint) constraints.values().toArray()[0];
-            database.removeSchemaObject(session, obj);
-        }
         // There can be dependencies between tables e.g. using computed columns,
         // so we might need to loop over them multiple times.
         boolean runLoopAgain = false;
@@ -186,12 +173,6 @@ public class Schema extends DbObjectBase {
             break;
         case DbObject.INDEX:
             result = indexes;
-            break;
-        case DbObject.TRIGGER:
-            result = triggers;
-            break;
-        case DbObject.CONSTRAINT:
-            result = constraints;
             break;
         case DbObject.CONSTANT:
             result = constants;
@@ -284,17 +265,6 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Try to find a trigger with this name. This method returns null if
-     * no object with this name exists.
-     *
-     * @param name the object name
-     * @return the object or null
-     */
-    public TriggerObject findTrigger(String name) {
-        return triggers.get(name);
-    }
-
-    /**
      * Try to find a sequence with this name. This method returns null if
      * no object with this name exists.
      *
@@ -303,22 +273,6 @@ public class Schema extends DbObjectBase {
      */
     public Sequence findSequence(String sequenceName) {
         return sequences.get(sequenceName);
-    }
-
-    /**
-     * Try to find a constraint with this name. This method returns null if no
-     * object with this name exists.
-     *
-     * @param session the session
-     * @param name the object name
-     * @return the object or null
-     */
-    public Constraint findConstraint(Session session, String name) {
-        Constraint constraint = constraints.get(name);
-        if (constraint == null) {
-            constraint = session.findLocalTempTableConstraint(name);
-        }
-        return constraint;
     }
 
     /**
@@ -383,23 +337,6 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Create a unique constraint name.
-     *
-     * @param session the session
-     * @param table the constraint table
-     * @return the unique name
-     */
-    public String getUniqueConstraintName(Session session, Table table) {
-        HashMap<String, Constraint> tableConstraints;
-        if (table.isTemporary() && !table.isGlobalTemporary()) {
-            tableConstraints = session.getLocalTempTableConstraints();
-        } else {
-            tableConstraints = constraints;
-        }
-        return getUniqueName(table, tableConstraints, "CONSTRAINT_");
-    }
-
-    /**
      * Create a unique index name.
      *
      * @param session the session
@@ -452,21 +389,6 @@ public class Schema extends DbObjectBase {
             throw DbException.get(ErrorCode.INDEX_NOT_FOUND_1, name);
         }
         return index;
-    }
-
-    /**
-     * Get the constraint with the given name.
-     *
-     * @param name the constraint name
-     * @return the constraint
-     * @throws DbException if no such object exists
-     */
-    public Constraint getConstraint(String name) {
-        Constraint constraint = constraints.get(name);
-        if (constraint == null) {
-            throw DbException.get(ErrorCode.CONSTRAINT_NOT_FOUND_1, name);
-        }
-        return constraint;
     }
 
     /**

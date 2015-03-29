@@ -442,12 +442,6 @@ public class SelectUnion extends Query {
     }
 
     @Override
-    public void fireBeforeSelectTriggers() {
-        left.fireBeforeSelectTriggers();
-        right.fireBeforeSelectTriggers();
-    }
-
-    @Override
     public int getType() {
         return CommandInterface.SELECT;
     }

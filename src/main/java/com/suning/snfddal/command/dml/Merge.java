@@ -8,7 +8,6 @@ package com.suning.snfddal.command.dml;
 import java.util.ArrayList;
 
 import com.suning.snfddal.api.ErrorCode;
-import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
@@ -108,7 +107,6 @@ public class Merge extends Prepared {
         } else {
             ResultInterface rows = query.query(0);
             count = 0;
-            table.fire(session, Trigger.UPDATE | Trigger.INSERT, true);
             table.lock(session, true, false);
             while (rows.next()) {
                 count++;
@@ -128,7 +126,6 @@ public class Merge extends Prepared {
                 merge(newRow);
             }
             rows.close();
-            table.fire(session, Trigger.UPDATE | Trigger.INSERT, false);
         }
         return count;
     }
