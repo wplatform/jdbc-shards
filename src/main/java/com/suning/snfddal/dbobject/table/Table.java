@@ -77,7 +77,6 @@ public abstract class Table extends SchemaObjectBase {
     private final boolean persistIndexes;
     private final boolean persistData;
     private ArrayList<Sequence> sequences;
-    private ArrayList<TableView> views;
     private boolean onCommitDrop, onCommitTruncate;
     private Row nullRow;
 
@@ -330,9 +329,6 @@ public abstract class Table extends SchemaObjectBase {
         if (sequences != null) {
             children.addAll(sequences);
         }
-        if (views != null) {
-            children.addAll(views);
-        }
         ArrayList<Right> rights = database.getAllRights();
         for (Right right : rights) {
             if (right.getGrantedTable() == this) {
@@ -436,17 +432,8 @@ public abstract class Table extends SchemaObjectBase {
         }
     }
 
-    public ArrayList<TableView> getViews() {
-        return views;
-    }
-
     @Override
     public void removeChildrenAndResources(Session session) {
-        while (views != null && views.size() > 0) {
-            TableView view = views.get(0);
-            views.remove(0);
-            database.removeSchemaObject(session, view);
-        }
         for (Right right : database.getAllRights()) {
             if (right.getGrantedTable() == this) {
                 database.removeDatabaseObject(session, right);
@@ -684,15 +671,6 @@ public abstract class Table extends SchemaObjectBase {
             }
         }
     }
-
-    /**
-     * Remove the given view from the list.
-     *
-     * @param view the view to remove
-     */
-    public void removeView(TableView view) {
-        remove(views, view);
-    }
     
     /**
      * Remove a sequence from the table. Sequences are used as identity columns.
@@ -701,15 +679,6 @@ public abstract class Table extends SchemaObjectBase {
      */
     public final void removeSequence(Sequence sequence) {
         remove(sequences, sequence);
-    }
-
-    /**
-     * Add a view to this table.
-     *
-     * @param view the view to add
-     */
-    public void addView(TableView view) {
-        views = add(views, view);
     }
 
     /**

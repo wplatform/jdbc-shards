@@ -33,7 +33,6 @@ import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SmallLRUCache;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.util.SynchronizedVerifier;
 import com.suning.snfddal.value.Value;
 
 /**
@@ -66,37 +65,12 @@ public class TableView extends Table {
         init(querySQL, params, columnNames, session, recursive);
     }
 
-    /**
-     * Try to replace the SQL statement of the view and re-compile this and all
-     * dependent views.
-     *
-     * @param querySQL the SQL statement
-     * @param columnNames the column names
-     * @param session the session
-     * @param recursive whether this is a recursive view
-     * @param force if errors should be ignored
-     */
-    public void replace(String querySQL, String[] columnNames, Session session,
-            boolean recursive, boolean force) {
-        String oldQuerySQL = this.querySQL;
-        String[] oldColumnNames = this.columnNames;
-        boolean oldRecursive = this.recursive;
-        init(querySQL, null, columnNames, session, recursive);
-        DbException e = recompile(session, force);
-        if (e != null) {
-            init(oldQuerySQL, null, oldColumnNames, session, oldRecursive);
-            recompile(session, true);
-            throw e;
-        }
-    }
-
     private synchronized void init(String querySQL, ArrayList<Parameter> params,
             String[] columnNames, Session session, boolean recursive) {
         this.querySQL = querySQL;
         this.columnNames = columnNames;
         this.recursive = recursive;
         index = new ViewIndex(this, querySQL, params, recursive);
-        SynchronizedVerifier.check(indexCache);
         indexCache.clear();
         initColumnsAndTables(session);
     }
@@ -109,43 +83,9 @@ public class TableView extends Table {
         return (Query) p;
     }
 
-    /**
-     * Re-compile the view query and all views that depend on this object.
-     *
-     * @param session the session
-     * @param force if exceptions should be ignored
-     * @return the exception if re-compiling this or any dependent view failed
-     *         (only when force is disabled)
-     */
-    public synchronized DbException recompile(Session session, boolean force) {
-        try {
-            compileViewQuery(session, querySQL);
-        } catch (DbException e) {
-            if (!force) {
-                return e;
-            }
-        }
-        ArrayList<TableView> views = getViews();
-        if (views != null) {
-            views = New.arrayList(views);
-        }
-        SynchronizedVerifier.check(indexCache);
-        indexCache.clear();
-        initColumnsAndTables(session);
-        if (views != null) {
-            for (TableView v : views) {
-                DbException e = v.recompile(session, force);
-                if (e != null && !force) {
-                    return e;
-                }
-            }
-        }
-        return force ? null : createException;
-    }
-
     private void initColumnsAndTables(Session session) {
         Column[] cols;
-        removeViewFromTables();
+        //removeViewFromTables();
         try {
             Query query = compileViewQuery(session, querySQL);
             this.querySQL = query.getPlanSQL();
@@ -209,7 +149,7 @@ public class TableView extends Table {
         }
         setColumns(cols);
         if (getId() != 0) {
-            addViewToTables();
+            //addViewToTables();
         }
     }
 
@@ -230,7 +170,6 @@ public class TableView extends Table {
         final CacheKey cacheKey = new CacheKey(masks, session);
 
         synchronized (this) {
-            SynchronizedVerifier.check(indexCache);
             ViewIndex i2 = indexCache.get(cacheKey);
             if (i2 != null) {
                 item.setIndex(i2);
@@ -406,7 +345,6 @@ public class TableView extends Table {
 
     @Override
     public void removeChildrenAndResources(Session session) {
-        removeViewFromTables();
         super.removeChildrenAndResources(session);
         querySQL = null;
         index = null;
@@ -451,20 +389,6 @@ public class TableView extends Table {
         return null;
     }
 
-    private void removeViewFromTables() {
-        if (tables != null) {
-            for (Table t : tables) {
-                t.removeView(this);
-            }
-            tables.clear();
-        }
-    }
-
-    private void addViewToTables() {
-        for (Table t : tables) {
-            t.addView(this);
-        }
-    }
 
     private void setOwner(User owner) {
         this.owner = owner;
