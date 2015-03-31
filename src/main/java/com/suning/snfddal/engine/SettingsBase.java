@@ -7,8 +7,8 @@ package com.suning.snfddal.engine;
 
 import java.util.HashMap;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.Utils;
 
 /**

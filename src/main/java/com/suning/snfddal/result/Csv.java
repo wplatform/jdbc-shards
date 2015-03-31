@@ -26,10 +26,10 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.IOUtils;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;

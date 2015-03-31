@@ -8,12 +8,12 @@ package com.suning.snfddal.command;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.ResultInterface;
 

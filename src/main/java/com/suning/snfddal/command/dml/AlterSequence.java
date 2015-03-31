@@ -5,7 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.ddl.SchemaCommand;
 import com.suning.snfddal.command.expression.Expression;
@@ -17,6 +16,7 @@ import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class represents the statement

@@ -7,7 +7,6 @@ package com.suning.snfddal.dbobject.index;
 
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.dml.Query;
 import com.suning.snfddal.command.dml.SelectUnion;
 import com.suning.snfddal.command.expression.Comparison;
@@ -19,6 +18,7 @@ import com.suning.snfddal.dbobject.table.TableView;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;
@@ -26,7 +26,6 @@ import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.IntArray;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SmallLRUCache;
-import com.suning.snfddal.util.SynchronizedVerifier;
 import com.suning.snfddal.util.Utils;
 import com.suning.snfddal.value.Value;
 
@@ -121,7 +120,6 @@ public class ViewIndex extends BaseIndex {
         }
         IntArray masksArray = new IntArray(masks == null ?
                 Utils.EMPTY_INT_ARRAY : masks);
-        SynchronizedVerifier.check(costCache);
         CostElement cachedCost = costCache.get(masksArray);
         if (cachedCost != null) {
             long time = System.currentTimeMillis();

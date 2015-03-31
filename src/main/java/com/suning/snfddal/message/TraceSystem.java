@@ -12,7 +12,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.jdbc.JdbcSQLException;
 import com.suning.snfddal.util.FileUtils;

@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.jdbc.JdbcSQLException;
 import com.suning.snfddal.util.SortedProperties;

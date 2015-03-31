@@ -10,15 +10,15 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
-import com.suning.snfddal.api.Aggregate;
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.dml.Select;
+import com.suning.snfddal.dbobject.Aggregate;
 import com.suning.snfddal.dbobject.UserAggregate;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;

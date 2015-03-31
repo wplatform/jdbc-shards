@@ -11,8 +11,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.result.SimpleResultSet;
 import com.suning.snfddal.value.Value;

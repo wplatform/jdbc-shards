@@ -5,7 +5,6 @@
  */
 package com.suning.snfddal.dbobject.index;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.schema.SchemaObjectBase;
 import com.suning.snfddal.dbobject.table.Column;
@@ -16,6 +15,7 @@ import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Mode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;

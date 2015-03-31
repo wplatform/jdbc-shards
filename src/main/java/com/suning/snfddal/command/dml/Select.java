@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.suning.snfddal.api.ErrorCode;
-import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.expression.Comparison;
 import com.suning.snfddal.command.expression.ConditionAndOr;
@@ -33,6 +31,7 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.ResultTarget;
@@ -951,14 +950,6 @@ public class Select extends Query {
             set.add(filter.getTable());
         }
         return set;
-    }
-
-    @Override
-    public void fireBeforeSelectTriggers() {
-        for (int i = 0, size = filters.size(); i < size; i++) {
-            TableFilter filter = filters.get(i);
-            filter.getTable().fire(session, Trigger.SELECT, true);
-        }
     }
 
     private double preparePlan() {

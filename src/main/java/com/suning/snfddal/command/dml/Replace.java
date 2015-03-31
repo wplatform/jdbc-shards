@@ -7,8 +7,6 @@ package com.suning.snfddal.command.dml;
 
 import java.util.ArrayList;
 
-import com.suning.snfddal.api.ErrorCode;
-import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
@@ -20,6 +18,7 @@ import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.util.New;
@@ -107,7 +106,6 @@ public class Replace extends Prepared {
         } else {
             ResultInterface rows = query.query(0);
             count = 0;
-            table.fire(session, Trigger.UPDATE | Trigger.INSERT, true);
             table.lock(session, true, false);
             while (rows.next()) {
                 count++;
@@ -127,7 +125,6 @@ public class Replace extends Prepared {
                 replace(newRow);
             }
             rows.close();
-            table.fire(session, Trigger.UPDATE | Trigger.INSERT, false);
         }
         return count;
     }

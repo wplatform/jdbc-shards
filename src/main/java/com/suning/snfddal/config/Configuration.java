@@ -18,7 +18,6 @@
 
 package com.suning.snfddal.config;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -90,6 +89,46 @@ public class Configuration {
         }
         settings.put(name, value);
     }
+    
+    /**
+     * Get the value of the given property.
+     *
+     * @param key the property key
+     * @return the value as a String
+     */
+    String getProperty(String key) {
+        Object value = settings.get(key);
+        if (value == null || !(value instanceof String)) {
+            return null;
+        }
+        return value.toString();
+    }
+
+    /**
+     * Get the value of the given property.
+     *
+     * @param key the property key
+     * @param defaultValue the default value
+     * @return the value as a String
+     */
+    public int getProperty(String key, int defaultValue) {
+        String s = getProperty(key);
+        return s == null ? defaultValue : Integer.parseInt(s);
+    }
+
+    /**
+     * Get the value of the given property.
+     *
+     * @param key the property key
+     * @param defaultValue the default value
+     * @return the value as a String
+     */
+    public String getProperty(String key, String defaultValue) {
+        String s = getProperty(key);
+        return s == null ? defaultValue : s;
+    }
+
+
 
     /**
      * @return the cluster
@@ -154,419 +193,5 @@ public class Configuration {
             throw new ConfigurationException("Duplicate ruleAlgorithm name " + name);
         }
         ruleAlgorithms.put(name, ruleAlgorithm);
-    }
-
-    public static class SchemaConfig {
-        private String name;
-        private String metadata;
-        private List<TableConfig> tables = New.arrayList();
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @param name the name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the metadata
-         */
-        public String getMetadata() {
-            return metadata;
-        }
-
-        /**
-         * @param metadata the metadata to set
-         */
-        public void setMetadata(String metadata) {
-            this.metadata = metadata;
-        }
-
-        /**
-         * @return the tables
-         */
-        public List<TableConfig> getTables() {
-            return tables;
-        }
-
-        /**
-         * @param tables the tables to set
-         */
-        public void setTables(List<TableConfig> tables) {
-            this.tables = tables;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            SchemaConfig other = (SchemaConfig) obj;
-            if (name == null) {
-                if (other.name != null)
-                    return false;
-            } else if (!name.equals(other.name))
-                return false;
-            return true;
-        }
-
-    }
-
-    public static class ShardConfig {
-        private String name;
-        private String description;
-        private Properties properties;
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @param name the name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the description
-         */
-        public String getDescription() {
-            return description;
-        }
-
-        /**
-         * @param description the description to set
-         */
-        public void setDescription(String description) {
-            this.description = description;
-        }
-        /**
-         * @return the properties
-         */
-        public Properties getProperties() {
-            return properties;
-        }
-
-        /**
-         * @param properties the properties to set
-         */
-        public void setProperties(Properties properties) {
-            this.properties = properties;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            ShardConfig other = (ShardConfig) obj;
-            if (name == null) {
-                if (other.name != null)
-                    return false;
-            } else if (!name.equals(other.name))
-                return false;
-            return true;
-        }
-
-    }
-
-    public static class TableConfig {
-        private SchemaConfig schemaConfig;
-        private String name;
-        private String metadata;
-        private TableRouter tableRouter;
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @param name the name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the metadata
-         */
-        public String getMetadata() {
-            return metadata;
-        }
-
-        /**
-         * @param metadata the metadata to set
-         */
-        public void setMetadata(String metadata) {
-            this.metadata = metadata;
-        }
-
-        /**
-         * @return the tableRouter
-         */
-        public TableRouter getTableRouter() {
-            return tableRouter;
-        }
-
-        /**
-         * @param tableRouter the tableRouter to set
-         */
-        public void setTableRouter(TableRouter tableRouter) {
-            this.tableRouter = tableRouter;
-        }
-
-        /**
-         * @return the schemaConfig
-         */
-        public SchemaConfig getSchemaConfig() {
-            return schemaConfig;
-        }
-
-        /**
-         * @param schemaConfig the schemaConfig to set
-         */
-        public void setSchemaConfig(SchemaConfig schemaConfig) {
-            this.schemaConfig = schemaConfig;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode() */
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            result = prime * result + ((schemaConfig == null) ? 0 : schemaConfig.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            TableConfig other = (TableConfig) obj;
-            if (name == null) {
-                if (other.name != null)
-                    return false;
-            } else if (!name.equals(other.name))
-                return false;
-            if (schemaConfig == null) {
-                if (other.schemaConfig != null)
-                    return false;
-            } else if (!schemaConfig.equals(other.schemaConfig))
-                return false;
-            return true;
-        }
-
-    }
-
-    public static class RuleAlgorithmConfig {
-        private String name;
-        private String clazz;
-        private Properties properties;
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @param name the name to set
-         */
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        /**
-         * @return the clazz
-         */
-        public String getClazz() {
-            return clazz;
-        }
-
-        /**
-         * @param clazz the clazz to set
-         */
-        public void setClazz(String clazz) {
-            this.clazz = clazz;
-        }
-
-        /**
-         * @return the properties
-         */
-        public Properties getProperties() {
-            return properties;
-        }
-
-        /**
-         * @param properties the properties to set
-         */
-        public void setProperties(Properties properties) {
-            this.properties = properties;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((name == null) ? 0 : name.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            RuleAlgorithmConfig other = (RuleAlgorithmConfig) obj;
-            if (name == null) {
-                if (other.name != null)
-                    return false;
-            } else if (!name.equals(other.name))
-                return false;
-            return true;
-        }
-
-    }
-
-    public static class DataSourceConfig {
-        private String id;
-        private String clazz;
-        private String jndiName;
-        private Properties properties;
-
-        /**
-         * @return the id
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * @param id the id to set
-         */
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        /**
-         * @return the clazz
-         */
-        public String getClazz() {
-            return clazz;
-        }
-
-        /**
-         * @param clazz the clazz to set
-         */
-        public void setClazz(String clazz) {
-            this.clazz = clazz;
-        }
-
-        /**
-         * @return the jndiName
-         */
-        public String getJndiName() {
-            return jndiName;
-        }
-
-        /**
-         * @param jndiName the jndiName to set
-         */
-        public void setJndiName(String jndiName) {
-            this.jndiName = jndiName;
-        }
-
-        /**
-         * @return the properties
-         */
-        public Properties getProperties() {
-            return properties;
-        }
-
-        /**
-         * @param properties the properties to set
-         */
-        public void setProperties(Properties properties) {
-            this.properties = properties;
-        }
-
-        public boolean isJndiDataSource() {
-            return jndiName != null;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode() */
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((id == null) ? 0 : id.hashCode());
-            return result;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#equals(java.lang.Object) */
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            DataSourceConfig other = (DataSourceConfig) obj;
-            if (id == null) {
-                if (other.id != null)
-                    return false;
-            } else if (!id.equals(other.id))
-                return false;
-            return true;
-        }
     }
 }

@@ -9,11 +9,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
 
-import com.suning.snfddal.api.ErrorCode;
+import com.suning.snfddal.command.ddl.CreateTableData;
+import com.suning.snfddal.config.Configuration;
+import com.suning.snfddal.config.ConfigurationException;
+import com.suning.snfddal.config.SchemaConfig;
+import com.suning.snfddal.config.ShardConfig;
+import com.suning.snfddal.config.TableConfig;
 import com.suning.snfddal.dbobject.Comment;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
@@ -22,12 +29,12 @@ import com.suning.snfddal.dbobject.Setting;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.UserAggregate;
 import com.suning.snfddal.dbobject.UserDataType;
-import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.route.RoutingHandler;
@@ -35,6 +42,7 @@ import com.suning.snfddal.route.RoutingHandlerImpl;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SourceCompiler;
+import com.suning.snfddal.util.TableMetaLoader;
 import com.suning.snfddal.value.CaseInsensitiveMap;
 import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.Value;
@@ -47,6 +55,8 @@ import com.suning.snfddal.value.Value;
  */
 public class Database {
 
+    public static final String SYSTEM_USER_NAME = "DBA";
+
     private final HashMap<String, Role> roles = New.hashMap();
     private final HashMap<String, User> users = New.hashMap();
     private final HashMap<String, Setting> settings = New.hashMap();
@@ -55,7 +65,7 @@ public class Database {
     private final HashMap<String, UserDataType> userDataTypes = New.hashMap();
     private final HashMap<String, UserAggregate> aggregates = New.hashMap();
     private final HashMap<String, Comment> comments = New.hashMap();
-    private final HashMap<String, DataSource> dataNodeMapping = New.hashMap();
+    private final HashMap<String, DataSource> dataNodes = New.hashMap();
 
     private final Set<Session> userSessions = Collections.synchronizedSet(new HashSet<Session>());
 
@@ -79,16 +89,64 @@ public class Database {
 
     public Database() {
 
+        Configuration configuration = Configuration.getInstance();
+
         this.compareMode = CompareMode.getInstance(null, 0);
         this.dbSettings = DbSettings.getInstance(null);
 
-        int traceLevelFile = TraceSystem.DEBUG;
-        int traceLevelSystemOut = TraceSystem.DEBUG;
+        String sqlMode = configuration.getProperty("sqlMode", Mode.MY_SQL);
+        Mode settingMode = Mode.getInstance(sqlMode);
+        if(settingMode != null) {
+            this.mode = settingMode;
+        }        
+        int traceLevelFile = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
+        int traceLevelSystemOut = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
 
         traceSystem = new TraceSystem(null);
         traceSystem.setLevelFile(traceLevelFile);
         traceSystem.setLevelSystemOut(traceLevelSystemOut);
         trace = traceSystem.getTrace(Trace.DATABASE);
+
+        openDatabase(configuration);
+
+    }
+
+    private synchronized void openDatabase(Configuration configuration) {
+
+        User systemUser = new User(this, allocateObjectId(), SYSTEM_USER_NAME);
+        systemUser.setAdmin(true);
+        systemUser.setUserPasswordHash(new byte[0]);
+        users.put(SYSTEM_USER_NAME, systemUser);
+
+        Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser, true);
+        schemas.put(schema.getName(), schema);
+
+        Role publicRole = new Role(this, 0, Constants.PUBLIC_ROLE_NAME, true);
+        roles.put(Constants.PUBLIC_ROLE_NAME, publicRole);
+
+        Map<String, ShardConfig> shardMapping = configuration.getCluster();
+        for (ShardConfig value : shardMapping.values()) {
+            String description = value.getDescription();
+            // TODO 处理数据源组
+            DataSource dataSource = configuration.getDataNodes().get(description);
+            if (dataSource == null) {
+                throw new ConfigurationException("Can' find data source: " + description);
+            }
+            addDataNode(value.getName(), dataSource);
+        }
+        
+        TableMetaLoader metaLoader = new TableMetaLoader();
+        metaLoader.setDataNodes(this.dataNodes);
+        metaLoader.setTrace(this.trace);
+        SchemaConfig sc = configuration.getSchemaConfig();
+        List<TableConfig> ctList = sc.getTables();
+        for (TableConfig tableConfig : ctList) {
+            CreateTableData tableData = metaLoader.loadMetaData(tableConfig);
+            tableData.schema = schema;
+            tableData.tableName = tableConfig.getName();
+            Table metaTable = schema.createTable(tableData);
+            this.addSchemaObject(metaTable);
+        }
 
     }
 
@@ -182,7 +240,7 @@ public class Database {
      */
     public synchronized void addSchemaObject(SchemaObject obj) {
         obj.getSchema().add(obj);
-        //trace.debug("addSchemaObject: {0}", obj.getCreateSQL());
+        // trace.debug("addSchemaObject: {0}", obj.getCreateSQL());
     }
 
     /**
@@ -594,13 +652,6 @@ public class Database {
                 session.removeLocalTempTableIndex(index);
                 return;
             }
-        } else if (type == DbObject.CONSTRAINT) {
-            Constraint constraint = (Constraint) obj;
-            Table table = constraint.getTable();
-            if (table.isTemporary() && !table.isGlobalTemporary()) {
-                session.removeLocalTempTableConstraint(constraint);
-                return;
-            }
         }
         Comment comment = findComment(obj);
         if (comment != null) {
@@ -610,14 +661,14 @@ public class Database {
     }
 
     public synchronized void addDataNode(String name, DataSource dataSource) {
-        if (dataNodeMapping.containsKey(name)) {
+        if (dataNodes.containsKey(name)) {
             DbException.throwInternalError("data node already exists: " + name);
         }
-        dataNodeMapping.put(name, dataSource);
+        dataNodes.put(name, dataSource);
     }
 
     public DataSource getDataNode(String name) {
-        DataSource dataSource = dataNodeMapping.get(name);
+        DataSource dataSource = dataNodes.get(name);
         if (dataSource == null) {
             DbException.throwInternalError("data node not exists: " + name);
         }
@@ -625,11 +676,11 @@ public class Database {
     }
 
     public synchronized DataSource removeDataNode(String name) {
-        DataSource dataSource = dataNodeMapping.get(name);
+        DataSource dataSource = dataNodes.get(name);
         if (dataSource == null) {
             DbException.throwInternalError("data node not found: " + name);
         }
-        return dataNodeMapping.remove(name);
+        return dataNodes.remove(name);
     }
 
     public TraceSystem getTraceSystem() {
@@ -737,14 +788,12 @@ public class Database {
         }
         return compiler;
     }
-    
+
     public RoutingHandler getRoutingHandler() {
         if (routingHandler == null) {
             routingHandler = new RoutingHandlerImpl(this);
         }
         return routingHandler;
     }
-    
-    
 
 }

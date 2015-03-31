@@ -19,9 +19,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.SimpleResultSet;
 import com.suning.snfddal.util.DateTimeUtils;
 import com.suning.snfddal.util.MathUtils;

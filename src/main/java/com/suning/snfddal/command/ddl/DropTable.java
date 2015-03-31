@@ -6,9 +6,9 @@
 package com.suning.snfddal.command.ddl;
 
 import com.suning.snfddal.command.CommandInterface;
-import com.suning.snfddal.dbobject.constraint.ConstraintReferential;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Table;
+import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 
@@ -27,8 +27,8 @@ public class DropTable extends SchemaCommand {
     public DropTable(Session session, Schema schema) {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
-                ConstraintReferential.RESTRICT :
-                ConstraintReferential.CASCADE;
+                Constants.RESTRICT :
+                    Constants.CASCADE;
     }
 
     /**

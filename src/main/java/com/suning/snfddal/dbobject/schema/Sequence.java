@@ -7,11 +7,11 @@ package com.suning.snfddal.dbobject.schema;
 
 import java.math.BigInteger;
 
-import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 
 /**

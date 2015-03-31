@@ -24,12 +24,12 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.suning.snfddal.config.Configuration;
-import com.suning.snfddal.config.Configuration.SchemaConfig;
-import com.suning.snfddal.config.Configuration.ShardConfig;
-import com.suning.snfddal.config.Configuration.TableConfig;
 import com.suning.snfddal.config.ConfigurationException;
 import com.suning.snfddal.config.DataSourceLookup;
-import com.suning.snfddal.config.XmlConfigParser;
+import com.suning.snfddal.config.SchemaConfig;
+import com.suning.snfddal.config.ShardConfig;
+import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.config.parser.XmlConfigParser;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.MappedTable;
@@ -42,7 +42,7 @@ import com.suning.snfddal.util.Utils;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class DispatcherDataSource implements DataSource {
+public class JdbcDataSource implements DataSource {
 
     private static final String DATABASE_MASTER_USER = "MASTER";
 
@@ -60,7 +60,7 @@ public class DispatcherDataSource implements DataSource {
     /**
      * The public constructor.
      */
-    public DispatcherDataSource() {
+    public JdbcDataSource() {
 
     }
 
