@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.dbobject.Comment;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
@@ -21,12 +22,12 @@ import com.suning.snfddal.dbobject.Setting;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.UserAggregate;
 import com.suning.snfddal.dbobject.UserDataType;
+import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.route.RoutingHandler;
@@ -591,6 +592,13 @@ public class Database {
             Table table = index.getTable();
             if (table.isTemporary() && !table.isGlobalTemporary()) {
                 session.removeLocalTempTableIndex(index);
+                return;
+            }
+        } else if (type == DbObject.CONSTRAINT) {
+            Constraint constraint = (Constraint) obj;
+            Table table = constraint.getTable();
+            if (table.isTemporary() && !table.isGlobalTemporary()) {
+                session.removeLocalTempTableConstraint(constraint);
                 return;
             }
         }

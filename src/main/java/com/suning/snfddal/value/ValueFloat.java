@@ -8,8 +8,8 @@ package com.suning.snfddal.value;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * Implementation of the REAL data type.

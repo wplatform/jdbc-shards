@@ -6,8 +6,8 @@
 package com.suning.snfddal.command.ddl;
 
 import com.suning.snfddal.command.CommandInterface;
+import com.suning.snfddal.dbobject.constraint.ConstraintReferential;
 import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 
@@ -24,8 +24,8 @@ public class DropView extends SchemaCommand {
     public DropView(Session session, Schema schema) {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
-                Constants.RESTRICT :
-                    Constants.CASCADE;
+                ConstraintReferential.RESTRICT :
+                ConstraintReferential.CASCADE;
     }
 
     public void setIfExists(boolean b) {

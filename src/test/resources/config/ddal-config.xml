@@ -3,21 +3,9 @@
 <ddal-config>
 
 	<schema name="PUBLIC" metadata="shard1">
-	
-		<tableGroup router="customer_group" joinKey="customer_id">
-			<table name="customer" metadata="shard1.orders _001"/>
-			<table name="address" metadata="shard1.address_001"/>
-		</tableGroup>	
-
-		<tableGroup router="order_sharding" joinKey="order_id">
-			<table name="orders" metadata="shard1.orders _01"/>
-			<table name="order_items" metadata="shard1.order_items _01"/>
-			<table name="order_status" metadata="shard1.order_status_01"/>
-		</tableGroup>
-		
-		<table name="product"/>
-		<table name="product_category"/>
-
+		<table name="t_student" metadata="shard1.t_student_001" router="partition4_with_id_mod"/>
+		<table name="t_student_course" metadata="shard1.t_student_course_001" router="partition4_with_id_mod"/>
+		<table name="t_school"/>
 	</schema>
 
 	<cluster>

@@ -7,6 +7,7 @@ package com.suning.snfddal.command.expression;
 
 import java.util.List;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.dml.Query;
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
@@ -14,7 +15,6 @@ import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;

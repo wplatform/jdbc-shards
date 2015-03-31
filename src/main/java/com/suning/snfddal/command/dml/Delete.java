@@ -5,6 +5,7 @@
  */
 package com.suning.snfddal.command.dml;
 
+import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -57,6 +58,7 @@ public class Delete extends Prepared {
         tableFilter.reset();
         Table table = tableFilter.getTable();
         session.getUser().checkRight(table, Right.DELETE);
+        table.fire(session, Trigger.DELETE, true);
         table.lock(session, true, false);
         RowList rows = new RowList(session);
         int limitRows = -1;
@@ -74,7 +76,13 @@ public class Delete extends Prepared {
                 if (condition == null || Boolean.TRUE.equals(
                         condition.getBooleanValue(session))) {
                     Row row = tableFilter.get();
-                    rows.add(row);
+                    boolean done = false;
+                    if (table.fireRow()) {
+                        done = table.fireBeforeRow(session, row, null);
+                    }
+                    if (!done) {
+                        rows.add(row);
+                    }
                     count++;
                     if (limitRows >= 0 && count >= limitRows) {
                         break;
@@ -89,7 +97,13 @@ public class Delete extends Prepared {
                 Row row = rows.next();
                 table.removeRow(session, row);
             }
-            
+            if (table.fireRow()) {
+                for (rows.reset(); rows.hasNext();) {
+                    Row row = rows.next();
+                    table.fireAfterRow(session, row, null, false);
+                }
+            }
+            table.fire(session, Trigger.DELETE, false);
             return count;
         } finally {
             rows.close();

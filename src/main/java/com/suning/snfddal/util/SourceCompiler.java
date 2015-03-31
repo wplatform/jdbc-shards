@@ -33,10 +33,10 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class allows to convert source code to a class. It uses one class loader

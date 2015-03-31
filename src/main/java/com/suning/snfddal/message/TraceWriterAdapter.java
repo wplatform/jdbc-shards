@@ -19,12 +19,12 @@ import org.slf4j.LoggerFactory;
  * jdbc:h2:&tilde;/test;TRACE_LEVEL_FILE=4
  * </pre>
  *
- * The logger name is 'jdbc-shards'.
+ * The logger name is 'h2database'.
  */
 public class TraceWriterAdapter implements TraceWriter {
 
     private String name;
-    private final Logger logger = LoggerFactory.getLogger("jdbc-shards");
+    private final Logger logger = LoggerFactory.getLogger("h2database");
 
     @Override
     public void setName(String name) {

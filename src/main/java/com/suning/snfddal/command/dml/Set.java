@@ -7,6 +7,7 @@ package com.suning.snfddal.command.dml;
 
 import java.text.Collator;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -17,7 +18,6 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Mode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.ValueInt;

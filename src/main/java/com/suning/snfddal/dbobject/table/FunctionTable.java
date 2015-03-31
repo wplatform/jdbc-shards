@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.FunctionCall;
 import com.suning.snfddal.command.expression.TableFunction;
@@ -19,7 +20,6 @@ import com.suning.snfddal.dbobject.index.IndexType;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.Row;

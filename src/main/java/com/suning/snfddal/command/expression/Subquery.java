@@ -7,12 +7,12 @@ package com.suning.snfddal.command.expression;
 
 import java.util.ArrayList;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.dml.Query;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;

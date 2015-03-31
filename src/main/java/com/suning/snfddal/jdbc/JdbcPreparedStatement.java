@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.DateTimeUtils;

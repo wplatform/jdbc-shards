@@ -5,6 +5,7 @@
  */
 package com.suning.snfddal.command.ddl;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.index.IndexType;
@@ -15,7 +16,6 @@ import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class represents the statement

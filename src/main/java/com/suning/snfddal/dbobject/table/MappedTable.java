@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.index.IndexType;
@@ -26,7 +27,6 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Mode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.RowList;
 import com.suning.snfddal.route.rule.RuleColumn;

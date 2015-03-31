@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.command.expression;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
 

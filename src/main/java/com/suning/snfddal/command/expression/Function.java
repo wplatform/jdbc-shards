@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.PatternSyntaxException;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.dbobject.schema.Schema;
@@ -33,7 +34,6 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Mode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.Csv;
 import com.suning.snfddal.util.DateTimeUtils;
 import com.suning.snfddal.util.JdbcUtils;

@@ -8,8 +8,8 @@ package com.suning.snfddal.jdbc;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.util.StringUtils;

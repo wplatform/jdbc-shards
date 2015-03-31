@@ -14,6 +14,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.suning.snfddal.api.ErrorCode;
+import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.ddl.AlterIndexRename;
 import com.suning.snfddal.command.ddl.AlterSchemaRename;
 import com.suning.snfddal.command.ddl.AlterTableAddConstraint;
@@ -28,11 +30,13 @@ import com.suning.snfddal.command.ddl.CreateAggregate;
 import com.suning.snfddal.command.ddl.CreateConstant;
 import com.suning.snfddal.command.ddl.CreateFunctionAlias;
 import com.suning.snfddal.command.ddl.CreateIndex;
+import com.suning.snfddal.command.ddl.CreateLinkedTable;
 import com.suning.snfddal.command.ddl.CreateRole;
 import com.suning.snfddal.command.ddl.CreateSchema;
 import com.suning.snfddal.command.ddl.CreateSequence;
 import com.suning.snfddal.command.ddl.CreateTable;
 import com.suning.snfddal.command.ddl.CreateTableData;
+import com.suning.snfddal.command.ddl.CreateTrigger;
 import com.suning.snfddal.command.ddl.CreateUser;
 import com.suning.snfddal.command.ddl.CreateUserDataType;
 import com.suning.snfddal.command.ddl.CreateView;
@@ -105,6 +109,7 @@ import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.UserAggregate;
 import com.suning.snfddal.dbobject.UserDataType;
+import com.suning.snfddal.dbobject.constraint.ConstraintReferential;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.Sequence;
@@ -114,15 +119,14 @@ import com.suning.snfddal.dbobject.table.IndexColumn;
 import com.suning.snfddal.dbobject.table.RangeTable;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
-import com.suning.snfddal.dbobject.table.TableFilter.TableFilterVisitor;
 import com.suning.snfddal.dbobject.table.TableView;
+import com.suning.snfddal.dbobject.table.TableFilter.TableFilterVisitor;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Procedure;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.New;
@@ -1319,12 +1323,12 @@ public class Parser {
             ifExists = readIfExists(ifExists);
             command.setIfExists(ifExists);
             if (readIf("CASCADE")) {
-                command.setDropAction(Constants.CASCADE);
+                command.setDropAction(ConstraintReferential.CASCADE);
                 readIf("CONSTRAINTS");
             } else if (readIf("RESTRICT")) {
-                command.setDropAction(Constants.RESTRICT);
+                command.setDropAction(ConstraintReferential.RESTRICT);
             } else if (readIf("IGNORE")) {
-                command.setDropAction(Constants.SET_DEFAULT);
+                command.setDropAction(ConstraintReferential.SET_DEFAULT);
             }
             return command;
         } else if (readIf("INDEX")) {
@@ -4036,7 +4040,9 @@ public class Parser {
             return parseCreateSequence();
         } else if (readIf("USER")) {
             return parseCreateUser();
-        } if (readIf("ROLE")) {
+        } else if (readIf("TRIGGER")) {
+            return parseCreateTrigger(force);
+        } else if (readIf("ROLE")) {
             return parseCreateRole();
         } else if (readIf("SCHEMA")) {
             return parseCreateSchema();
@@ -4050,7 +4056,9 @@ public class Parser {
             return parseCreateUserDataType();
         } else if (readIf("AGGREGATE")) {
             return parseCreateAggregate(force);
-        } 
+        } else if (readIf("LINKED")) {
+            return parseCreateLinkedTable(false, false, force);
+        }
         // tables or linked tables
         boolean cached = false;
         if (readIf("MEMORY")) {
@@ -4059,13 +4067,22 @@ public class Parser {
         }
         if (readIf("LOCAL")) {
             read("TEMPORARY");
+            if (readIf("LINKED")) {
+                return parseCreateLinkedTable(true, false, force);
+            }
             read("TABLE");
             return parseCreateTable(true, false, cached);
         } else if (readIf("GLOBAL")) {
             read("TEMPORARY");
+            if (readIf("LINKED")) {
+                return parseCreateLinkedTable(true, true, force);
+            }
             read("TABLE");
             return parseCreateTable(true, true, cached);
         } else if (readIf("TEMP") || readIf("TEMPORARY")) {
+            if (readIf("LINKED")) {
+                return parseCreateLinkedTable(true, true, force);
+            }
             read("TABLE");
             return parseCreateTable(true, true, cached);
         } else if (readIf("TABLE")) {
@@ -4415,6 +4432,68 @@ public class Parser {
         col.rename(null);
         command.setColumn(col);
         command.setIfNotExists(ifNotExists);
+        return command;
+    }
+
+    private CreateTrigger parseCreateTrigger(boolean force) {
+        boolean ifNotExists = readIfNoExists();
+        String triggerName = readIdentifierWithSchema(null);
+        Schema schema = getSchema();
+        boolean insteadOf, isBefore;
+        if (readIf("INSTEAD")) {
+            read("OF");
+            isBefore = true;
+            insteadOf = true;
+        } else if (readIf("BEFORE")) {
+            insteadOf = false;
+            isBefore = true;
+        } else {
+            read("AFTER");
+            insteadOf = false;
+            isBefore = false;
+        }
+        int typeMask = 0;
+        boolean onRollback = false;
+        do {
+            if (readIf("INSERT")) {
+                typeMask |= Trigger.INSERT;
+            } else if (readIf("UPDATE")) {
+                typeMask |= Trigger.UPDATE;
+            } else if (readIf("DELETE")) {
+                typeMask |= Trigger.DELETE;
+            } else if (readIf("SELECT")) {
+                typeMask |= Trigger.SELECT;
+            } else if (readIf("ROLLBACK")) {
+                onRollback = true;
+            } else {
+                throw getSyntaxError();
+            }
+        } while (readIf(","));
+        read("ON");
+        String tableName = readIdentifierWithSchema();
+        checkSchema(schema);
+        CreateTrigger command = new CreateTrigger(session, getSchema());
+        command.setForce(force);
+        command.setTriggerName(triggerName);
+        command.setIfNotExists(ifNotExists);
+        command.setInsteadOf(insteadOf);
+        command.setBefore(isBefore);
+        command.setOnRollback(onRollback);
+        command.setTypeMask(typeMask);
+        command.setTableName(tableName);
+        if (readIf("FOR")) {
+            read("EACH");
+            read("ROW");
+            command.setRowBased(true);
+        } else {
+            command.setRowBased(false);
+        }
+        if (readIf("QUEUE")) {
+            command.setQueueSize(readPositiveInt());
+        }
+        command.setNoWait(readIf("NOWAIT"));
+        read("CALL");
+        command.setTriggerClassName(readUniqueIdentifier());
         return command;
     }
 
@@ -4816,6 +4895,17 @@ public class Parser {
                 command.setInt(Constants.ALLOW_LITERALS_ALL);
             } else if (readIf("NUMBERS")) {
                 command.setInt(Constants.ALLOW_LITERALS_NUMBERS);
+            } else {
+                command.setInt(readPositiveInt());
+            }
+            return command;
+        } else if (readIf("DEFAULT_TABLE_TYPE")) {
+            readIfEqualOrTo();
+            Set command = new Set(session, SetTypes.DEFAULT_TABLE_TYPE);
+            if (readIf("MEMORY")) {
+                command.setInt(Table.TYPE_MEMORY);
+            } else if (readIf("CACHED")) {
+                command.setInt(Table.TYPE_CACHED);
             } else {
                 command.setInt(readPositiveInt());
             }
@@ -5302,21 +5392,21 @@ public class Parser {
         }
         if (readIf("NO")) {
             read("ACTION");
-            return Constants.RESTRICT;
+            return ConstraintReferential.RESTRICT;
         }
         read("SET");
         if (readIf("NULL")) {
-            return Constants.SET_NULL;
+            return ConstraintReferential.SET_NULL;
         }
         read("DEFAULT");
-        return Constants.SET_DEFAULT;
+        return ConstraintReferential.SET_DEFAULT;
     }
 
     private Integer parseCascadeOrRestrict() {
         if (readIf("CASCADE")) {
-            return Constants.CASCADE;
+            return ConstraintReferential.CASCADE;
         } else if (readIf("RESTRICT")) {
-            return Constants.RESTRICT;
+            return ConstraintReferential.RESTRICT;
         } else {
             return null;
         }
@@ -5459,6 +5549,43 @@ public class Parser {
         } else {
             readIf("DEFERRABLE");
         }
+    }
+
+    private CreateLinkedTable parseCreateLinkedTable(boolean temp,
+            boolean globalTemp, boolean force) {
+        read("TABLE");
+        boolean ifNotExists = readIfNoExists();
+        String tableName = readIdentifierWithSchema();
+        CreateLinkedTable command = new CreateLinkedTable(session, getSchema());
+        command.setTemporary(temp);
+        command.setGlobalTemporary(globalTemp);
+        command.setForce(force);
+        command.setIfNotExists(ifNotExists);
+        command.setTableName(tableName);
+        command.setComment(readCommentIf());
+        read("(");
+        command.setDriver(readString());
+        read(",");
+        command.setUrl(readString());
+        read(",");
+        command.setUser(readString());
+        read(",");
+        command.setPassword(readString());
+        read(",");
+        String originalTable = readString();
+        if (readIf(",")) {
+            command.setOriginalSchema(originalTable);
+            originalTable = readString();
+        }
+        command.setOriginalTable(originalTable);
+        read(")");
+        if (readIf("EMIT")) {
+            read("UPDATES");
+            command.setEmitUpdates(true);
+        } else if (readIf("READONLY")) {
+            command.setReadOnly(true);
+        }
+        return command;
     }
 
     private CreateTable parseCreateTable(boolean temp, boolean globalTemp,

@@ -8,6 +8,8 @@ package com.suning.snfddal.command.dml;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.suning.snfddal.api.ErrorCode;
+import com.suning.snfddal.api.Trigger;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -20,7 +22,6 @@ import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.RowList;
@@ -87,6 +88,7 @@ public class Update extends Prepared {
         try {
             Table table = tableFilter.getTable();
             session.getUser().checkRight(table, Right.UPDATE);
+            table.fire(session, Trigger.UPDATE, true);
             table.lock(session, true, false);
             int columnCount = table.getColumns().length;
             // get the old rows, compute the new rows
@@ -124,8 +126,14 @@ public class Update extends Prepared {
                         newRow.setValue(i, newValue);
                     }
                     table.validateConvertUpdateSequence(session, newRow);
-                    rows.add(oldRow);
-                    rows.add(newRow);
+                    boolean done = false;
+                    if (table.fireRow()) {
+                        done = table.fireBeforeRow(session, oldRow, newRow);
+                    }
+                    if (!done) {
+                        rows.add(oldRow);
+                        rows.add(newRow);
+                    }
                     count++;
                 }
             }
@@ -138,6 +146,14 @@ public class Update extends Prepared {
 
             // the cached row is already updated - we need the old values
             table.updateRows(this, session, rows);
+            if (table.fireRow()) {
+                for (rows.reset(); rows.hasNext();) {
+                    Row o = rows.next();
+                    Row n = rows.next();
+                    table.fireAfterRow(session, o, n, false);
+                }
+            }
+            table.fire(session, Trigger.UPDATE, false);
             return count;
         } finally {
             rows.close();

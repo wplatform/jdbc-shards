@@ -8,6 +8,7 @@ package com.suning.snfddal.command.dml;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Alias;
 import com.suning.snfddal.command.expression.Expression;
@@ -21,7 +22,6 @@ import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultTarget;
 import com.suning.snfddal.result.SortOrder;
@@ -191,6 +191,11 @@ public abstract class Query extends Prepared {
      * @param s the session
      */
     public abstract void updateAggregate(Session s);
+
+    /**
+     * Call the before triggers on all tables.
+     */
+    public abstract void fireBeforeSelectTriggers();
 
     /**
      * Set the distinct flag.

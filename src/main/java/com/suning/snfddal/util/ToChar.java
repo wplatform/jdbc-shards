@@ -19,8 +19,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * Emulates Oracle's TO_CHAR function.

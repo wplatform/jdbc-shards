@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.SessionInterface;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.jdbc.JdbcBlob;
 import com.suning.snfddal.jdbc.JdbcClob;
 import com.suning.snfddal.jdbc.JdbcConnection;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.SimpleResultSet;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;

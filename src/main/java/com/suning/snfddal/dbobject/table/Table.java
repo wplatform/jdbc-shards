@@ -10,20 +10,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.ExpressionVisitor;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
+import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.index.IndexType;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObjectBase;
 import com.suning.snfddal.dbobject.schema.Sequence;
+import com.suning.snfddal.dbobject.schema.TriggerObject;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.RowList;
@@ -41,6 +43,26 @@ import com.suning.snfddal.value.ValueNull;
  * A table contains a list of columns and a list of rows.
  */
 public abstract class Table extends SchemaObjectBase {
+
+    /**
+     * The table type that means this table is a regular persistent table.
+     */
+    public static final int TYPE_CACHED = 0;
+
+    /**
+     * The table type that means this table is a regular persistent table.
+     */
+    public static final int TYPE_MEMORY = 1;
+
+    /**
+     * The table type name for linked tables.
+     */
+    public static final String TABLE_LINK = "TABLE LINK";
+
+    /**
+     * The table type name for system tables.
+     */
+    public static final String SYSTEM_TABLE = "SYSTEM TABLE";
 
     /**
      * The table type name for regular data tables.
@@ -76,7 +98,11 @@ public abstract class Table extends SchemaObjectBase {
     private final HashMap<String, Column> columnMap;
     private final boolean persistIndexes;
     private final boolean persistData;
+    private ArrayList<TriggerObject> triggers;
+    private ArrayList<Constraint> constraints;
     private ArrayList<Sequence> sequences;
+    private ArrayList<TableView> views;
+    private boolean checkForeignKeyConstraints = true;
     private boolean onCommitDrop, onCommitTruncate;
     private Row nullRow;
 
@@ -92,6 +118,12 @@ public abstract class Table extends SchemaObjectBase {
     @Override
     public void rename(String newName) {
         super.rename(newName);
+        if (constraints != null) {
+            for (int i = 0, size = constraints.size(); i < size; i++) {
+                Constraint constraint = constraints.get(i);
+                constraint.rebuild();
+            }
+        }
     }
 
     /**
@@ -316,6 +348,11 @@ public abstract class Table extends SchemaObjectBase {
         for (Column col : columns) {
             col.isEverything(visitor);
         }
+        if (constraints != null) {
+            for (Constraint c : constraints) {
+                c.isEverything(visitor);
+            }
+        }
         dependencies.add(this);
     }
 
@@ -326,8 +363,17 @@ public abstract class Table extends SchemaObjectBase {
         if (indexes != null) {
             children.addAll(indexes);
         }
+        if (constraints != null) {
+            children.addAll(constraints);
+        }
+        if (triggers != null) {
+            children.addAll(triggers);
+        }
         if (sequences != null) {
             children.addAll(sequences);
+        }
+        if (views != null) {
+            children.addAll(views);
         }
         ArrayList<Right> rights = database.getAllRights();
         for (Right right : rights) {
@@ -432,8 +478,27 @@ public abstract class Table extends SchemaObjectBase {
         }
     }
 
+    public ArrayList<TableView> getViews() {
+        return views;
+    }
+
     @Override
     public void removeChildrenAndResources(Session session) {
+        while (views != null && views.size() > 0) {
+            TableView view = views.get(0);
+            views.remove(0);
+            database.removeSchemaObject(session, view);
+        }
+        while (triggers != null && triggers.size() > 0) {
+            TriggerObject trigger = triggers.get(0);
+            triggers.remove(0);
+            database.removeSchemaObject(session, trigger);
+        }
+        while (constraints != null && constraints.size() > 0) {
+            Constraint constraint = constraints.get(0);
+            constraints.remove(0);
+            database.removeSchemaObject(session, constraint);
+        }
         for (Right right : database.getAllRights()) {
             if (right.getGrantedTable() == this) {
                 database.removeDatabaseObject(session, right);
@@ -466,6 +531,22 @@ public abstract class Table extends SchemaObjectBase {
      */
     public void dropSingleColumnConstraintsAndIndexes(Session session,
             Column col) {
+        ArrayList<Constraint> constraintsToDrop = New.arrayList();
+        if (constraints != null) {
+            for (int i = 0, size = constraints.size(); i < size; i++) {
+                Constraint constraint = constraints.get(i);
+                HashSet<Column> columns = constraint.getReferencedColumns(this);
+                if (!columns.contains(col)) {
+                    continue;
+                }
+                if (columns.size() == 1) {
+                    constraintsToDrop.add(constraint);
+                } else {
+                    throw DbException.get(
+                            ErrorCode.COLUMN_IS_REFERENCED_1, constraint.getSQL());
+                }
+            }
+        }
         ArrayList<Index> indexesToDrop = New.arrayList();
         ArrayList<Index> indexes = getIndexes();
         if (indexes != null) {
@@ -484,6 +565,9 @@ public abstract class Table extends SchemaObjectBase {
                             ErrorCode.COLUMN_IS_REFERENCED_1, index.getSQL());
                 }
             }
+        }
+        for (Constraint c : constraintsToDrop) {
+            session.getDatabase().removeSchemaObject(session, c);
         }
         for (Index i : indexesToDrop) {
             // the index may already have been dropped when dropping the
@@ -671,7 +755,25 @@ public abstract class Table extends SchemaObjectBase {
             }
         }
     }
-    
+
+    /**
+     * Remove the given view from the list.
+     *
+     * @param view the view to remove
+     */
+    public void removeView(TableView view) {
+        remove(views, view);
+    }
+
+    /**
+     * Remove the given constraint from the list.
+     *
+     * @param constraint the constraint to remove
+     */
+    public void removeConstraint(Constraint constraint) {
+        remove(constraints, constraint);
+    }
+
     /**
      * Remove a sequence from the table. Sequences are used as identity columns.
      *
@@ -682,12 +784,54 @@ public abstract class Table extends SchemaObjectBase {
     }
 
     /**
+     * Remove the given trigger from the list.
+     *
+     * @param trigger the trigger to remove
+     */
+    public void removeTrigger(TriggerObject trigger) {
+        remove(triggers, trigger);
+    }
+
+    /**
+     * Add a view to this table.
+     *
+     * @param view the view to add
+     */
+    public void addView(TableView view) {
+        views = add(views, view);
+    }
+
+    /**
+     * Add a constraint to the table.
+     *
+     * @param constraint the constraint to add
+     */
+    public void addConstraint(Constraint constraint) {
+        if (constraints == null || constraints.indexOf(constraint) < 0) {
+            constraints = add(constraints, constraint);
+        }
+    }
+
+    public ArrayList<Constraint> getConstraints() {
+        return constraints;
+    }
+
+    /**
      * Add a sequence to this table.
      *
      * @param sequence the sequence to add
      */
     public void addSequence(Sequence sequence) {
         sequences = add(sequences, sequence);
+    }
+
+    /**
+     * Add a trigger to this table.
+     *
+     * @param trigger the trigger to add
+     */
+    public void addTrigger(TriggerObject trigger) {
+        triggers = add(triggers, trigger);
     }
 
     private static <T> ArrayList<T> add(ArrayList<T> list, T obj) {
@@ -700,6 +844,48 @@ public abstract class Table extends SchemaObjectBase {
     }
 
     /**
+     * Fire the triggers for this table.
+     *
+     * @param session the session
+     * @param type the trigger type
+     * @param beforeAction whether 'before' triggers should be called
+     */
+    public void fire(Session session, int type, boolean beforeAction) {
+        if (triggers != null) {
+            for (TriggerObject trigger : triggers) {
+                trigger.fire(session, type, beforeAction);
+            }
+        }
+    }
+
+    /**
+     * Check whether this table has a select trigger.
+     *
+     * @return true if it has
+     */
+    public boolean hasSelectTrigger() {
+        if (triggers != null) {
+            for (TriggerObject trigger : triggers) {
+                if (trigger.isSelectTrigger()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if row based triggers or constraints are defined.
+     * In this case the fire after and before row methods need to be called.
+     *
+     *  @return if there are any triggers or rows defined
+     */
+    public boolean fireRow() {
+        return (constraints != null && constraints.size() > 0) ||
+                (triggers != null && triggers.size() > 0);
+    }
+
+    /**
      * Fire all triggers that need to be called before a row is updated.
      *
      * @param session the session
@@ -709,7 +895,21 @@ public abstract class Table extends SchemaObjectBase {
      */
     public boolean fireBeforeRow(Session session, Row oldRow, Row newRow) {
         boolean done = fireRow(session, oldRow, newRow, true, false);
+        fireConstraints(session, oldRow, newRow, true);
         return done;
+    }
+
+    private void fireConstraints(Session session, Row oldRow, Row newRow,
+            boolean before) {
+        if (constraints != null) {
+            // don't use enhanced for loop to avoid creating objects
+            for (int i = 0, size = constraints.size(); i < size; i++) {
+                Constraint constraint = constraints.get(i);
+                if (constraint.isBefore() == before) {
+                    constraint.checkRow(session, this, oldRow, newRow);
+                }
+            }
+        }
     }
 
     /**
@@ -723,11 +923,21 @@ public abstract class Table extends SchemaObjectBase {
     public void fireAfterRow(Session session, Row oldRow, Row newRow,
             boolean rollback) {
         fireRow(session, oldRow, newRow, false, rollback);
-
+        if (!rollback) {
+            fireConstraints(session, oldRow, newRow, false);
+        }
     }
 
     private boolean fireRow(Session session, Row oldRow, Row newRow,
             boolean beforeAction, boolean rollback) {
+        if (triggers != null) {
+            for (TriggerObject trigger : triggers) {
+                boolean done = trigger.fireRow(session, oldRow, newRow, beforeAction, rollback);
+                if (done) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -742,6 +952,30 @@ public abstract class Table extends SchemaObjectBase {
      */
     public boolean canTruncate() {
         return false;
+    }
+
+    /**
+     * Enable or disable foreign key constraint checking for this table.
+     *
+     * @param session the session
+     * @param enabled true if checking should be enabled
+     * @param checkExisting true if existing rows must be checked during this
+     *            call
+     */
+    public void setCheckForeignKeyConstraints(Session session, boolean enabled,
+            boolean checkExisting) {
+        if (enabled && checkExisting) {
+            if (constraints != null) {
+                for (Constraint c : constraints) {
+                    c.checkExistingData(session);
+                }
+            }
+        }
+        checkForeignKeyConstraints = enabled;
+    }
+
+    public boolean getCheckForeignKeyConstraints() {
+        return checkForeignKeyConstraints;
     }
 
     /**
@@ -781,6 +1015,28 @@ public abstract class Table extends SchemaObjectBase {
 
     public void setOnCommitTruncate(boolean onCommitTruncate) {
         this.onCommitTruncate = onCommitTruncate;
+    }
+
+    /**
+     * If the index is still required by a constraint, transfer the ownership to
+     * it. Otherwise, the index is removed.
+     *
+     * @param session the session
+     * @param index the index that is no longer required
+     */
+    public void removeIndexOrTransferOwnership(Session session, Index index) {
+        boolean stillNeeded = false;
+        if (constraints != null) {
+            for (Constraint cons : constraints) {
+                if (cons.usesIndex(index)) {
+                    cons.setIndexOwner(index);
+                    stillNeeded = true;
+                }
+            }
+        }
+        if (!stillNeeded) {
+            database.removeSchemaObject(session, index);
+        }
     }
 
     /**

@@ -17,9 +17,9 @@ import java.io.PipedOutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.util.IOUtils;
 import com.suning.snfddal.util.Task;

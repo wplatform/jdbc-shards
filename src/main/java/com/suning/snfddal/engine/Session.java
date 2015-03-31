@@ -16,6 +16,7 @@ import java.util.Random;
 
 import javax.sql.DataSource;
 
+import com.suning.snfddal.api.ErrorCode;
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Parser;
@@ -23,12 +24,12 @@ import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.dbobject.Setting;
 import com.suning.snfddal.dbobject.User;
+import com.suning.snfddal.dbobject.constraint.Constraint;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.jdbc.JdbcConnection;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.result.LocalResult;
@@ -74,6 +75,7 @@ public class Session extends SessionWithState {
     private HashMap<String, Savepoint> savepoints;
     private HashMap<String, Table> localTempTables;
     private HashMap<String, Index> localTempTableIndexes;
+    private HashMap<String, Constraint> localTempTableConstraints;
     private int throttle;
     private long lastThrottle;
     private Command currentCommand;
@@ -282,6 +284,65 @@ public class Session extends SessionWithState {
             localTempTableIndexes.remove(index.getName());
             synchronized (database) {
                 index.removeChildrenAndResources(this);
+            }
+        }
+    }
+
+    /**
+     * Get the local temporary constraint if one exists with that name, or
+     * null if not.
+     *
+     * @param name the constraint name
+     * @return the constraint, or null
+     */
+    public Constraint findLocalTempTableConstraint(String name) {
+        if (localTempTableConstraints == null) {
+            return null;
+        }
+        return localTempTableConstraints.get(name);
+    }
+
+    /**
+     * Get the map of constraints for all constraints on local, temporary
+     * tables, if any. The map's keys are the constraints' names.
+     *
+     * @return the map of constraints, or null
+     */
+    public HashMap<String, Constraint> getLocalTempTableConstraints() {
+        if (localTempTableConstraints == null) {
+            return New.hashMap();
+        }
+        return localTempTableConstraints;
+    }
+
+    /**
+     * Add a local temporary constraint to this session.
+     *
+     * @param constraint the constraint to add
+     * @throws DbException if a constraint with the same name already exists
+     */
+    public void addLocalTempTableConstraint(Constraint constraint) {
+        if (localTempTableConstraints == null) {
+            localTempTableConstraints = database.newStringMap();
+        }
+        String name = constraint.getName();
+        if (localTempTableConstraints.get(name) != null) {
+            throw DbException.get(ErrorCode.CONSTRAINT_ALREADY_EXISTS_1,
+                    constraint.getSQL());
+        }
+        localTempTableConstraints.put(name, constraint);
+    }
+
+    /**
+     * Drop and remove the given local temporary constraint from this session.
+     *
+     * @param constraint the constraint
+     */
+    void removeLocalTempTableConstraint(Constraint constraint) {
+        if (localTempTableConstraints != null) {
+            localTempTableConstraints.remove(constraint.getName());
+            synchronized (database) {
+                constraint.removeChildrenAndResources(this);
             }
         }
     }
