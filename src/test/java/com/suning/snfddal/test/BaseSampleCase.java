@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 
 import org.junit.After;
 
-import com.suning.snfddal.jdbc.DispatcherDataSource;
+import com.suning.snfddal.jdbc.JdbcDataSource;
 import com.suning.snfddal.util.Utils;
 
 public abstract class BaseSampleCase {
@@ -22,7 +22,7 @@ public abstract class BaseSampleCase {
     public BaseSampleCase() {
         try {
             String configLocation = "/config/ddal-config.xml";
-            DispatcherDataSource dataSource = new DispatcherDataSource();
+            JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setConfigLocation(configLocation);
             dataSource.init();
             this.dataSource = dataSource;
@@ -35,7 +35,7 @@ public abstract class BaseSampleCase {
     @After
     public void disorty() {
         try {
-            ((DispatcherDataSource) dataSource).close();
+            ((JdbcDataSource) dataSource).close();
         } catch (Exception e) {
             e.printStackTrace();
         }
