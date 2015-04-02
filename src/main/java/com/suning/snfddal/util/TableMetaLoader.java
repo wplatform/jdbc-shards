@@ -27,7 +27,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -38,8 +37,6 @@ import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
-import com.suning.snfddal.route.rule.RuleColumn;
-import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.ValueDate;
 import com.suning.snfddal.value.ValueTime;
@@ -58,7 +55,6 @@ public class TableMetaLoader {
     private boolean storesMixedCase;
     private boolean storesMixedCaseQuoted;
     private boolean supportsMixedCaseIdentifiers;
-    private boolean force;
 
     private Trace trace;
     private Map<String, DataSource> dataNodes;
@@ -83,10 +79,9 @@ public class TableMetaLoader {
         try {
             createTableData = readMetaData(tableConfig);
         } catch (DbException e) {
-            if (!force) {
+            if (tableConfig.isValidation()) {
                 throw e;
             }
-            Column[] cols = {};
             createTableData.columns = New.arrayList();
             //setColumns(cols);
             //linkedIndex = new MappedIndex(this, id, IndexColumn.wrap(cols), IndexType.createNonUnique(false));
@@ -96,14 +91,19 @@ public class TableMetaLoader {
     }
 
     private CreateTableData readMetaData(TableConfig tableConfig) {
+        String name = tableConfig.getName();
+        String qualified = tableConfig.getQualifiedTableName();
+        String metadataNode = tableConfig.getMetadataNode();
         for (int retry = 0;; retry++) {
             try {
                 Connection conn = null;
                 try {
-                    String metadataNode = tableConfig.getMetadata();
+                    trace.debug("Try to load {}'s metadata from table {} of shard {}.",name,qualified, metadataNode);
                     DataSource ds = this.dataNodes.get(metadataNode);
                     conn = ds.getConnection();
-                    return tryReadMetaData(conn, tableConfig);
+                    CreateTableData metaData = tryReadMetaData(conn, tableConfig);
+                    trace.debug("Load the {}'s metadata success.",name);
+                    return metaData;
                 } catch (Exception e) {
                     throw DbException.convert(e);
                 } finally {
@@ -348,6 +348,7 @@ public class TableMetaLoader {
         indexes.add(index);
     }*/
     
+    /*
     protected void checkRuleColumn(TableConfig config,CreateTableData data) {
         TableRouter tableRouter = config.getTableRouter();
         if(tableRouter != null) {
@@ -366,7 +367,7 @@ public class TableMetaLoader {
                 }
             }
         }
-    }
+    }*/
 
 
     /**

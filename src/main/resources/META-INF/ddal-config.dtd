@@ -20,7 +20,7 @@
 
 <!ELEMENT settings (property*)>
 
-<!ELEMENT schema (table*)>
+<!ELEMENT schema (tableGroup* , table*)>
 <!ATTLIST schema 
 name CDATA #REQUIRED
 metadata CDATA #IMPLIED
@@ -60,6 +60,20 @@ class CDATA #REQUIRED
 name CDATA #REQUIRED
 metadata CDATA #IMPLIED
 router CDATA #IMPLIED
+validation (true|false) #IMPLIED
+enableFts (true|false) #IMPLIED
+scanLevel (none|any|primaryKey|shardingKey) #IMPLIED
+broadcast CDATA #IMPLIED
+>
+
+<!ELEMENT tableGroup (table+)>
+<!ATTLIST tableGroup
+metadata CDATA #IMPLIED
+router CDATA #IMPLIED
+validation (true|false) #IMPLIED
+enableFts (true|false) #IMPLIED
+scanLevel (none|any|index|primaryKey|shardingKey) #IMPLIED
+broadcast CDATA #IMPLIED
 >
 
 <!ELEMENT property (#PCDATA)>

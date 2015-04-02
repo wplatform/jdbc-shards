@@ -20,9 +20,9 @@ package com.suning.snfddal.route.rule;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.util.New;
 
 /**
@@ -34,13 +34,19 @@ public class TableRouter implements Serializable{
     
     private String id;
     
-    private Map<String, Set<String>> partition;
+    private List<TableNode> partition;
         
-    private RuleExpression shardRuleExpression;
+    private RuleExpression ruleExpression;
     
-    private RuleExpression tableRuleExpression;
+    private final Configuration configuration;
     
-    private TableTopology topology;
+    /**
+     * @param configuration
+     */
+    public TableRouter(Configuration configuration) {
+        super();
+        this.configuration = configuration;
+    }
 
     /**
      * @return the id
@@ -57,81 +63,51 @@ public class TableRouter implements Serializable{
     }
 
     /**
+     * @return the ruleColumns
+     */
+    public List<RuleColumn> getRuleColumns() {
+        Set<RuleColumn> temp = New.linkedHashSet();
+        temp.addAll(ruleExpression.getRuleColumns());
+        List<RuleColumn> result = New.arrayList(temp);
+        return result;
+    }
+
+    /**
      * @return the partition
      */
-    public Map<String, Set<String>> getPartition() {
+    public List<TableNode> getPartition() {
         return partition;
     }
 
     /**
      * @param partition the partition to set
      */
-    public void setPartition(Map<String, Set<String>> partition) {
+    public void setPartition(List<TableNode> partition) {
         this.partition = partition;
     }
 
     /**
-     * @return the ruleColumns
+     * @return the ruleExpression
      */
-    public List<RuleColumn> getRuleColumns() {
-        Set<RuleColumn> temp = New.linkedHashSet();
-        temp.addAll(shardRuleExpression.getRuleColumns());
-        temp.addAll(tableRuleExpression.getRuleColumns());
-        List<RuleColumn> result = New.arrayList(temp);
-        return result;
-    }
-    /**
-     * @return the shardRuleExpression
-     */
-    public RuleExpression getShardRuleExpression() {
-        return shardRuleExpression;
+    public RuleExpression getRuleExpression() {
+        return ruleExpression;
     }
 
     /**
-     * @param shardRuleExpression the shardRuleExpression to set
+     * @param ruleExpression the ruleExpression to set
      */
-    public void setShardRuleExpression(RuleExpression shardRuleExpression) {
-        this.shardRuleExpression = shardRuleExpression;
+    public void setRuleExpression(RuleExpression ruleExpression) {
+        this.ruleExpression = ruleExpression;
     }
 
     /**
-     * @return the tableRuleExpression
+     * @return the configuration
      */
-    public RuleExpression getTableRuleExpression() {
-        return tableRuleExpression;
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
-    /**
-     * @param tableRuleExpression the tableRuleExpression to set
-     */
-    public void setTableRuleExpression(RuleExpression tableRuleExpression) {
-        this.tableRuleExpression = tableRuleExpression;
-    }
-
-    /**
-     * @return the topology
-     */
-    public TableTopology getTopology() {
-        return topology;
-    }
     
-    /**
-     * @param topology the topology to set
-     */
-    public void initTopology(String tableName) {
-        Map<String, Set<String>> structure = New.linkedHashMap();
-        for (Map.Entry<String, Set<String>> entry : partition.entrySet()) {
-            String shardName = entry.getKey();
-            Set<String> suffixs = entry.getValue();
-            Set<String> tables = New.linkedHashSet();
-            for (String suffix : suffixs) {
-                tables.add(tableName + suffix);
-            }
-            structure.put(shardName, tables);
-        }
-        topology = new TableTopology(structure);
-        
-    }
     
     
     

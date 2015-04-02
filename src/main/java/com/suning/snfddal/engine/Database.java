@@ -87,9 +87,7 @@ public class Database {
     private SourceCompiler compiler;
     private RoutingHandler routingHandler;
 
-    public Database() {
-
-        Configuration configuration = Configuration.getInstance();
+    public Database(Configuration configuration) {
 
         this.compareMode = CompareMode.getInstance(null, 0);
         this.dbSettings = DbSettings.getInstance(null);

@@ -31,6 +31,16 @@ public class RuleExpression implements Serializable {
     private List<RuleColumn> ruleColumns;
 
     private String expression;
+    
+    private final TableRouter tableRouter;
+
+    /**
+     * @param tableRouter
+     */
+    public RuleExpression(TableRouter tableRouter) {
+        super();
+        this.tableRouter = tableRouter;
+    }
 
     /**
      * @return the ruleColumns
@@ -59,6 +69,15 @@ public class RuleExpression implements Serializable {
     public void setExpression(String expression) {
         this.expression = expression;
     }
+
+    /**
+     * @return the tableRouter
+     */
+    public TableRouter getTableRouter() {
+        return tableRouter;
+    }
+    
+    
     
     
 }

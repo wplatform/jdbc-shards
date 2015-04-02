@@ -6,24 +6,16 @@
 package com.suning.snfddal.command.ddl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import com.suning.snfddal.command.CommandInterface;
-import com.suning.snfddal.command.dml.Insert;
 import com.suning.snfddal.command.dml.Query;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.dbobject.schema.Sequence;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.IndexColumn;
-import com.suning.snfddal.dbobject.table.Table;
-import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.value.DataType;
 
 /**
  * This class represents the statement

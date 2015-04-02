@@ -19,20 +19,13 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
 import com.suning.snfddal.config.Configuration;
-import com.suning.snfddal.config.ConfigurationException;
 import com.suning.snfddal.config.DataSourceLookup;
-import com.suning.snfddal.config.SchemaConfig;
-import com.suning.snfddal.config.ShardConfig;
-import com.suning.snfddal.config.TableConfig;
 import com.suning.snfddal.config.parser.XmlConfigParser;
 import com.suning.snfddal.dbobject.User;
-import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.dbobject.table.MappedTable;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.SessionInterface;
 import com.suning.snfddal.message.DbException;
@@ -296,48 +289,7 @@ public class JdbcDataSource implements DataSource {
         }
         XmlConfigParser parser = new XmlConfigParser(source);
         Configuration configuration = parser.parse();
-        SchemaConfig dsConfig = configuration.getSchemaConfig();
-        this.database = new Database();
-        Map<String, ShardConfig> shardMapping = configuration.getCluster();
-        for (ShardConfig value : shardMapping.values()) {
-            String description = value.getDescription();
-            //TODO 处理数据源组
-            DataSource dataSource = configuration.getDataNodes().get(description);
-            if(dataSource == null) {
-                throw new ConfigurationException("Can' find data source: " + description);
-            }
-            database.addDataNode(value.getName(), dataSource);
-        }
-        
-        Schema schema = database.findSchema(dsConfig.getName());
-        String userName = DATABASE_MASTER_USER;
-        if (schema == null) {
-            User user = database.findUser(userName);
-            if (database.findUser(userName) == null) {
-                // users is the last thing we add, so if no user is around,
-                // the database is new (or not initialized correctly)
-                user = new User(database, database.allocateObjectId(), userName);
-                user.setAdmin(true);
-                user.setUserPasswordHash(new byte[0]);
-                database.addDatabaseObject(user);
-            }
-            schema = new Schema(database, database.allocateObjectId(), dsConfig.getName(), user, true);
-            database.addDatabaseObject(schema);
-        }
-        for (TableConfig tbConfig : dsConfig.getTables()) {
-            String metadata = tbConfig.getMetadata();
-            String metaNode = metadata;
-            String originalTable = tbConfig.getName();
-            int dotPost = metadata.indexOf('.');
-            if(dotPost != -1) {
-                metaNode = metadata.substring(0, dotPost);
-                originalTable = metadata.substring(dotPost + 1);
-            }
-            MappedTable tableObject = schema.createMappedTable(database.allocateObjectId(), tbConfig.getName(),
-                    metaNode, null, originalTable, false, false);
-            tableObject.setTableRouter(tbConfig.getTableRouter());
-            database.addSchemaObject(tableObject);
-        }
+        this.database = new Database(configuration);
         inited = true;
     }
 

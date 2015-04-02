@@ -6,7 +6,9 @@ import java.beans.PropertyDescriptor;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -19,6 +21,8 @@ import com.suning.snfddal.config.RuleAlgorithmConfig;
 import com.suning.snfddal.config.SchemaConfig;
 import com.suning.snfddal.config.ShardConfig;
 import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.route.rule.RuleExpression;
+import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
@@ -35,7 +39,7 @@ public class XmlConfigParser {
     }
 
     public XmlConfigParser(XPathParser parser) {
-        this.configuration = Configuration.getInstance();
+        this.configuration = new Configuration();
         this.parser = parser;
     }
 
@@ -173,7 +177,18 @@ public class XmlConfigParser {
             throw new ParsingException("There was an error to construct RuleAlgorithm " + clazz + " Cause: " + e, e);
         }
     }
-    
+
+    /**
+     * @param tableConfings
+     * @param config
+     */
+    private void addToListIfNotDuplicate(List<TableConfig> tableConfings, TableConfig config) {
+        if (tableConfings.contains(config)) {
+            throw new ParsingException("Duplicate table name '" + config.getName() + "' in schema.");
+        }
+        tableConfings.add(config);
+    }
+
     private void parseSchemaConfig(XNode xNode) {
         SchemaConfig dsConfig = new SchemaConfig();
         String name = xNode.getStringAttribute("name");
@@ -184,43 +199,199 @@ public class XmlConfigParser {
         dsConfig.setName(name);
         dsConfig.setMetadata(metadata);
         List<TableConfig> tableConfings = New.arrayList();
-        List<XNode> xNodes = xNode.evalNodes("table");
+        List<XNode> xNodes = xNode.evalNodes("tableGroup");
+        for (XNode tableGroupNode : xNodes) {
+            Map<String, String> attributes = parseTableGroupAttributs(tableGroupNode);
+            xNodes = tableGroupNode.evalNodes("table");
+            for (XNode tableNode : xNodes) {
+                TableConfig config = newTableConfig(dsConfig, attributes, tableNode);
+                addToListIfNotDuplicate(tableConfings, config);
+            }
+        }
+        xNodes = xNode.evalNodes("table");
         for (XNode tableNode : xNodes) {
-            TableConfig config = new TableConfig();
-            String tableName = tableNode.getStringAttribute("name");
-            String tableMetadata = tableNode.getStringAttribute("metadata");
-            String router = tableNode.getStringAttribute("router");
-            if (StringUtils.isNullOrEmpty(tableName)) {
-                throw new ParsingException("table attribute 'name' is required.");
-            }
-            config.setName(tableName);
-            if (StringUtils.isNullOrEmpty(tableMetadata)) {
-                config.setMetadata(dsConfig.getMetadata());
-            } else {
-                config.setMetadata(tableMetadata);
-            }
-            if (!StringUtils.isNullOrEmpty(router)) {
-               TableRouter tableRouter = configuration.getTableRouters().get(router);
-               if(tableRouter == null) {
-                   throw new ParsingException("The table router '" + router + "' is not found.");
-               }
-               TableRouter copy = new TableRouter();
-               copy.setId(tableRouter.getId());
-               copy.setPartition(tableRouter.getPartition());
-               copy.setShardRuleExpression(tableRouter.getShardRuleExpression());
-               copy.setTableRuleExpression(tableRouter.getTableRuleExpression());
-               copy.initTopology(config.getName());
-               config.setTableRouter(copy);
-            }
-            config.setSchemaConfig(dsConfig);
-            if(tableConfings.contains(config)) {
-                throw new ParsingException("Duplicate table name '" + tableName + "' in schema.");
-            }
-            tableConfings.add(config);
+            TableConfig config = newTableConfig(dsConfig, null, tableNode);
+            addToListIfNotDuplicate(tableConfings, config);
         }
         dsConfig.setTables(tableConfings);
         configuration.setSchemaConfig(dsConfig);
+        configuration.getTemporaryTableRouters().clear();
+
+    }
     
+    /**
+     * @param config
+     * @param scanLevel
+     */
+    private void setTableScanLevel(TableConfig config, String scanLevel) {
+        if ("none".equals(scanLevel)) {
+            config.setScanLevel(TableConfig.SCANLEVEL_NONE);
+        } else if ("any".equals(scanLevel)) {
+            config.setScanLevel(TableConfig.SCANLEVEL_ANY);
+        } else if ("index".equals(scanLevel)) {
+            config.setScanLevel(TableConfig.SCANLEVEL_INDEX);
+        } else if ("primaryKey".equals(scanLevel)) {
+            config.setScanLevel(TableConfig.SCANLEVEL_PRIMARYKEY);
+        } else if ("shardingKey".equals(scanLevel)) {
+            config.setScanLevel(TableConfig.SCANLEVEL_SHARDINGKEY);
+        }
+    }
+
+    /**
+     * @param config
+     * @param tableMetadata
+     */
+    private void setTableMetadata(TableConfig config, String tableMetadata) {
+        if (StringUtils.isNullOrEmpty(tableMetadata)) {
+            throw new ParsingException("The table " + config.getName() 
+                    + " attribute 'metadata' is null.");
+        }
+        String[] tokens = tableMetadata.split("\\.");
+        switch (tokens.length) {
+        case 1:
+            config.setMetadataNode(tokens[0]);
+            config.setOriginalTable(config.getName());
+            break;
+        case 2:
+            config.setMetadataNode(tokens[0]);
+            config.setOriginalTable(tokens[1]);
+            break;
+        case 3:
+            config.setMetadataNode(tokens[0]);
+            config.setOriginalSchema(tokens[1]);
+            config.setOriginalTable(tokens[2]);
+            break;
+        case 4:
+            config.setMetadataNode(tokens[0]);
+            config.setOriginalCatalog(tokens[1]);
+            config.setOriginalSchema(tokens[2]);
+            config.setOriginalTable(tokens[3]);
+            break;
+
+        default:
+            throw new ParsingException("The table " + config.getName() 
+                    + " attribute 'metadata' configuration error.");
+        }
+        if(!configuration.getCluster().containsKey(config.getMetadataNode())) {
+            throw new ParsingException("The table " + config.getName() 
+                    + " attribute 'metadata' not match in cluster.");
+        }
+    }
+
+    /**
+     * @param tableNode
+     * @return
+     */
+    private Map<String, String> parseTableGroupAttributs(XNode tableNode) {
+        Map<String, String> attributes = New.hashMap();
+        String tableMetadata = tableNode.getStringAttribute("metadata");
+        String router = tableNode.getStringAttribute("router");
+        String validation = tableNode.getStringAttribute("validation", "true");
+        String fullTableScan = tableNode.getStringAttribute("enableFts", "false");
+        String scanLevel = tableNode.getStringAttribute("scanLevel", "none");
+        String broadcast = tableNode.getStringAttribute("broadcast");
+
+        attributes.put("metadata", tableMetadata);
+        attributes.put("router", router);
+        attributes.put("validation", validation);
+        attributes.put("scanLevel", scanLevel);
+        attributes.put("enableFts", fullTableScan);
+        attributes.put("broadcast", broadcast);
+        return attributes;
+    }
+
+    /**
+     * @param xNode
+     * @param dsConfig
+     * @param tableConfings
+     * @param tableNode
+     */
+    private TableConfig newTableConfig(SchemaConfig dsConfig, Map<String, String> template, XNode tableNode) {
+        TableConfig config = new TableConfig();
+        String tableMetadata = null;
+        String router = null;
+        boolean validation = true;
+        boolean fullTableScan = false;
+        String scanLevel = "none";
+        String broadcast = null;
+        if (template != null) {
+            tableMetadata = template.get("metadata");
+            router = template.get("router");
+            validation = Boolean.parseBoolean(template.get("validation"));
+            fullTableScan = Boolean.parseBoolean(template.get("enableFts"));
+            scanLevel = template.get("scanLevel");
+            broadcast = template.get("broadcast");
+        }
+        String tableName = tableNode.getStringAttribute("name");
+        tableMetadata = tableNode.getStringAttribute("metadata");
+        String routerChild = tableNode.getStringAttribute("router", router);
+        validation = tableNode.getBooleanAttribute("validation", validation);
+        fullTableScan = tableNode.getBooleanAttribute("enableFts", fullTableScan);
+        scanLevel = tableNode.getStringAttribute("scanLevel", scanLevel);
+        broadcast = tableNode.getStringAttribute("broadcast", broadcast);
+
+        if (StringUtils.isNullOrEmpty(tableName)) {
+            throw new ParsingException("table attribute 'name' is required.");
+        }
+        if (!StringUtils.isNullOrEmpty(router) && !StringUtils.equals(router, routerChild)) {
+            throw new ParsingException("table's attribute 'router' can't override tableGroup's attribute 'router'.");
+        }
+        if (!StringUtils.isNullOrEmpty(router) && !StringUtils.isNullOrEmpty(broadcast)) {
+            throw new ParsingException("attribute 'broadcast' must be null if attribute 'router' was assigned.");
+        }
+        router = routerChild;
+        config.setName(tableName);
+        config.setValidation(validation);
+        config.setEnabledFts(fullTableScan);
+
+        Set<String> nodes = New.linkedHashSet();
+        if (!StringUtils.isNullOrEmpty(broadcast)) {
+            for (String string : broadcast.split(",")) {
+                if (!string.trim().isEmpty()) {
+                    nodes.add(string);
+                }
+            }
+        }
+        config.setBroadcast(nodes.toArray(new String[nodes.size()]));
+        setTableScanLevel(config, scanLevel);
+        if (StringUtils.isNullOrEmpty(tableMetadata)) {
+            setTableMetadata(config, dsConfig.getMetadata());
+        } else {
+            setTableMetadata(config, tableMetadata);
+        }
+        if (!StringUtils.isNullOrEmpty(router)) {
+            TableRouter rawRouter = configuration.getTemporaryTableRouters().get(router);
+            if (rawRouter == null) {
+                throw new ParsingException("The table router '" + router + "' is not found.");
+            }
+            TableRouter tableRouter = new TableRouter(configuration);
+            List<TableNode> partition = rawRouter.getPartition();
+            List<TableNode> actualPartitions = New.arrayList(partition.size());
+            for (TableNode item : partition) {
+                TableNode actualNode = new TableNode();
+                String actualShardName = item.getShardName();
+                String actualTableName;
+                if (StringUtils.isNullOrEmpty(item.getTableName())) {
+                    actualTableName = config.getName();
+                } else {
+                    actualTableName = config.getName() + item.getTableName();
+                }
+                actualNode.setShardName(actualShardName);
+                actualNode.setTableName(actualTableName);
+                actualPartitions.add(actualNode);
+            }
+
+            tableRouter.setId(rawRouter.getId());
+            tableRouter.setPartition(actualPartitions);
+            RuleExpression rawExpression = rawRouter.getRuleExpression();
+            RuleExpression expression = new RuleExpression(tableRouter);
+            expression.setExpression(rawExpression.getExpression());
+            expression.setRuleColumns(rawExpression.getRuleColumns());
+            tableRouter.setRuleExpression(expression);
+            config.setTableRouter(tableRouter);
+        }
+        config.setSchemaConfig(dsConfig);
+        return config;
     }
 
     private DataSource constructDataSource(DataNodeConfig dataSourceConfig) {

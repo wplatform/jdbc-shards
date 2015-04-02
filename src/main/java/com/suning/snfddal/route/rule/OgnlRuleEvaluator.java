@@ -45,8 +45,8 @@ public class OgnlRuleEvaluator implements RuleEvaluator {
                     args.put(ruleColumn.getName(), argValue.getObject());
                 }
             }
-            Map<String, Object> algorithms = Configuration.getInstance().getRuleAlgorithms();
-            
+            Configuration configuration = expression.getTableRouter().getConfiguration();
+            Map<String, Object> algorithms = configuration.getRuleAlgorithms();
             evaluateContext.putAll(algorithms);
             evaluateContext.putAll(args);
             Object result = OgnlCache.getValue(ognlExpr, evaluateContext);

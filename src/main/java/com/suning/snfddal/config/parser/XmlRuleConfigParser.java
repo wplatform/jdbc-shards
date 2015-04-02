@@ -21,8 +21,6 @@ package com.suning.snfddal.config.parser;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -30,6 +28,7 @@ import org.w3c.dom.NodeList;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.route.rule.RuleColumn;
 import com.suning.snfddal.route.rule.RuleExpression;
+import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
@@ -68,10 +67,10 @@ public class XmlRuleConfigParser {
                 throw new ParsingException(
                         "Error parsing ddal-rule XML . Cause: the id attribute of 'tableRouter' element is required.");
             }
-            TableRouter tableRule = new TableRouter();
-            tableRule.setId(id);
-            parseTableRuleChildrenXNode(tableRule, xNode.getChildren());
-            configuration.addTableRouter(id, tableRule);
+            TableRouter routeConfig = new TableRouter(null);
+            routeConfig.setId(id);
+            parseTableRuleChildrenXNode(routeConfig, xNode.getChildren());
+            configuration.addTemporaryTableRouter(id, routeConfig);
         }
     }
 
@@ -80,25 +79,15 @@ public class XmlRuleConfigParser {
 
         for (XNode xNode : list) {
             if ("partition".equals(xNode.getName())) {
-                String partition = getStringBody(xNode);
-                if (partition != null) {
-                    partition = partition.replaceAll("\\s", "");
-                }
-                if (StringUtils.isNullOrEmpty(partition)) {
-                    throw new ParsingException("RuleTable '" + tableRouter.getId() + "' partition is emptry.");
-                }
-                parsePartition(tableRouter, partition);
-            } else if ("shardRule".equals(xNode.getName())) {
-                RuleExpression ruleExpr = parseRuleExpression(xNode, tableRouter);
-                tableRouter.setShardRuleExpression(ruleExpr);
+                parsePartition(tableRouter, xNode.getChildren());
             } else if ("tableRule".equals(xNode.getName())) {
-                RuleExpression ruleExpr = parseRuleExpression(xNode, tableRouter);
-                tableRouter.setTableRuleExpression(ruleExpr);
+                RuleExpression ruleExpr = parseRuleExpression(xNode);
+                tableRouter.setRuleExpression(ruleExpr);
             }
         }
 
     }
-    
+
     private String getStringBody(XNode xNode) {
         StringBuilder sb = new StringBuilder();
         NodeList children = xNode.getNode().getChildNodes();
@@ -118,7 +107,7 @@ public class XmlRuleConfigParser {
     }
 
     // 解析<rule>标签的内容
-    public RuleExpression parseRuleExpression(XNode xNode, TableRouter tableRouter) {
+    public RuleExpression parseRuleExpression(XNode xNode) {
         String stringBody = getStringBody(xNode);
         String text = stringBody.replaceAll("\\s", " ");
         final List<RuleColumn> ruleColumns = new ArrayList<RuleColumn>();
@@ -149,7 +138,7 @@ public class XmlRuleConfigParser {
             }
         });
         String expression = parser.parse(text);
-        RuleExpression rule = new RuleExpression();
+        RuleExpression rule = new RuleExpression(null);
         rule.setExpression(expression);
         rule.setRuleColumns(ruleColumns);
         return rule;
@@ -174,76 +163,67 @@ public class XmlRuleConfigParser {
         return ruleColumn;
     }
 
-    private void parsePartition(TableRouter tableRouter, String partition) {
-        Map<String, Set<String>> partitionConfig = New.linkedHashMap();
-        String shards[] = partition.split(",");
-        for (String shard : shards) {
-            String shardName = null;
-            int begin = shard.indexOf('[');
-            int end = shard.lastIndexOf(']');
-            String tableDesc = null;
-            if (begin != -1 && end != -1) {
-                tableDesc = shard.substring(begin + 1, end);
-                shardName = shard.substring(0, begin);
-            } else {
-                shardName = shard;
+    private void parsePartition(TableRouter tableRouter, List<XNode> list) {
+        List<TableNode> tableNodes = New.arrayList();
+        for (XNode xNode : list) {
+            String shard = xNode.getStringAttribute("shard");
+            String suffix = xNode.getStringAttribute("suffix");
+            shard = shard == null ? null : shard.trim();
+            suffix = suffix == null ? null : suffix.trim();
+            if (StringUtils.isNullOrEmpty(shard)) {
+                throw new ParsingException("Error parsing ddal-rule XML. Cause: "
+                        + "the shard attribute of 'table' element is required.");
             }
-            Set<String> suffixs = New.linkedHashSet();
-            if (tableDesc != null) {
-                int length = tableDesc.length();
-                ParsingException parsingException = new ParsingException(
-                        "Error parsing partition element in rule XML. Cause： incorrect table suffix " + shard);
-                if (length % 2 == 1 && tableDesc.charAt((length - 1) / 2) == '-') {
-                    String connSign = parseConnSign(tableDesc.substring(0, length / 2));
-                    String minNum = tableDesc.substring(0, length / 2).substring(connSign.length());
-                    String maxNum = tableDesc.substring(length / 2 + 1).substring(connSign.length());
-                    int min = Integer.valueOf(minNum);
-                    int max = Integer.valueOf(maxNum);
-                    if (min >= max) {
-                        throw parsingException;
-                    } else {
-                        for (int j = min; j <= max; j++) {
-                            String suffix = connSign + addZero(String.valueOf(j), minNum.length());
-                            suffixs.add(suffix);
-                        }
+            List<String> shards = collectItems(shard);
+            List<String> suffixes = collectItems(suffix);
+            if (suffixes.isEmpty()) {
+                for (String shardItem : shards) {
+                    TableNode node = new TableNode();
+                    node.setShardName(shardItem);
+                    if(tableNodes.contains(node)) {
+                        throw new ParsingException("Duplicate " + node + " defined in " 
+                                + tableRouter.getId() + "'s partition");
                     }
-                } else {
-                    throw parsingException;
+                    tableNodes.add(node);
+                }
+            } else {
+                for (String shardItem : shards) {
+                    for (String suffixItem : suffixes) {
+                        TableNode node = new TableNode();
+                        node.setShardName(shardItem);
+                        node.setTableName(suffixItem);
+                        if(tableNodes.contains(node)) {
+                            throw new ParsingException("Duplicate " + node + " defined in " 
+                                    + tableRouter.getId() + "'s partition");
+                        }
+                        tableNodes.add(node);
+                    }
                 }
             }
-            
-            if (!configuration.getShardNames().contains(shardName)) {
-                throw new ParsingException("Error parsing partition element in rule XML . "
-                        + "Cause : The shard must exist in cluster .");
-            } else if (partitionConfig.containsKey(shardName)) {
-                throw new ParsingException(
-                        "Error parsing partition element in rule XML . Cause : The shardName in TableRouter's "
-                                + "partition must be unrepeatable .");
-            }
-            partitionConfig.put(shardName, suffixs);
         }
-        tableRouter.setPartition(partitionConfig);
-        
+        tableRouter.setPartition(tableNodes);
+
     }
 
-    private String parseConnSign(String str) {
-        String connSign = "";
-        for (int i = 0; i < str.length(); i++) {
-            if ('0' <= str.charAt(i) && str.charAt(i) <= '9') {
-                connSign = str.substring(0, i);
-                break;
+    /**
+     * @param items
+     * @param shards
+     */
+    private List<String> collectItems(String items) {
+        List<String> result = New.arrayList();
+        if (!StringUtils.isNullOrEmpty(items)) {
+            for (String string : items.split(",")) {
+                string = string.trim();
+                if (StringUtils.isNullOrEmpty(string)) {
+                    continue;
+                }
+                if (result.contains(string)) {
+                    throw new ParsingException("Error parsing ddal-rule XML . Duplicate item '" + items + "'");
+                }
+                result.add(string);
             }
         }
-        return connSign;
-    }
-
-    private String addZero(String str, int len) {
-        int strLen = str.length();
-        while (strLen < len) {
-            str = "0" + str;
-            strLen = str.length();
-        }
-        return str;
+        return result;
     }
 
 }

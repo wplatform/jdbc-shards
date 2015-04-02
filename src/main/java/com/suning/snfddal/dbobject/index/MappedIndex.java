@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ import com.suning.snfddal.route.MultiNodeExecutor;
 import com.suning.snfddal.route.RoutingHandler;
 import com.suning.snfddal.route.TableRoutingException;
 import com.suning.snfddal.route.rule.RoutingResult;
+import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
@@ -75,12 +77,14 @@ public class MappedIndex extends BaseIndex {
     @Override
     public void add(Session session, Row row) {
         RoutingResult result = routingHandler.doRoute(mappedTable, row);
-        List<RoutingResult.MatchedShard> shards = result.getMatchedShards();
-        if (shards.size() != 1 && shards.get(0).getTables().length != 1) {
+        
+        if(result.isMultipleNode()) {
             throw new TableRoutingException(table.getName() + " routing error.");
         }
-        String shardName = shards.get(0).getShardName();
-        String tableName = shards.get(0).getTables()[0];
+        TableNode node = result.singleResult();
+        
+        String shardName = node.getShardName();
+        String tableName = node.getTableName();
         ArrayList<Value> params = New.arrayList();
         StatementBuilder buff = new StatementBuilder("INSERT INTO ");
         buff.append(tableName);
@@ -120,22 +124,27 @@ public class MappedIndex extends BaseIndex {
         Session session = filter.getSession();
         List<IndexCondition> conditions = filter.getIndexConditions();
         RoutingResult rr = routingHandler.doRoute(mappedTable, session, conditions);
-        List<RoutingResult.MatchedShard> shards = rr.getMatchedShards();
-        List<Callable<ResultCursor>> callables = New.arrayList(shards.size());
         
-        String shardName = null;
+        
         String sql = null;
         ArrayList<Value> params = null;
-        for (RoutingResult.MatchedShard shard : shards) {
+        
+        Set<String> shards = rr.shardNames();
+        int shardCount = shards.size();
+        List<Callable<ResultCursor>> callables = New.arrayList(shardCount);
+        
+        for (String shardName : shards) {
+
             StatementBuilder shardSql = new StatementBuilder();
-            shardName = shard.getShardName();
             params = New.arrayList();
-            String[] tables = shard.getTables();
-            if(tables.length == 0) {
+            
+            Set<String> tables = rr.tableNames(shardName);
+
+            if(tables.size() == 0) {
                 sql = buildQuerySqlFromTable(filter, targetTableName, queryCondition);
                 params.addAll(queryParams);
-            } else if(tables.length == 1){
-                sql = buildQuerySqlFromTable(filter, tables[0], queryCondition);
+            } else if(tables.size() == 1){
+                sql = buildQuerySqlFromTable(filter, tables.iterator().next(), queryCondition);
                 params.addAll(queryParams);
             }else {
                 shardSql.append("SELECT * FROM ( ");
@@ -148,12 +157,15 @@ public class MappedIndex extends BaseIndex {
                 sql =shardSql.toString();
             }
             callables.add(newQueryCallable(session, shardName, sql, params));
+        
+        
         }
+               
         if(callables.size() > 1) {
            List<ResultCursor> results = MultiNodeExecutor.execute(callables);
            return new MergedCursor(results);
         } else if(callables.size() == 1) {
-            return find(session, shardName, sql, params);
+            return find(session, shards.iterator().next(), sql, params);
         } else {
             throw DbException.throwInternalError();
         }
@@ -224,12 +236,13 @@ public class MappedIndex extends BaseIndex {
     @Override
     public void remove(Session session, Row row) {
         RoutingResult result = routingHandler.doRoute(mappedTable, row);
-        List<RoutingResult.MatchedShard> shards = result.getMatchedShards();
-        if (shards.size() != 1 && shards.get(0).getTables().length != 1) {
+        if(result.isMultipleNode()) {
             throw new TableRoutingException(table.getName() + " routing error.");
         }
-        String shardName = shards.get(0).getShardName();
-        String tableName = shards.get(0).getTables()[0];
+        TableNode node = result.singleResult();
+        
+        String shardName = node.getShardName();
+        String tableName = node.getTableName();
         ArrayList<Value> params = New.arrayList();
         StatementBuilder buff = new StatementBuilder("DELETE FROM ");
         buff.append(tableName).append(" WHERE ");

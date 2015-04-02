@@ -19,8 +19,10 @@
 package com.suning.snfddal.route.rule;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
+import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -29,30 +31,74 @@ public class RoutingResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<MatchedShard> matchedShards;
+    private List<TableNode> all;
 
-    /**
-     * @return the matchedShards
-     */
-    public List<MatchedShard> getMatchedShards() {
-        return matchedShards;
-    }
+    private List<TableNode> selected;
 
-    /**
-     * @param matchedShards the matchedShards to set
-     */
-    public void setMatchedShards(List<MatchedShard> matchedShards) {
-        this.matchedShards = matchedShards;
+    RoutingResult(List<TableNode> all, List<TableNode> selected) {
+        this.all = selected;
+        this.selected = selected;
     }
     
+    
+    public static RoutingResult createResult(TableNode tableNode) {
+        List<TableNode> nodes = New.arrayList(1);
+        nodes.add(tableNode);
+        return new RoutingResult(nodes,nodes);
+    }
+
+    public boolean isMultipleNode() {
+        return selected.size() > 1;
+    }
+
+    public TableNode singleResult() {
+        if (isMultipleNode()) {
+            throw new IllegalStateException("The RoutingResult has multiple table node.");
+        }
+        return selected.get(0);
+    }
+
+    public boolean isFullNode() {
+        return all.equals(selected) && all.size() > 1;
+    }
+
+    public int tableNodeCount() {
+        return selected.size();
+    }
+
+    public Set<String> shardNames() {
+        Set<String> shards = New.linkedHashSet();
+        for (TableNode tableNode : selected) {
+            String shardName = tableNode.getShardName();
+            shards.add(shardName);
+        }
+        return shards;
+    }
+
+    public Set<String> tableNames(String shardName) {
+        Set<String> collect = New.linkedHashSet();
+        for (TableNode tableNode : selected) {
+            String nodeName = tableNode.getShardName();
+            String tableName = tableNode.getTableName();
+            if (shardName.equals(nodeName)) {
+                collect.add(tableName);
+            }
+        }
+        return collect;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode() */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((matchedShards == null) ? 0 : matchedShards.hashCode());
+        result = prime * result + ((selected == null) ? 0 : selected.hashCode());
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object) */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -62,80 +108,12 @@ public class RoutingResult implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         RoutingResult other = (RoutingResult) obj;
-        if (matchedShards == null) {
-            if (other.matchedShards != null)
+        if (selected == null) {
+            if (other.selected != null)
                 return false;
-        } else if (!matchedShards.equals(other.matchedShards))
+        } else if (!selected.equals(other.selected))
             return false;
         return true;
-    }
-
-
-
-
-    public static class MatchedShard implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private String shardName;
-        private String[] tables;
-
-        /**
-         * @return the shardName
-         */
-        public String getShardName() {
-            return shardName;
-        }
-
-        /**
-         * @param shardName the shardName to set
-         */
-        public void setShardName(String shardName) {
-            this.shardName = shardName;
-        }
-
-        /**
-         * @return the tables
-         */
-        public String[] getTables() {
-            return tables;
-        }
-
-        /**
-         * @param tables the tables to set
-         */
-        public void setTables(String[] tables) {
-            this.tables = tables;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
-            result = prime * result + Arrays.hashCode(tables);
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            MatchedShard other = (MatchedShard) obj;
-            if (shardName == null) {
-                if (other.shardName != null)
-                    return false;
-            } else if (!shardName.equals(other.shardName))
-                return false;
-            if (!Arrays.equals(tables, other.tables))
-                return false;
-            return true;
-        }
-
-        
-        
     }
 
 }

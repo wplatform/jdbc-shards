@@ -18,11 +18,14 @@
 -->
 <!ELEMENT ddal-rule (tableRouter+)>
 
-<!ELEMENT tableRouter (partition,shardRule?,tableRule?)>
+<!ELEMENT tableRouter (partition,tableRule)>
 <!ATTLIST tableRouter id CDATA #REQUIRED>
 
-<!ELEMENT partition (#PCDATA)>
-
-<!ELEMENT shardRule (#PCDATA)>
+<!ELEMENT partition (table+)>
 
 <!ELEMENT tableRule (#PCDATA)>
+
+<!ELEMENT table (#PCDATA)>
+<!ATTLIST table shard CDATA #REQUIRED>
+<!ATTLIST table suffix CDATA #IMPLIED>
+

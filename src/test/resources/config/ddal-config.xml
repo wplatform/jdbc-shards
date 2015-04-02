@@ -4,12 +4,12 @@
 
 	<schema name="PUBLIC" metadata="shard1">
 	
-		<tableGroup router="customer_group" joinKey="customer_id">
+		<tableGroup router="customer_group">
 			<table name="customer" metadata="shard1.orders _001"/>
 			<table name="address" metadata="shard1.address_001"/>
 		</tableGroup>	
 
-		<tableGroup router="order_sharding" joinKey="order_id">
+		<tableGroup router="order_group">
 			<table name="orders" metadata="shard1.orders _01"/>
 			<table name="order_items" metadata="shard1.order_items _01"/>
 			<table name="order_status" metadata="shard1.order_status_01"/>

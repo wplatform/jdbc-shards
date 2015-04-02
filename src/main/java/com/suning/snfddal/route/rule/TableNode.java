@@ -30,6 +30,20 @@ public class TableNode implements Serializable {
     private String shardName;
 
     private String tableName;
+    
+    public TableNode() {
+        
+    }
+
+    /**
+     * @param shardName
+     * @param tableName
+     */
+    public TableNode(String shardName, String tableName) {
+        super();
+        this.shardName = shardName;
+        this.tableName = tableName;
+    }
 
     /**
      * @return the shardName

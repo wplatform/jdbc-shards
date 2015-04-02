@@ -22,17 +22,25 @@ import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.StringUtils;
 
 public class TableConfig {
+
+    public static int SCANLEVEL_NONE = 1;
+    public static int SCANLEVEL_ANY = 2;
+    public static int SCANLEVEL_INDEX = 3;
+    public static int SCANLEVEL_PRIMARYKEY = 4;
+    public static int SCANLEVEL_SHARDINGKEY = 5;
+
     private SchemaConfig schemaConfig;
     private String name;
-    private String metadata;
     private String originalCatalog;
     private String originalSchema;
     private String originalTable;
     private String metadataNode;
-    private boolean enabledFullScan;
-    private boolean force;
+    private String[] broadcast;
+    private boolean enabledFts;
+    private int scanLevel = SCANLEVEL_SHARDINGKEY;
+    private boolean validation;
     private TableRouter tableRouter;
-    
+
     /**
      * @return the name
      */
@@ -48,34 +56,6 @@ public class TableConfig {
     }
 
     /**
-     * @return the metadata
-     */
-    public String getMetadata() {
-        return metadata;
-    }
-
-    /**
-     * @param metadata the metadata to set
-     */
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
-    }
-
-    /**
-     * @return the tableRouter
-     */
-    public TableRouter getTableRouter() {
-        return tableRouter;
-    }
-
-    /**
-     * @param tableRouter the tableRouter to set
-     */
-    public void setTableRouter(TableRouter tableRouter) {
-        this.tableRouter = tableRouter;
-    }
-
-    /**
      * @return the schemaConfig
      */
     public SchemaConfig getSchemaConfig() {
@@ -88,7 +68,6 @@ public class TableConfig {
     public void setSchemaConfig(SchemaConfig schemaConfig) {
         this.schemaConfig = schemaConfig;
     }
-    
 
     /**
      * @return the originalSchema
@@ -103,15 +82,15 @@ public class TableConfig {
     public void setOriginalSchema(String originalSchema) {
         this.originalSchema = originalSchema;
     }
-    
+
     public String getQualifiedTableName() {
         StringBuilder qualifiedName = new StringBuilder();
         if (!StringUtils.isNullOrEmpty(originalCatalog)) {
             qualifiedName.append(originalCatalog).append(".");
-        } 
+        }
         if (!StringUtils.isNullOrEmpty(originalSchema)) {
             qualifiedName.append(originalSchema).append(".");
-        } 
+        }
         qualifiedName.append(originalTable);
         return qualifiedName.toString();
     }
@@ -143,20 +122,6 @@ public class TableConfig {
     public void setOriginalTable(String originalTable) {
         this.originalTable = originalTable;
     }
-    
-    /**
-     * @return the enabledFullScan
-     */
-    public boolean isEnabledFullScan() {
-        return enabledFullScan;
-    }
-
-    /**
-     * @param enabledFullScan the enabledFullScan to set
-     */
-    public void setEnabledFullScan(boolean enabledFullScan) {
-        this.enabledFullScan = enabledFullScan;
-    }
 
     /**
      * @return the originalCatalog
@@ -173,17 +138,72 @@ public class TableConfig {
     }
 
     /**
-     * @return the force
+     * @return the validation
      */
-    public boolean isForce() {
-        return force;
+    public boolean isValidation() {
+        return validation;
     }
 
     /**
-     * @param force the force to set
+     * @param validation the validation to set
      */
-    public void setForce(boolean force) {
-        this.force = force;
+    public void setValidation(boolean validation) {
+        this.validation = validation;
+    }
+
+    /**
+     * @return the broadcast
+     */
+    public String[] getBroadcast() {
+        return broadcast;
+    }
+
+    /**
+     * @param broadcast the broadcast to set
+     */
+    public void setBroadcast(String[] broadcast) {
+        this.broadcast = broadcast;
+    }
+
+    /**
+     * @return the enabledFts
+     */
+    public boolean isEnabledFts() {
+        return enabledFts;
+    }
+
+    /**
+     * @param enabledFts the enabledFts to set
+     */
+    public void setEnabledFts(boolean enabledFts) {
+        this.enabledFts = enabledFts;
+    }
+    /**
+     * @return the scanLevel
+     */
+    public int getScanLevel() {
+        return scanLevel;
+    }
+
+    /**
+     * @param scanLevel the scanLevel to set
+     */
+    public void setScanLevel(int scanLevel) {
+        this.scanLevel = scanLevel;
+    }
+
+    /**
+     * @return the tableRouter
+     */
+    public TableRouter getTableRouter() {
+        return tableRouter;
+    }
+
+    /**
+     * @param tableRouter the tableRouter to set
+     */
+    public void setTableRouter(TableRouter tableRouter) {
+        this.tableRouter = tableRouter;
     }
 
     /* (non-Javadoc)
@@ -218,5 +238,8 @@ public class TableConfig {
             return false;
         return true;
     }
+    
+    
+    
 
 }

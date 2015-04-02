@@ -34,6 +34,7 @@ import com.suning.snfddal.route.rule.RoutingCalculator;
 import com.suning.snfddal.route.rule.RoutingCalculatorImpl;
 import com.suning.snfddal.route.rule.RoutingResult;
 import com.suning.snfddal.route.rule.RuleColumn;
+import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
@@ -60,15 +61,14 @@ public class RoutingHandlerImpl implements RoutingHandler {
         if (tr != null) {
             Map<String, List<Value>> args = getRuleColumnArgs(table, row);
             RoutingResult rr = trc.calculate(tr, args);
-            List<RoutingResult.MatchedShard> shards = rr.getMatchedShards();
-            if (shards.size() != 1 && shards.get(0).getTables().length != 1) {
+            if (rr.isMultipleNode()) {
                 throw new TableRoutingException(table.getName() + " routing error.");
             }
             return rr;
         } else {
             shardName = table.getMetadataNode();
             tableName = table.getQualifiedTable();
-            return singlenessResult(shardName, tableName);
+            return singleRoutingResult(new TableNode(shardName, tableName));
         }
 
     }
@@ -79,7 +79,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         if (tr == null) {
             String shardName = table.getMetadataNode();
             String tableName = table.getQualifiedTable();
-            return singlenessResult(shardName, tableName);
+            return singleRoutingResult(new TableNode(shardName, tableName));
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
             exportRangeArg(table, first, last, routingArgs);
@@ -98,7 +98,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         if (tr == null) {
             String shardName = table.getMetadataNode();
             String tableName = table.getQualifiedTable();
-            return singlenessResult(shardName, tableName);
+            return singleRoutingResult(new TableNode(shardName, tableName));
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
             List<RuleColumn> ruleCols = tr.getRuleColumns();
@@ -183,14 +183,8 @@ public class RoutingHandlerImpl implements RoutingHandler {
     /**
      * @param table
      */
-    private RoutingResult singlenessResult(String shardName, String tableName) {
-        RoutingResult result = new RoutingResult();
-        List<RoutingResult.MatchedShard> list = New.arrayList(1);
-        RoutingResult.MatchedShard matched = new RoutingResult.MatchedShard();
-        matched.setShardName(shardName);
-        matched.setTables(new String[] { tableName });
-        list.add(matched);
-        result.setMatchedShards(list);
+    private RoutingResult singleRoutingResult(TableNode tableNode) {
+        RoutingResult result = RoutingResult.createResult(tableNode);
         return result;
     }
     

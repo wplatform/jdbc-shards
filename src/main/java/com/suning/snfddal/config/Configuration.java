@@ -31,13 +31,6 @@ import com.suning.snfddal.util.New;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class Configuration {
-    
-    
-    private static Configuration instance = new Configuration();
-    
-    public static Configuration getInstance() {
-        return instance;
-    }
 
     // ddal-config
     private final Properties settings = new Properties();
@@ -48,12 +41,10 @@ public class Configuration {
 
     private final Map<String, DataSource> dataNodes = New.hashMap();
     
-    private final Map<String, TableRouter> tableRouters = New.hashMap();
-
     private final Map<String, Object> ruleAlgorithms = New.hashMap();
     
-    private Configuration() {
-    }
+    private final Map<String, TableRouter> temporary = New.hashMap();
+    
 
     public Set<String> getShardNames() {
         return cluster.keySet();
@@ -161,24 +152,17 @@ public class Configuration {
         dataNodes.put(id, dataSource);
     }
     
-    public void addTableRouter(String id, TableRouter tableRule) {
-        if (tableRouters.containsKey(id)) {
+    public void addTemporaryTableRouter(String id, TableRouter tableRouter) {
+        if (temporary.containsKey(id)) {
             throw new ConfigurationException("Duplicate table router id " + id);
         }
-        tableRouters.put(id, tableRule);
+        temporary.put(id, tableRouter);
     }
     /**
      * @return the tableRules
      */
-    public Map<String, TableRouter> getTableRouters() {
-        return tableRouters;
-    }
-
-    public void addRuleAlgorithm(String id, TableRouter tableRouter) {
-        if (tableRouters.containsKey(id)) {
-            throw new ConfigurationException("Duplicate table rule id " + id);
-        }
-        tableRouters.put(id, tableRouter);
+    public Map<String, TableRouter> getTemporaryTableRouters() {
+        return temporary;
     }
 
     /**

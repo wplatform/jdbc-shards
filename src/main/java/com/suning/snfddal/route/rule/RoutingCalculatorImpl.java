@@ -19,11 +19,9 @@
 package com.suning.snfddal.route.rule;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
@@ -32,7 +30,7 @@ import com.suning.snfddal.value.Value;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class RoutingCalculatorImpl implements RoutingCalculator {
-    
+
     private RuleEvaluator evaluator = new OgnlRuleEvaluator();
 
     public RuleEvaluator getEvaluator() {
@@ -52,65 +50,16 @@ public class RoutingCalculatorImpl implements RoutingCalculator {
             throw new IllegalArgumentException("columnValue is null.");
         }
 
-        RuleExpression dbRule = tableRouter.getShardRuleExpression();
-        RuleExpression tbRule = tableRouter.getTableRuleExpression();
+        RuleExpression expression = tableRouter.getRuleExpression();
 
-        Set<String> shardSet = null;
-        if (canUseRule(dbRule, columnValue)) {
-            shardSet = evaluateGroupRule(tableRouter, dbRule, columnValue);
+        List<TableNode> tableNode = null;
+        if (canUseRule(expression, columnValue)) {
+            tableNode = evaluateTableRule(tableRouter, columnValue);
         } else {
             // 无库规则,库的范围是TableRule配置的所有库
-            shardSet = tableRouter.getTopology().getShard();
+            tableNode = tableRouter.getPartition();
         }
-        RoutingResult result = new RoutingResult();
-        List<RoutingResult.MatchedShard> matchedShards = New.arrayList();
-        result.setMatchedShards(matchedShards);
-        if (canUseRule(tbRule, columnValue)) {
-            // 有库规则,库的范围根据表规则计算得出
-            Set<Object> evalValues = evaluateTableRule(tbRule, columnValue);
-            for (String shardName : shardSet) {
-                RoutingResult.MatchedShard matchedShard = new RoutingResult.MatchedShard();
-                matchedShard.setShardName(shardName);
-                List<String> tables = New.arrayList();
-                for (Object evalValue : evalValues) {
-                    String tableName;
-                    if (evalValue instanceof String) {
-                        if (!tableRouter.getTopology().getTableInShard(shardName).contains(evalValue)) {
-                            throw new RuleEvaluateException("The table rule expression " + tbRule.getExpression()
-                                    + " evaluated " + evalValue + " is not in distribution list.");
-                        }
-                        tableName = evalValue.toString();
-                    } else if (evalValue.getClass() == int.class || evalValue.getClass() == Integer.class
-                            || evalValue.getClass() == long.class || evalValue.getClass() == Long.class
-                            || evalValue.getClass() == short.class || evalValue.getClass() == Short.class
-                            || evalValue.getClass() == byte.class || evalValue.getClass() == Byte.class) {
-                        tableName = tableIndexToName(tableRouter, evalValue, shardName);
-                    } else {
-                        throw new RuleEvaluateException("The table rule expression " + tbRule.getExpression()
-                                + " return a value " + tbRule.getClass() + " which type is unsupported.");
-                    }
-                    tables.add(tableName);
-                }
-                String[] tbs = tables.toArray(new String[tables.size()]);
-                matchedShard.setTables(tbs);
-                matchedShards.add(matchedShard);
-            }
-        } else {
-            // 无库规则,库的范围是TableRule配置的所有库
-            for (String shardName : shardSet) {
-                RoutingResult.MatchedShard matchedShard = new RoutingResult.MatchedShard();
-                matchedShard.setShardName(shardName);
-                Set<String> tableNames = tableRouter.getTopology().getTableInShard(shardName);
-                List<String> tables = New.arrayList();
-                for (String tableName : tableNames) {
-                    tables.add(tableName);
-                }
-                String[] tbs = tables.toArray(new String[tables.size()]);
-                matchedShard.setTables(tbs);
-                matchedShards.add(matchedShard);
-            }
-        }
-        return result;
+        return new RoutingResult(tableRouter.getPartition(), tableNode);
     }
 
     /**
@@ -118,8 +67,10 @@ public class RoutingCalculatorImpl implements RoutingCalculator {
      * @param columnValue
      * @param tableRule
      */
-    private Set<String> evaluateGroupRule(TableRouter tr, RuleExpression rule, Map<String, List<Value>> args) {
-        Set<String> resultSet = new HashSet<String>();
+    private List<TableNode> evaluateTableRule(TableRouter tr, Map<String, List<Value>> args) {
+        List<TableNode> result = New.arrayList();
+        RuleExpression rule = tr.getRuleExpression();
+        List<TableNode> partion = tr.getPartition();
         List<RuleColumn> ruleColumns = rule.getRuleColumns();
         Map<String, List<Value>> paramCollections = New.hashMap(ruleColumns.size(), 1L);
         for (RuleColumn ruleColumn : ruleColumns) {
@@ -128,84 +79,39 @@ public class RoutingCalculatorImpl implements RoutingCalculator {
         }
         // 一个规则存在多个RuleColumn，多个RuleColumn对应的取值集合做笛卡尔积后的所有集
         for (Map<String, Value> parameters : new CrossedCollection(paramCollections)) {
-            String groupName = null;
+            TableNode tableNode = null;
             Object evlValue = evaluator.evaluate(rule, parameters);
             if (evlValue == null) {
-                throw new RuleEvaluateException("The group rule expression " + rule.getExpression()
+                throw new RuleEvaluateException("The rule expression " + rule.getExpression()
                         + " evaluate a null value.");
             }
-            if (evlValue instanceof String) {
-                if (!tr.getTopology().getShard().contains(evlValue)) {
-                    throw new RuleEvaluateException("The group rule expression " + rule.getExpression() + " evaluated "
-                            + evlValue + " is not in distribution list.");
+            if (evlValue instanceof TableNode) {
+                if (!partion.contains(evlValue)) {
+                    throw new RuleEvaluateException("The rule expression " + rule.getExpression() + " evaluated "
+                            + evlValue + " is not in partition list.");
                 }
-                groupName = evlValue.toString();
+                tableNode = (TableNode) evlValue;
             } else if (evlValue.getClass() == int.class || evlValue.getClass() == Integer.class
                     || evlValue.getClass() == long.class || evlValue.getClass() == Long.class
                     || evlValue.getClass() == short.class || evlValue.getClass() == Short.class
                     || evlValue.getClass() == byte.class || evlValue.getClass() == Byte.class) {
-                groupName = groupIndexToName(tr, evlValue);
+                try {
+                    int index = Integer.parseInt(evlValue.toString());
+                    tableNode = partion.get(index);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new RuleEvaluateException("The rule expression " + rule.getExpression() + " evaluated "
+                            + evlValue + " is out of range partition list.");
+                }
+
             } else {
                 throw new RuleEvaluateException("The group rule expression " + rule.getExpression()
                         + " return a value " + evlValue.getClass() + " which type is unsupported.");
             }
-            resultSet.add(groupName);
+            result.add(tableNode);
         }
-        return resultSet;
+        return result;
     }
 
-    /**
-     * @param ruleToUse
-     * @param columnValue
-     * @param tableRule
-     */
-    private Set<Object> evaluateTableRule(RuleExpression rule, Map<String, List<Value>> columnValue) {
-        Set<Object> resultSet = new HashSet<Object>();
-        List<RuleColumn> ruleColumns = rule.getRuleColumns();
-        Map<String, List<Value>> paramCollections = New.hashMap(ruleColumns.size(), 1L);
-        for (RuleColumn ruleColumn : ruleColumns) {
-            String name = ruleColumn.getName();
-            paramCollections.put(name, columnValue.get(name));
-        }
-        // 一个规则存在多个RuleColumn，多个RuleColumn对应的取值集合做笛卡尔积后的所有集
-        for (Map<String, Value> parameters : new CrossedCollection(paramCollections)) {
-            Object evlValue = evaluator.evaluate(rule, parameters);
-            resultSet.add(evlValue);
-        }
-        return resultSet;
-    }
-
-    /**
-     * @param tableRule
-     * @param evlValue
-     */
-    private String groupIndexToName(TableRouter tr, Object evlValue) {
-        try {
-            int index = Integer.parseInt(evlValue.toString());
-            return tr.getTopology().indexShard(index);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new RuleEvaluateException(e.getMessage());
-        }
-
-    }
-
-    /**
-     * @param tableRule
-     * @param evlValue
-     * @param shardName
-     * @return
-     */
-    private String tableIndexToName(TableRouter tr, Object evlValue, String shardName) {
-        try {
-            int index = Integer.parseInt(evlValue.toString());
-            return tr.getTopology().indexTableInShard(shardName, index);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new RuleEvaluateException(e.getMessage());
-        }
-
-    }
-    
-    
     /**
      * 对于分库分表存在多个Rule的情况下，choiceRule负责根据表的字段值选取一个符合条件的Rule做为sharding规则，
      * 先择的规则按优先顺序，优先最大匹配，先匹配所有列，找不到再去除可选列之后匹配
