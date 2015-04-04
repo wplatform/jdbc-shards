@@ -1564,30 +1564,25 @@ public class JdbcCallableStatement extends JdbcPreparedStatement implements
     }
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      *
      * @param parameterIndex the parameter index (1, 2, ...)
      * @param type the class of the returned value
      */
-/*## Java 1.7 ##
-    @Override
     public <T> T getObject(int parameterIndex, Class<T> type) {
         return null;
     }
-//*/
+
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      *
      * @param parameterName the parameter name
      * @param type the class of the returned value
      */
-/*## Java 1.7 ##
-    @Override
     public <T> T getObject(String parameterName, Class<T> type) {
         return null;
     }
-//*/
 
     private ResultSetMetaData getCheckedMetaData() throws SQLException {
         ResultSetMetaData meta = getMetaData();

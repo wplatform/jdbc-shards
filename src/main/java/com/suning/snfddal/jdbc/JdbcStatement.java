@@ -928,24 +928,20 @@ public class JdbcStatement extends TraceObject implements Statement {
     }
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      */
-/*## Java 1.7 ##
-    @Override
     public void closeOnCompletion() {
         // not supported
+        checkClosed();
     }
-//*/
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      */
-/*## Java 1.7 ##
-    @Override
     public boolean isCloseOnCompletion() {
+        checkClosed();
         return true;
     }
-//*/
 
     // =============================================================
 

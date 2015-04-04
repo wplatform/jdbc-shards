@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -150,6 +151,13 @@ public class JdbcDataSource implements DataSource {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return iface != null && iface.isAssignableFrom(getClass());
+    }
+    
+    /**
+     * [Not supported]Java 1.7
+     */
+    public Logger getParentLogger() {
+        return null;
     }
     
     /**

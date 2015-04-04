@@ -3130,17 +3130,14 @@ public class JdbcDatabaseMetaData extends TraceObject implements
     }
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      */
-    /*## Java 1.7 ##
-    @Override
     public boolean generatedKeyAlwaysReturned() {
         return true;
     }
-    //*/
 
     /**
-     * [Not supported]
+     * [Not supported]Java 1.7
      *
      * @param catalog null (to get all objects) or the catalog name
      * @param schemaPattern null (to get all objects) or a schema name
@@ -3150,13 +3147,10 @@ public class JdbcDatabaseMetaData extends TraceObject implements
      * @param columnNamePattern null (to get all objects) or a column name
      *            (uppercase for unquoted names)
      */
-    /*## Java 1.7 ##
-    @Override
     public ResultSet getPseudoColumns(String catalog, String schemaPattern,
             String tableNamePattern, String columnNamePattern) {
         return null;
     }
-    //*/
 
     /**
      * INTERNAL
