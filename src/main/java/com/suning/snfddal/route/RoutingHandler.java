@@ -21,7 +21,7 @@ package com.suning.snfddal.route;
 import java.util.List;
 
 import com.suning.snfddal.dbobject.index.IndexCondition;
-import com.suning.snfddal.dbobject.table.MappedTable;
+import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.route.rule.RoutingResult;
@@ -31,10 +31,10 @@ import com.suning.snfddal.route.rule.RoutingResult;
  */
 public interface RoutingHandler {
     
-    RoutingResult doRoute(MappedTable table, SearchRow row);
+    RoutingResult doRoute(TableMate table, SearchRow row);
     
-    RoutingResult doRoute(MappedTable table, SearchRow stard, SearchRow end);
+    RoutingResult doRoute(TableMate table, SearchRow stard, SearchRow end);
     
-    RoutingResult doRoute(MappedTable table, Session session, List<IndexCondition> indexConditions);
+    RoutingResult doRoute(TableMate table, Session session, List<IndexCondition> indexConditions);
     
 }

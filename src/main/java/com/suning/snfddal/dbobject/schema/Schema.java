@@ -15,7 +15,6 @@ import com.suning.snfddal.dbobject.DbObjectBase;
 import com.suning.snfddal.dbobject.FunctionAlias;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.index.Index;
-import com.suning.snfddal.dbobject.table.MappedTable;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
@@ -24,7 +23,6 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.util.StringUtils;
 
 /**
  * A schema as created by the SQL statement
@@ -77,25 +75,6 @@ public class Schema extends DbObjectBase {
      */
     public boolean canDrop() {
         return !system;
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public String getDropSQL() {
-        return null;
-    }
-
-    @Override
-    public String getCreateSQL() {
-        if (system) {
-            return null;
-        }
-        return "CREATE SCHEMA IF NOT EXISTS " +
-            getSQL() + " AUTHORIZATION " + owner.getSQL();
     }
 
     @Override
@@ -483,33 +462,6 @@ public class Schema extends DbObjectBase {
         synchronized (database) {
             data.schema = this;
             throw DbException.getUnsupportedException("Create table unsupported");
-        }
-    }
-
-    /**
-     * Add a linked table to the schema.
-     *
-     * @param id the object id
-     * @param tableName the table name of the alias
-     * @param driver the driver class name
-     * @param url the database URL
-     * @param user the user name
-     * @param password the password
-     * @param originalSchema the schema name of the target table
-     * @param originalTable the table name of the target table
-     * @param emitUpdates if updates should be emitted instead of delete/insert
-     * @param force create the object even if the database can not be accessed
-     * @return the {@link MappedTable} object
-     */
-    public MappedTable createMappedTable(int id, String tableName, String matedataNode,
-            String originalSchema, String originalTable, boolean emitUpdates, boolean force) {
-        synchronized (database) {
-            boolean identifiersToUpper = database.getSettings().databaseToUpper;
-            if(identifiersToUpper) {
-                tableName = StringUtils.toUpperEnglish(tableName);
-            }
-            return new MappedTable(this, id, tableName, 
-                    matedataNode, originalSchema,originalTable, emitUpdates, force);
         }
     }
 

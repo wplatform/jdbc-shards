@@ -24,7 +24,7 @@ import java.util.Map;
 import com.suning.snfddal.command.expression.Comparison;
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.Column;
-import com.suning.snfddal.dbobject.table.MappedTable;
+import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
@@ -55,7 +55,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
     }
 
     @Override
-    public RoutingResult doRoute(MappedTable table, SearchRow row) {
+    public RoutingResult doRoute(TableMate table, SearchRow row) {
         TableRouter tr = table.getTableRouter();
         String shardName, tableName;
         if (tr != null) {
@@ -66,19 +66,19 @@ public class RoutingHandlerImpl implements RoutingHandler {
             }
             return rr;
         } else {
-            shardName = table.getMetadataNode();
-            tableName = table.getQualifiedTable();
+            shardName = table.getMatedataNode().getShardName();
+            tableName = table.getMatedataNode().getTableName();
             return singleRoutingResult(new TableNode(shardName, tableName));
         }
 
     }
 
     @Override
-    public RoutingResult doRoute(MappedTable table, SearchRow first, SearchRow last) {
+    public RoutingResult doRoute(TableMate table, SearchRow first, SearchRow last) {
         TableRouter tr = table.getTableRouter();
         if (tr == null) {
-            String shardName = table.getMetadataNode();
-            String tableName = table.getQualifiedTable();
+            String shardName = table.getMatedataNode().getShardName();
+            String tableName = table.getMatedataNode().getTableName();
             return singleRoutingResult(new TableNode(shardName, tableName));
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
@@ -93,11 +93,11 @@ public class RoutingHandlerImpl implements RoutingHandler {
     
     
     @Override
-    public RoutingResult doRoute(MappedTable table, Session session, List<IndexCondition> indexConditions) {
+    public RoutingResult doRoute(TableMate table, Session session, List<IndexCondition> indexConditions) {
         TableRouter tr = table.getTableRouter();
         if (tr == null) {
-            String shardName = table.getMetadataNode();
-            String tableName = table.getQualifiedTable();
+            String shardName = table.getMatedataNode().getShardName();
+            String tableName = table.getMatedataNode().getTableName();
             return singleRoutingResult(new TableNode(shardName, tableName));
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
@@ -154,7 +154,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         
     }
 
-    private Map<String, List<Value>> getRuleColumnArgs(MappedTable table, SearchRow row) {
+    private Map<String, List<Value>> getRuleColumnArgs(TableMate table, SearchRow row) {
         Map<String, List<Value>> args = New.hashMap();
         TableRouter tableRouter = table.getTableRouter();
         for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
@@ -195,7 +195,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
      * @param last
      * @param routingArgs
      */
-    private void exportRangeArg(MappedTable table, SearchRow first, SearchRow last, Map<String, List<Value>> routingArgs) {
+    private void exportRangeArg(TableMate table, SearchRow first, SearchRow last, Map<String, List<Value>> routingArgs) {
         TableRouter tr = table.getTableRouter();
         List<RuleColumn> ruleCols = tr.getRuleColumns();
         if (first != null && last != null) {
@@ -269,7 +269,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
     }
     
     
-    private SearchRow getSearchRow(MappedTable table, Session s,SearchRow row, int columnId, Value v,
+    private SearchRow getSearchRow(TableMate table, Session s,SearchRow row, int columnId, Value v,
             boolean max) {
         if (row == null) {
             row = table.getTemplateRow();
@@ -284,7 +284,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         return row;
     }
 
-    private Value getMax(MappedTable table,Session s,Value a, Value b, boolean bigger) {
+    private Value getMax(TableMate table,Session s,Value a, Value b, boolean bigger) {
         if (a == null) {
             return b;
         } else if (b == null) {

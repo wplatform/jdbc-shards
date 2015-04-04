@@ -6,7 +6,6 @@
 package com.suning.snfddal.dbobject.table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import com.suning.snfddal.command.Prepared;
@@ -19,18 +18,15 @@ import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.index.Index;
+import com.suning.snfddal.dbobject.index.IndexMate;
 import com.suning.snfddal.dbobject.index.IndexType;
-import com.suning.snfddal.dbobject.index.ViewIndex;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
-import com.suning.snfddal.result.Row;
-import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.util.SmallLRUCache;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
@@ -48,11 +44,8 @@ public class TableView extends Table {
     private ArrayList<Table> tables;
     private String[] columnNames;
     private Query viewQuery;
-    private ViewIndex index;
     private boolean recursive;
     private DbException createException;
-    private final SmallLRUCache<CacheKey, ViewIndex> indexCache =
-            SmallLRUCache.newInstance(Constants.VIEW_INDEX_CACHE_SIZE);
     private User owner;
     private Query topQuery;
     private LocalResult recursiveResult;
@@ -61,7 +54,7 @@ public class TableView extends Table {
     public TableView(Schema schema, int id, String name, String querySQL,
             ArrayList<Parameter> params, String[] columnNames, Session session,
             boolean recursive) {
-        super(schema, id, name, false, true);
+        super(schema, id, name);
         init(querySQL, params, columnNames, session, recursive);
     }
 
@@ -70,8 +63,6 @@ public class TableView extends Table {
         this.querySQL = querySQL;
         this.columnNames = columnNames;
         this.recursive = recursive;
-        index = new ViewIndex(this, querySQL, params, recursive);
-        indexCache.clear();
         initColumnsAndTables(session);
     }
 
@@ -131,7 +122,7 @@ public class TableView extends Table {
             createException = null;
             viewQuery = query;
         } catch (DbException e) {
-            e.addSQL(getCreateSQL());
+            e.addSQL(querySQL);
             createException = e;
             // if it can't be compiled, then it's a 'zero column table'
             // this avoids problems when creating the view when opening the
@@ -143,7 +134,7 @@ public class TableView extends Table {
                 for (int i = 0; i < columnNames.length; i++) {
                     cols[i] = new Column(columnNames[i], Value.STRING);
                 }
-                index.setRecursive(true);
+                //index.setRecursive(true);
                 createException = null;
             }
         }
@@ -163,37 +154,6 @@ public class TableView extends Table {
     }
 
     @Override
-    public PlanItem getBestPlanItem(Session session, int[] masks,
-            TableFilter filter, SortOrder sortOrder) {
-        PlanItem item = new PlanItem();
-        item.cost = index.getCost(session, masks, filter, sortOrder);
-        final CacheKey cacheKey = new CacheKey(masks, session);
-
-        synchronized (this) {
-            ViewIndex i2 = indexCache.get(cacheKey);
-            if (i2 != null) {
-                item.setIndex(i2);
-                return item;
-            }
-        }
-        // We cannot hold the lock during the ViewIndex creation or we risk ABBA
-        // deadlocks if the view creation calls back into H2 via something like
-        // a FunctionTable.
-        ViewIndex i2 = new ViewIndex(this, index, session, masks);
-        synchronized (this) {
-            // have to check again in case another session has beat us to it
-            ViewIndex i3 = indexCache.get(cacheKey);
-            if (i3 != null) {
-                item.setIndex(i3);
-                return item;
-            }
-            indexCache.put(cacheKey, i2);
-            item.setIndex(i2);
-        }
-        return item;
-    }
-
-    @Override
     public boolean isQueryComparable() {
         if (!super.isQueryComparable()) {
             return false;
@@ -208,22 +168,6 @@ public class TableView extends Table {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String getDropSQL() {
-        return "DROP VIEW IF EXISTS " + getSQL() + " CASCADE";
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        return getCreateSQL(false, true, quotedName);
-    }
-
-
-    @Override
-    public String getCreateSQL() {
-        return getCreateSQL(false, true);
     }
 
     /**
@@ -275,67 +219,13 @@ public class TableView extends Table {
     }
 
     @Override
-    public boolean lock(Session session, boolean exclusive, boolean forceLockEvenInMvcc) {
-        // exclusive lock means: the view will be dropped
-        return false;
-    }
-
-    @Override
-    public void close(Session session) {
-        // nothing to do
-    }
-
-    @Override
-    public void unlock(Session s) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isLockedExclusively() {
-        return false;
-    }
-
-    @Override
-    public Index addIndex(Session session, String indexName, int indexId,
-            IndexColumn[] cols, IndexType indexType, boolean create,
-            String indexComment) {
-        throw DbException.getUnsupportedException("VIEW");
-    }
-
-    @Override
-    public void removeRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("VIEW");
-    }
-
-    @Override
-    public void addRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("VIEW");
-    }
-
-    @Override
-    public void checkSupportAlter() {
-        throw DbException.getUnsupportedException("VIEW");
-    }
-
-    @Override
-    public void truncate(Session session) {
-        throw DbException.getUnsupportedException("VIEW");
-    }
-
-    @Override
     public long getRowCount(Session session) {
         throw DbException.throwInternalError();
     }
-
+    
     @Override
     public boolean canGetRowCount() {
-        // TODO view: could get the row count, but not that easy
         return false;
-    }
-
-    @Override
-    public boolean canDrop() {
-        return true;
     }
 
     @Override
@@ -347,7 +237,6 @@ public class TableView extends Table {
     public void removeChildrenAndResources(Session session) {
         super.removeChildrenAndResources(session);
         querySQL = null;
-        index = null;
         invalidate();
     }
 
@@ -370,13 +259,7 @@ public class TableView extends Table {
             throw DbException.get(ErrorCode.VIEW_IS_INVALID_2,
                     createException, getSQL(), msg);
         }
-        PlanItem item = getBestPlanItem(session, null, null, null);
-        return item.getIndex();
-    }
-
-    @Override
-    public boolean canReference() {
-        return false;
+        return new IndexMate(this, 0, null,IndexColumn.wrap(columns),IndexType.createScan());
     }
 
     @Override
@@ -433,11 +316,6 @@ public class TableView extends Table {
         return ROW_COUNT_APPROXIMATION;
     }
 
-    @Override
-    public long getDiskSpaceUsed() {
-        return 0;
-    }
-
     public int getParameterOffset() {
         return topQuery == null ? 0 : topQuery.getParameters().size();
     }
@@ -481,48 +359,10 @@ public class TableView extends Table {
         }
     }
 
-    /**
-     * The key of the index cache for views.
-     */
-    private static final class CacheKey {
-
-        private final int[] masks;
-        private final Session session;
-
-        public CacheKey(int[] masks, Session session) {
-            this.masks = masks;
-            this.session = session;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + Arrays.hashCode(masks);
-            result = prime * result + session.hashCode();
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            CacheKey other = (CacheKey) obj;
-            if (session != other.session) {
-                return false;
-            }
-            if (!Arrays.equals(masks, other.masks)) {
-                return false;
-            }
-            return true;
-        }
+    @Override
+    public void addIndex(ArrayList<Column> list, IndexType indexType) {
+        throw DbException.getUnsupportedException("VIEW");
+        
     }
 
 }

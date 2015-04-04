@@ -9,12 +9,11 @@ import java.util.ArrayList;
 
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.index.Index;
+import com.suning.snfddal.dbobject.index.IndexMate;
 import com.suning.snfddal.dbobject.index.IndexType;
-import com.suning.snfddal.dbobject.index.RangeIndex;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.result.Row;
 import com.suning.snfddal.value.Value;
 
 /**
@@ -41,7 +40,7 @@ public class RangeTable extends Table {
      */
     public RangeTable(Schema schema, Expression min, Expression max,
             boolean noColumns) {
-        super(schema, 0, NAME, true, true);
+        super(schema, 0, NAME);
         Column[] cols = noColumns ? new Column[0] : new Column[] { new Column(
                 "X", Value.LONG) };
         this.min = min;
@@ -50,62 +49,10 @@ public class RangeTable extends Table {
     }
 
     @Override
-    public String getDropSQL() {
-        return null;
-    }
-
-    @Override
-    public String getCreateSQL() {
-        return null;
-    }
-
-    @Override
     public String getSQL() {
         return NAME + "(" + min.getSQL() + ", " + max.getSQL() + ")";
     }
 
-    @Override
-    public boolean lock(Session session, boolean exclusive, boolean forceLockEvenInMvcc) {
-        // nothing to do
-        return false;
-    }
-
-    @Override
-    public void close(Session session) {
-        // nothing to do
-    }
-
-    @Override
-    public void unlock(Session s) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isLockedExclusively() {
-        return false;
-    }
-
-    @Override
-    public Index addIndex(Session session, String indexName,
-            int indexId, IndexColumn[] cols, IndexType indexType,
-            boolean create, String indexComment) {
-        throw DbException.getUnsupportedException("SYSTEM_RANGE");
-    }
-
-    @Override
-    public void removeRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("SYSTEM_RANGE");
-    }
-
-    @Override
-    public void addRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("SYSTEM_RANGE");
-    }
-
-    @Override
-    public void checkSupportAlter() {
-        throw DbException.getUnsupportedException("SYSTEM_RANGE");
-    }
 
     @Override
     public void checkRename() {
@@ -115,11 +62,6 @@ public class RangeTable extends Table {
     @Override
     public boolean canGetRowCount() {
         return true;
-    }
-
-    @Override
-    public boolean canDrop() {
-        return false;
     }
 
     @Override
@@ -134,7 +76,7 @@ public class RangeTable extends Table {
 
     @Override
     public Index getScanIndex(Session session) {
-        return new RangeIndex(this, IndexColumn.wrap(columns));
+        return new IndexMate(this, 0, null,IndexColumn.wrap(columns),IndexType.createScan());
     }
 
     /**
@@ -172,10 +114,6 @@ public class RangeTable extends Table {
         return null;
     }
 
-    @Override
-    public void truncate(Session session) {
-        throw DbException.getUnsupportedException("SYSTEM_RANGE");
-    }
 
     @Override
     public Index getUniqueIndex() {
@@ -187,10 +125,6 @@ public class RangeTable extends Table {
         return 100;
     }
 
-    @Override
-    public long getDiskSpaceUsed() {
-        return 0;
-    }
 
     @Override
     public boolean isDeterministic() {
@@ -198,8 +132,8 @@ public class RangeTable extends Table {
     }
 
     @Override
-    public boolean canReference() {
-        return false;
+    public void addIndex(ArrayList<Column> list, IndexType indexType) {
+        throw DbException.getUnsupportedException("SYSTEM_RANGE");        
     }
 
 }

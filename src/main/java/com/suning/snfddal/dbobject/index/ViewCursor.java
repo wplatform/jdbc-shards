@@ -5,83 +5,48 @@
  */
 package com.suning.snfddal.dbobject.index;
 
-import com.suning.snfddal.dbobject.table.Table;
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueNull;
 
 /**
  * The cursor implementation of a view index.
  */
 public class ViewCursor implements Cursor {
 
-    private final Table table;
-    private final ViewIndex index;
-    private final LocalResult result;
-    private final SearchRow first, last;
-    private Row current;
-
-    ViewCursor(ViewIndex index, LocalResult result, SearchRow first,
-            SearchRow last) {
-        this.table = index.getTable();
-        this.index = index;
-        this.result = result;
-        this.first = first;
-        this.last = last;
-    }
-
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#get()
+     */
     @Override
     public Row get() {
-        return current;
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#getSearchRow()
+     */
     @Override
     public SearchRow getSearchRow() {
-        return current;
+        // TODO Auto-generated method stub
+        return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#next()
+     */
     @Override
     public boolean next() {
-        while (true) {
-            boolean res = result.next();
-            if (!res) {
-                if (index.isRecursive()) {
-                    result.reset();
-                } else {
-                    result.close();
-                }
-                current = null;
-                return false;
-            }
-            current = table.getTemplateRow();
-            Value[] values = result.currentRow();
-            for (int i = 0, len = current.getColumnCount(); i < len; i++) {
-                Value v = i < values.length ? values[i] : ValueNull.INSTANCE;
-                current.setValue(i, v);
-            }
-            int comp;
-            if (first != null) {
-                comp = index.compareRows(current, first);
-                if (comp < 0) {
-                    continue;
-                }
-            }
-            if (last != null) {
-                comp = index.compareRows(current, last);
-                if (comp > 0) {
-                    continue;
-                }
-            }
-            return true;
-        }
+        // TODO Auto-generated method stub
+        return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#previous()
+     */
     @Override
     public boolean previous() {
-        throw DbException.throwInternalError();
+        // TODO Auto-generated method stub
+        return false;
     }
-
+    
 }

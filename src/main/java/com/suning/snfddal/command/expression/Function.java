@@ -25,8 +25,6 @@ import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.Sequence;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
-import com.suning.snfddal.dbobject.table.LinkSchema;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
@@ -94,8 +92,7 @@ public class Function extends Expression implements FunctionCall {
 
     public static final int DATABASE = 150, USER = 151, CURRENT_USER = 152,
             IDENTITY = 153, SCOPE_IDENTITY = 154, AUTOCOMMIT = 155,
-            READONLY = 156, DATABASE_PATH = 157, LOCK_TIMEOUT = 158,
-            DISK_SPACE_USED = 159;
+            READONLY = 156, DATABASE_PATH = 157, LOCK_TIMEOUT = 158;
 
     public static final int IFNULL = 200, CASEWHEN = 201, CONVERT = 202,
             CAST = 203, COALESCE = 204, NULLIF = 205, CASE = 206,
@@ -445,8 +442,6 @@ public class Function extends Expression implements FunctionCall {
                 0, Value.STRING);
         addFunctionWithNull("DECODE", DECODE,
                 VAR_ARGS, Value.NULL);
-        addFunctionNotDeterministic("DISK_SPACE_USED", DISK_SPACE_USED,
-                1, Value.LONG);
         addFunction("H2VERSION", H2VERSION, 0, Value.STRING);
 
         // TableFunction
@@ -893,9 +888,6 @@ public class Function extends Expression implements FunctionCall {
         case LOCK_TIMEOUT:
             result = ValueInt.get(session.getLockTimeout());
             break;
-        case DISK_SPACE_USED:
-            result = ValueLong.get(getDiskSpaceUsed(session, v0));
-            break;
         case CAST:
         case CONVERT: {
             v0 = v0.convertTo(dataType);
@@ -1103,13 +1095,6 @@ public class Function extends Expression implements FunctionCall {
             }
         }
         return false;
-    }
-
-    private static long getDiskSpaceUsed(Session session, Value v0) {
-        Parser p = new Parser(session);
-        String sql = v0.getString();
-        Table table = p.parseTableName(sql);
-        return table.getDiskSpaceUsed();
     }
 
     private static Value getNullOrValue(Session session, Expression[] args,
@@ -1446,15 +1431,6 @@ public class Function extends Expression implements FunctionCall {
             }
             break;
         }
-        case LINK_SCHEMA: {
-            session.getUser().checkAdmin();
-            Connection conn = session.createConnection(false);
-            ResultSet rs = LinkSchema.linkSchema(conn, v0.getString(),
-                    v1.getString(), v2.getString(), v3.getString(),
-                    v4.getString(), v5.getString());
-            result = ValueResultSet.get(rs);
-            break;
-        }
         case CSVWRITE: {
             session.getUser().checkAdmin();
             Connection conn = session.createConnection(false);
@@ -1521,6 +1497,7 @@ public class Function extends Expression implements FunctionCall {
         case DECRYPT:
         case COMPRESS: 
         case FILE_READ:
+        case LINK_SCHEMA:
             throw DbException.throwInternalError("function unimplemented. tyle=" + info.type);
         default:
             throw DbException.throwInternalError("type=" + info.type);

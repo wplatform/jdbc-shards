@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.FunctionCall;
 import com.suning.snfddal.command.expression.TableFunction;
-import com.suning.snfddal.dbobject.index.FunctionIndex;
 import com.suning.snfddal.dbobject.index.Index;
+import com.suning.snfddal.dbobject.index.IndexMate;
 import com.suning.snfddal.dbobject.index.IndexType;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.engine.Session;
@@ -22,7 +22,6 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultInterface;
-import com.suning.snfddal.result.Row;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
@@ -42,7 +41,7 @@ public class FunctionTable extends Table {
 
     public FunctionTable(Schema schema, Session session,
             Expression functionExpr, FunctionCall function) {
-        super(schema, 0, function.getName(), false, true);
+        super(schema, 0, function.getName());
         this.functionExpr = functionExpr;
         this.function = function;
         if (function instanceof TableFunction) {
@@ -86,59 +85,7 @@ public class FunctionTable extends Table {
         }
     }
 
-    @Override
-    public boolean lock(Session session, boolean exclusive, boolean forceLockEvenInMvcc) {
-        // nothing to do
-        return false;
-    }
-
-    @Override
-    public void close(Session session) {
-        // nothing to do
-    }
-
-    @Override
-    public void unlock(Session s) {
-        // nothing to do
-    }
-
-    @Override
-    public boolean isLockedExclusively() {
-        return false;
-    }
-
-    @Override
-    public Index addIndex(Session session, String indexName, int indexId,
-            IndexColumn[] cols, IndexType indexType, boolean create,
-            String indexComment) {
-        throw DbException.getUnsupportedException("ALIAS");
-    }
-
-    @Override
-    public void removeRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("ALIAS");
-    }
-
-    @Override
-    public void truncate(Session session) {
-        throw DbException.getUnsupportedException("ALIAS");
-    }
-
-    @Override
-    public boolean canDrop() {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public void addRow(Session session, Row row) {
-        throw DbException.getUnsupportedException("ALIAS");
-    }
-
-    @Override
-    public void checkSupportAlter() {
-        throw DbException.getUnsupportedException("ALIAS");
-    }
-
+    
     @Override
     public String getTableType() {
         return null;
@@ -146,7 +93,7 @@ public class FunctionTable extends Table {
 
     @Override
     public Index getScanIndex(Session session) {
-        return new FunctionIndex(this, IndexColumn.wrap(columns));
+        return new IndexMate(this, 0, null,IndexColumn.wrap(columns),IndexType.createScan());
     }
 
     @Override
@@ -162,16 +109,6 @@ public class FunctionTable extends Table {
     @Override
     public long getRowCount(Session session) {
         return rowCount;
-    }
-
-    @Override
-    public String getCreateSQL() {
-        return null;
-    }
-
-    @Override
-    public String getDropSQL() {
-        return null;
     }
 
     @Override
@@ -243,18 +180,18 @@ public class FunctionTable extends Table {
     }
 
     @Override
-    public long getDiskSpaceUsed() {
-        return 0;
-    }
-
-    @Override
     public boolean isDeterministic() {
         return function.isDeterministic();
     }
 
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.table.Table#addIndex(java.util.ArrayList, com.suning.snfddal.dbobject.index.IndexType)
+     */
     @Override
-    public boolean canReference() {
-        return false;
+    public void addIndex(ArrayList<Column> list, IndexType indexType) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

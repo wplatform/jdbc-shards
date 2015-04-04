@@ -88,7 +88,6 @@ import com.suning.snfddal.command.expression.ExpressionColumn;
 import com.suning.snfddal.command.expression.ExpressionList;
 import com.suning.snfddal.command.expression.Function;
 import com.suning.snfddal.command.expression.FunctionCall;
-import com.suning.snfddal.command.expression.JavaAggregate;
 import com.suning.snfddal.command.expression.JavaFunction;
 import com.suning.snfddal.command.expression.Operation;
 import com.suning.snfddal.command.expression.Parameter;
@@ -103,8 +102,6 @@ import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.FunctionAlias;
 import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.User;
-import com.suning.snfddal.dbobject.UserAggregate;
-import com.suning.snfddal.dbobject.UserDataType;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.Sequence;
@@ -2309,19 +2306,6 @@ public class Parser {
         return func;
     }
 
-    private JavaAggregate readJavaAggregate(UserAggregate aggregate) {
-        ArrayList<Expression> params = New.arrayList();
-        do {
-            params.add(readExpression());
-        } while (readIf(","));
-        read(")");
-        Expression[] list = new Expression[params.size()];
-        params.toArray(list);
-        JavaAggregate agg = new JavaAggregate(aggregate, list, currentSelect);
-        currentSelect.setGroupQuery();
-        return agg;
-    }
-
     private int getAggregateType(String name) {
         if (!identifiersToUpper) {
             // if not yet converted to uppercase, do it now
@@ -2340,10 +2324,6 @@ public class Parser {
         }
         Function function = Function.getFunction(database, name);
         if (function == null) {
-            UserAggregate aggregate = database.findAggregate(name);
-            if (aggregate != null) {
-                return readJavaAggregate(aggregate);
-            }
             return readJavaFunction(null, name);
         }
         switch (function.getFunctionType()) {
@@ -3910,26 +3890,15 @@ public class Parser {
         int displaySize = -1;
         int scale = -1;
         String comment = null;
-        Column templateColumn = null;
         DataType dataType;
         if (!identifiersToUpper) {
             original = StringUtils.toUpperEnglish(original);
         }
-        UserDataType userDataType = database.findUserDataType(original);
-        if (userDataType != null) {
-            templateColumn = userDataType.getColumn();
-            dataType = DataType.getDataType(templateColumn.getType());
-            comment = templateColumn.getComment();
-            original = templateColumn.getOriginalSQL();
-            precision = templateColumn.getPrecision();
-            displaySize = templateColumn.getDisplaySize();
-            scale = templateColumn.getScale();
-        } else {
-            dataType = DataType.getTypeByName(original);
-            if (dataType == null) {
-                throw DbException.get(ErrorCode.UNKNOWN_DATA_TYPE_1,
-                        currentToken);
-            }
+
+        dataType = DataType.getTypeByName(original);
+        if (dataType == null) {
+            throw DbException.get(ErrorCode.UNKNOWN_DATA_TYPE_1,
+                    currentToken);
         }
         if (database.getIgnoreCase() && dataType.type == Value.STRING &&
                 !equalsToken("VARCHAR_CASESENSITIVE", original)) {
@@ -4004,18 +3973,6 @@ public class Parser {
         }
         Column column = new Column(columnName, type, precision, scale,
                 displaySize);
-        if (templateColumn != null) {
-            column.setNullable(templateColumn.isNullable());
-            column.setDefaultExpression(session,
-                    templateColumn.getDefaultExpression());
-            int selectivity = templateColumn.getSelectivity();
-            if (selectivity != Constants.SELECTIVITY_DEFAULT) {
-                column.setSelectivity(selectivity);
-            }
-            Expression checkConstraint = templateColumn.getCheckConstraint(
-                    session, columnName);
-            column.addCheckConstraint(session, checkConstraint);
-        }
         column.setComment(comment);
         column.setOriginalSQL(original);
         return column;
@@ -4520,7 +4477,6 @@ public class Parser {
         view.setTableExpression(true);
         view.setTemporary(true);
         session.addLocalTempTable(view);
-        view.setOnCommitDrop(true);
         Query q = parseSelect();
         q.setPrepareAlways(true);
         return q;

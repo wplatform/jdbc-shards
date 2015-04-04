@@ -13,7 +13,6 @@ import java.util.List;
 
 import com.suning.snfddal.command.dml.Select;
 import com.suning.snfddal.command.dml.SelectOrderBy;
-import com.suning.snfddal.dbobject.index.Cursor;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
@@ -22,7 +21,6 @@ import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
@@ -279,15 +277,15 @@ public class Aggregate extends Expression {
                 if ((sortType & SortOrder.DESCENDING) != 0) {
                     first = !first;
                 }
-                Cursor cursor = index.findFirstOrLast(session, first);
-                SearchRow row = cursor.getSearchRow();
-                Value v;
-                if (row == null) {
-                    v = ValueNull.INSTANCE;
-                } else {
-                    v = row.getValue(index.getColumns()[0].getColumnId());
-                }
-                return v;
+                //Cursor cursor = index.findFirstOrLast(session, first);
+                //SearchRow row = cursor.getSearchRow();
+                //Value v;
+                //if (row == null) {
+                //    v = ValueNull.INSTANCE;
+                //} else {
+                //    v = row.getValue(index.getColumns()[0].getColumnId());
+                //}
+                return null;
             default:
                 DbException.throwInternalError("type=" + type);
             }

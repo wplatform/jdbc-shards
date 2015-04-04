@@ -131,7 +131,7 @@ public class RuleColumn implements Serializable {
      */
     @Override
     public String toString() {
-        return "{" + name + ", type=" + type + ", required=" + required + "}";
+        return "${" + name + "}";
     }
 
     

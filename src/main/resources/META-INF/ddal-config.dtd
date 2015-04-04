@@ -61,8 +61,7 @@ name CDATA #REQUIRED
 metadata CDATA #IMPLIED
 router CDATA #IMPLIED
 validation (true|false) #IMPLIED
-enableFts (true|false) #IMPLIED
-scanLevel (none|any|primaryKey|shardingKey) #IMPLIED
+scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
 broadcast CDATA #IMPLIED
 >
 
@@ -71,8 +70,7 @@ broadcast CDATA #IMPLIED
 metadata CDATA #IMPLIED
 router CDATA #IMPLIED
 validation (true|false) #IMPLIED
-enableFts (true|false) #IMPLIED
-scanLevel (none|any|index|primaryKey|shardingKey) #IMPLIED
+scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
 broadcast CDATA #IMPLIED
 >
 

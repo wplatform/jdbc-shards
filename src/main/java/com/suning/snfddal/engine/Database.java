@@ -15,7 +15,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.ConfigurationException;
 import com.suning.snfddal.config.SchemaConfig;
@@ -27,31 +26,28 @@ import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.Role;
 import com.suning.snfddal.dbobject.Setting;
 import com.suning.snfddal.dbobject.User;
-import com.suning.snfddal.dbobject.UserAggregate;
-import com.suning.snfddal.dbobject.UserDataType;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
 import com.suning.snfddal.dbobject.table.Table;
+import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.route.RoutingHandler;
 import com.suning.snfddal.route.RoutingHandlerImpl;
+import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
+import com.suning.snfddal.util.SchemaMetaLoader;
 import com.suning.snfddal.util.SourceCompiler;
-import com.suning.snfddal.util.TableMetaLoader;
 import com.suning.snfddal.value.CaseInsensitiveMap;
 import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.Value;
 
 /**
- * There is one database object per open database. The format of the meta data
- * table is: id int, 0, objectType int, sql varchar
- *
- * @since 2004-04-15 22:49
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class Database {
 
@@ -62,8 +58,6 @@ public class Database {
     private final HashMap<String, Setting> settings = New.hashMap();
     private final HashMap<String, Schema> schemas = New.hashMap();
     private final HashMap<String, Right> rights = New.hashMap();
-    private final HashMap<String, UserDataType> userDataTypes = New.hashMap();
-    private final HashMap<String, UserAggregate> aggregates = New.hashMap();
     private final HashMap<String, Comment> comments = New.hashMap();
     private final HashMap<String, DataSource> dataNodes = New.hashMap();
 
@@ -94,9 +88,9 @@ public class Database {
 
         String sqlMode = configuration.getProperty("sqlMode", Mode.MY_SQL);
         Mode settingMode = Mode.getInstance(sqlMode);
-        if(settingMode != null) {
+        if (settingMode != null) {
             this.mode = settingMode;
-        }        
+        }
         int traceLevelFile = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
         int traceLevelSystemOut = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
 
@@ -116,7 +110,8 @@ public class Database {
         systemUser.setUserPasswordHash(new byte[0]);
         users.put(SYSTEM_USER_NAME, systemUser);
 
-        Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser, true);
+        Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser,
+                true);
         schemas.put(schema.getName(), schema);
 
         Role publicRole = new Role(this, 0, Constants.PUBLIC_ROLE_NAME, true);
@@ -132,18 +127,26 @@ public class Database {
             }
             addDataNode(value.getName(), dataSource);
         }
-        
-        TableMetaLoader metaLoader = new TableMetaLoader();
-        metaLoader.setDataNodes(this.dataNodes);
-        metaLoader.setTrace(this.trace);
+
+        SchemaMetaLoader metaLoader = new SchemaMetaLoader(schema);
         SchemaConfig sc = configuration.getSchemaConfig();
         List<TableConfig> ctList = sc.getTables();
         for (TableConfig tableConfig : ctList) {
-            CreateTableData tableData = metaLoader.loadMetaData(tableConfig);
-            tableData.schema = schema;
-            tableData.tableName = tableConfig.getName();
-            Table metaTable = schema.createTable(tableData);
-            this.addSchemaObject(metaTable);
+            String matedataNode = tableConfig.getMetadataNode();
+            String matedataTable = tableConfig.getNameWithSchemaName();
+            TableMate tableMate = metaLoader.loadTableMeta(tableConfig);
+            tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
+            tableMate.setTableRouter(tableConfig.getTableRouter());
+            tableMate.setScanLevel(tableConfig.getScanLevel());
+            String[] broadcast = tableConfig.getBroadcast();
+            if (broadcast.length > 0) {
+                TableNode[] bNodes = new TableNode[broadcast.length];
+                for (int i = 0; i < broadcast.length; i++) {
+                    bNodes[i] = new TableNode(broadcast[i], matedataTable);
+                }
+                tableMate.setBroadcastNode(bNodes);
+            }
+            this.addSchemaObject(tableMate);
         }
 
     }
@@ -215,14 +218,8 @@ public class Database {
         case DbObject.SCHEMA:
             result = schemas;
             break;
-        case DbObject.USER_DATATYPE:
-            result = userDataTypes;
-            break;
         case DbObject.COMMENT:
             result = comments;
-            break;
-        case DbObject.AGGREGATE:
-            result = aggregates;
             break;
         default:
             throw DbException.throwInternalError("type=" + type);
@@ -254,17 +251,6 @@ public class Database {
             DbException.throwInternalError("object already exists");
         }
         map.put(name, obj);
-        trace.debug("addDatabaseObject: {0}", obj.getCreateSQL());
-    }
-
-    /**
-     * Get the user defined aggregate function if it exists, or null if not.
-     *
-     * @param name the name of the user defined aggregate function
-     * @return the aggregate function or null
-     */
-    public UserAggregate findAggregate(String name) {
-        return aggregates.get(name);
     }
 
     /**
@@ -321,16 +307,6 @@ public class Database {
      */
     public User findUser(String name) {
         return users.get(name);
-    }
-
-    /**
-     * Get the user defined data type if it exists, or null if not.
-     *
-     * @param name the name of the user defined data type
-     * @return the user defined data type or null
-     */
-    public UserDataType findUserDataType(String name) {
-        return userDataTypes.get(name);
     }
 
     /**
@@ -422,10 +398,6 @@ public class Database {
         return i;
     }
 
-    public ArrayList<UserAggregate> getAllAggregates() {
-        return New.arrayList(aggregates.values());
-    }
-
     public ArrayList<Comment> getAllComments() {
         return New.arrayList(comments.values());
     }
@@ -491,10 +463,6 @@ public class Database {
 
     public ArrayList<Setting> getAllSettings() {
         return New.arrayList(settings.values());
-    }
-
-    public ArrayList<UserDataType> getAllUserDataTypes() {
-        return New.arrayList(userDataTypes.values());
     }
 
     public ArrayList<User> getAllUsers() {

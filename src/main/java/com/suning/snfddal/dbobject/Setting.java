@@ -5,7 +5,6 @@
  */
 package com.suning.snfddal.dbobject;
 
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
@@ -37,28 +36,6 @@ public class Setting extends DbObjectBase {
 
     public String getStringValue() {
         return stringValue;
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public String getDropSQL() {
-        return null;
-    }
-
-    @Override
-    public String getCreateSQL() {
-        StringBuilder buff = new StringBuilder("SET ");
-        buff.append(getSQL()).append(' ');
-        if (stringValue != null) {
-            buff.append(stringValue);
-        } else {
-            buff.append(intValue);
-        }
-        return buff.toString();
     }
 
     @Override

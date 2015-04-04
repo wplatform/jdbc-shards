@@ -5,14 +5,29 @@
  */
 package com.suning.snfddal.dbobject.index;
 
+
 /**
  * Represents information about the properties of an index
  */
 public class IndexType {
 
-    private boolean primaryKey, persistent, unique, hash, scan, spatial;
-    private boolean belongsToConstraint;
-
+    private boolean partitionKey, primaryKey, unique, scan;
+    
+    /**
+     * Create a partitionKey key index.
+     *
+     * @param persistent if the index is persistent
+     * @param hash if a hash index should be used
+     * @return the index type
+     */
+    public static IndexType createPartitionKey() {
+        IndexType type = new IndexType();
+        type.partitionKey = true;
+        type.primaryKey = true;
+        type.unique = true;
+        return type;
+    }
+    
     /**
      * Create a primary key index.
      *
@@ -20,11 +35,9 @@ public class IndexType {
      * @param hash if a hash index should be used
      * @return the index type
      */
-    public static IndexType createPrimaryKey(boolean persistent, boolean hash) {
+    public static IndexType createPrimaryKey() {
         IndexType type = new IndexType();
         type.primaryKey = true;
-        type.persistent = persistent;
-        type.hash = hash;
         type.unique = true;
         return type;
     }
@@ -36,22 +49,10 @@ public class IndexType {
      * @param hash if a hash index should be used
      * @return the index type
      */
-    public static IndexType createUnique(boolean persistent, boolean hash) {
+    public static IndexType createUnique() {
         IndexType type = new IndexType();
         type.unique = true;
-        type.persistent = persistent;
-        type.hash = hash;
         return type;
-    }
-
-    /**
-     * Create a non-unique index.
-     *
-     * @param persistent if the index is persistent
-     * @return the index type
-     */
-    public static IndexType createNonUnique(boolean persistent) {
-        return createNonUnique(persistent, false, false);
     }
 
     /**
@@ -62,72 +63,30 @@ public class IndexType {
      * @param spatial if a spatial index should be used
      * @return the index type
      */
-    public static IndexType createNonUnique(boolean persistent, boolean hash,
-            boolean spatial) {
+    public static IndexType createNonUnique() {
         IndexType type = new IndexType();
-        type.persistent = persistent;
-        type.hash = hash;
-        type.spatial = spatial;
         return type;
     }
-
+    
     /**
      * Create a scan pseudo-index.
      *
      * @param persistent if the index is persistent
      * @return the index type
      */
-    public static IndexType createScan(boolean persistent) {
+    public static IndexType createScan() {
         IndexType type = new IndexType();
-        type.persistent = persistent;
         type.scan = true;
         return type;
     }
-
+    
     /**
-     * Sets if this index belongs to a constraint.
+     * Does this index belong to a primary key constraint?
      *
-     * @param belongsToConstraint if the index belongs to a constraint
+     * @return true if it references a primary key constraint
      */
-    public void setBelongsToConstraint(boolean belongsToConstraint) {
-        this.belongsToConstraint = belongsToConstraint;
-    }
-
-    /**
-     * If the index is created because of a constraint. Such indexes are to be
-     * dropped once the constraint is dropped.
-     *
-     * @return if the index belongs to a constraint
-     */
-    public boolean getBelongsToConstraint() {
-        return belongsToConstraint;
-    }
-
-    /**
-     * Is this a hash index?
-     *
-     * @return true if it is a hash index
-     */
-    public boolean isHash() {
-        return hash;
-    }
-
-    /**
-     * Is this a spatial index?
-     *
-     * @return true if it is a spatial index
-     */
-    public boolean isSpatial() {
-        return spatial;
-    }
-
-    /**
-     * Is this index persistent?
-     *
-     * @return true if it is persistent
-     */
-    public boolean isPersistent() {
-        return persistent;
+    public boolean isPartitionKey() {
+        return partitionKey;
     }
 
     /**
@@ -157,18 +116,9 @@ public class IndexType {
         StringBuilder buff = new StringBuilder();
         if (primaryKey) {
             buff.append("PRIMARY KEY");
-            if (hash) {
-                buff.append(" HASH");
-            }
         } else {
             if (unique) {
                 buff.append("UNIQUE ");
-            }
-            if (hash) {
-                buff.append("HASH ");
-            }
-            if (spatial) {
-                buff.append("SPATIAL ");
             }
             buff.append("INDEX");
         }

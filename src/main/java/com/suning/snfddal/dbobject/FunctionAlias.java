@@ -17,7 +17,6 @@ import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObjectBase;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
@@ -28,7 +27,6 @@ import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SourceCompiler;
 import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
@@ -197,16 +195,6 @@ public class FunctionAlias extends SchemaObjectBase {
     }
 
     @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public String getDropSQL() {
-        return "DROP ALIAS IF EXISTS " + getSQL();
-    }
-
-    @Override
     public String getSQL() {
         // TODO can remove this method once FUNCTIONS_IN_SCHEMA is enabled
         if (database.getSettings().functionsInSchema ||
@@ -214,25 +202,6 @@ public class FunctionAlias extends SchemaObjectBase {
             return super.getSQL();
         }
         return Parser.quoteIdentifier(getName());
-    }
-
-    @Override
-    public String getCreateSQL() {
-        StringBuilder buff = new StringBuilder("CREATE FORCE ALIAS ");
-        buff.append(getSQL());
-        if (deterministic) {
-            buff.append(" DETERMINISTIC");
-        }
-        if (!bufferResultSetToLocalTemp) {
-            buff.append(" NOBUFFER");
-        }
-        if (source != null) {
-            buff.append(" AS ").append(StringUtils.quoteStringSQL(source));
-        } else {
-            buff.append(" FOR ").append(Parser.quoteIdentifier(
-                    className + "." + methodName));
-        }
-        return buff.toString();
     }
 
     @Override

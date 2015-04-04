@@ -143,7 +143,7 @@ public class TableFilter implements ColumnResolver {
      * @param forceLockEvenInMvcc lock even in the MVCC mode
      */
     public void lock(Session s, boolean exclusive, boolean forceLockEvenInMvcc) {
-        table.lock(s, exclusive, forceLockEvenInMvcc);
+        //table.lock(s, exclusive, forceLockEvenInMvcc);
         if (join != null) {
             join.lock(s, exclusive, forceLockEvenInMvcc);
         }
@@ -679,7 +679,7 @@ public class TableFilter implements ColumnResolver {
         if (index != null) {
             buff.append('\n');
             StatementBuilder planBuff = new StatementBuilder();
-            planBuff.append(index.getPlanSQL());
+            planBuff.append(index.getSQL());
             if (indexConditions.size() > 0) {
                 planBuff.append(": ");
                 for (IndexCondition condition : indexConditions) {
@@ -982,8 +982,8 @@ public class TableFilter implements ColumnResolver {
     public void lockRows(ArrayList<Row> forUpdateRows) {
         for (Row row : forUpdateRows) {
             Row newRow = row.getCopy();
-            table.removeRow(session, row);
-            table.addRow(session, newRow);
+            //table.removeRow(session, row);
+            //table.addRow(session, newRow);
         }
     }
 

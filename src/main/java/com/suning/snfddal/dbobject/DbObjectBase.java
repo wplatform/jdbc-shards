@@ -53,22 +53,6 @@ public abstract class DbObjectBase implements DbObject {
     }
 
     /**
-     * Build a SQL statement to re-create this object.
-     *
-     * @return the SQL statement
-     */
-    @Override
-    public abstract String getCreateSQL();
-
-    /**
-     * Build a SQL statement to drop this object.
-     *
-     * @return the SQL statement
-     */
-    @Override
-    public abstract String getDropSQL();
-
-    /**
      * Remove all dependent objects and free all resources (files, blocks in
      * files) of this object.
      *

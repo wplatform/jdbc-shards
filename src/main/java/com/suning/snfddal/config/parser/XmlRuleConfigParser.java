@@ -82,6 +82,9 @@ public class XmlRuleConfigParser {
                 parsePartition(tableRouter, xNode.getChildren());
             } else if ("tableRule".equals(xNode.getName())) {
                 RuleExpression ruleExpr = parseRuleExpression(xNode);
+                if (ruleExpr.getRuleColumns().isEmpty()) {
+                    throw new ParsingException("The table router '" + tableRouter.getId() + "' has no sharding column.");
+                }
                 tableRouter.setRuleExpression(ruleExpr);
             }
         }

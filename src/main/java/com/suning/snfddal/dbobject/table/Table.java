@@ -1,16 +1,26 @@
 /*
- * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0,
- * and the EPL 1.0 (http://h2database.com/html/license.html).
- * Initial Developer: H2 Group
+ * Copyright 2014 suning.com Holding Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+// Created on 2014年12月25日
+// $Id$
 package com.suning.snfddal.dbobject.table;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
-import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.ExpressionVisitor;
 import com.suning.snfddal.dbobject.DbObject;
@@ -26,19 +36,19 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.Row;
-import com.suning.snfddal.result.RowList;
 import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.result.SimpleRow;
 import com.suning.snfddal.result.SimpleRowValue;
 import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
 
 /**
- * This is the base class for most tables.
- * A table contains a list of columns and a list of rows.
+ * This is the base class for most tables. A table contains a list of columns
+ * and a list of rows.
+ * 
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public abstract class Table extends SchemaObjectBase {
 
@@ -53,40 +63,18 @@ public abstract class Table extends SchemaObjectBase {
     public static final String VIEW = "VIEW";
 
     /**
-     * The table type name for external table engines.
-     */
-    public static final String EXTERNAL_TABLE_ENGINE = "EXTERNAL";
-
-    /**
      * The columns of this table.
      */
     protected Column[] columns;
 
-    /**
-     * The compare mode used for this table.
-     */
-    protected CompareMode compareMode;
-
-    /**
-     * Protected tables are not listed in the meta data and are excluded when
-     * using the SCRIPT command.
-     */
-    protected boolean isHidden;
-
     private final HashMap<String, Column> columnMap;
-    private final boolean persistIndexes;
-    private final boolean persistData;
     private ArrayList<Sequence> sequences;
-    private boolean onCommitDrop, onCommitTruncate;
     private Row nullRow;
 
-    public Table(Schema schema, int id, String name, boolean persistIndexes,
-            boolean persistData) {
+    public Table(Schema schema, int id, String name) {
         columnMap = schema.getDatabase().newStringMap();
         initSchemaObjectBase(schema, id, name, Trace.TABLE);
-        this.persistIndexes = persistIndexes;
-        this.persistData = persistData;
-        compareMode = schema.getDatabase().getCompareMode();
+        // compareMode = schema.getDatabase().getCompareMode();
     }
 
     @Override
@@ -95,33 +83,7 @@ public abstract class Table extends SchemaObjectBase {
     }
 
     /**
-     * Lock the table for the given session.
-     * This method waits until the lock is granted.
-     *
-     * @param session the session
-     * @param exclusive true for write locks, false for read locks
-     * @param forceLockEvenInMvcc lock even in the MVCC mode
-     * @return true if the table was already exclusively locked by this session.
-     * @throws DbException if a lock timeout occurred
-     */
-    public abstract boolean lock(Session session, boolean exclusive, boolean forceLockEvenInMvcc);
-
-    /**
-     * Close the table object and flush changes.
-     *
-     * @param session the session
-     */
-    public abstract void close(Session session);
-
-    /**
-     * Release the lock for this session.
-     *
-     * @param s the session
-     */
-    public abstract void unlock(Session s);
-
-    /**
-     * Create an index for this table
+     * Create add index for this table
      *
      * @param session the session
      * @param indexName the name of the index
@@ -132,61 +94,7 @@ public abstract class Table extends SchemaObjectBase {
      * @param indexComment the comment
      * @return the index
      */
-    public abstract Index addIndex(Session session, String indexName,
-            int indexId, IndexColumn[] cols, IndexType indexType,
-            boolean create, String indexComment);
-
-    /**
-     * Get the given row.
-     *
-     * @param session the session
-     * @param key the primary key
-     * @return the row
-     */
-    public Row getRow(Session session, long key) {
-        return null;
-    }
-
-    /**
-     * Remove a row from the table and all indexes.
-     *
-     * @param session the session
-     * @param row the row
-     */
-    public abstract void removeRow(Session session, Row row);
-
-    /**
-     * Remove all rows from the table and indexes.
-     *
-     * @param session the session
-     */
-    public abstract void truncate(Session session);
-
-    /**
-     * Add a row to the table and all indexes.
-     *
-     * @param session the session
-     * @param row the row
-     * @throws DbException if a constraint was violated
-     */
-    public abstract void addRow(Session session, Row row);
-
-    /**
-     * Commit an operation (when using multi-version concurrency).
-     *
-     * @param operation the operation
-     * @param row the row
-     */
-    public void commit(short operation, Row row) {
-        // nothing to do
-    }
-
-    /**
-     * Check if this table supports ALTER TABLE.
-     *
-     * @throws DbException if it is not supported
-     */
-    public abstract void checkSupportAlter();
+    public abstract void addIndex(ArrayList<Column> list, IndexType indexType);
 
     /**
      * Get the table type name
@@ -218,13 +126,6 @@ public abstract class Table extends SchemaObjectBase {
     public abstract ArrayList<Index> getIndexes();
 
     /**
-     * Check if this table is locked exclusively.
-     *
-     * @return true if it is.
-     */
-    public abstract boolean isLockedExclusively();
-
-    /**
      * Check if the table is deterministic.
      *
      * @return true if it is
@@ -237,22 +138,6 @@ public abstract class Table extends SchemaObjectBase {
      * @return true if it can
      */
     public abstract boolean canGetRowCount();
-
-    /**
-     * Check if this table can be referenced.
-     *
-     * @return true if it can
-     */
-    public boolean canReference() {
-        return true;
-    }
-
-    /**
-     * Check if this table can be dropped.
-     *
-     * @return true if it can
-     */
-    public abstract boolean canDrop();
 
     /**
      * Get the row count for this table.
@@ -269,8 +154,6 @@ public abstract class Table extends SchemaObjectBase {
      */
     public abstract long getRowCountApproximation();
 
-    public abstract long getDiskSpaceUsed();
-
     /**
      * Get the row id column if this table has one.
      *
@@ -278,11 +161,6 @@ public abstract class Table extends SchemaObjectBase {
      */
     public Column getRowIdColumn() {
         return null;
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
     }
 
     /**
@@ -311,8 +189,8 @@ public abstract class Table extends SchemaObjectBase {
                 dependencies.add(s);
             }
         }
-        ExpressionVisitor visitor = ExpressionVisitor.getDependenciesVisitor(
-                dependencies);
+        ExpressionVisitor visitor = ExpressionVisitor
+                .getDependenciesVisitor(dependencies);
         for (Column col : columns) {
             col.isEverything(visitor);
         }
@@ -347,14 +225,14 @@ public abstract class Table extends SchemaObjectBase {
             Column col = columns[i];
             int dataType = col.getType();
             if (dataType == Value.UNKNOWN) {
-                throw DbException.get(
-                        ErrorCode.UNKNOWN_DATA_TYPE_1, col.getSQL());
+                throw DbException.get(ErrorCode.UNKNOWN_DATA_TYPE_1,
+                        col.getSQL());
             }
             col.setTable(this, i);
             String columnName = col.getName();
             if (columnMap.get(columnName) != null) {
-                throw DbException.get(
-                        ErrorCode.DUPLICATE_COLUMN_NAME_1, columnName);
+                throw DbException.get(ErrorCode.DUPLICATE_COLUMN_NAME_1,
+                        columnName);
             }
             columnMap.put(columnName, col);
         }
@@ -372,64 +250,13 @@ public abstract class Table extends SchemaObjectBase {
                 continue;
             }
             if (c.getName().equals(newName)) {
-                throw DbException.get(
-                        ErrorCode.DUPLICATE_COLUMN_NAME_1, newName);
+                throw DbException.get(ErrorCode.DUPLICATE_COLUMN_NAME_1,
+                        newName);
             }
         }
         columnMap.remove(column.getName());
         column.rename(newName);
         columnMap.put(newName, column);
-    }
-
-    /**
-     * Check if the table is exclusively locked by this session.
-     *
-     * @param session the session
-     * @return true if it is
-     */
-    public boolean isLockedExclusivelyBy(Session session) {
-        return false;
-    }
-
-    /**
-     * Update a list of rows in this table.
-     *
-     * @param prepared the prepared statement
-     * @param session the session
-     * @param rows a list of row pairs of the form old row, new row, old row,
-     *            new row,...
-     */
-    public void updateRows(Prepared prepared, Session session, RowList rows) {
-        // in case we need to undo the update
-        Session.Savepoint rollback = session.setSavepoint();
-        // remove the old rows
-        int rowScanCount = 0;
-        for (rows.reset(); rows.hasNext();) {
-            if ((++rowScanCount & 127) == 0) {
-                prepared.checkCanceled();
-            }
-            Row o = rows.next();
-            rows.next();
-            removeRow(session, o);
-        }
-        // add the new rows
-        for (rows.reset(); rows.hasNext();) {
-            if ((++rowScanCount & 127) == 0) {
-                prepared.checkCanceled();
-            }
-            rows.next();
-            Row n = rows.next();
-            try {
-                addRow(session, n);
-            } catch (DbException e) {
-                if (e.getErrorCode() == ErrorCode.CONCURRENT_UPDATE_1) {
-                    session.rollbackTo(rollback, false);
-                    session.startStatementWithinTransaction();
-                    rollback = session.setSavepoint();
-                }
-                throw e;
-            }
-        }
     }
 
     @Override
@@ -471,17 +298,14 @@ public abstract class Table extends SchemaObjectBase {
         if (indexes != null) {
             for (int i = 0, size = indexes.size(); i < size; i++) {
                 Index index = indexes.get(i);
-                if (index.getCreateSQL() == null) {
-                    continue;
-                }
                 if (index.getColumnIndex(col) < 0) {
                     continue;
                 }
                 if (index.getColumns().length == 1) {
                     indexesToDrop.add(index);
                 } else {
-                    throw DbException.get(
-                            ErrorCode.COLUMN_IS_REFERENCED_1, index.getSQL());
+                    throw DbException.get(ErrorCode.COLUMN_IS_REFERENCED_1,
+                            index.getSQL());
                 }
             }
         }
@@ -570,7 +394,7 @@ public abstract class Table extends SchemaObjectBase {
      *
      * @param session the session
      * @param masks per-column comparison bit masks, null means 'always false',
-     *              see constants in IndexCondition
+     *            see constants in IndexCondition
      * @param filter the table filter
      * @param sortOrder the sort order
      * @return the plan item
@@ -671,7 +495,7 @@ public abstract class Table extends SchemaObjectBase {
             }
         }
     }
-    
+
     /**
      * Remove a sequence from the table. Sequences are used as identity columns.
      *
@@ -699,54 +523,13 @@ public abstract class Table extends SchemaObjectBase {
         return list;
     }
 
-    /**
-     * Fire all triggers that need to be called before a row is updated.
-     *
-     * @param session the session
-     * @param oldRow the old data or null for an insert
-     * @param newRow the new data or null for a delete
-     * @return true if no further action is required (for 'instead of' triggers)
-     */
-    public boolean fireBeforeRow(Session session, Row oldRow, Row newRow) {
-        boolean done = fireRow(session, oldRow, newRow, true, false);
-        return done;
-    }
-
-    /**
-     * Fire all triggers that need to be called after a row is updated.
-     *
-     *  @param session the session
-     *  @param oldRow the old data or null for an insert
-     *  @param newRow the new data or null for a delete
-     *  @param rollback when the operation occurred within a rollback
-     */
-    public void fireAfterRow(Session session, Row oldRow, Row newRow,
-            boolean rollback) {
-        fireRow(session, oldRow, newRow, false, rollback);
-
-    }
-
-    private boolean fireRow(Session session, Row oldRow, Row newRow,
-            boolean beforeAction, boolean rollback) {
-        return false;
-    }
-
     public boolean isGlobalTemporary() {
         return false;
     }
 
     /**
-     * Check if this table can be truncated.
-     *
-     * @return true if it can
-     */
-    public boolean canTruncate() {
-        return false;
-    }
-
-    /**
-     * Get the index that has the given column as the first element.
-     * This method returns null if no matching index is found.
+     * Get the index that has the given column as the first element. This method
+     * returns null if no matching index is found.
      *
      * @param column the column
      * @return the index or null
@@ -756,83 +539,14 @@ public abstract class Table extends SchemaObjectBase {
         if (indexes != null) {
             for (int i = 1, size = indexes.size(); i < size; i++) {
                 Index index = indexes.get(i);
-                if (index.canGetFirstOrLast()) {
-                    int idx = index.getColumnIndex(column);
-                    if (idx == 0) {
-                        return index;
-                    }
+                int idx = index.getColumnIndex(column);
+                if (idx == 0) {
+                    return index;
                 }
+
             }
         }
         return null;
-    }
-
-    public boolean getOnCommitDrop() {
-        return onCommitDrop;
-    }
-
-    public void setOnCommitDrop(boolean onCommitDrop) {
-        this.onCommitDrop = onCommitDrop;
-    }
-
-    public boolean getOnCommitTruncate() {
-        return onCommitTruncate;
-    }
-
-    public void setOnCommitTruncate(boolean onCommitTruncate) {
-        this.onCommitTruncate = onCommitTruncate;
-    }
-
-    /**
-     * Check if a deadlock occurred. This method is called recursively. There is
-     * a circle if the session to be tested has already being visited. If this
-     * session is part of the circle (if it is the clash session), the method
-     * must return an empty object array. Once a deadlock has been detected, the
-     * methods must add the session to the list. If this session is not part of
-     * the circle, or if no deadlock is detected, this method returns null.
-     *
-     * @param session the session to be tested for
-     * @param clash set with sessions already visited, and null when starting
-     *            verification
-     * @param visited set with sessions already visited, and null when starting
-     *            verification
-     * @return an object array with the sessions involved in the deadlock, or
-     *         null
-     */
-    public ArrayList<Session> checkDeadlock(Session session, Session clash,
-            Set<Session> visited) {
-        return null;
-    }
-
-    public boolean isPersistIndexes() {
-        return persistIndexes;
-    }
-
-    public boolean isPersistData() {
-        return persistData;
-    }
-
-    /**
-     * Compare two values with the current comparison mode. The values may be of
-     * different type.
-     *
-     * @param a the first value
-     * @param b the second value
-     * @return 0 if both values are equal, -1 if the first value is smaller, and
-     *         1 otherwise
-     */
-    public int compareTypeSave(Value a, Value b) {
-        if (a == b) {
-            return 0;
-        }
-        int dataType = Value.getHigherOrder(a.getType(), b.getType());
-        a = a.convertTo(dataType);
-        b = b.convertTo(dataType);
-        return a.compareTypeSave(b, compareMode);
-    }
-
-    public CompareMode getCompareMode() {
-        return compareMode;
     }
 
     /**
@@ -851,19 +565,6 @@ public abstract class Table extends SchemaObjectBase {
             v = defaultExpr.getValue(session);
         }
         return column.convert(v);
-    }
-
-    @Override
-    public boolean isHidden() {
-        return isHidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.isHidden = hidden;
-    }
-
-    public boolean isMVStore() {
-        return false;
     }
 
 }

@@ -27,16 +27,22 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.dbobject.index.IndexType;
+import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Column;
+import com.suning.snfddal.dbobject.table.TableMate;
+import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
+import com.suning.snfddal.route.rule.RuleColumn;
+import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.ValueDate;
 import com.suning.snfddal.value.ValueTime;
@@ -46,7 +52,7 @@ import com.suning.snfddal.value.ValueTimestamp;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class TableMetaLoader {
+public class SchemaMetaLoader {
 
 
     private static final int MAX_RETRY = 2;
@@ -56,41 +62,46 @@ public class TableMetaLoader {
     private boolean storesMixedCaseQuoted;
     private boolean supportsMixedCaseIdentifiers;
 
+    private Database database;
+    private Schema currentSchema;
     private Trace trace;
-    private Map<String, DataSource> dataNodes;
+    
+    
+    public SchemaMetaLoader(Schema schema) {
+        this.currentSchema = schema;
+        this.database = schema.getDatabase();
+        this.trace = database.getTrace(Trace.SCHEMA);
+    }
+    
     
 
-    /**
-     * @param trace the trace to set
-     */
-    public void setTrace(Trace trace) {
-        this.trace = trace;
-    }
-
-    /**
-     * @param dataNodes the dataNodes to set
-     */
-    public void setDataNodes(Map<String, DataSource> dataNodes) {
-        this.dataNodes = dataNodes;
-    }
-
-    public CreateTableData loadMetaData(TableConfig tableConfig) {
-        CreateTableData createTableData = new CreateTableData();
+    public TableMate loadTableMeta(TableConfig tableConfig) {
+        TableMate tableMate = null;
         try {
-            createTableData = readMetaData(tableConfig);
+            tableMate = readMetaData(tableConfig);
         } catch (DbException e) {
             if (tableConfig.isValidation()) {
                 throw e;
             }
-            createTableData.columns = New.arrayList();
-            //setColumns(cols);
-            //linkedIndex = new MappedIndex(this, id, IndexColumn.wrap(cols), IndexType.createNonUnique(false));
-            //indexes.add(linkedIndex);
+            CreateTableData tableData = createTableData(tableConfig);
+            tableData.columns = New.arrayList();
+            tableMate = new TableMate(tableData);
         }
+        return tableMate;
+    }
+
+    /**
+     * @return
+     */
+    private CreateTableData createTableData(TableConfig tableConfig) {
+        CreateTableData createTableData = new CreateTableData();
+        createTableData.id = database.allocateObjectId();
+        createTableData.schema = currentSchema;
+        createTableData.tableName = tableConfig.getName();
         return createTableData;
     }
 
-    private CreateTableData readMetaData(TableConfig tableConfig) {
+    private TableMate readMetaData(TableConfig tableConfig) {
         String name = tableConfig.getName();
         String qualified = tableConfig.getQualifiedTableName();
         String metadataNode = tableConfig.getMetadataNode();
@@ -99,11 +110,11 @@ public class TableMetaLoader {
                 Connection conn = null;
                 try {
                     trace.debug("Try to load {}'s metadata from table {} of shard {}.",name,qualified, metadataNode);
-                    DataSource ds = this.dataNodes.get(metadataNode);
+                    DataSource ds = database.getDataNode(metadataNode);
                     conn = ds.getConnection();
-                    CreateTableData metaData = tryReadMetaData(conn, tableConfig);
+                    TableMate tableMate = tryReadMetaData(conn, tableConfig);
                     trace.debug("Load the {}'s metadata success.",name);
-                    return metaData;
+                    return tableMate;
                 } catch (Exception e) {
                     throw DbException.convert(e);
                 } finally {
@@ -117,9 +128,7 @@ public class TableMetaLoader {
         }
     }
 
-    private CreateTableData tryReadMetaData(Connection conn, TableConfig tableConfig) throws SQLException {
-        
-        CreateTableData tableData = new CreateTableData();
+    private TableMate tryReadMetaData(Connection conn, TableConfig tableConfig) throws SQLException {
         
         DatabaseMetaData meta = conn.getMetaData();
         storesLowerCase = meta.storesLowerCaseIdentifiers();
@@ -202,14 +211,14 @@ public class TableMetaLoader {
         } finally {
             JdbcUtils.closeSilently(stat);
         }
+        CreateTableData tableData = createTableData(tableConfig);
         tableData.columns = columnList;
-        //Column[] cols = new Column[columnList.size()];
-        //columnList.toArray(cols);
-        //setColumns(cols);
-        //int id = getId();
-        //linkedIndex = new MappedIndex(this, id, IndexColumn.wrap(cols), IndexType.createNonUnique(false));
-        //indexes.add(linkedIndex);
-        /*
+        TableMate tableMate = new TableMate(tableData);
+        ArrayList<Column> ruleColumns = getRuleColumn(tableConfig, columnList);
+        if(!ruleColumns.isEmpty()) {
+            tableMate.addIndex(ruleColumns, IndexType.createPartitionKey());
+        }
+        //load primary keys
         try {
             rs = meta.getPrimaryKeys(null, originalSchema, originalTable);
         } catch (Exception e) {
@@ -241,9 +250,13 @@ public class TableMetaLoader {
                     list.set(idx - 1, column);
                 }
             } while (rs.next());
-            addIndex(list, IndexType.createPrimaryKey(false, false));
-            rs.close();
+            //If primaryKey column same as shardingKey,do't add index again.
+            if(list != null && !ruleColumns.equals(list)) {
+                tableMate.addIndex(list, IndexType.createPrimaryKey());
+                rs.close();
+            }
         }
+        
         try {
             rs = meta.getIndexInfo(null, originalSchema, originalTable, false, true);
         } catch (Exception e) {
@@ -265,7 +278,7 @@ public class TableMetaLoader {
                     continue;
                 }
                 if (indexName != null && !indexName.equals(newIndex)) {
-                    addIndex(list, indexType);
+                    tableMate.addIndex(list, indexType);
                     indexName = null;
                 }
                 if (indexName == null) {
@@ -273,7 +286,7 @@ public class TableMetaLoader {
                     list.clear();
                 }
                 boolean unique = !rs.getBoolean("NON_UNIQUE");
-                indexType = unique ? IndexType.createUnique(false, false) : IndexType.createNonUnique(false);
+                indexType = unique ? IndexType.createUnique() : IndexType.createNonUnique();
                 String col = rs.getString("COLUMN_NAME");
                 col = convertColumnName(col);
                 Column column = columnMap.get(col);
@@ -282,11 +295,9 @@ public class TableMetaLoader {
             rs.close();
         }
         if (indexName != null) {
-            addIndex(list, indexType);
-        }*/
-        //checkRuleColumn();
-        
-        return tableData;
+            tableMate.addIndex(list, indexType);
+        }        
+        return tableMate;
     }
 
     private static long convertPrecision(int sqlType, long precision) {
@@ -348,12 +359,12 @@ public class TableMetaLoader {
         indexes.add(index);
     }*/
     
-    /*
-    protected void checkRuleColumn(TableConfig config,CreateTableData data) {
+    
+    private ArrayList<Column> getRuleColumn(TableConfig config, List<Column> columns) {
+        ArrayList<Column> ruleColumn = New.arrayList();
         TableRouter tableRouter = config.getTableRouter();
         if(tableRouter != null) {
             for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
-                List<Column> columns = data.columns;
                 Column matched = null;
                 for (Column column : columns) {
                     String colName = column.getName();
@@ -363,12 +374,14 @@ public class TableMetaLoader {
                     }                
                 }
                 if(matched == null){
-                    throw DbException.getInvalidValueException("RuleColumn", ruleCol);
+                    throw DbException.throwInternalError("The rule column " + ruleCol
+                            + "does not exist in "+ config.getName() + " table." );
                 }
+                ruleColumn.add(matched);
             }
         }
-    }*/
-
+        return ruleColumn;
+    }
 
     /**
      * Wrap a SQL exception that occurred while accessing a linked table.
@@ -381,6 +394,5 @@ public class TableMetaLoader {
         SQLException e = DbException.toSQLException(ex);
         return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
     }
-
 
 }

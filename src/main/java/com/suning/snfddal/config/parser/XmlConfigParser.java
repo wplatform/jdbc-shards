@@ -21,6 +21,7 @@ import com.suning.snfddal.config.RuleAlgorithmConfig;
 import com.suning.snfddal.config.SchemaConfig;
 import com.suning.snfddal.config.ShardConfig;
 import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.route.rule.RuleExpression;
 import com.suning.snfddal.route.rule.TableNode;
 import com.suning.snfddal.route.rule.TableRouter;
@@ -224,19 +225,18 @@ public class XmlConfigParser {
      * @param scanLevel
      */
     private void setTableScanLevel(TableConfig config, String scanLevel) {
-        if ("none".equals(scanLevel)) {
-            config.setScanLevel(TableConfig.SCANLEVEL_NONE);
-        } else if ("any".equals(scanLevel)) {
-            config.setScanLevel(TableConfig.SCANLEVEL_ANY);
-        } else if ("index".equals(scanLevel)) {
-            config.setScanLevel(TableConfig.SCANLEVEL_INDEX);
-        } else if ("primaryKey".equals(scanLevel)) {
-            config.setScanLevel(TableConfig.SCANLEVEL_PRIMARYKEY);
+        if ("unlimited".equals(scanLevel)) {
+            config.setScanLevel(Constants.SCANLEVEL_UNLIMITED);
+        } else if ("filter".equals(scanLevel)) {
+            config.setScanLevel(Constants.SCANLEVEL_FILTER);
+        } else if ("anyIndex".equals(scanLevel)) {
+            config.setScanLevel(Constants.SCANLEVEL_ANYINDEX);
+        } else if ("uniqueIndex".equals(scanLevel)) {
+            config.setScanLevel(Constants.SCANLEVEL_UNIQUEINDEX);
         } else if ("shardingKey".equals(scanLevel)) {
-            config.setScanLevel(TableConfig.SCANLEVEL_SHARDINGKEY);
+            config.setScanLevel(Constants.SCANLEVEL_SHARDINGKEY);
         }
     }
-
     /**
      * @param config
      * @param tableMetadata
@@ -287,7 +287,6 @@ public class XmlConfigParser {
         String tableMetadata = tableNode.getStringAttribute("metadata");
         String router = tableNode.getStringAttribute("router");
         String validation = tableNode.getStringAttribute("validation", "true");
-        String fullTableScan = tableNode.getStringAttribute("enableFts", "false");
         String scanLevel = tableNode.getStringAttribute("scanLevel", "none");
         String broadcast = tableNode.getStringAttribute("broadcast");
 
@@ -295,7 +294,6 @@ public class XmlConfigParser {
         attributes.put("router", router);
         attributes.put("validation", validation);
         attributes.put("scanLevel", scanLevel);
-        attributes.put("enableFts", fullTableScan);
         attributes.put("broadcast", broadcast);
         return attributes;
     }
@@ -311,14 +309,12 @@ public class XmlConfigParser {
         String tableMetadata = null;
         String router = null;
         boolean validation = true;
-        boolean fullTableScan = false;
         String scanLevel = "none";
         String broadcast = null;
         if (template != null) {
             tableMetadata = template.get("metadata");
             router = template.get("router");
             validation = Boolean.parseBoolean(template.get("validation"));
-            fullTableScan = Boolean.parseBoolean(template.get("enableFts"));
             scanLevel = template.get("scanLevel");
             broadcast = template.get("broadcast");
         }
@@ -326,7 +322,6 @@ public class XmlConfigParser {
         tableMetadata = tableNode.getStringAttribute("metadata");
         String routerChild = tableNode.getStringAttribute("router", router);
         validation = tableNode.getBooleanAttribute("validation", validation);
-        fullTableScan = tableNode.getBooleanAttribute("enableFts", fullTableScan);
         scanLevel = tableNode.getStringAttribute("scanLevel", scanLevel);
         broadcast = tableNode.getStringAttribute("broadcast", broadcast);
 
@@ -342,7 +337,6 @@ public class XmlConfigParser {
         router = routerChild;
         config.setName(tableName);
         config.setValidation(validation);
-        config.setEnabledFts(fullTableScan);
 
         Set<String> nodes = New.linkedHashSet();
         if (!StringUtils.isNullOrEmpty(broadcast)) {
@@ -350,6 +344,9 @@ public class XmlConfigParser {
                 if (!string.trim().isEmpty()) {
                     nodes.add(string);
                 }
+            }
+            if(nodes.size() < 2) {
+                throw new ParsingException("table's attribute 'broadcast' must be multi-node.");
             }
         }
         config.setBroadcast(nodes.toArray(new String[nodes.size()]));
@@ -372,9 +369,9 @@ public class XmlConfigParser {
                 String actualShardName = item.getShardName();
                 String actualTableName;
                 if (StringUtils.isNullOrEmpty(item.getTableName())) {
-                    actualTableName = config.getName();
+                    actualTableName = config.getNameWithSchemaName();
                 } else {
-                    actualTableName = config.getName() + item.getTableName();
+                    actualTableName = config.getNameWithSchemaName() + item.getTableName();
                 }
                 actualNode.setShardName(actualShardName);
                 actualNode.setTableName(actualTableName);

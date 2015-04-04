@@ -63,7 +63,6 @@ public class Session extends SessionWithState {
     private final Database database;
     private final User user;
     private final int id;
-    private final ArrayList<Table> locks = New.arrayList();
     private boolean autoCommit = true;
     private Random random;
     private int lockTimeout;
@@ -394,7 +393,6 @@ public class Session extends SessionWithState {
      * @param ddl if the statement was a data definition statement
      */
     public void commit(boolean ddl) {
-        checkCommitRollback();
         currentTransactionName = null;
         transactionStart = 0;
         if (containsUncommitted()) {
@@ -455,11 +453,6 @@ public class Session extends SessionWithState {
         
     }
 
-    private void checkCommitRollback() {
-        if (commitOrRollbackDisabled && locks.size() > 0) {
-            throw DbException.get(ErrorCode.COMMIT_ROLLBACK_NOT_ALLOWED);
-        }
-    }
 
     private void endTransaction() {
         if (unlinkLobMap != null && unlinkLobMap.size() > 0) {
@@ -467,19 +460,14 @@ public class Session extends SessionWithState {
             // if the commit record is not written
             unlinkLobMap = null;
         }
-        unlockAll();
     }
 
     /**
      * Fully roll back the current transaction.
      */
     public void rollback() {
-        checkCommitRollback();
         currentTransactionName = null;
-        boolean needCommit = false;
-        if (locks.size() > 0 || needCommit) {
-            database.commit(this);
-        }
+
         cleanTempTables(false);
         if (autoCommitAtTransactionEnd) {
             autoCommit = true;
@@ -561,58 +549,18 @@ public class Session extends SessionWithState {
         }
     }
 
-    /**
-     * Add a lock for the given table. The object is unlocked on commit or
-     * rollback.
-     *
-     * @param table the table that is locked
-     */
-    public void addLock(Table table) {
-        if (SysProperties.CHECK) {
-            if (locks.contains(table)) {
-                DbException.throwInternalError();
-            }
-        }
-        locks.add(table);
-    }
-
-    /**
-     * Unlock just this table.
-     *
-     * @param t the table to unlock
-     */
-    void unlock(Table t) {
-        locks.remove(t);
-    }
-
-    private void unlockAll() {
-        if (locks.size() > 0) {
-            // don't use the enhanced for loop to save memory
-            for (int i = 0, size = locks.size(); i < size; i++) {
-                Table t = locks.get(i);
-                t.unlock(this);
-            }
-            locks.clear();
-        }
-        savepoints = null;
-        sessionStateChanged = true;
-    }
 
     private void cleanTempTables(boolean closeSession) {
         if (localTempTables != null && localTempTables.size() > 0) {
             synchronized (database) {
                 for (Table table : New.arrayList(localTempTables.values())) {
-                    if (closeSession || table.getOnCommitDrop()) {
-                        modificationId++;
-                        localTempTables.remove(table.getName());
-                        table.removeChildrenAndResources(this);
-                        if (closeSession) {
-                            // need to commit, otherwise recovery might
-                            // ignore the table removal
-                            database.commit(this);
-                        }
-                    } else if (table.getOnCommitTruncate()) {
-                        table.truncate(this);
+                    modificationId++;
+                    localTempTables.remove(table.getName());
+                    table.removeChildrenAndResources(this);
+                    if (closeSession) {
+                        // need to commit, otherwise recovery might
+                        // ignore the table removal
+                        database.commit(this);
                     }
                 }
             }
@@ -712,7 +660,6 @@ public class Session extends SessionWithState {
      * @param name the savepoint name
      */
     public void rollbackToSavepoint(String name) {
-        checkCommitRollback();
         if (savepoints == null) {
             throw DbException.get(ErrorCode.SAVEPOINT_IS_INVALID_1, name);
         }
@@ -975,21 +922,6 @@ public class Session extends SessionWithState {
         return transactionStart;
     }
 
-    public Table[] getLocks() {
-        // copy the data without synchronizing
-        ArrayList<Table> copy = New.arrayList();
-        for (int i = 0; i < locks.size(); i++) {
-            try {
-                copy.add(locks.get(i));
-            } catch (Exception e) {
-                // ignore
-                break;
-            }
-        }
-        Table[] list = new Table[copy.size()];
-        copy.toArray(list);
-        return list;
-    }
 
     /**
      * Remember the result set and close it as soon as the transaction is

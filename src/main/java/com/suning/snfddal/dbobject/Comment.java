@@ -5,12 +5,10 @@
  */
 package com.suning.snfddal.dbobject;
 
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.Trace;
-import com.suning.snfddal.util.StringUtils;
 
 /**
  * Represents a database object comment.
@@ -25,11 +23,6 @@ public class Comment extends DbObjectBase {
         initDbObjectBase(database, id,  getKey(obj), Trace.DATABASE);
         this.objectType = obj.getType();
         this.objectName = obj.getSQL();
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
     }
 
     private static String getTypeName(int type) {
@@ -61,24 +54,6 @@ public class Comment extends DbObjectBase {
             // comment
             return "type" + type;
         }
-    }
-
-    @Override
-    public String getDropSQL() {
-        return null;
-    }
-
-    @Override
-    public String getCreateSQL() {
-        StringBuilder buff = new StringBuilder("COMMENT ON ");
-        buff.append(getTypeName(objectType)).append(' ').
-                append(objectName).append(" IS ");
-        if (commentText == null) {
-            buff.append("NULL");
-        } else {
-            buff.append(StringUtils.quoteStringSQL(commentText));
-        }
-        return buff.toString();
     }
 
     @Override

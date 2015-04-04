@@ -263,9 +263,10 @@ public class LocalResult implements ResultInterface, ResultTarget {
                 distinctRows.put(array, values);
                 rowCount = distinctRows.size();
                 if (rowCount > maxMemoryRows) {
-                    external = new ResultTempTable(session, expressions, true, sort);
-                    rowCount = external.addRows(distinctRows.values());
-                    distinctRows = null;
+                    throw DbException.getUnsupportedException("too big result row " + maxMemoryRows);
+                    //external = new ResultTempTable(session, expressions, true, sort);
+                    //rowCount = external.addRows(distinctRows.values());
+                    //distinctRows = null;
                 }
             } else {
                 rowCount = external.addRow(values);
@@ -276,7 +277,7 @@ public class LocalResult implements ResultInterface, ResultTarget {
         rowCount++;
         if (rows.size() > maxMemoryRows) {
             if (external == null) {
-                external = new ResultTempTable(session, expressions, false, sort);
+                //external = new ResultTempTable(session, expressions, false, sort);
             }
             addRowsToDisk();
         }
@@ -313,7 +314,7 @@ public class LocalResult implements ResultInterface, ResultTarget {
                             break;
                         }
                         if (external == null) {
-                            external = new ResultTempTable(session, expressions, true, sort);
+                            //external = new ResultTempTable(session, expressions, true, sort);
                         }
                         rows.add(list);
                         if (rows.size() > maxMemoryRows) {

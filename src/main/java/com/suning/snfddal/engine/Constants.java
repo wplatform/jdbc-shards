@@ -526,6 +526,13 @@ public class Constants {
      */
     public static final int SET_NULL = 3;
     
+    
+    public static int SCANLEVEL_UNLIMITED = 1;
+    public static int SCANLEVEL_FILTER = 2;
+    public static int SCANLEVEL_ANYINDEX = 3;
+    public static int SCANLEVEL_UNIQUEINDEX = 4;
+    public static int SCANLEVEL_SHARDINGKEY = 5;
+    
 
     private Constants() {
         // utility class

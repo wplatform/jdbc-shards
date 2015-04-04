@@ -57,7 +57,7 @@ public class Delete extends Prepared {
         tableFilter.reset();
         Table table = tableFilter.getTable();
         session.getUser().checkRight(table, Right.DELETE);
-        table.lock(session, true, false);
+        //table.lock(session, true, false);
         RowList rows = new RowList(session);
         int limitRows = -1;
         if (limitExpr != null) {
@@ -87,7 +87,7 @@ public class Delete extends Prepared {
                     checkCanceled();
                 }
                 Row row = rows.next();
-                table.removeRow(session, row);
+                //table.removeRow(session, row);
             }
             
             return count;

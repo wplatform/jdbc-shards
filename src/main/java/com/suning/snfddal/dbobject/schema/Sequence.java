@@ -8,7 +8,6 @@ package com.suning.snfddal.dbobject.schema;
 import java.math.BigInteger;
 
 import com.suning.snfddal.dbobject.DbObject;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
@@ -194,44 +193,6 @@ public class Sequence extends SchemaObjectBase {
 
     public void setCycle(boolean cycle) {
         this.cycle = cycle;
-    }
-
-    @Override
-    public String getDropSQL() {
-        if (getBelongsToTable()) {
-            return null;
-        }
-        return "DROP SEQUENCE IF EXISTS " + getSQL();
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public synchronized String getCreateSQL() {
-        StringBuilder buff = new StringBuilder("CREATE SEQUENCE ");
-        buff.append(getSQL()).append(" START WITH ").append(value);
-        if (increment != 1) {
-            buff.append(" INCREMENT BY ").append(increment);
-        }
-        if (minValue != getDefaultMinValue(value, increment)) {
-            buff.append(" MINVALUE ").append(minValue);
-        }
-        if (maxValue != getDefaultMaxValue(value, increment)) {
-            buff.append(" MAXVALUE ").append(maxValue);
-        }
-        if (cycle) {
-            buff.append(" CYCLE");
-        }
-        if (cacheSize != DEFAULT_CACHE_SIZE) {
-            buff.append(" CACHE ").append(cacheSize);
-        }
-        if (belongsToTable) {
-            buff.append(" BELONGS_TO_TABLE");
-        }
-        return buff.toString();
     }
 
     /**

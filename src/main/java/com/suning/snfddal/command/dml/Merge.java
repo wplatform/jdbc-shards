@@ -107,7 +107,7 @@ public class Merge extends Prepared {
         } else {
             ResultInterface rows = query.query(0);
             count = 0;
-            table.lock(session, true, false);
+            //table.lock(session, true, false);
             while (rows.next()) {
                 count++;
                 Value[] r = rows.currentRow();
@@ -151,12 +151,12 @@ public class Merge extends Prepared {
         if (count == 0) {
             try {
                 table.validateConvertUpdateSequence(session, row);
-                boolean done = table.fireBeforeRow(session, null, row);
-                if (!done) {
-                    table.lock(session, true, false);
-                    table.addRow(session, row);
-                    table.fireAfterRow(session, null, row, false);
-                }
+                //boolean done = table.fireBeforeRow(session, null, row);
+                //if (!done) {
+                //    table.lock(session, true, false);
+                //    table.addRow(session, row);
+                //    table.fireAfterRow(session, null, row, false);
+                //}
             } catch (DbException e) {
                 if (e.getErrorCode() == ErrorCode.DUPLICATE_KEY_1) {
                     // possibly a concurrent merge or insert

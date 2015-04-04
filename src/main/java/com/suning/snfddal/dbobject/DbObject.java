@@ -7,7 +7,6 @@ package com.suning.snfddal.dbobject;
 
 import java.util.ArrayList;
 
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 
@@ -127,30 +126,6 @@ public interface DbObject {
      * @return the name
      */
     String getName();
-
-    /**
-     * Build a SQL statement to re-create the object, or to create a copy of the
-     * object with a different name or referencing a different table
-     *
-     * @param table the new table
-     * @param quotedName the quoted name
-     * @return the SQL statement
-     */
-    String getCreateSQLForCopy(Table table, String quotedName);
-
-    /**
-     * Construct the original CREATE ... SQL statement for this object.
-     *
-     * @return the SQL statement
-     */
-    String getCreateSQL();
-
-    /**
-     * Construct a DROP ... SQL statement for this object.
-     *
-     * @return the SQL statement
-     */
-    String getDropSQL();
 
     /**
      * Get the object type.

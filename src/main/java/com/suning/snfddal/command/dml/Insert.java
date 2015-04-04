@@ -139,11 +139,11 @@ public class Insert extends Prepared implements ResultTarget {
                 //boolean done = table.fireBeforeRow(session, null, newRow);
                 //if (!done) {}
                 //table.lock(session, true, false);
-                try {
-                    table.addRow(session, newRow);
-                } catch (DbException de) {
-                    handleOnDuplicate(de);
-                }
+                //try {
+                //    table.addRow(session, newRow);
+                //} catch (DbException de) {
+                //    handleOnDuplicate(de);
+                //}
                 //table.fireAfterRow(session, null, newRow, false);
             
             }
@@ -180,7 +180,7 @@ public class Insert extends Prepared implements ResultTarget {
         }
         //table.validateConvertUpdateSequence(session, newRow);
         //boolean done = table.fireBeforeRow(session, null, newRow);
-        table.addRow(session, newRow);
+        //table.addRow(session, newRow);
         //if (!done) {
             //table.fireAfterRow(session, null, newRow, false);
         //}

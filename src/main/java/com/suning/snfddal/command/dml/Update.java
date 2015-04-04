@@ -87,7 +87,7 @@ public class Update extends Prepared {
         try {
             Table table = tableFilter.getTable();
             session.getUser().checkRight(table, Right.UPDATE);
-            table.lock(session, true, false);
+            //table.lock(session, true, false);
             int columnCount = table.getColumns().length;
             // get the old rows, compute the new rows
             setCurrentRowNumber(0);
@@ -137,7 +137,7 @@ public class Update extends Prepared {
             // we need to update all indexes) before row triggers
 
             // the cached row is already updated - we need the old values
-            table.updateRows(this, session, rows);
+            //table.updateRows(this, session, rows);
             return count;
         } finally {
             rows.close();

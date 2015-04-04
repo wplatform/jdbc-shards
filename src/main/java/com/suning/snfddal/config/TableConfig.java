@@ -18,16 +18,13 @@
 
 package com.suning.snfddal.config;
 
+import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.StringUtils;
 
 public class TableConfig {
 
-    public static int SCANLEVEL_NONE = 1;
-    public static int SCANLEVEL_ANY = 2;
-    public static int SCANLEVEL_INDEX = 3;
-    public static int SCANLEVEL_PRIMARYKEY = 4;
-    public static int SCANLEVEL_SHARDINGKEY = 5;
+    
 
     private SchemaConfig schemaConfig;
     private String name;
@@ -36,8 +33,7 @@ public class TableConfig {
     private String originalTable;
     private String metadataNode;
     private String[] broadcast;
-    private boolean enabledFts;
-    private int scanLevel = SCANLEVEL_SHARDINGKEY;
+    private int scanLevel = Constants.SCANLEVEL_ANYINDEX;
     private boolean validation;
     private TableRouter tableRouter;
 
@@ -46,6 +42,19 @@ public class TableConfig {
      */
     public String getName() {
         return name;
+    }
+    
+    public String getNameWithSchemaName() {
+        StringBuilder fullName = new StringBuilder();
+        if (!StringUtils.isNullOrEmpty(originalCatalog)) {
+            fullName.append(originalCatalog).append(".");
+        }
+        if (!StringUtils.isNullOrEmpty(originalSchema)) {
+            fullName.append(originalSchema).append(".");
+        }
+        fullName.append(name);
+        return fullName.toString();
+    
     }
 
     /**
@@ -94,7 +103,7 @@ public class TableConfig {
         qualifiedName.append(originalTable);
         return qualifiedName.toString();
     }
-
+    
     /**
      * @return the metadataNode
      */
@@ -163,20 +172,6 @@ public class TableConfig {
      */
     public void setBroadcast(String[] broadcast) {
         this.broadcast = broadcast;
-    }
-
-    /**
-     * @return the enabledFts
-     */
-    public boolean isEnabledFts() {
-        return enabledFts;
-    }
-
-    /**
-     * @param enabledFts the enabledFts to set
-     */
-    public void setEnabledFts(boolean enabledFts) {
-        this.enabledFts = enabledFts;
     }
     /**
      * @return the scanLevel

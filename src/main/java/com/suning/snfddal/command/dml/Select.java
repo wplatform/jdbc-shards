@@ -18,15 +18,12 @@ import com.suning.snfddal.command.expression.ExpressionColumn;
 import com.suning.snfddal.command.expression.ExpressionVisitor;
 import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.command.expression.Wildcard;
-import com.suning.snfddal.dbobject.index.Cursor;
 import com.suning.snfddal.dbobject.index.Index;
-import com.suning.snfddal.dbobject.index.IndexType;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.IndexColumn;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
-import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
@@ -36,7 +33,6 @@ import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.ResultTarget;
 import com.suning.snfddal.result.Row;
-import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
@@ -251,10 +247,11 @@ public class Select extends Query {
                 if (index.getIndexType().isScan()) {
                     continue;
                 }
+                /*
                 if (index.getIndexType().isHash()) {
                     // does not allow scanning entries
                     continue;
-                }
+                }*/
                 if (isGroupSortedIndex(topTableFilter, index)) {
                     return index;
                 }
@@ -427,13 +424,15 @@ public class Select extends Query {
         if (list != null) {
             for (int i = 0, size = list.size(); i < size; i++) {
                 Index index = list.get(i);
+                /*
                 if (index.getCreateSQL() == null) {
                     // can't use the scan index
                     continue;
-                }
+                }*/
+                /*
                 if (index.getIndexType().isHash()) {
                     continue;
-                }
+                }*/
                 IndexColumn[] indexCols = index.getIndexColumns();
                 if (indexCols.length < sortCols.length) {
                     continue;
@@ -462,10 +461,10 @@ public class Select extends Query {
         }
         if (sortCols.length == 1 && sortCols[0].getColumnId() == -1) {
             // special case: order by _ROWID_
-            Index index = topTableFilter.getTable().getScanIndex(session);
-            if (index.isRowIdIndex()) {
-                return index;
-            }
+            //Index index = topTableFilter.getTable().getScanIndex(session);
+            //if (index.isRowIdIndex()) {
+            //    return index;
+            //}
         }
         return null;
     }
@@ -480,6 +479,7 @@ public class Select extends Query {
                 limitRows += offset;
             }
         }
+        /*
         int rowNumber = 0;
         setCurrentRowNumber(0);
         Index index = topTableFilter.getIndex();
@@ -490,7 +490,7 @@ public class Select extends Query {
             setCurrentRowNumber(rowNumber + 1);
             Cursor cursor = index.findNext(session, first, null);
             if (!cursor.next()) {
-                break;
+               break;
             }
             SearchRow found = cursor.getSearchRow();
             Value value = found.getValue(columnIndex);
@@ -508,7 +508,7 @@ public class Select extends Query {
             if (sampleSize > 0 && rowNumber >= sampleSize) {
                 break;
             }
-        }
+        }*/
     }
 
     private void queryFlat(int columnCount, ResultTarget result, long limitRows) {
@@ -860,36 +860,7 @@ public class Select extends Query {
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&
                 !isGroupQuery && filters.size() == 1 &&
                 expressions.size() == 1 && condition == null) {
-            Expression expr = expressions.get(0);
-            expr = expr.getNonAliasExpression();
-            if (expr instanceof ExpressionColumn) {
-                Column column = ((ExpressionColumn) expr).getColumn();
-                int selectivity = column.getSelectivity();
-                Index columnIndex = topTableFilter.getTable().
-                        getIndexForColumn(column);
-                if (columnIndex != null &&
-                        selectivity != Constants.SELECTIVITY_DEFAULT &&
-                        selectivity < 20) {
-                    // the first column must be ascending
-                    boolean ascending = columnIndex.
-                            getIndexColumns()[0].sortType == SortOrder.ASCENDING;
-                    Index current = topTableFilter.getIndex();
-                    // if another index is faster
-                    if (columnIndex.canFindNext() && ascending &&
-                            (current == null ||
-                            current.getIndexType().isScan() ||
-                            columnIndex == current)) {
-                        IndexType type = columnIndex.getIndexType();
-                        // hash indexes don't work, and unique single column
-                        // indexes don't work
-                        if (!type.isHash() && (!type.isUnique() ||
-                                columnIndex.getColumns().length > 1)) {
-                            topTableFilter.setIndex(columnIndex);
-                            isDistinctQuery = true;
-                        }
-                    }
-                }
-            }
+            //分布式的查询不合适
         }
         if (sort != null && !isQuickAggregateQuery && !isGroupQuery) {
             Index index = getSortIndex();

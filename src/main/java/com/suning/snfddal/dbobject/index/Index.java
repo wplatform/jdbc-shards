@@ -1,8 +1,20 @@
 /*
- * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0,
- * and the EPL 1.0 (http://h2database.com/html/license.html).
- * Initial Developer: H2 Group
+ * Copyright 2014 suning.com Holding Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+// Created on 2014年12月25日
+// $Id$
 package com.suning.snfddal.dbobject.index;
 
 import com.suning.snfddal.dbobject.schema.SchemaObject;
@@ -11,68 +23,13 @@ import com.suning.snfddal.dbobject.table.IndexColumn;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
-import com.suning.snfddal.result.Row;
-import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.result.SortOrder;
 
 /**
  * An index. Indexes are used to speed up searching data.
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface Index extends SchemaObject {
-
-    /**
-     * Get the message to show in a EXPLAIN statement.
-     *
-     * @return the plan
-     */
-    String getPlanSQL();
-
-    /**
-     * Close this index.
-     *
-     * @param session the session used to write data
-     */
-    void close(Session session);
-
-    /**
-     * Add a row to the index.
-     *
-     * @param session the session to use
-     * @param row the row to add
-     */
-    void add(Session session, Row row);
-
-    /**
-     * Remove a row from the index.
-     *
-     * @param session the session
-     * @param row the row
-     */
-    void remove(Session session, Row row);
-
-    /**
-     * Find a row or a list of rows and create a cursor to iterate over the
-     * result.
-     *
-     * @param session the session
-     * @param first the first row, or null for no limit
-     * @param last the last row, or null for no limit
-     * @return the cursor to iterate over the results
-     */
-    Cursor find(Session session, SearchRow first, SearchRow last);
-
-    /**
-     * Find a row or a list of rows and create a cursor to iterate over the
-     * result.
-     *
-     * @param filter the table filter (which possibly knows about additional
-     *            conditions)
-     * @param first the first row, or null for no limit
-     * @param last the last row, or null for no limit
-     * @return the cursor to iterate over the results
-     */
-    Cursor find(TableFilter filter, SearchRow first, SearchRow last);
-
     /**
      * Estimate the cost to search for rows given the search mask.
      * There is one element per column in the search mask.
@@ -87,98 +44,7 @@ public interface Index extends SchemaObject {
      */
     double getCost(Session session, int[] masks, TableFilter filter,
             SortOrder sortOrder);
-
-    /**
-     * Remove the index.
-     *
-     * @param session the session
-     */
-    void remove(Session session);
-
-    /**
-     * Remove all rows from the index.
-     *
-     * @param session the session
-     */
-    void truncate(Session session);
-
-    /**
-     * Check if the index can directly look up the lowest or highest value of a
-     * column.
-     *
-     * @return true if it can
-     */
-    boolean canGetFirstOrLast();
-
-    /**
-     * Check if the index can get the next higher value.
-     *
-     * @return true if it can
-     */
-    boolean canFindNext();
-
-    /**
-     * Find a row or a list of rows that is larger and create a cursor to
-     * iterate over the result.
-     *
-     * @param session the session
-     * @param higherThan the lower limit (excluding)
-     * @param last the last row, or null for no limit
-     * @return the cursor
-     */
-    Cursor findNext(Session session, SearchRow higherThan, SearchRow last);
-
-    /**
-     * Find the first (or last) value of this index. The cursor returned is
-     * positioned on the correct row, or on null if no row has been found.
-     *
-     * @param session the session
-     * @param first true if the first (lowest for ascending indexes) or last
-     *            value should be returned
-     * @return a cursor (never null)
-     */
-    Cursor findFirstOrLast(Session session, boolean first);
-
-    /**
-     * Check if the index needs to be rebuilt.
-     * This method is called after opening an index.
-     *
-     * @return true if a rebuild is required.
-     */
-    boolean needRebuild();
-
-    /**
-     * Get the row count of this table, for the given session.
-     *
-     * @param session the session
-     * @return the row count
-     */
-    long getRowCount(Session session);
-
-    /**
-     * Get the approximated row count for this table.
-     *
-     * @return the approximated row count
-     */
-    long getRowCountApproximation();
-
-    /**
-     * Get the used disk space for this index.
-     *
-     * @return the estimated number of bytes
-     */
-    long getDiskSpaceUsed();
-
-    /**
-     * Compare two rows.
-     *
-     * @param rowData the first row
-     * @param compare the second row
-     * @return 0 if both rows are equal, -1 if the first row is smaller,
-     *         otherwise 1
-     */
-    int compareRows(SearchRow rowData, SearchRow compare);
-
+    
     /**
      * Get the index of a column in the list of index columns
      *
@@ -214,46 +80,5 @@ public interface Index extends SchemaObject {
      * @return the table
      */
     Table getTable();
-
-    /**
-     * Commit the operation for a row. This is only important for multi-version
-     * indexes. The method is only called if multi-version is enabled.
-     *
-     * @param operation the operation type
-     * @param row the row
-     */
-    void commit(int operation, Row row);
-
-    /**
-     * Get the row with the given key.
-     *
-     * @param session the session
-     * @param key the unique key
-     * @return the row
-     */
-    Row getRow(Session session, long key);
-
-    /**
-     * Does this index support lookup by row id?
-     *
-     * @return true if it does
-     */
-    boolean isRowIdIndex();
-
-    /**
-     * Can this index iterate over all rows?
-     *
-     * @return true if it can
-     */
-    boolean canScan();
-
-    /**
-     * Enable or disable the 'sorted insert' optimizations (rows are inserted in
-     * ascending or descending order) if applicable for this index
-     * implementation.
-     *
-     * @param sortedInsertMode the new value
-     */
-    void setSortedInsertMode(boolean sortedInsertMode);
 
 }

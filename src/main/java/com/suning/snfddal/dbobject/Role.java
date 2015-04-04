@@ -5,10 +5,8 @@
  */
 package com.suning.snfddal.dbobject;
 
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
-import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.Trace;
 
 /**
@@ -21,16 +19,6 @@ public class Role extends RightOwner {
     public Role(Database database, int id, String roleName, boolean system) {
         super(database, id, roleName, Trace.USER);
         this.system = system;
-    }
-
-    @Override
-    public String getCreateSQLForCopy(Table table, String quotedName) {
-        throw DbException.throwInternalError();
-    }
-
-    @Override
-    public String getDropSQL() {
-        return null;
     }
 
     /**
@@ -49,11 +37,6 @@ public class Role extends RightOwner {
         }
         buff.append(getSQL());
         return buff.toString();
-    }
-
-    @Override
-    public String getCreateSQL() {
-        return getCreateSQL(false);
     }
 
     @Override
