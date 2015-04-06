@@ -45,7 +45,7 @@ import com.suning.snfddal.value.ValueString;
  * mode, this object resides on the server side and communicates with a
  * SessionRemote object on the client side.
  */
-public class Session extends SessionWithState {
+public class Session implements SessionInterface {
 
     /**
      * This special log position means that the log entry has been written.
@@ -402,9 +402,7 @@ public class Session extends SessionWithState {
         }
         if (temporaryLobs != null) {
             for (Value v : temporaryLobs) {
-                if (!v.isLinked()) {
-                    v.close();
-                }
+                v.close();
             }
             temporaryLobs.clear();
         }
@@ -806,22 +804,6 @@ public class Session extends SessionWithState {
     }
 
     /**
-     * Remember that the given LOB value must be un-linked (disconnected from
-     * the table) at commit.
-     *
-     * @param v the value
-     */
-    public void unlinkAtCommit(Value v) {
-        if (SysProperties.CHECK && !v.isLinked()) {
-            DbException.throwInternalError();
-        }
-        if (unlinkLobMap == null) {
-            unlinkLobMap = New.hashMap();
-        }
-        unlinkLobMap.put(v.toString(), v);
-    }
-
-    /**
      * Do not unlink this LOB value at commit any longer.
      *
      * @param v the value
@@ -999,11 +981,8 @@ public class Session extends SessionWithState {
 
     @Override
     public SessionInterface reconnect(boolean write) {
-        readSessionState();
         close();
         Session newSession = database.createSession(this.user);
-        newSession.sessionState = sessionState;
-        newSession.recreateSessionState();
         return newSession;
     }
 

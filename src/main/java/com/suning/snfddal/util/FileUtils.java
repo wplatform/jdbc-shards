@@ -142,7 +142,7 @@ public class FileUtils {
      * @param path the directory
      * @return the list of fully qualified file names
      */
-    public static List<String> newDirectoryStream(String path) { //文件和目录名都会列出来
+    public static List<String> newDirectoryStream(String path) {
         List<FilePath> list = FilePath.get(path).newDirectoryStream();
         int len = list.size();
         List<String> result = New.arrayList(len);
@@ -199,7 +199,8 @@ public class FileUtils {
      * @param mode the access mode. Supported are r, rw, rws, rwd
      * @return the file object
      */
-    public static FileChannel open(String fileName, String mode) throws IOException {
+    public static FileChannel open(String fileName, String mode)
+            throws IOException {
         return FilePath.get(fileName).open(mode);
     }
 
@@ -211,7 +212,8 @@ public class FileUtils {
      * @param fileName the file name
      * @return the input stream
      */
-    public static InputStream newInputStream(String fileName) throws IOException {
+    public static InputStream newInputStream(String fileName)
+            throws IOException {
         return FilePath.get(fileName).newInputStream();
     }
 
@@ -225,7 +227,8 @@ public class FileUtils {
      *            truncated first
      * @return the output stream
      */
-    public static OutputStream newOutputStream(String fileName, boolean append) throws IOException {
+    public static OutputStream newOutputStream(String fileName, boolean append)
+            throws IOException {
         return FilePath.get(fileName).newOutputStream(append);
     }
 
@@ -333,8 +336,10 @@ public class FileUtils {
      * @param inTempDir if the file should be stored in the temporary directory
      * @return the name of the created file
      */
-    public static String createTempFile(String prefix, String suffix, boolean deleteOnExit, boolean inTempDir) throws IOException {
-        return FilePath.get(prefix).createTempFile(suffix, deleteOnExit, inTempDir).toString();
+    public static String createTempFile(String prefix, String suffix,
+            boolean deleteOnExit, boolean inTempDir) throws IOException {
+        return FilePath.get(prefix).createTempFile(
+                suffix, deleteOnExit, inTempDir).toString();
     }
 
     /**
@@ -344,7 +349,8 @@ public class FileUtils {
      * @param channel the file channel
      * @param dst the byte buffer
      */
-    public static void readFully(FileChannel channel, ByteBuffer dst) throws IOException {
+    public static void readFully(FileChannel channel, ByteBuffer dst)
+            throws IOException {
         do {
             int r = channel.read(dst);
             if (r < 0) {
@@ -359,7 +365,8 @@ public class FileUtils {
      * @param channel the file channel
      * @param src the byte buffer
      */
-    public static void writeFully(FileChannel channel, ByteBuffer src) throws IOException {
+    public static void writeFully(FileChannel channel, ByteBuffer src)
+            throws IOException {
         do {
             channel.write(src);
         } while (src.remaining() > 0);

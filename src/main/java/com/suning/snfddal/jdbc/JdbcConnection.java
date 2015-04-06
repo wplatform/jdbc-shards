@@ -5,7 +5,9 @@
  */
 package com.suning.snfddal.jdbc;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Array;
 import java.sql.Blob;
@@ -36,9 +38,11 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.JdbcUtils;
+import com.suning.snfddal.util.Utils;
 import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueInt;
+import com.suning.snfddal.value.ValueLobDb;
 import com.suning.snfddal.value.ValueNull;
 import com.suning.snfddal.value.ValueString;
 
@@ -1394,7 +1398,9 @@ public class JdbcConnection extends TraceObject implements Connection {
             debugCodeAssign("Clob", TraceObject.CLOB, id, "createClob()");
             checkClosedForWrite();
             try {
-                Value v = ValueNull.INSTANCE;// TODO Clob supported
+                Value v = ValueLobDb.createTempClob(
+                        new InputStreamReader(
+                        new ByteArrayInputStream(Utils.EMPTY_BYTES)), 0);
                 session.addTemporaryLob(v);
                 return new JdbcClob(this, v, id);
             } finally {
@@ -1417,7 +1423,8 @@ public class JdbcConnection extends TraceObject implements Connection {
             debugCodeAssign("Blob", TraceObject.BLOB, id, "createClob()");
             checkClosedForWrite();
             try {
-                Value v = ValueNull.INSTANCE;// TODO Blob supported
+                Value v = ValueLobDb.createTempBlob(
+                        new ByteArrayInputStream(Utils.EMPTY_BYTES), 0);
                 session.addTemporaryLob(v);
                 return new JdbcBlob(this, v, id);
             } finally {
@@ -1440,7 +1447,9 @@ public class JdbcConnection extends TraceObject implements Connection {
             debugCodeAssign("NClob", TraceObject.CLOB, id, "createNClob()");
             checkClosedForWrite();
             try {
-                Value v = ValueNull.INSTANCE;// TODO Clob supported
+                Value v = ValueLobDb.createTempClob(
+                        new InputStreamReader(
+                        new ByteArrayInputStream(Utils.EMPTY_BYTES)), 0);
                 session.addTemporaryLob(v);
                 return new JdbcClob(this, v, id);
             } finally {
@@ -1632,7 +1641,7 @@ public class JdbcConnection extends TraceObject implements Connection {
         if (length <= 0) {
             length = -1;
         }
-        Value v = ValueNull.INSTANCE;// TODO
+        Value v = ValueLobDb.createTempClob(x, length);
         session.addTemporaryLob(v);
         return v;
     }
@@ -1652,7 +1661,7 @@ public class JdbcConnection extends TraceObject implements Connection {
         if (length <= 0) {
             length = -1;
         }
-        Value v = ValueNull.INSTANCE;// TODO
+        Value v = ValueLobDb.createTempBlob(x, length);
         session.addTemporaryLob(v);
         return v;
     }

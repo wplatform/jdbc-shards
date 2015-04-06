@@ -5,6 +5,9 @@
  */
 package com.suning.snfddal.value;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SessionInterface;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.jdbc.JdbcBlob;
@@ -44,15 +48,6 @@ public class DataType {
      * ResultSet (OracleTypes.CURSOR = -10).
      */
     public static final int TYPE_RESULT_SET = -10;
-
-    /**
-     * The Geometry class. This object is null if the jts jar file is not in the
-     * classpath.
-     */
-    public static final Class<?> GEOMETRY_CLASS;
-
-    private static final String GEOMETRY_CLASS_NAME =
-            "com.vividsolutions.jts.geom.Geometry";
 
     /**
      * The list of types. An ArrayList so that Tomcat doesn't set it to null
@@ -167,17 +162,6 @@ public class DataType {
      * The number of bytes required for an object.
      */
     public int memory;
-
-    static {
-        Class<?> g;
-        try {
-            g = JdbcUtils.loadUserClass(GEOMETRY_CLASS_NAME);
-        } catch (Exception e) {
-            // class is not in the classpath - ignore
-            g = null;
-        }
-        GEOMETRY_CLASS = g;
-    }
 
     static {
         for (int i = 0; i < Value.TYPE_COUNT; i++) {
@@ -585,10 +569,29 @@ public class DataType {
                 break;
             }
             case Value.CLOB: {
-                throw DbException.getUnsupportedException("TODO");
+                if (session == null) {
+                    v = ValueLobDb.createSmallLob(
+                            Value.CLOB, rs.getString(columnIndex).getBytes(Constants.UTF8));
+                } else {
+                    Reader in = rs.getCharacterStream(columnIndex);
+                    if (in == null) {
+                        v = ValueNull.INSTANCE;
+                    } else {
+                        v = ValueLobDb.createTempClob(new BufferedReader(in), -1);
+                    }
+                }
+                break;
             }
             case Value.BLOB: {
-                throw DbException.getUnsupportedException("TODO");
+                if (session == null) {
+                    v = ValueLobDb.createSmallLob(
+                            Value.BLOB, rs.getBytes(columnIndex));
+                } else {
+                    InputStream in = rs.getBinaryStream(columnIndex);
+                    v = (in == null) ? (Value) ValueNull.INSTANCE :
+                        ValueLobDb.createTempBlob(in, -1);
+                }
+                break;
             }
             case Value.JAVA_OBJECT: {
                 if (SysProperties.serializeJavaObject) {
@@ -945,13 +948,24 @@ public class DataType {
         } else if (x instanceof java.util.Date) {
             return ValueTimestamp.fromMillis(((java.util.Date) x).getTime());
         } else if (x instanceof java.io.Reader) {
-            throw DbException.getUnsupportedException("TODO");
+            Reader r = new BufferedReader((java.io.Reader) x);
+            return ValueLobDb.createTempClob(r, -1);
         } else if (x instanceof java.sql.Clob) {
-            throw DbException.getUnsupportedException("TODO");
+            try {
+                Reader r = new BufferedReader(
+                        ((java.sql.Clob) x).getCharacterStream());
+                return ValueLobDb.createTempClob(r, -1);
+            } catch (SQLException e) {
+                throw DbException.convert(e);
+            }
         } else if (x instanceof java.io.InputStream) {
-            throw DbException.getUnsupportedException("TODO");
+            return ValueLobDb.createTempBlob((java.io.InputStream) x, -1);
         } else if (x instanceof java.sql.Blob) {
-            throw DbException.getUnsupportedException("TODO");
+            try {
+                return ValueLobDb.createTempBlob(((java.sql.Blob) x).getBinaryStream(), -1);
+            } catch (SQLException e) {
+                throw DbException.convert(e);
+            }
         } else if (x instanceof ResultSet) {
             if (x instanceof SimpleResultSet) {
                 return ValueResultSet.get((ResultSet) x);
@@ -975,32 +989,6 @@ public class DataType {
         } else {
             return ValueJavaObject.getNoCopy(x, null);
         }
-    }
-
-    /**
-     * Check whether a given class matches the Geometry class.
-     *
-     * @param x the class
-     * @return true if it is a Geometry class
-     */
-    public static boolean isGeometryClass(Class<?> x) {
-        if (x == null || GEOMETRY_CLASS == null) {
-            return false;
-        }
-        return GEOMETRY_CLASS.isAssignableFrom(x);
-    }
-
-    /**
-     * Check whether a given object is a Geometry object.
-     *
-     * @param x the the object
-     * @return true if it is a Geometry object
-     */
-    public static boolean isGeometry(Object x) {
-        if (x == null) {
-            return false;
-        }
-        return isGeometryClass(x.getClass());
     }
 
     /**

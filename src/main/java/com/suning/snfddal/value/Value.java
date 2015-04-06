@@ -19,6 +19,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
+import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
@@ -790,9 +791,8 @@ public abstract class Value {
             case BLOB: {
                 switch(getType()) {
                 case BYTES:
-                    //TODO
-                    /*return ValueLobDb.createSmallLob(
-                            Value.BLOB, getBytesNoCopy());*/
+                    return ValueLobDb.createSmallLob(
+                            Value.BLOB, getBytesNoCopy());
                 }
                 break;
             }
@@ -857,9 +857,11 @@ public abstract class Value {
             case FLOAT:
                 return ValueFloat.get(Float.parseFloat(s.trim()));
             case CLOB:
-                throw DbException.getUnsupportedException("Conversion unsupported. string->clob");
+                return ValueLobDb.createSmallLob(
+                        CLOB, s.getBytes(Constants.UTF8));
             case BLOB:
-                throw DbException.getUnsupportedException("Conversion unsupported. string->lob");
+                return ValueLobDb.createSmallLob(
+                        BLOB, StringUtils.convertHexToBytes(s.trim()));
             case ARRAY:
                 return ValueArray.get(new Value[]{ValueString.get(s)});
             case RESULT_SET: {
@@ -997,6 +999,18 @@ public abstract class Value {
     }
 
     /**
+     * Link a large value to a given table. For values that are kept fully in
+     * memory this method has no effect.
+     *
+     * @param handler the data handler
+     * @param tableId the table to link to
+     * @return the new value or itself
+     */
+    public Value link(int tableId) {
+        return this;
+    }
+
+    /**
      * Check if this value is linked to a specific table. For values that are
      * kept fully in memory, this method returns false.
      *
@@ -1004,6 +1018,16 @@ public abstract class Value {
      */
     public boolean isLinked() {
         return false;
+    }
+
+    /**
+     * Mark any underlying resource as 'not linked to any table'. For values
+     * that are kept fully in memory this method has no effect.
+     *
+     * @param handler the data handler
+     */
+    public void unlink() {
+        // nothing to do
     }
 
     /**

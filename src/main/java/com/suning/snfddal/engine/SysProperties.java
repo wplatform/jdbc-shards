@@ -230,14 +230,6 @@ public class SysProperties {
             Utils.getProperty("h2.javaSystemCompiler", true);
 
     /**
-     * System property <code>h2.lobCloseBetweenReads</code>
-     * (default: false).<br />
-     * Close LOB files between read operations.
-     */
-    public static boolean lobCloseBetweenReads =
-            Utils.getProperty("h2.lobCloseBetweenReads", false);
-
-    /**
      * System property <code>h2.lobFilesPerDirectory</code>
      * (default: 256).<br />
      * Maximum number of LOB files per directory.
