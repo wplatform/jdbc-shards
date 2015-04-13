@@ -22,9 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
-import com.suning.snfddal.route.rule.TableRouter;
+import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.util.New;
 
 /**
@@ -38,14 +36,13 @@ public class Configuration {
     private SchemaConfig schemaConfig = new SchemaConfig();
 
     private final Map<String, ShardConfig> cluster = New.hashMap();
-
-    private final Map<String, DataSource> dataNodes = New.hashMap();
     
     private final Map<String, Object> ruleAlgorithms = New.hashMap();
     
     private final Map<String, TableRouter> temporary = New.hashMap();
     
-
+    private DataSourceProvider dataSourceProvider;
+    
     public Set<String> getShardNames() {
         return cluster.keySet();
     }
@@ -137,20 +134,6 @@ public class Configuration {
         }
         cluster.put(name, shard);
     }
-
-    /**
-     * @return the dataNodes
-     */
-    public Map<String, DataSource> getDataNodes() {
-        return dataNodes;
-    }
-
-    public void addDataNode(String id, DataSource dataSource) {
-        if (dataNodes.containsKey(id)) {
-            throw new ConfigurationException("Duplicate datasource id " + id);
-        }
-        dataNodes.put(id, dataSource);
-    }
     
     public void addTemporaryTableRouter(String id, TableRouter tableRouter) {
         if (temporary.containsKey(id)) {
@@ -178,4 +161,20 @@ public class Configuration {
         }
         ruleAlgorithms.put(name, ruleAlgorithm);
     }
+
+    /**
+     * @return the dataSourceProvider
+     */
+    public DataSourceProvider getDataSourceProvider() {
+        return dataSourceProvider;
+    }
+
+    /**
+     * @param dataSourceProvider the dataSourceProvider to set
+     */
+    public void setDataSourceProvider(DataSourceProvider dataSourceProvider) {
+        this.dataSourceProvider = dataSourceProvider;
+    }
+    
+    
 }

@@ -19,12 +19,14 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.config.Configuration;
-import com.suning.snfddal.config.DataSourceLookup;
+import com.suning.snfddal.config.DataSourceProvider;
 import com.suning.snfddal.config.parser.XmlConfigParser;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.engine.Database;
@@ -37,20 +39,20 @@ import com.suning.snfddal.util.Utils;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class JdbcDataSource implements DataSource {
-
-    private static final String DATABASE_MASTER_USER = "MASTER";
-
+    
     private PrintWriter logWriter;
     private int loginTimeout;
     private String userName = "";
     private char[] passwordChars = { };
     private String url = "";
     
+    private Properties prop = new Properties();
     private Database database;
     private String configLocation;
-    private DataSourceLookup dataSourceLookup;
+    private DataSourceProvider dataSourceProvider;
     private boolean inited = false;
-
+    
+    
     /**
      * The public constructor.
      */
@@ -107,7 +109,7 @@ public class JdbcDataSource implements DataSource {
      */
     @Override
     public Connection getConnection() throws SQLException {
-        return getConnection(DATABASE_MASTER_USER, null);
+        return getConnection(Database.SYSTEM_USER_NAME, null);
     }
 
     /**
@@ -271,17 +273,41 @@ public class JdbcDataSource implements DataSource {
     }
 
     /**
-     * @return the dataSourceLookup
+     * @return the dataSourceProvider
      */
-    public DataSourceLookup getDataSourceLookup() {
-        return dataSourceLookup;
+    public DataSourceProvider getDataSourceProvider() {
+        return dataSourceProvider;
     }
 
     /**
-     * @param dataSourceLookup the dataSourceLookup to set
+     * @param dataSourceProvider the dataSourceProvider to set
      */
-    public void setDataSourceLookup(DataSourceLookup dataSourceLookup) {
-        this.dataSourceLookup = dataSourceLookup;
+    public void setDataSourceProvider(DataSourceProvider dataSourceProvider) {
+        this.dataSourceProvider = dataSourceProvider;
+    }
+
+    /**
+     * @param sqlMode the sqlMode to set
+     */
+    public void setSqlMode(String sqlMode) {
+        String varName = SetTypes.getTypeName(SetTypes.MODE);
+        prop.setProperty(varName, sqlMode);
+    }
+    
+    /**
+     * @param outputLogLevel the outputLogLevel to set
+     */
+    public void setOutputLogLevel(String outputLogLevel) {
+        String varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_SYSTEM_OUT);
+        prop.setProperty(varName, outputLogLevel);
+    }
+    
+    /**
+     * @param fileLogLevel the fileLogLevel to set
+     */
+    public void setFileLogLevel(String fileLogLevel) {
+        String varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_FILE);
+        prop.setProperty(varName, fileLogLevel);
     }
 
     public synchronized void init() {
@@ -297,6 +323,7 @@ public class JdbcDataSource implements DataSource {
         }
         XmlConfigParser parser = new XmlConfigParser(source);
         Configuration configuration = parser.parse();
+        configuration.getSettings().putAll(prop);
         this.database = new Database(configuration);
         inited = true;
     }

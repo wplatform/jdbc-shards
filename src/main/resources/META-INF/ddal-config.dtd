@@ -24,11 +24,12 @@
 <!ATTLIST schema 
 name CDATA #REQUIRED
 metadata CDATA #IMPLIED
+validation (true|false) #IMPLIED
 >
 
 
 <!ELEMENT cluster (shard+)>
-<!ELEMENT shard (property*)>
+<!ELEMENT shard (standalone|(master*,slave*)+)>
 <!ATTLIST shard 
 name CDATA #REQUIRED
 >
@@ -78,4 +79,22 @@ broadcast CDATA #IMPLIED
 <!ATTLIST property 
 name CDATA #REQUIRED
 value CDATA #REQUIRED
+>
+
+<!ELEMENT standalone (#PCDATA)>
+<!ATTLIST standalone 
+ref CDATA #REQUIRED
+>
+
+<!ELEMENT master (#PCDATA)>
+<!ATTLIST master 
+ref CDATA #REQUIRED
+wWeight CDATA #IMPLIED
+rWeight CDATA #IMPLIED
+>
+
+<!ELEMENT slave (#PCDATA)>
+<!ATTLIST slave 
+ref CDATA #REQUIRED
+rWeight CDATA #IMPLIED
 >

@@ -515,6 +515,31 @@ public class Utils {
         InputStream source = Utils.class.getResourceAsStream(path);
         return source;
     }
+    
+    public static Class<?> loadClass(String className) {
+        Class<?> clazz = null;
+
+        if (className == null) {
+            return null;
+        }
+        
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            // skip
+        }
+
+        ClassLoader ctxClassLoader = Thread.currentThread().getContextClassLoader();
+        if (ctxClassLoader != null) {
+            try {
+                clazz = ctxClassLoader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                // skip
+            }
+        }
+
+        return clazz;
+    }
 
     /**
      * Calls a static method via reflection. This will try to use the method

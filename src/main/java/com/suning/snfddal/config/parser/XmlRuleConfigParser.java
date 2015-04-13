@@ -26,10 +26,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.suning.snfddal.config.Configuration;
-import com.suning.snfddal.route.rule.RuleColumn;
-import com.suning.snfddal.route.rule.RuleExpression;
-import com.suning.snfddal.route.rule.TableNode;
-import com.suning.snfddal.route.rule.TableRouter;
+import com.suning.snfddal.dispatch.rule.RuleColumn;
+import com.suning.snfddal.dispatch.rule.RuleExpression;
+import com.suning.snfddal.dispatch.rule.TableNode;
+import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
 
@@ -147,7 +147,7 @@ public class XmlRuleConfigParser {
         return rule;
     }
 
-    // 封装成RuleColum
+
     public static RuleColumn newRuleColumn(String name, String required, String type) {
         RuleColumn ruleColumn = new RuleColumn();
         if (StringUtils.isNullOrEmpty(name) || name.contains("=")) {
@@ -181,8 +181,7 @@ public class XmlRuleConfigParser {
             List<String> suffixes = collectItems(suffix);
             if (suffixes.isEmpty()) {
                 for (String shardItem : shards) {
-                    TableNode node = new TableNode();
-                    node.setShardName(shardItem);
+                    TableNode node = new TableNode(shardItem,null,null);
                     if(tableNodes.contains(node)) {
                         throw new ParsingException("Duplicate " + node + " defined in " 
                                 + tableRouter.getId() + "'s partition");
@@ -192,9 +191,7 @@ public class XmlRuleConfigParser {
             } else {
                 for (String shardItem : shards) {
                     for (String suffixItem : suffixes) {
-                        TableNode node = new TableNode();
-                        node.setShardName(shardItem);
-                        node.setTableName(suffixItem);
+                        TableNode node = new TableNode(shardItem,null,suffixItem);
                         if(tableNodes.contains(node)) {
                             throw new ParsingException("Duplicate " + node + " defined in " 
                                     + tableRouter.getId() + "'s partition");

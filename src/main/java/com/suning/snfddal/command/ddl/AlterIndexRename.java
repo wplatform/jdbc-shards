@@ -32,7 +32,6 @@ public class AlterIndexRename extends DefineCommand {
     }
     
     
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");

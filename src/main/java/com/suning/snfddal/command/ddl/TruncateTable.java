@@ -6,9 +6,9 @@
 package com.suning.snfddal.command.ddl;
 
 import com.suning.snfddal.command.CommandInterface;
+import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
-import com.suning.snfddal.message.DbException;
 
 /**
  * This class represents the statement
@@ -28,7 +28,9 @@ public class TruncateTable extends DefineCommand {
 
     @Override
     public int update() {
-        throw DbException.getUnsupportedException("TODO");
+        session.commit(true);
+        session.getUser().checkRight(table, Right.DELETE);
+        return 0;
     }
 
     @Override

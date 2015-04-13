@@ -189,9 +189,8 @@ public class FunctionTable extends Table {
      * @see com.suning.snfddal.dbobject.table.Table#addIndex(java.util.ArrayList, com.suning.snfddal.dbobject.index.IndexType)
      */
     @Override
-    public void addIndex(ArrayList<Column> list, IndexType indexType) {
-        // TODO Auto-generated method stub
-        
+    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
+        throw DbException.getUnsupportedException("Function Table");
     }
 
 }

@@ -16,6 +16,7 @@ import com.suning.snfddal.dbobject.FunctionAlias;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.table.Table;
+import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
@@ -38,6 +39,8 @@ public class Schema extends DbObjectBase {
     private final HashMap<String, Sequence> sequences;
     private final HashMap<String, Constant> constants;
     private final HashMap<String, FunctionAlias> functions;
+    
+    private TableNode matedataNode;
 
     /**
      * The set of returned unique names that are not yet stored. It is used to
@@ -464,5 +467,22 @@ public class Schema extends DbObjectBase {
             throw DbException.getUnsupportedException("Create table unsupported");
         }
     }
+
+    /**
+     * @return the matedataNode
+     */
+    public TableNode getMatedataNode() {
+        return matedataNode;
+    }
+
+    /**
+     * @param matedataNode the matedataNode to set
+     */
+    public void setMatedataNode(TableNode matedataNode) {
+        this.matedataNode = matedataNode;
+    }
+    
+    
+    
 
 }

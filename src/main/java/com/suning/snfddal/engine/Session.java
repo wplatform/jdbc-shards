@@ -105,7 +105,7 @@ public class Session implements SessionInterface {
     private int transactionIsolation;
 
     
-    private final Map<String, Connection> connectionHolder = New.hashMap();
+    private final Map<String, Connection> connectionHolder = New.concurrentHashMap();
 
     public Session(Database database, User user, int id) {
         this.database = database;

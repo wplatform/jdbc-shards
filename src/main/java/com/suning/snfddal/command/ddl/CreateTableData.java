@@ -48,16 +48,6 @@ public class CreateTableData {
     public boolean globalTemporary;
 
     /**
-     * Whether the indexes should be persisted.
-     */
-    public boolean persistIndexes;
-
-    /**
-     * Whether the data should be persisted.
-     */
-    public boolean persistData;
-
-    /**
      * Whether to create a new table.
      */
     public boolean create;

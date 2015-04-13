@@ -6,20 +6,31 @@
 package com.suning.snfddal.command.ddl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.suning.snfddal.command.CommandInterface;
+import com.suning.snfddal.command.dml.Insert;
 import com.suning.snfddal.command.dml.Query;
+import com.suning.snfddal.command.expression.Expression;
+import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.schema.Schema;
+import com.suning.snfddal.dbobject.schema.Sequence;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.IndexColumn;
+import com.suning.snfddal.dbobject.table.Table;
+import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.New;
+import com.suning.snfddal.util.StatementBuilder;
+import com.suning.snfddal.util.StringUtils;
+import com.suning.snfddal.value.DataType;
 
 /**
- * This class represents the statement
- * CREATE TABLE
+ * This class represents the statement CREATE TABLE
+ * 
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class CreateTable extends SchemaCommand {
 
@@ -32,11 +43,10 @@ public class CreateTable extends SchemaCommand {
     private Query asQuery;
     private String comment;
     private boolean sortedInsertMode;
+    private String charset;
 
     public CreateTable(Session session, Schema schema) {
         super(session, schema);
-        data.persistIndexes = true;
-        data.persistData = true;
     }
 
     public void setQuery(Query query) {
@@ -61,8 +71,8 @@ public class CreateTable extends SchemaCommand {
     }
 
     /**
-     * Add a constraint statement to this statement.
-     * The primary key definition is one possible constraint statement.
+     * Add a constraint statement to this statement. The primary key definition
+     * is one possible constraint statement.
      *
      * @param command the statement to add
      */
@@ -89,12 +99,114 @@ public class CreateTable extends SchemaCommand {
 
     @Override
     public int update() {
+        //Database db = session.getDatabase();
+        TableMate tableOrView = finalTableMate(data.tableName);
+        if (tableOrView != null && !tableOrView.isLoadFailed()) {
+            if (ifNotExists) {
+                return 0;
+            }
+            throw DbException.get(ErrorCode.TABLE_OR_VIEW_ALREADY_EXISTS_1, data.tableName);
+        }
+        if (asQuery != null) {
+            asQuery.prepare();
+            if (data.columns.size() == 0) {
+                generateColumnsFromQuery();
+            } else if (data.columns.size() != asQuery.getColumnCount()) {
+                throw DbException.get(ErrorCode.COLUMN_COUNT_DOES_NOT_MATCH);
+            }
+        }
+        if (pkColumns != null) {
+            for (Column c : data.columns) {
+                for (IndexColumn idxCol : pkColumns) {
+                    if (c.getName().equals(idxCol.columnName)) {
+                        c.setNullable(false);
+                    }
+                }
+            }
+        }
+        data.id = getObjectId();
+        data.create = create;
+        data.session = session;
+        // boolean isSessionTemporary = data.temporary && !data.globalTemporary;
+        // Table table = getSchema().createTable(data);
+        ArrayList<Sequence> sequences = New.arrayList();
+        for (Column c : data.columns) {
+            if (c.isAutoIncrement()) {
+                int objId = getObjectId();
+                c.convertAutoIncrementToSequence(session, getSchema(), objId, data.temporary);
+            }
+            Sequence seq = c.getSequence();
+            if (seq != null) {
+                sequences.add(seq);
+            }
+        }
+        // table.setComment(comment);
+        System.out.println(getPlanSQL());
+
+        try {
+            for (Column c : data.columns) {
+                c.prepareExpression(session);
+            }
+            /*for (Sequence sequence : sequences) { table.addSequence(sequence);
+             * } */
+            for (DefineCommand command : constraintCommands) {
+                command.setTransactional(transactional);
+                int type = command.getType();
+                switch (type) {
+                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
+                    
+                }
+                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
+                    
+                }
+                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
+                    
+                }
+                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
+                    
+                }
+                }
+                command.update();
+            }
+            if (asQuery != null) {
+                session.startStatementWithinTransaction();
+                Insert insert = new Insert(session);
+                insert.setSortedInsertMode(sortedInsertMode);
+                insert.setQuery(asQuery);
+                // insert.setTable(table);
+                insert.setInsertFromSelect(true);
+                insert.prepare();
+                insert.update();
+            }
+            HashSet<DbObject> set = New.hashSet();
+            set.clear();
+            // table.addDependencies(set);
+            for (DbObject obj : set) {
+                /*
+                 * if (obj == table) { continue; } */
+                if (obj.getType() == DbObject.TABLE_OR_VIEW) {
+                    if (obj instanceof Table) {
+                        //Table t = (Table) obj;
+                        /* if (t.getId() > table.getId()) { throw
+                         * DbException.get( ErrorCode.FEATURE_NOT_SUPPORTED_1,
+                         * "Table depends on another table " +
+                         * "with a higher ID: " + t +
+                         * ", this is currently not supported, " +
+                         * "as it would prevent the database from " +
+                         * "being re-opened"); } */
+                    }
+                }
+            }
+        } catch (DbException e) {
+            //db.removeSchemaObject(session, table);
+            throw e;
+        }
         throw DbException.getUnsupportedException("TODO");
     }
 
     /**
-     * Sets the primary key columns, but also check if a primary key
-     * with different columns is already defined.
+     * Sets the primary key columns, but also check if a primary key with
+     * different columns is already defined.
      *
      * @param columns the primary key columns
      * @return true if the same primary key columns where already set
@@ -114,10 +226,6 @@ public class CreateTable extends SchemaCommand {
         }
         this.pkColumns = columns;
         return false;
-    }
-
-    public void setPersistIndexes(boolean persistIndexes) {
-        data.persistIndexes = persistIndexes;
     }
 
     public void setGlobalTemporary(boolean globalTemporary) {
@@ -142,13 +250,6 @@ public class CreateTable extends SchemaCommand {
         this.comment = comment;
     }
 
-    public void setPersistData(boolean persistData) {
-        data.persistData = persistData;
-        if (!persistData) {
-            data.persistIndexes = false;
-        }
-    }
-
     public void setSortedInsertMode(boolean sortedInsertMode) {
         this.sortedInsertMode = sortedInsertMode;
     }
@@ -165,9 +266,46 @@ public class CreateTable extends SchemaCommand {
         data.isHidden = isHidden;
     }
 
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
     @Override
     public int getType() {
         return CommandInterface.CREATE_TABLE;
+    }
+
+    private void generateColumnsFromQuery() {
+        int columnCount = asQuery.getColumnCount();
+        ArrayList<Expression> expressions = asQuery.getExpressions();
+        for (int i = 0; i < columnCount; i++) {
+            Expression expr = expressions.get(i);
+            int type = expr.getType();
+            String name = expr.getAlias();
+            long precision = expr.getPrecision();
+            int displaySize = expr.getDisplaySize();
+            DataType dt = DataType.getDataType(type);
+            if (precision > 0
+                    && (dt.defaultPrecision == 0 || (dt.defaultPrecision > precision && dt.defaultPrecision < Byte.MAX_VALUE))) {
+                // dont' set precision to MAX_VALUE if this is the default
+                precision = dt.defaultPrecision;
+            }
+            int scale = expr.getScale();
+            if (scale > 0
+                    && (dt.defaultScale == 0 || (dt.defaultScale > scale && dt.defaultScale < precision))) {
+                scale = dt.defaultScale;
+            }
+            if (scale > precision) {
+                precision = scale;
+            }
+            Column col = new Column(name, type, precision, scale, displaySize);
+            addColumn(col);
+        }
+    }
+
+    @Override
+    public String getPlanSQL() {
+        return null;
     }
 
 }

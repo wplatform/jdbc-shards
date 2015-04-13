@@ -6,28 +6,15 @@
 package com.suning.snfddal.dbobject.index;
 
 
+
 /**
  * Represents information about the properties of an index
  */
 public class IndexType {
 
-    private boolean partitionKey, primaryKey, unique, scan;
-    
-    /**
-     * Create a partitionKey key index.
-     *
-     * @param persistent if the index is persistent
-     * @param hash if a hash index should be used
-     * @return the index type
-     */
-    public static IndexType createPartitionKey() {
-        IndexType type = new IndexType();
-        type.partitionKey = true;
-        type.primaryKey = true;
-        type.unique = true;
-        return type;
-    }
-    
+    private boolean primaryKey, unique, hash, scan, spatial;
+    private boolean belongsToConstraint;
+
     /**
      * Create a primary key index.
      *
@@ -35,9 +22,10 @@ public class IndexType {
      * @param hash if a hash index should be used
      * @return the index type
      */
-    public static IndexType createPrimaryKey() {
+    public static IndexType createPrimaryKey(boolean hash) {
         IndexType type = new IndexType();
         type.primaryKey = true;
+        type.hash = hash;
         type.unique = true;
         return type;
     }
@@ -49,10 +37,21 @@ public class IndexType {
      * @param hash if a hash index should be used
      * @return the index type
      */
-    public static IndexType createUnique() {
+    public static IndexType createUnique(boolean hash) {
         IndexType type = new IndexType();
         type.unique = true;
+        type.hash = hash;
         return type;
+    }
+
+    /**
+     * Create a non-unique index.
+     *
+     * @param persistent if the index is persistent
+     * @return the index type
+     */
+    public static IndexType createNonUnique() {
+        return createNonUnique(false, false);
     }
 
     /**
@@ -63,11 +62,14 @@ public class IndexType {
      * @param spatial if a spatial index should be used
      * @return the index type
      */
-    public static IndexType createNonUnique() {
+    public static IndexType createNonUnique(boolean hash,
+            boolean spatial) {
         IndexType type = new IndexType();
+        type.hash = hash;
+        type.spatial = spatial;
         return type;
     }
-    
+
     /**
      * Create a scan pseudo-index.
      *
@@ -79,14 +81,42 @@ public class IndexType {
         type.scan = true;
         return type;
     }
-    
+
     /**
-     * Does this index belong to a primary key constraint?
+     * Sets if this index belongs to a constraint.
      *
-     * @return true if it references a primary key constraint
+     * @param belongsToConstraint if the index belongs to a constraint
      */
-    public boolean isPartitionKey() {
-        return partitionKey;
+    public void setBelongsToConstraint(boolean belongsToConstraint) {
+        this.belongsToConstraint = belongsToConstraint;
+    }
+
+    /**
+     * If the index is created because of a constraint. Such indexes are to be
+     * dropped once the constraint is dropped.
+     *
+     * @return if the index belongs to a constraint
+     */
+    public boolean getBelongsToConstraint() {
+        return belongsToConstraint;
+    }
+
+    /**
+     * Is this a hash index?
+     *
+     * @return true if it is a hash index
+     */
+    public boolean isHash() {
+        return hash;
+    }
+
+    /**
+     * Is this a spatial index?
+     *
+     * @return true if it is a spatial index
+     */
+    public boolean isSpatial() {
+        return spatial;
     }
 
     /**
@@ -116,9 +146,18 @@ public class IndexType {
         StringBuilder buff = new StringBuilder();
         if (primaryKey) {
             buff.append("PRIMARY KEY");
+            if (hash) {
+                buff.append(" HASH");
+            }
         } else {
             if (unique) {
                 buff.append("UNIQUE ");
+            }
+            if (hash) {
+                buff.append("HASH ");
+            }
+            if (spatial) {
+                buff.append("SPATIAL ");
             }
             buff.append("INDEX");
         }

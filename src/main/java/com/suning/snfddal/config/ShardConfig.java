@@ -18,13 +18,15 @@
 
 package com.suning.snfddal.config;
 
-import java.util.Properties;
+import java.io.Serializable;
+import java.util.List;
 
-public class ShardConfig {
+public class ShardConfig implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
     private String name;
-    private String description;
-    private Properties properties;
-
+    private List<ShardItem> shardItems;
     /**
      * @return the name
      */
@@ -40,30 +42,17 @@ public class ShardConfig {
     }
 
     /**
-     * @return the description
+     * @return the shardItems
      */
-    public String getDescription() {
-        return description;
+    public List<ShardItem> getShardItems() {
+        return shardItems;
     }
 
     /**
-     * @param description the description to set
+     * @param shardItems the shardItems to set
      */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    /**
-     * @return the properties
-     */
-    public Properties getProperties() {
-        return properties;
-    }
-
-    /**
-     * @param properties the properties to set
-     */
-    public void setProperties(Properties properties) {
-        this.properties = properties;
+    public void setShardItems(List<ShardItem> shardItems) {
+        this.shardItems = shardItems;
     }
 
     @Override
@@ -89,6 +78,103 @@ public class ShardConfig {
         } else if (!name.equals(other.name))
             return false;
         return true;
+    }
+    
+    
+    public static class ShardItem implements Serializable {        
+        private static final long serialVersionUID = 1L;
+        private boolean writable;
+        private boolean readable;
+        private int rWeight;
+        private int wWeight;
+        private String ref;
+        /**
+         * @return the writable
+         */
+        public boolean isWritable() {
+            return writable;
+        }
+        /**
+         * @param writable the writable to set
+         */
+        public void setWritable(boolean writable) {
+            this.writable = writable;
+        }
+        /**
+         * @return the readable
+         */
+        public boolean isReadable() {
+            return readable;
+        }
+        /**
+         * @param readable the readable to set
+         */
+        public void setReadable(boolean readable) {
+            this.readable = readable;
+        }
+        /**
+         * @return the rWeight
+         */
+        public int getrWeight() {
+            return rWeight;
+        }
+        /**
+         * @param rWeight the rWeight to set
+         */
+        public void setrWeight(int rWeight) {
+            this.rWeight = rWeight;
+        }
+        /**
+         * @return the wWeight
+         */
+        public int getwWeight() {
+            return wWeight;
+        }
+        /**
+         * @param wWeight the wWeight to set
+         */
+        public void setwWeight(int wWeight) {
+            this.wWeight = wWeight;
+        }
+        /**
+         * @return the ref
+         */
+        public String getRef() {
+            return ref;
+        }
+        /**
+         * @param ref the ref to set
+         */
+        public void setRef(String ref) {
+            this.ref = ref;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((ref == null) ? 0 : ref.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            ShardItem other = (ShardItem) obj;
+            if (ref == null) {
+                if (other.ref != null)
+                    return false;
+            } else if (!ref.equals(other.ref))
+                return false;
+            return true;
+        }
+        
+        
     }
 
 }

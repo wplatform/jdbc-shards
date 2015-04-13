@@ -18,8 +18,8 @@
 
 package com.suning.snfddal.config;
 
+import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.util.StringUtils;
 
 public class TableConfig {

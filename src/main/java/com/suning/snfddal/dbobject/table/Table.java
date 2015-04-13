@@ -94,7 +94,7 @@ public abstract class Table extends SchemaObjectBase {
      * @param indexComment the comment
      * @return the index
      */
-    public abstract void addIndex(ArrayList<Column> list, IndexType indexType);
+    public abstract Index addIndex(ArrayList<Column> list, IndexType indexType);
 
     /**
      * Get the table type name

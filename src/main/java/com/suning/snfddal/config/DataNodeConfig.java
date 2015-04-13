@@ -18,9 +18,11 @@
 
 package com.suning.snfddal.config;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-public class DataNodeConfig {
+public class DataNodeConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private String clazz;
     private String jndiName;

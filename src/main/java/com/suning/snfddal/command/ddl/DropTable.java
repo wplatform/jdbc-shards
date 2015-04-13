@@ -1,20 +1,36 @@
 /*
- * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0,
- * and the EPL 1.0 (http://h2database.com/html/license.html).
- * Initial Developer: H2 Group
+ * Copyright 2015 suning.com Holding Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+// Created on 2015年3月27日
+// $Id$
 package com.suning.snfddal.command.ddl;
 
 import com.suning.snfddal.command.CommandInterface;
+import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Constants;
+import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class represents the statement
  * DROP TABLE
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class DropTable extends SchemaCommand {
 
@@ -57,7 +73,10 @@ public class DropTable extends SchemaCommand {
 
     @Override
     public int update() {
-        throw DbException.getUnsupportedException("TODO");
+        session.commit(true);
+        prepareDrop();
+        executeDrop();
+        return 0;
     }
 
     public void setDropAction(int dropAction) {
@@ -71,5 +90,35 @@ public class DropTable extends SchemaCommand {
     public int getType() {
         return CommandInterface.DROP_TABLE;
     }
+    
+    
+    private void prepareDrop() {
+        table = finalTableMate(tableName);
+        if (table == null) {
+            if (!ifExists) {
+                throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
+            }
+        }
+        session.getUser().checkRight(table, Right.ALL);
+        if (dropAction == Constants.CASCADE) {
+            
+        }
+        if (next != null) {
+            next.prepareDrop();
+        }
+    }
+    
+    private void executeDrop() {
+        table = finalTableMate(tableName);
+        if (table != null) {
+            Database db = session.getDatabase();
+            db.removeSchemaObject(session, table);
+        }
+        if (next != null) {
+            next.executeDrop();
+        }
+    }
+    
+    
 
 }

@@ -59,7 +59,13 @@ public abstract class Query extends Prepared {
      * Whether the result needs to support random access.
      */
     protected boolean randomAccessResult;
-
+    
+    private boolean noCache;
+    private int lastLimit;
+    private LocalResult lastResult;
+    private Value[] lastParameters;
+    private boolean cacheableChecked;
+    
     Query(Session session) {
         super(session);
     }
@@ -223,7 +229,36 @@ public abstract class Query extends Prepared {
     public boolean isTransactional() {
         return true;
     }
-
+    
+    /**
+     * Disable caching of result sets.
+     */
+    public void disableCache() {
+        this.noCache = true;
+    }
+    
+    private boolean sameResultAsLast(Session s, Value[] params,
+            Value[] lastParams) {
+        if (!cacheableChecked) {
+            cacheableChecked = true;
+        }
+        if (noCache) {
+            return false;
+        }
+        Database db = s.getDatabase();
+        for (int i = 0; i < params.length; i++) {
+            Value a = lastParams[i], b = params[i];
+            if (a.getType() != b.getType() || !db.areEqual(a, b)) {
+                return false;
+            }
+        }
+        if (!isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR) ||
+                !isEverything(ExpressionVisitor.INDEPENDENT_VISITOR)) {
+            return false;
+        }
+        return true;
+    }    
+    
     public final Value[] getParameterValues() {
         ArrayList<Parameter> list = getParameters();
         if (list == null) {
@@ -251,7 +286,34 @@ public abstract class Query extends Prepared {
      * @return the result set (if the target is not set).
      */
     LocalResult query(int limit, ResultTarget target) {
-        return queryWithoutCache(limit, target);
+        if (noCache) {
+            return queryWithoutCache(limit, target);
+        }
+        Value[] params = getParameterValues();
+        if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {
+            if (lastResult != null && !lastResult.isClosed() &&
+                    limit == lastLimit) {
+                if (sameResultAsLast(session, params, lastParameters)) {
+                    lastResult = lastResult.createShallowCopy(session);
+                    if (lastResult != null) {
+                        lastResult.reset();
+                        return lastResult;
+                    }
+                }
+            }
+        }
+        lastParameters = params;
+        closeLastResult();
+        LocalResult r = queryWithoutCache(limit, target);
+        lastResult = r;
+        lastLimit = limit;
+        return r;
+    }
+    
+    private void closeLastResult() {
+        if (lastResult != null) {
+            lastResult.close();
+        }
     }
 
     /**

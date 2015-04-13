@@ -27,7 +27,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -41,8 +40,6 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
-import com.suning.snfddal.route.rule.RuleColumn;
-import com.suning.snfddal.route.rule.TableRouter;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.ValueDate;
 import com.suning.snfddal.value.ValueTime;
@@ -97,7 +94,9 @@ public class SchemaMetaLoader {
         CreateTableData createTableData = new CreateTableData();
         createTableData.id = database.allocateObjectId();
         createTableData.schema = currentSchema;
-        createTableData.tableName = tableConfig.getName();
+        //same as the parser, the parser converted char to supper case.
+        String tableName = StringUtils.toUpperEnglish(tableConfig.getName());
+        createTableData.tableName = tableName;
         return createTableData;
     }
 
@@ -109,13 +108,14 @@ public class SchemaMetaLoader {
             try {
                 Connection conn = null;
                 try {
-                    trace.debug("Try to load {}'s metadata from table {} of shard {}.",name,qualified, metadataNode);
+                    trace.debug("Try to load {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);
                     DataSource ds = database.getDataNode(metadataNode);
                     conn = ds.getConnection();
                     TableMate tableMate = tryReadMetaData(conn, tableConfig);
-                    trace.debug("Load the {}'s metadata success.",name);
+                    trace.debug("Load the {0} metadata success.",name);
                     return tableMate;
                 } catch (Exception e) {
+                    trace.error(e,"an error occurred when loading the {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);
                     throw DbException.convert(e);
                 } finally {
                     JdbcUtils.closeSilently(conn);
@@ -214,10 +214,6 @@ public class SchemaMetaLoader {
         CreateTableData tableData = createTableData(tableConfig);
         tableData.columns = columnList;
         TableMate tableMate = new TableMate(tableData);
-        ArrayList<Column> ruleColumns = getRuleColumn(tableConfig, columnList);
-        if(!ruleColumns.isEmpty()) {
-            tableMate.addIndex(ruleColumns, IndexType.createPartitionKey());
-        }
         //load primary keys
         try {
             rs = meta.getPrimaryKeys(null, originalSchema, originalTable);
@@ -250,11 +246,8 @@ public class SchemaMetaLoader {
                     list.set(idx - 1, column);
                 }
             } while (rs.next());
-            //If primaryKey column same as shardingKey,do't add index again.
-            if(list != null && !ruleColumns.equals(list)) {
-                tableMate.addIndex(list, IndexType.createPrimaryKey());
-                rs.close();
-            }
+            tableMate.addIndex(list, IndexType.createPrimaryKey(false));
+            rs.close();
         }
         
         try {
@@ -286,7 +279,7 @@ public class SchemaMetaLoader {
                     list.clear();
                 }
                 boolean unique = !rs.getBoolean("NON_UNIQUE");
-                indexType = unique ? IndexType.createUnique() : IndexType.createNonUnique();
+                indexType = unique ? IndexType.createUnique(false) : IndexType.createNonUnique();
                 String col = rs.getString("COLUMN_NAME");
                 col = convertColumnName(col);
                 Column column = columnMap.get(col);
@@ -350,39 +343,9 @@ public class SchemaMetaLoader {
         }
         return columnName;
     }
-
-    /*
-    private void addIndex(ArrayList<Column> list, IndexType indexType) {
-        Column[] cols = new Column[list.size()];
-        list.toArray(cols);
-        Index index = new MappedIndex(this, 0, IndexColumn.wrap(cols), indexType);
-        indexes.add(index);
-    }*/
     
     
-    private ArrayList<Column> getRuleColumn(TableConfig config, List<Column> columns) {
-        ArrayList<Column> ruleColumn = New.arrayList();
-        TableRouter tableRouter = config.getTableRouter();
-        if(tableRouter != null) {
-            for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
-                Column matched = null;
-                for (Column column : columns) {
-                    String colName = column.getName();
-                    if(colName.equalsIgnoreCase(ruleCol.getName())) {
-                        matched = column;
-                        break;
-                    }                
-                }
-                if(matched == null){
-                    throw DbException.throwInternalError("The rule column " + ruleCol
-                            + "does not exist in "+ config.getName() + " table." );
-                }
-                ruleColumn.add(matched);
-            }
-        }
-        return ruleColumn;
-    }
-
+    
     /**
      * Wrap a SQL exception that occurred while accessing a linked table.
      *

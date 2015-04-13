@@ -4007,26 +4007,34 @@ public class Parser {
             return parseCreateUserDataType();
         } else if (readIf("AGGREGATE")) {
             return parseCreateAggregate(force);
-        } 
-        // tables or linked tables
-        boolean cached = false;
+        }
         if (readIf("MEMORY")) {
+            throw getSyntaxError();
         } else if (readIf("CACHED")) {
-            cached = true;
+            throw getSyntaxError();
         }
         if (readIf("LOCAL")) {
             read("TEMPORARY");
+            if (readIf("LINKED")) {
+                throw getSyntaxError();
+            }
             read("TABLE");
-            return parseCreateTable(true, false, cached);
+            return parseCreateTable(true, false);
         } else if (readIf("GLOBAL")) {
             read("TEMPORARY");
+            if (readIf("LINKED")) {
+                throw getSyntaxError();
+            }
             read("TABLE");
-            return parseCreateTable(true, true, cached);
+            return parseCreateTable(true, true);
         } else if (readIf("TEMP") || readIf("TEMPORARY")) {
+            if (readIf("LINKED")) {
+                throw getSyntaxError();
+            }
             read("TABLE");
-            return parseCreateTable(true, true, cached);
+            return parseCreateTable(true, true);
         } else if (readIf("TABLE")) {
-            return parseCreateTable(false, false, cached);
+            return parseCreateTable(false, false);
         } else {
             boolean hash = false, primaryKey = false;
             boolean unique = false, spatial = false;
@@ -4454,8 +4462,6 @@ public class Parser {
         data.columns = columns;
         data.tableName = tempViewName;
         data.temporary = true;
-        data.persistData = true;
-        data.persistIndexes = false;
         data.create = true;
         data.session = session;
         recursiveTable = schema.createTable(data);
@@ -5417,8 +5423,7 @@ public class Parser {
         }
     }
 
-    private CreateTable parseCreateTable(boolean temp, boolean globalTemp,
-            boolean persistIndexes) {
+    private CreateTable parseCreateTable(boolean temp, boolean globalTemp) {
         boolean ifNotExists = readIfNoExists();
         String tableName = readIdentifierWithSchema();
         if (temp && globalTemp && equalsToken("SESSION", schemaName)) {
@@ -5429,7 +5434,6 @@ public class Parser {
         }
         Schema schema = getSchema();
         CreateTable command = new CreateTable(session, schema);
-        command.setPersistIndexes(persistIndexes);
         command.setTemporary(temp);
         command.setGlobalTemporary(globalTemp);
         command.setIfNotExists(ifNotExists);
@@ -5525,10 +5529,13 @@ public class Parser {
                 // map MySQL engine types onto H2 behavior
                 String tableEngine = readUniqueIdentifier();
                 if ("InnoDb".equalsIgnoreCase(tableEngine)) {
-                    // ok
-                } else if (!"MyISAM".equalsIgnoreCase(tableEngine)) {
+                    command.setTableEngine("InnoDb");
+                } else if ("MyISAM".equalsIgnoreCase(tableEngine)) {
+                    command.setTableEngine("MyISAM");
+                } else {
                     throw DbException.getUnsupportedException(tableEngine);
                 }
+                
             } else {
                 command.setTableEngine(readUniqueIdentifier());
                 if (readIf("WITH")) {
@@ -5555,7 +5562,10 @@ public class Parser {
         readIf("DEFAULT");
         if (readIf("CHARSET")) {
             read("=");
-            read("UTF8");
+            //read("UTF8");
+            String charset = StringUtils.toLowerEnglish(readUniqueIdentifier());
+            command.setCharset(charset);
+            
         }
         if (temp) {
             if (readIf("ON")) {
@@ -5568,7 +5578,7 @@ public class Parser {
                 }
             } else if (readIf("NOT")) {
                 if (readIf("PERSISTENT")) {
-                    command.setPersistData(false);
+                    throw getSyntaxError();
                 } else {
                     read("LOGGED");
                 }
@@ -5576,9 +5586,9 @@ public class Parser {
             if (readIf("TRANSACTIONAL")) {
                 command.setTransactional(true);
             }
-        } else if (!persistIndexes && readIf("NOT")) {
+        } else if (readIf("NOT")) {
             read("PERSISTENT");
-            command.setPersistData(false);
+            throw getSyntaxError();
         }
         if (readIf("HIDDEN")) {
             command.setHidden(true);

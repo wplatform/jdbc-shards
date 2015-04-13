@@ -15,11 +15,14 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.ConfigurationException;
+import com.suning.snfddal.config.DataSourceProvider;
 import com.suning.snfddal.config.SchemaConfig;
 import com.suning.snfddal.config.ShardConfig;
 import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.config.ShardConfig.ShardItem;
 import com.suning.snfddal.dbobject.Comment;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
@@ -31,13 +34,15 @@ import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.SchemaObject;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableMate;
+import com.suning.snfddal.dispatch.RoutingHandler;
+import com.suning.snfddal.dispatch.RoutingHandlerImpl;
+import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
-import com.suning.snfddal.route.RoutingHandler;
-import com.suning.snfddal.route.RoutingHandlerImpl;
-import com.suning.snfddal.route.rule.TableNode;
+import com.suning.snfddal.shard.ShardDataSource;
+import com.suning.snfddal.shard.UidDataSource;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SchemaMetaLoader;
@@ -51,7 +56,7 @@ import com.suning.snfddal.value.Value;
  */
 public class Database {
 
-    public static final String SYSTEM_USER_NAME = "DBA";
+    public static final String SYSTEM_USER_NAME = "MASTER";
 
     private final HashMap<String, Role> roles = New.hashMap();
     private final HashMap<String, User> users = New.hashMap();
@@ -73,7 +78,7 @@ public class Database {
     private int allowLiterals = Constants.ALLOW_LITERALS_ALL;
     private volatile boolean closing;
     private boolean ignoreCase;
-    private Mode mode = Mode.getInstance(Mode.MY_SQL);
+    private Mode mode = Mode.getInstance(Mode.REGULAR);
     private int maxMemoryRows = SysProperties.MAX_MEMORY_ROWS;
     private int maxOperationMemory = Constants.DEFAULT_MAX_OPERATION_MEMORY;
     private final DbSettings dbSettings;
@@ -86,13 +91,21 @@ public class Database {
         this.compareMode = CompareMode.getInstance(null, 0);
         this.dbSettings = DbSettings.getInstance(null);
 
-        String sqlMode = configuration.getProperty("sqlMode", Mode.MY_SQL);
+        
+        String varName = SetTypes.getTypeName(SetTypes.MODE);
+        String sqlMode = configuration.getProperty(varName, Mode.MY_SQL);
         Mode settingMode = Mode.getInstance(sqlMode);
         if (settingMode != null) {
             this.mode = settingMode;
         }
-        int traceLevelFile = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
-        int traceLevelSystemOut = configuration.getProperty("traceLevelFile", TraceSystem.ERROR);
+        varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_FILE);
+        int traceLevelFile =
+                configuration.getProperty(varName,
+                TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
+        varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_SYSTEM_OUT);
+        int traceLevelSystemOut =
+                configuration.getProperty(varName,
+                TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
 
         traceSystem = new TraceSystem(null);
         traceSystem.setLevelFile(traceLevelFile);
@@ -104,7 +117,6 @@ public class Database {
     }
 
     private synchronized void openDatabase(Configuration configuration) {
-
         User systemUser = new User(this, allocateObjectId(), SYSTEM_USER_NAME);
         systemUser.setAdmin(true);
         systemUser.setUserPasswordHash(new byte[0]);
@@ -117,15 +129,26 @@ public class Database {
         Role publicRole = new Role(this, 0, Constants.PUBLIC_ROLE_NAME, true);
         roles.put(Constants.PUBLIC_ROLE_NAME, publicRole);
 
+        DataSourceProvider dataSourceProvider = configuration.getDataSourceProvider();
+        if(dataSourceProvider == null) {
+            throw new ConfigurationException("No configuration data source.");
+        }
         Map<String, ShardConfig> shardMapping = configuration.getCluster();
         for (ShardConfig value : shardMapping.values()) {
-            String description = value.getDescription();
-            // TODO 处理数据源组
-            DataSource dataSource = configuration.getDataNodes().get(description);
-            if (dataSource == null) {
-                throw new ConfigurationException("Can' find data source: " + description);
+            List<ShardItem> shardItems = value.getShardItems();
+            List<UidDataSource> shardDs = New.arrayList(shardItems.size());
+            UidDataSource ds;
+            for (ShardItem i : shardItems) {
+                String ref = i.getRef();
+                DataSource dataSource = dataSourceProvider.lookup(ref);
+                if (dataSource == null) {
+                    throw new ConfigurationException("Can' find data source: " + ref);
+                }
+                ds = new UidDataSource(ref, i.isWritable(), i.isReadable(), dataSource);
+                shardDs.add(ds);
             }
-            addDataNode(value.getName(), dataSource);
+            ShardDataSource shardDataSource = new ShardDataSource(value.getName(), shardDs);
+            addDataNode(value.getName(), shardDataSource);
         }
 
         SchemaMetaLoader metaLoader = new SchemaMetaLoader(schema);
@@ -135,8 +158,9 @@ public class Database {
             String matedataNode = tableConfig.getMetadataNode();
             String matedataTable = tableConfig.getNameWithSchemaName();
             TableMate tableMate = metaLoader.loadTableMeta(tableConfig);
-            tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
             tableMate.setTableRouter(tableConfig.getTableRouter());
+            tableMate.validationRuleColumn();
+            tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
             tableMate.setScanLevel(tableConfig.getScanLevel());
             String[] broadcast = tableConfig.getBroadcast();
             if (broadcast.length > 0) {
@@ -335,7 +359,7 @@ public class Database {
     public synchronized Session createSession(User user) {
         Session session = new Session(this, user, ++nextSessionId);
         userSessions.add(session);
-        trace.info("connecting session #{0} to {1}", session.getId());
+        trace.info("create session #{0}", session.getId(),"engine");
         return session;
     }
 

@@ -2,36 +2,39 @@
 <!DOCTYPE ddal-config PUBLIC "-//suning.com//DTD ddal-config//EN" "http://suning.com/dtd/ddal-config.dtd">
 <ddal-config>
 
-	<schema name="PUBLIC" metadata="shard1">
+	<schema name="PUBLIC" metadata="shard2">
 	
-		<tableGroup router="customer_group">
-			<table name="customer" metadata="shard1.orders _001"/>
+		<tableGroup router="customer_group" validation="false">
+			<table name="customers" metadata="shard1.customers_001"/>
 			<table name="address" metadata="shard1.address_001"/>
 		</tableGroup>	
 
-		<tableGroup router="order_group">
-			<table name="orders" metadata="shard1.orders _01"/>
-			<table name="order_items" metadata="shard1.order_items _01"/>
+		<tableGroup router="order_group" validation="false">
+			<table name="orders" metadata="shard1.orders_01"/>
+			<table name="order_items" metadata="shard1.order_items_01"/>
 			<table name="order_status" metadata="shard1.order_status_01"/>
 		</tableGroup>
 		
-		<table name="product"/>
-		<table name="product_category"/>
+		<table name="product" validation="false"/>
+		<table name="product_category" validation="false"/>
 
 	</schema>
 
 	<cluster>
 		<shard name="shard1">
-			<property name="description" value="db1m" />
+			<master ref="db1m" rWeight="1"/>
+			<slave ref="db1s" rWeight="2"/>
 		</shard>
 		<shard name="shard2">
-			<property name="description" value="db2m" />
+			<master ref="db2m" rWeight="1"/>
+			<slave ref="db2s" rWeight="2"/>
 		</shard>
 		<shard name="shard3">
-			<property name="description" value="db3m" />
+			<slave ref="db3s" rWeight="2"/>
+			<slave ref="db4s" rWeight="2"/>
 		</shard>
 		<shard name="shard4">
-			<property name="description" value="db4m" />
+			<standalone ref="db4m"/>
 		</shard>
 	</cluster>
 

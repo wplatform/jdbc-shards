@@ -24,6 +24,8 @@ public abstract class BaseSampleCase {
             String configLocation = "/config/ddal-config.xml";
             JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setConfigLocation(configLocation);
+            dataSource.setOutputLogLevel("4");
+            dataSource.setFileLogLevel("4");
             dataSource.init();
             this.dataSource = dataSource;
         } catch (RuntimeException e) {

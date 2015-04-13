@@ -18,14 +18,17 @@
 package com.suning.snfddal.dbobject.table;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.index.IndexMate;
 import com.suning.snfddal.dbobject.index.IndexType;
+import com.suning.snfddal.dispatch.rule.RuleColumn;
+import com.suning.snfddal.dispatch.rule.TableNode;
+import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.engine.Session;
-import com.suning.snfddal.route.rule.TableNode;
-import com.suning.snfddal.route.rule.TableRouter;
+import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.New;
 
 /**
@@ -41,7 +44,7 @@ public class TableMate extends Table {
     
     
     private TableRouter tableRouter;
-    private TableNode matedataNode; 
+    private TableNode matedataNode;
     private TableNode[] broadcastNode;
     private int scanLevel;
     
@@ -125,6 +128,56 @@ public class TableMate extends Table {
     public void setBroadcastNode(TableNode[] broadcastNode) {
         this.broadcastNode = broadcastNode;
     }
+    
+    /**
+     * @return
+     * @see com.suning.snfddal.dispatch.rule.TableRouter#getPartition()
+     */
+    public TableNode[] getPartitionNode() {
+        if(tableRouter != null) {
+            List<TableNode> partition = tableRouter.getPartition();
+            return partition.toArray(new TableNode[partition.size()]);
+        }
+        if(broadcastNode != null) {
+            return broadcastNode;
+        }
+        return new TableNode[]{matedataNode};
+        
+    }
+    /**
+     * validation the rule columns is in the table columns
+     * @param config
+     * @param columns
+     */
+    public void validationRuleColumn() {
+        if(isLoadFailed()) {
+           return; 
+        }
+        if(tableRouter != null) {
+            for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
+                Column matched = null;
+                for (Column column : columns) {
+                    String colName = column.getName();
+                    if(colName.equalsIgnoreCase(ruleCol.getName())) {
+                        matched = column;
+                        break;
+                    }                
+                }
+                if(matched == null){
+                    throw DbException.throwInternalError("The rule column " + ruleCol
+                            + " does not exist in "+ getName() + " table." );
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @return the loadFailed
+     */
+    public boolean isLoadFailed() {
+        return this.columns.length == 0;
+    }
 
     @Override
     public boolean isGlobalTemporary() {
@@ -132,12 +185,13 @@ public class TableMate extends Table {
     }
     
     @Override
-    public void addIndex(ArrayList<Column> list, IndexType indexType) {
+    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
         Column[] cols = new Column[list.size()];
         list.toArray(cols);
         Index index = new IndexMate(this, 0, null, IndexColumn.wrap(cols), indexType);
         indexes.add(index);
-    }
+        return index;
+   }
 
     @Override
     public String getTableType() {
@@ -163,15 +217,11 @@ public class TableMate extends Table {
      * @see com.suning.snfddal.dbobject.table.Table#isDeterministic() */
     @Override
     public boolean isDeterministic() {
-        // TODO Auto-generated method stub
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.dbobject.table.Table#canGetRowCount() */
     @Override
     public boolean canGetRowCount() {
-        // TODO Auto-generated method stub
         return false;
     }
 

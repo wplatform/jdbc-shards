@@ -18,9 +18,11 @@
 
 package com.suning.snfddal.config;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-public class RuleAlgorithmConfig {
+public class RuleAlgorithmConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private String clazz;
     private Properties properties;

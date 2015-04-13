@@ -132,7 +132,7 @@ public class RangeTable extends Table {
     }
 
     @Override
-    public void addIndex(ArrayList<Column> list, IndexType indexType) {
+    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
         throw DbException.getUnsupportedException("SYSTEM_RANGE");        
     }
 

@@ -18,13 +18,16 @@
 
 package com.suning.snfddal.config;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.suning.snfddal.util.New;
 
-public class SchemaConfig {
+public class SchemaConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String name;
     private String metadata;
+    private boolean validation;
     private List<TableConfig> tables = New.arrayList();
 
     /**
@@ -67,6 +70,20 @@ public class SchemaConfig {
      */
     public void setTables(List<TableConfig> tables) {
         this.tables = tables;
+    }
+
+    /**
+     * @return the validation
+     */
+    public boolean isValidation() {
+        return validation;
+    }
+
+    /**
+     * @param validation the validation to set
+     */
+    public void setValidation(boolean validation) {
+        this.validation = validation;
     }
 
     @Override
