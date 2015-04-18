@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月13日
+// Created on 2015年4月16日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.shards;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public interface Switchover {
+public interface DataSourceDispatcher {
 
-    void switchover(Option option);
+    public Connection doDispatch(Optional optional) throws SQLException;
+        
 }

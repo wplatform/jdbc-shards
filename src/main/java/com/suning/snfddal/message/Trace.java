@@ -90,9 +90,19 @@ public class Trace {
     public static final String USER = "user";
 
     /**
-     * The trace module name for the page store.
+     * The trace module name for executor.
      */
-    public static final String PAGE_STORE = "pageStore";
+    public static final String EXECUTOR = "executor";
+    
+    /**
+     * The trace module name for transaction.
+     */
+    public static final String TRANSACTION = "transaction";
+    
+    /**
+     * The trace module name for datasource.
+     */
+    public static final String DATASOURCE = "datasource";
 
     private final TraceWriter traceWriter;
     private final String module;

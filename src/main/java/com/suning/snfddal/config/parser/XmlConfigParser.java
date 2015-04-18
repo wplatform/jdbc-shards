@@ -107,7 +107,7 @@ public class XmlConfigParser {
                     throw new ParsingException(nodename + "'s ref is required.");
                 }
                 if(wWeight < 0 || rWeight < 0 ) {
-                    throw new ParsingException(nodename + "'s weight must bigger then 0.");
+                    throw new ParsingException(nodename + "'s weight not be less than zero.");
                 }
                 shardItem.setRef(ref);
                 shardItem.setwWeight(wWeight);

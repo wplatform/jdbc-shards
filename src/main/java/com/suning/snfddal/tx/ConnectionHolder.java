@@ -16,12 +16,29 @@
 // Created on 2015年4月13日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.tx;
+
+import java.sql.Connection;
+import java.util.Map;
+
+import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public interface Failover {
+public class ConnectionHolder {
+    
+    public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
+    
+
+    private Map<String, Connection> resources = New.hashMap();
+
+    public Connection getConnection(String uid) {
+        return resources.get(uid);
+    }
+
+    public void enlistConnection(String uid, Connection connection) {
+        resources.put(uid, connection);
+    }
 
 }

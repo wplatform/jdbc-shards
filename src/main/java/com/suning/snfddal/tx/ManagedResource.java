@@ -13,32 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月13日
+// Created on 2015年4月18日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.tx;
 
 import java.sql.Connection;
-import java.util.Map;
+import java.sql.SQLException;
 
-import com.suning.snfddal.util.New;
+import com.suning.snfddal.shards.DataSourceDispatcher;
+import com.suning.snfddal.shards.Optional;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class ConnectionHolder {
-    
-    public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
-    
+public class ManagedResource implements DataSourceDispatcher {
 
-    private Map<String, Connection> resources = New.hashMap();
+    private DataSourceDispatcher delegate;
 
-    public Connection getConnection(String uid) {
-        return resources.get(uid);
+    /**
+     * @param delegate
+     */
+    public ManagedResource(DataSourceDispatcher delegate) {
+        this.delegate = delegate;
     }
 
-    public void enlistConnection(String uid, Connection connection) {
-        resources.put(uid, connection);
+    @Override
+    public Connection doDispatch(Optional optional) throws SQLException {
+        // TODO Auto-generated method stub
+        return delegate.doDispatch(optional);
     }
 
 }

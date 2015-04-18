@@ -1,7 +1,6 @@
-package com.suning.snfddal.shard.vendor;
+package com.suning.snfddal.shards.vendor;
 
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class DB2ExceptionSorter implements ExceptionSorter {
 
@@ -30,9 +29,5 @@ public class DB2ExceptionSorter implements ExceptionSorter {
         return false;
     }
 
-    @Override
-    public void configFromProperties(Properties properties) {
-
-    }
 
 }

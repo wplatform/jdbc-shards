@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2011 Alibaba Group Holding Ltd.
+ * Copyright 2015 suning.com Holding Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.suning.snfddal.shard.vendor;
+// Created on 2015年4月17日
+// $Id$
 
-import java.sql.SQLException;
-import java.util.Properties;
+package com.suning.snfddal.tx;
 
-public class NullExceptionSorter implements ExceptionSorter {
+import com.suning.snfddal.shards.DataSourceDispatcher;
 
-    private final static NullExceptionSorter instance = new NullExceptionSorter();
-
-    public final static NullExceptionSorter getInstance() {
-        return instance;
-    }
-
-    @Override
-    public boolean isExceptionFatal(SQLException e) {
-        return false;
-    }
-
-    public void configFromProperties(Properties properties) {
-        
-    }
+/**
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
+ */
+public interface TransactionService {
+    
+    TransactionManager getTransactionManager();
+    
+    DataSourceDispatcher getManagedResource();
+    
 }

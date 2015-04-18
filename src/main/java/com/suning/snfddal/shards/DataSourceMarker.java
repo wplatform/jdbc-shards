@@ -16,11 +16,9 @@
 // Created on 2015年4月13日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.shards;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
@@ -29,15 +27,19 @@ import com.suning.snfddal.util.StringUtils;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class UidDataSource implements DataSource {
-
+public class DataSourceMarker {
+    
     private final String uid;
 
+    private final String shardName;
+    
     private final boolean writable;
 
     private final boolean readable;
 
-    private final DataSource targetDatasource;
+    private final DataSource dataSource;
+    
+    private final AtomicInteger failedCount = new AtomicInteger(0);
 
     /**
      * @param uid
@@ -45,17 +47,21 @@ public class UidDataSource implements DataSource {
      * @param readable
      * @param datasource
      */
-    public UidDataSource(String uid, boolean writable, boolean readable, DataSource datasource) {
+    public DataSourceMarker(String uid, String shardName,boolean writable, boolean readable, DataSource datasource) {
         if(StringUtils.isNullOrEmpty(uid)) {
             throw new IllegalArgumentException("No uid specified");
+        }
+        if(StringUtils.isNullOrEmpty(shardName)) {
+            throw new IllegalArgumentException("No shardName specified");
         }
         if(datasource == null) {
             throw new IllegalArgumentException("No DataSource specified");
         }
         this.uid = uid;
+        this.shardName = shardName;
         this.writable = writable;
         this.readable = readable;
-        this.targetDatasource = datasource;
+        this.dataSource = datasource;
     }
 
     /**
@@ -63,6 +69,13 @@ public class UidDataSource implements DataSource {
      */
     public String getUid() {
         return uid;
+    }
+
+    /**
+     * @return the shardName
+     */
+    public String getShardName() {
+        return shardName;
     }
 
     /**
@@ -82,58 +95,16 @@ public class UidDataSource implements DataSource {
     /**
      * @return the datasource
      */
-    public DataSource getTargetDataSource() {
-        return targetDatasource;
+    public DataSource getDataSource() {
+        return dataSource;
     }
 
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return targetDatasource.getLogWriter();
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
-        targetDatasource.setLogWriter(out);
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-        targetDatasource.setLoginTimeout(seconds);
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return targetDatasource.getLoginTimeout();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (isWrapperFor(iface)) {
-            return (T) this;
-        }
-        throw new SQLException("Invalid iface " + iface.getName());
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface != null && iface.isAssignableFrom(getClass());
-    }
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        return targetDatasource.getConnection();
-    }
-
-    @Override
-    public Connection getConnection(String username, String password) throws SQLException {
-        return targetDatasource.getConnection(username, password);
-    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
         result = prime * result + ((uid == null) ? 0 : uid.hashCode());
         return result;
     }
@@ -146,7 +117,12 @@ public class UidDataSource implements DataSource {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        UidDataSource other = (UidDataSource) obj;
+        DataSourceMarker other = (DataSourceMarker) obj;
+        if (shardName == null) {
+            if (other.shardName != null)
+                return false;
+        } else if (!shardName.equals(other.shardName))
+            return false;
         if (uid == null) {
             if (other.uid != null)
                 return false;
@@ -156,6 +132,35 @@ public class UidDataSource implements DataSource {
     }
     
     
+
+    /**
+     * @return
+     * @see java.util.concurrent.atomic.AtomicInteger#get()
+     */
+    public final int getFailedCount() {
+        return failedCount.get();
+    }
+
+    /**
+     * @param newValue
+     * @see java.util.concurrent.atomic.AtomicInteger#set(int)
+     */
+    public final void resetFailedCount() {
+        failedCount.set(0);
+    }
+
+    /**
+     * @return
+     * @see java.util.concurrent.atomic.AtomicInteger#incrementAndGet()
+     */
+    public final void incrementFailedCount() {
+        failedCount.incrementAndGet();
+    }
+
     
+    
+    
+    
+
 
 }

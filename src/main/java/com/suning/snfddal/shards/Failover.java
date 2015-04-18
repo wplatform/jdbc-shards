@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月13日
+// Created on 2015年4月15日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.shards;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class LoadBalance {
+public interface Failover {
+
+    public void doHandleAbnormal(DataSourceMarker source);
+
+    public void doHandleWakeup(DataSourceMarker source);
 
 }

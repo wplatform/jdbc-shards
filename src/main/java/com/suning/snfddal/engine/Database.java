@@ -41,8 +41,8 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
-import com.suning.snfddal.shard.ShardDataSource;
-import com.suning.snfddal.shard.UidDataSource;
+import com.suning.snfddal.shards.DataSourceSelector;
+import com.suning.snfddal.shards.DataSourceMarker;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SchemaMetaLoader;
@@ -136,19 +136,21 @@ public class Database {
         Map<String, ShardConfig> shardMapping = configuration.getCluster();
         for (ShardConfig value : shardMapping.values()) {
             List<ShardItem> shardItems = value.getShardItems();
-            List<UidDataSource> shardDs = New.arrayList(shardItems.size());
-            UidDataSource ds;
+            List<DataSourceMarker> shardDs = New.arrayList(shardItems.size());
+            DataSourceMarker ds;
             for (ShardItem i : shardItems) {
                 String ref = i.getRef();
                 DataSource dataSource = dataSourceProvider.lookup(ref);
                 if (dataSource == null) {
                     throw new ConfigurationException("Can' find data source: " + ref);
                 }
-                ds = new UidDataSource(ref, i.isWritable(), i.isReadable(), dataSource);
+                ds = new DataSourceMarker(ref,value.getName(), i.isWritable(), i.isReadable(), dataSource);
                 shardDs.add(ds);
             }
-            ShardDataSource shardDataSource = new ShardDataSource(value.getName(), shardDs);
+            /*
+            DataSourceSelector shardDataSource = new DataSourceSelector(value.getName(), shardDs);
             addDataNode(value.getName(), shardDataSource);
+            */
         }
 
         SchemaMetaLoader metaLoader = new SchemaMetaLoader(schema);

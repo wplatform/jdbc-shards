@@ -13,34 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月13日
+// Created on 2015年4月17日
 // $Id$
 
-package com.suning.snfddal.shard;
-
-
-
-
+package com.suning.snfddal.tx;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class Synchronization {
+public interface TransactionManager {
 
-    private static final ThreadLocal<ConnectionHolder> resources =
-            new ThreadLocal<ConnectionHolder>();
+    public void begin() throws TransactionException;
     
+    public void commit () throws TransactionException;
     
-    public static ConnectionHolder getResource(Object actualKey) {
-        ConnectionHolder holder = resources.get();
-        if (holder == null) {
-            return null;
-        }
-        return holder;
-    }
-    
-    public static void registerResource(ConnectionHolder synchronization) {
-        resources.set(synchronization);
-    }
+    public void rollback() throws TransactionException;
+
 }

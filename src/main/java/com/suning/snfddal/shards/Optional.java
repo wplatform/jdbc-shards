@@ -16,19 +16,25 @@
 // Created on 2015年4月13日
 // $Id$
 
-package com.suning.snfddal.shard;
+package com.suning.snfddal.shards;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class Option {
+public class Optional {
     
-    private static final ThreadLocal<Option> option = new ThreadLocal<Option>();
+    public static final int DEFAULT_TRYTIMES = 3;
     
+    public int retry = DEFAULT_TRYTIMES;
     public String dbid;
     public String shardName;
-    public boolean isWrite;
+    public boolean isWriteOperation;
     
-
+    
+    public static Optional create() {
+        Optional optional = new Optional();
+        return optional;
+    }
+    
 }

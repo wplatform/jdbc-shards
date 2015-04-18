@@ -1,8 +1,7 @@
-package com.suning.snfddal.shard.vendor;
+package com.suning.snfddal.shards.vendor;
 
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.Properties;
 
 public class InformixExceptionSorter implements ExceptionSorter, Serializable {
 
@@ -34,8 +33,5 @@ public class InformixExceptionSorter implements ExceptionSorter, Serializable {
         return false;
     }
     
-    public void configFromProperties(Properties properties) {
-        
-    }
 
 }
