@@ -19,74 +19,106 @@
 package com.suning.snfddal.shards;
 
 import java.util.List;
+import java.util.Set;
 
+import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class OneMasterSelector implements DataSourceSelector {
+public class OneMasterSelector extends DataSourceSelector {
 
-    private DataSourceMarker master;
-    private List<DataSourceMarker> readable;
+    private List<SmartDataSource> registered;
+    private volatile SmartDataSource master;
+    private Set<SmartDataSource> readable = New.copyOnWriteArraySet();
     private String shardName;
-    
+    private volatile LoadBalance readableLoadBalance;
 
-    
-    
     /**
      * @param master
      * @param slave
      * @param readable
      * @param shardName
      */
-    public OneMasterSelector(String shardName, DataSourceMarker master,
-            List<DataSourceMarker> readable) {
-        super();
-        this.master = master;
-        this.readable = readable;
-        this.shardName = shardName;
+    public OneMasterSelector(String shardName, List<SmartDataSource> registered) {
+        List<SmartDataSource> writable = New.arrayList(1);
+        List<SmartDataSource> readable = New.arrayList(registered.size());
+        for (SmartDataSource item : registered) {
+            if(!item.isReadOnly() && item.getwWeight() > 0) {
+                writable.add(item);
+            }
+            if(item.getrWeight() > 0) {
+                readable.add(item);
+            }
+        }
+        if(writable.size() != 1) {
+            throw new IllegalStateException();
+        }
+        if(readable.size() < 1) {
+            throw new IllegalStateException();
+        }
+        this.master = writable.get(0);
+        this.readable.addAll(readable);
+        this.registered = registered;
+        this.readableLoadBalance = new LoadBalance(readable, true);
     }
-
 
     @Override
-    public DataSourceMarker doSelect(Optional option) {
-        // TODO Auto-generated method stub
-        return master;
+    public SmartDataSource doSelect(Optional option) {
+        if (!option.readOnly) {
+            return master;
+        } else {
+            return readableLoadBalance.load();
+        }
+
     }
 
-    
+    @Override
+    public SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive) {
+        if (!option.readOnly) {
+            return master;
+        }
+        for (SmartDataSource marker : registered) {
+            if(exclusive.contains(marker)) {
+                continue;
+            }
+            return marker;
+        }
+        return null;
+    }
+
     @Override
     public String getShardName() {
         return shardName;
     }
 
-
     @Override
-    public void doHandleAbnormal(DataSourceMarker source) {
-        String over = source.getShardName();
-        if(!shardName.equals(over)) {
-            return;
+    public void doHandleAbnormal(SmartDataSource source) {
+        if (!registered.contains(source)) {
+            throw new IllegalStateException(shardName + "datasource not matched. " + source);
         }
-        String dbid = source.getUid();
+        if(!source.isReadOnly()) {
+            master = null;
+        }
+        if(readable.remove(source)) {
+            readableLoadBalance = new LoadBalance(readable, true);
+        }
+        
         
     }
 
-
     @Override
-    public void doHandleWakeup(DataSourceMarker source) {
-        // TODO Auto-generated method stub
+    public void doHandleWakeup(SmartDataSource source) {
+        if (!registered.contains(source)) {
+            throw new IllegalStateException(shardName + " datasource not matched. " + source);
+        }
+        if(!source.isReadOnly()) {
+            master = source;
+        }
+        if(source.getrWeight() > 0 && readable.add(source)) {
+            this.readableLoadBalance = new LoadBalance(readable, true);
+        }
         
     }
-
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.shards.DataSourceSelector#doSelect(com.suning.snfddal.shards.Optional, java.util.List)
-     */
-    @Override
-    public DataSourceMarker doSelect(Optional option, List<DataSourceMarker> exclusive) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
 }

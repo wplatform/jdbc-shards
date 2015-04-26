@@ -19,6 +19,7 @@
 package com.suning.snfddal.shards;
 
 import java.util.Collection;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -26,32 +27,31 @@ import com.suning.snfddal.util.MurmurHash;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class LoadBalance {
     private static final int defaultNumberOfReplicas = 16;
-    private int numberOfReplicas;
-    private SortedMap<Integer, String> circle = new TreeMap<Integer, String>();
+    private int numberOfReplicas = defaultNumberOfReplicas;
+    private Random random = new Random();
+    private boolean readOnly;
+    private SortedMap<Integer, SmartDataSource> circle = new TreeMap<Integer, SmartDataSource>();
 
-    public LoadBalance(Collection<String> nodes, int numberOfReplicas) {
+    public LoadBalance(Collection<SmartDataSource> nodes, boolean readOnly) {
         if (numberOfReplicas < 1) {
             throw new IllegalArgumentException("The numberOfReplicas must bigger then 0.");
         }
         if (nodes == null || nodes.isEmpty()) {
             throw new IllegalArgumentException("The shards can't empty.");
         }
-        this.numberOfReplicas = numberOfReplicas;
-        for (String node : nodes) {
+        this.readOnly = readOnly;
+        for (SmartDataSource node : nodes) {
             add(node);
         }
     }
 
-    public LoadBalance(Collection<String> nodes) {
-        this(nodes, defaultNumberOfReplicas);
-    }
-
-    public void add(String node) {
-        for (int i = 0; i < numberOfReplicas; i++) {
+    public void add(SmartDataSource node) {
+        int weight = readOnly ? node.getrWeight() : node.getwWeight();
+        int nodeCount = numberOfReplicas * weight;
+        for (int i = 0; i < nodeCount; i++) {
             String decorateWithCounter = decorateWithCounter(node.toString(), i);
             circle.put(hash(decorateWithCounter), node);
         }
@@ -63,16 +63,24 @@ public class LoadBalance {
         }
     }
 
-    public String get(Object key) {
+    public SmartDataSource load() {
+        return get(random.nextInt());
+    }
+
+    public SmartDataSource get(Object key) {
         if (circle.isEmpty()) {
             return null;
         }
         int hash = hash(key.toString());
         if (!circle.containsKey(hash)) {
-            SortedMap<Integer, String> tailMap = circle.tailMap(hash);
+            SortedMap<Integer, SmartDataSource> tailMap = circle.tailMap(hash);
             hash = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();
         }
         return circle.get(hash);
+    }
+
+    public boolean hasNodes() {
+        return circle.isEmpty();
     }
 
     private static int hash(final String k) {

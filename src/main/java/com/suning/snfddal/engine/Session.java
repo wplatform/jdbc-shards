@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.sql.DataSource;
-
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Parser;
@@ -32,6 +30,9 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.result.LocalResult;
+import com.suning.snfddal.shards.DataSourceDispatcher;
+import com.suning.snfddal.shards.DataSourceMarker;
+import com.suning.snfddal.shards.Optional;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SmallLRUCache;
@@ -103,6 +104,7 @@ public class Session implements SessionInterface {
     private ArrayList<Value> temporaryLobs;
     private boolean readOnly;
     private int transactionIsolation;
+    private volatile DataSourceDispatcher dsDispatcher;
 
     
     private final Map<String, Connection> connectionHolder = New.concurrentHashMap();
@@ -118,6 +120,7 @@ public class Session implements SessionInterface {
         this.lockTimeout = setting == null ?
                 Constants.INITIAL_LOCK_TIMEOUT : setting.getIntValue();
         this.currentSchemaName = Constants.SCHEMA_MAIN;
+        this.dsDispatcher = database.getDataSourceRepository();
     }
 
     public boolean setCommitOrRollbackDisabled(boolean x) {
@@ -1054,15 +1057,32 @@ public class Session implements SessionInterface {
     }
     
     
-    public Connection getDataNodeConnection(String dataNode) throws SQLException {
-        Connection result = connectionHolder.get(dataNode);
+    public Connection applyConnection(String shardName) throws SQLException {
+        Optional optional = Optional.create();
+        optional.shardName = shardName;
+        optional.readOnly = false;
+        
+        Connection result = connectionHolder.get(shardName);
         if (result == null) {
-            DataSource ds = database.getDataNode(dataNode);
-            result = ds.getConnection();
+            DataSourceMarker dsMarker = dsDispatcher.doDispatch(optional);
+            result = dsMarker.doGetConnection();
             if (result.getAutoCommit() != getAutoCommit()) {
                 result.setAutoCommit(getAutoCommit());
             }
-            connectionHolder.put(dataNode, result);
+            connectionHolder.put(shardName, result);
+        }
+        return result;
+    }
+    
+    public Connection applyConnection(Optional optional) throws SQLException {
+        Connection result = connectionHolder.get(optional.shardName);
+        if (result == null) {
+            DataSourceMarker dsMarker = dsDispatcher.doDispatch(optional);
+            result = dsMarker.doGetConnection();
+            if (result.getAutoCommit() != getAutoCommit()) {
+                result.setAutoCommit(getAutoCommit());
+            }
+            connectionHolder.put(optional.shardName, result);
         }
         return result;
     }

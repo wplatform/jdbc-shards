@@ -3,6 +3,8 @@ package com.suning.snfddal.shards.vendor;
 import java.io.Serializable;
 import java.sql.SQLException;
 
+import com.suning.snfddal.shards.ExceptionSorter;
+
 public class SybaseExceptionSorter implements ExceptionSorter, Serializable {
 
     private static final long serialVersionUID = 2742592563671255116L;

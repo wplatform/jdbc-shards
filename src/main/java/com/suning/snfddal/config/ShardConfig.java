@@ -83,34 +83,23 @@ public class ShardConfig implements Serializable {
     
     public static class ShardItem implements Serializable {        
         private static final long serialVersionUID = 1L;
-        private boolean writable;
-        private boolean readable;
+        private boolean readOnly;
         private int rWeight;
         private int wWeight;
         private String ref;
+        
+        
         /**
-         * @return the writable
+         * @return the readOnly
          */
-        public boolean isWritable() {
-            return writable;
+        public boolean isReadOnly() {
+            return readOnly;
         }
         /**
-         * @param writable the writable to set
+         * @param readOnly the readOnly to set
          */
-        public void setWritable(boolean writable) {
-            this.writable = writable;
-        }
-        /**
-         * @return the readable
-         */
-        public boolean isReadable() {
-            return readable;
-        }
-        /**
-         * @param readable the readable to set
-         */
-        public void setReadable(boolean readable) {
-            this.readable = readable;
+        public void setReadOnly(boolean readOnly) {
+            this.readOnly = readOnly;
         }
         /**
          * @return the rWeight

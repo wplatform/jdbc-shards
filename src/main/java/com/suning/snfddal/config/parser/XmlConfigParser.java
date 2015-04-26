@@ -76,7 +76,7 @@ public class XmlConfigParser {
             if (StringUtils.isNullOrEmpty(proValue)) {
                 throw new ParsingException("Error parsing ddal-config XML . Cause: propery's value required.");
             }
-            configuration.addSettings(proName, proValue);
+            configuration.setProperty(proName, proValue);
         }
     }
 
@@ -94,11 +94,9 @@ public class XmlConfigParser {
                 ShardItem shardItem = new ShardItem();
                 String nodename = xNode.getName();
                 if ("standalone".equals(nodename) || "master".equals(nodename)) {
-                    shardItem.setWritable(true);
-                    shardItem.setReadable(true);
+                    shardItem.setReadOnly(false);
                 } else if ("slave".equals(nodename)) {
-                    shardItem.setWritable(false);
-                    shardItem.setReadable(true);
+                    shardItem.setReadOnly(false);
                 }
                 String ref = child.getStringAttribute("ref");
                 int wWeight = child.getIntAttribute("wWeight", 1);

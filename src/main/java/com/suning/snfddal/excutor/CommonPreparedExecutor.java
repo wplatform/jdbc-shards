@@ -18,6 +18,7 @@
 
 package com.suning.snfddal.excutor;
 
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 
 import com.suning.snfddal.command.CommandInterface;
@@ -108,7 +109,17 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     
     
     
-    
+    /**
+     * Wrap a SQL exception that occurred while accessing a linked table.
+     *
+     * @param sql the SQL statement
+     * @param ex the exception from the remote database
+     * @return the wrapped exception
+     */
+    protected static DbException wrapException(String sql, Exception ex) {
+        SQLException e = DbException.toSQLException(ex);
+        return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
+    }
     
 
 }

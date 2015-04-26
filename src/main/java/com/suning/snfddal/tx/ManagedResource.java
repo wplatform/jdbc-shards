@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.suning.snfddal.shards.DataSourceDispatcher;
+import com.suning.snfddal.shards.DataSourceMarker;
 import com.suning.snfddal.shards.Optional;
 
 /**
@@ -39,7 +40,7 @@ public class ManagedResource implements DataSourceDispatcher {
     }
 
     @Override
-    public Connection doDispatch(Optional optional) throws SQLException {
+    public DataSourceMarker doDispatch(Optional optional) throws SQLException {
         // TODO Auto-generated method stub
         return delegate.doDispatch(optional);
     }

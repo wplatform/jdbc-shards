@@ -18,149 +18,47 @@
 
 package com.suning.snfddal.shards;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.sql.DataSource;
-
-import com.suning.snfddal.util.StringUtils;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class DataSourceMarker {
-    
-    private final String uid;
-
-    private final String shardName;
-    
-    private final boolean writable;
-
-    private final boolean readable;
-
-    private final DataSource dataSource;
-    
-    private final AtomicInteger failedCount = new AtomicInteger(0);
-
-    /**
-     * @param uid
-     * @param writable
-     * @param readable
-     * @param datasource
-     */
-    public DataSourceMarker(String uid, String shardName,boolean writable, boolean readable, DataSource datasource) {
-        if(StringUtils.isNullOrEmpty(uid)) {
-            throw new IllegalArgumentException("No uid specified");
-        }
-        if(StringUtils.isNullOrEmpty(shardName)) {
-            throw new IllegalArgumentException("No shardName specified");
-        }
-        if(datasource == null) {
-            throw new IllegalArgumentException("No DataSource specified");
-        }
-        this.uid = uid;
-        this.shardName = shardName;
-        this.writable = writable;
-        this.readable = readable;
-        this.dataSource = datasource;
-    }
-
+public interface DataSourceMarker {
     /**
      * @return the xid
      */
-    public String getUid() {
-        return uid;
-    }
+    public String getUid();
 
     /**
      * @return the shardName
      */
-    public String getShardName() {
-        return shardName;
-    }
+    public String getShardName();
+
 
     /**
-     * @return the writable
+     * @return the readOnly
      */
-    public boolean isWritable() {
-        return writable;
-    }
+    public boolean isReadOnly();
+
 
     /**
-     * @return the readable
+     * @return the rWeight
      */
-    public boolean isReadable() {
-        return readable;
-    }
+    public int getrWeight();
+
 
     /**
-     * @return the datasource
+     * @return the wWeight
      */
-    public DataSource getDataSource() {
-        return dataSource;
-    }
+    public int getwWeight();
 
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DataSourceMarker other = (DataSourceMarker) obj;
-        if (shardName == null) {
-            if (other.shardName != null)
-                return false;
-        } else if (!shardName.equals(other.shardName))
-            return false;
-        if (uid == null) {
-            if (other.uid != null)
-                return false;
-        } else if (!uid.equals(other.uid))
-            return false;
-        return true;
-    }
     
-    
-
     /**
-     * @return
-     * @see java.util.concurrent.atomic.AtomicInteger#get()
+     * do get database connection form managed data source
+     * @return database connection
+     * @throws SQLException 
      */
-    public final int getFailedCount() {
-        return failedCount.get();
-    }
-
-    /**
-     * @param newValue
-     * @see java.util.concurrent.atomic.AtomicInteger#set(int)
-     */
-    public final void resetFailedCount() {
-        failedCount.set(0);
-    }
-
-    /**
-     * @return
-     * @see java.util.concurrent.atomic.AtomicInteger#incrementAndGet()
-     */
-    public final void incrementFailedCount() {
-        failedCount.incrementAndGet();
-    }
-
-    
-    
-    
-    
-
+    public Connection doGetConnection() throws SQLException;
 
 }

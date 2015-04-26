@@ -18,7 +18,6 @@
 
 package com.suning.snfddal.shards;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -26,6 +25,6 @@ import java.sql.SQLException;
  */
 public interface DataSourceDispatcher {
 
-    public Connection doDispatch(Optional optional) throws SQLException;
+    public DataSourceMarker doDispatch(Optional optional) throws SQLException;
         
 }

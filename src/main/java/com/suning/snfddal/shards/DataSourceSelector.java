@@ -20,15 +20,46 @@ package com.suning.snfddal.shards;
 
 import java.util.List;
 
+import com.suning.snfddal.util.New;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public interface DataSourceSelector extends Failover {
+public abstract class DataSourceSelector implements Failover {
     
-    public String getShardName();
+    public abstract String getShardName();
 
-    public DataSourceMarker doSelect(Optional option);
+    public abstract SmartDataSource doSelect(Optional option);
     
-    public DataSourceMarker doSelect(Optional option, List<DataSourceMarker> exclusive);
+    public abstract SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive);
+    
+    
+    public static DataSourceSelector create(String shardName, List<SmartDataSource> items) {
+        DataSourceSelector selector;
+        if(items.size() == 1) {
+            SmartDataSource ds = items.get(0);
+            if(ds.isReadOnly()) {
+                throw new IllegalArgumentException();
+            }
+            selector =  new StandaloneSelector(shardName, ds);
+        }
+        List<DataSourceMarker> writableDb = New.arrayList(items.size());
+        List<DataSourceMarker> readableDb = New.arrayList(items.size());
+        for (DataSourceMarker item : items) {
+            if(!item.isReadOnly()) {
+                writableDb.add(item);
+            }
+            readableDb.add(item);
+        }
+        if(writableDb.isEmpty() || readableDb.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        if(writableDb.size() == 1) {
+            selector =  new OneMasterSelector(shardName, items);
+        } else {
+            selector =  new MultiMasterSelector(shardName, items);
+        }
+        return selector;
+    }
 
 }

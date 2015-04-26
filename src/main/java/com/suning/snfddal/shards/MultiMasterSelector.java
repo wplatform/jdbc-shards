@@ -19,73 +19,109 @@
 package com.suning.snfddal.shards;
 
 import java.util.List;
+import java.util.Set;
+
+import com.suning.snfddal.util.New;
 
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class MultiMasterSelector implements DataSourceSelector {
-
+public class MultiMasterSelector extends DataSourceSelector {
     private String shardName;
-    private List<DataSourceMarker> writable;
-    private List<DataSourceMarker> readable;
+    private List<SmartDataSource> registered;
+    private Set<SmartDataSource> readable = New.copyOnWriteArraySet();
+    private Set<SmartDataSource> writable = New.copyOnWriteArraySet();
+    private volatile LoadBalance writableLoadBalance;
+    private volatile LoadBalance readableLoadBalance;
     
     /**
      * @param shardName
      * @param writable
      * @param readable
      */
-    public MultiMasterSelector(String shardName, List<DataSourceMarker> writable,
-            List<DataSourceMarker> readable) {
-        super();
-        this.shardName = shardName;
-        this.writable = writable;
-        this.readable = readable;
+    public MultiMasterSelector(String shardName, List<SmartDataSource> registered) {
+        List<SmartDataSource> writable = New.arrayList();
+        List<SmartDataSource> readable = New.arrayList();
+        for (SmartDataSource item : registered) {
+            if(!item.isReadOnly() && item.getwWeight() > 0) {
+                writable.add(item);
+            }
+            if(item.getrWeight() > 0) {
+                readable.add(item);
+            }
+        }
+        if(writable.size() < 1) {
+            throw new IllegalStateException();
+        }
+        if(readable.size() < 1) {
+            throw new IllegalStateException();
+        }
+        this.registered = registered;
+        this.writable.addAll(writable);
+        this.readable.addAll(readable);
+        this.writableLoadBalance = new LoadBalance(writable, false);
+        this.readableLoadBalance = new LoadBalance(readable, true);
     }
 
 
     @Override
-    public DataSourceMarker doSelect(Optional option) {
+    public SmartDataSource doSelect(Optional option) {
+        if (!option.readOnly) {
+            return writableLoadBalance.load();
+        } else {
+            return readableLoadBalance.load();
+        }
+
+    }
+
+    @Override
+    public SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive) {
+        for (SmartDataSource marker : registered) {
+            if(exclusive.contains(marker)) {
+                continue;
+            }
+            if (!option.readOnly && marker.isReadOnly()) {
+                continue;
+            }
+            return marker;
+        }
         return null;
     }
 
-    
     @Override
     public String getShardName() {
         return shardName;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.shards.Failover#doHandleAbnormal(com.suning.snfddal.shards.UidDataSource)
-     */
     @Override
-    public void doHandleAbnormal(DataSourceMarker source) {
-        // TODO Auto-generated method stub
+    public void doHandleAbnormal(SmartDataSource source) {
+        if (!registered.contains(source)) {
+            throw new IllegalStateException(shardName + "datasource not matched. " + source);
+        }
+        if(!source.isReadOnly() && writable.remove(source)) {
+            this.writableLoadBalance = new LoadBalance(writable, false);
+        }
+        if(readable.remove(source)) {
+            readableLoadBalance = new LoadBalance(readable, true);
+        }
+        
         
     }
 
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.shards.Failover#doHandleWakeup(com.suning.snfddal.shards.UidDataSource)
-     */
     @Override
-    public void doHandleWakeup(DataSourceMarker source) {
-        // TODO Auto-generated method stub
+    public void doHandleWakeup(SmartDataSource source) {
+        if (!registered.contains(source)) {
+            throw new IllegalStateException(shardName + " datasource not matched. " + source);
+        }
+        if(!source.isReadOnly() && source.getwWeight() > 0 && writable.add(source)) {
+            this.writableLoadBalance = new LoadBalance(writable, true);
+        }
+        if(source.getrWeight() > 0 && readable.add(source)) {
+            this.readableLoadBalance = new LoadBalance(readable, true);
+        }
         
     }
-
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.shards.DataSourceSelector#doSelect(com.suning.snfddal.shards.Optional, java.util.List)
-     */
-    @Override
-    public DataSourceMarker doSelect(Optional option, List<DataSourceMarker> exclusive) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    
     
 }

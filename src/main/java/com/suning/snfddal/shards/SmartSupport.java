@@ -25,8 +25,8 @@ public class SmartSupport {
     private List<Object> columnNames = new ArrayList<Object>();
     private List<Object> columnValues = new ArrayList<Object>();
 
-    protected final DatabaseCluster database;
-    protected final DataSourceMarker dataSource;
+    protected final DataSourceRepository database;
+    protected final SmartDataSource dataSource;
     protected final Trace trace;
 
     /**
@@ -35,7 +35,7 @@ public class SmartSupport {
      * @param connection
      * @param trace
      */
-    protected SmartSupport(DatabaseCluster database, DataSourceMarker dataSource) {
+    protected SmartSupport(DataSourceRepository database, SmartDataSource dataSource) {
         this.database = database;
         this.dataSource = dataSource;
         this.trace = database.getTrace();
@@ -119,7 +119,7 @@ public class SmartSupport {
 
     protected void debug(String text) {
         if (trace.isDebugEnabled()) {
-            trace.debug(text);
+            trace.debug(dataSource.toString() + text);
         }
     }
 

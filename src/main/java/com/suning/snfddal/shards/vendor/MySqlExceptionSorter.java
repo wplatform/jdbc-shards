@@ -2,6 +2,8 @@ package com.suning.snfddal.shards.vendor;
 
 import java.sql.SQLException;
 
+import com.suning.snfddal.shards.ExceptionSorter;
+
 public class MySqlExceptionSorter implements ExceptionSorter {
 
     @Override

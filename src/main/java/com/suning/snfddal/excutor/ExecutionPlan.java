@@ -25,44 +25,31 @@ package com.suning.snfddal.excutor;
 public class ExecutionPlan {
 
     private ExecutionPlan parent;
-    private ExecutionPlan left;
-    private ExecutionPlan right;
+    private ExecutionPlan[] children;
     /**
      * @return the parent
      */
-    public ExecutionPlan getParent() {
+    protected ExecutionPlan getParent() {
         return parent;
     }
     /**
      * @param parent the parent to set
      */
-    public void setParent(ExecutionPlan parent) {
+    protected void setParent(ExecutionPlan parent) {
         this.parent = parent;
     }
     /**
-     * @return the left
+     * @return the children
      */
-    public ExecutionPlan getLeft() {
-        return left;
+    protected ExecutionPlan[] getChildren() {
+        return children;
     }
     /**
-     * @param left the left to set
+     * @param children the children to set
      */
-    public void setLeft(ExecutionPlan left) {
-        this.left = left;
-    }
-    /**
-     * @return the right
-     */
-    public ExecutionPlan getRight() {
-        return right;
-    }
-    /**
-     * @param right the right to set
-     */
-    public void setRight(ExecutionPlan right) {
-        this.right = right;
+    protected void setChildren(ExecutionPlan[] children) {
+        this.children = children;
     }
 
-
+    
 }

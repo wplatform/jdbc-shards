@@ -19,7 +19,7 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
      * @param dataSource
      * @param traceable
      */
-    protected SmartConnection(DatabaseCluster database, DataSourceMarker dataSource, Connection connection) {
+    protected SmartConnection(DataSourceRepository database, SmartDataSource dataSource, Connection connection) {
         super(database, dataSource);
         this.connection = connection;
     }
@@ -46,7 +46,7 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
                 return stmt;
             } else if ("close".equals(method.getName())) {
                 if (isDebugEnabled()) {
-                    debug("xxx Connection Closed");
+                    debug("Connection Closed");
                 }
                 return method.invoke(connection, params);
             } else {
@@ -65,7 +65,7 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
      * @param conn - the original connection
      * @return - the connection with exception trace
      */
-    public static Connection newInstance(DatabaseCluster database, DataSourceMarker dataSource, Connection connection) {
+    public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource, Connection connection) {
         InvocationHandler handler = new SmartConnection(database, dataSource, connection);
         ClassLoader cl = Connection.class.getClassLoader();
         return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);

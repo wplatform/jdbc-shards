@@ -50,7 +50,7 @@ public class XmlDataSourceProvider implements DataSourceProvider {
     @Override
     public DataSource lookup(String uid) {
         if (StringUtils.isNullOrEmpty(uid)) {
-            throw new IllegalArgumentException("DataSource key be not null.");
+            throw new DataSourceException("DataSource id be not null.");
         }
         DataSource result = dataNodes.get(uid);
         return result;

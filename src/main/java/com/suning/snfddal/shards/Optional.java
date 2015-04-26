@@ -29,7 +29,7 @@ public class Optional {
     public int retry = DEFAULT_TRYTIMES;
     public String dbid;
     public String shardName;
-    public boolean isWriteOperation;
+    public boolean readOnly;
     
     
     public static Optional create() {

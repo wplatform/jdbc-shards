@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -20,9 +19,7 @@ import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.ConfigurationException;
 import com.suning.snfddal.config.DataSourceProvider;
 import com.suning.snfddal.config.SchemaConfig;
-import com.suning.snfddal.config.ShardConfig;
 import com.suning.snfddal.config.TableConfig;
-import com.suning.snfddal.config.ShardConfig.ShardItem;
 import com.suning.snfddal.dbobject.Comment;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.Right;
@@ -41,8 +38,7 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceSystem;
-import com.suning.snfddal.shards.DataSourceSelector;
-import com.suning.snfddal.shards.DataSourceMarker;
+import com.suning.snfddal.shards.DataSourceRepository;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.SchemaMetaLoader;
@@ -77,46 +73,45 @@ public class Database {
     private CompareMode compareMode;
     private int allowLiterals = Constants.ALLOW_LITERALS_ALL;
     private volatile boolean closing;
-    private boolean ignoreCase;
+    private boolean ignoreCase;// for data type VARCHAR_IGNORECASE
     private Mode mode = Mode.getInstance(Mode.REGULAR);
     private int maxMemoryRows = SysProperties.MAX_MEMORY_ROWS;
     private int maxOperationMemory = Constants.DEFAULT_MAX_OPERATION_MEMORY;
     private final DbSettings dbSettings;
+    private final DataSourceRepository dsRepository;
+    private final Configuration configuration;
 
     private SourceCompiler compiler;
     private RoutingHandler routingHandler;
 
     public Database(Configuration configuration) {
-
+        this.configuration = configuration;
         this.compareMode = CompareMode.getInstance(null, 0);
         this.dbSettings = DbSettings.getInstance(null);
 
-        
-        String varName = SetTypes.getTypeName(SetTypes.MODE);
-        String sqlMode = configuration.getProperty(varName, Mode.MY_SQL);
+        String sqlMode = configuration.getProperty(SetTypes.MODE, Mode.MY_SQL);
         Mode settingMode = Mode.getInstance(sqlMode);
         if (settingMode != null) {
             this.mode = settingMode;
         }
-        varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_FILE);
-        int traceLevelFile =
-                configuration.getProperty(varName,
+        int traceLevelFile = configuration.getIntProperty(SetTypes.TRACE_LEVEL_FILE,
                 TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
-        varName = SetTypes.getTypeName(SetTypes.TRACE_LEVEL_SYSTEM_OUT);
-        int traceLevelSystemOut =
-                configuration.getProperty(varName,
+        int traceLevelSystemOut = configuration.getIntProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
                 TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
 
-        traceSystem = new TraceSystem(null);
+        String traceFile = configuration.getProperty(SetTypes.TRACE_FILE_NAME, null);
+
+        traceSystem = new TraceSystem(traceFile);
         traceSystem.setLevelFile(traceLevelFile);
         traceSystem.setLevelSystemOut(traceLevelSystemOut);
         trace = traceSystem.getTrace(Trace.DATABASE);
-
-        openDatabase(configuration);
+        dsRepository = new DataSourceRepository(this);
+        
+        openDatabase();
 
     }
 
-    private synchronized void openDatabase(Configuration configuration) {
+    private synchronized void openDatabase() {
         User systemUser = new User(this, allocateObjectId(), SYSTEM_USER_NAME);
         systemUser.setAdmin(true);
         systemUser.setUserPasswordHash(new byte[0]);
@@ -130,50 +125,35 @@ public class Database {
         roles.put(Constants.PUBLIC_ROLE_NAME, publicRole);
 
         DataSourceProvider dataSourceProvider = configuration.getDataSourceProvider();
-        if(dataSourceProvider == null) {
+        if (dataSourceProvider == null) {
             throw new ConfigurationException("No configuration data source.");
         }
-        Map<String, ShardConfig> shardMapping = configuration.getCluster();
-        for (ShardConfig value : shardMapping.values()) {
-            List<ShardItem> shardItems = value.getShardItems();
-            List<DataSourceMarker> shardDs = New.arrayList(shardItems.size());
-            DataSourceMarker ds;
-            for (ShardItem i : shardItems) {
-                String ref = i.getRef();
-                DataSource dataSource = dataSourceProvider.lookup(ref);
-                if (dataSource == null) {
-                    throw new ConfigurationException("Can' find data source: " + ref);
-                }
-                ds = new DataSourceMarker(ref,value.getName(), i.isWritable(), i.isReadable(), dataSource);
-                shardDs.add(ds);
-            }
-            /*
-            DataSourceSelector shardDataSource = new DataSourceSelector(value.getName(), shardDs);
-            addDataNode(value.getName(), shardDataSource);
-            */
-        }
-
         SchemaMetaLoader metaLoader = new SchemaMetaLoader(schema);
-        SchemaConfig sc = configuration.getSchemaConfig();
-        List<TableConfig> ctList = sc.getTables();
-        for (TableConfig tableConfig : ctList) {
-            String matedataNode = tableConfig.getMetadataNode();
-            String matedataTable = tableConfig.getNameWithSchemaName();
-            TableMate tableMate = metaLoader.loadTableMeta(tableConfig);
-            tableMate.setTableRouter(tableConfig.getTableRouter());
-            tableMate.validationRuleColumn();
-            tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
-            tableMate.setScanLevel(tableConfig.getScanLevel());
-            String[] broadcast = tableConfig.getBroadcast();
-            if (broadcast.length > 0) {
-                TableNode[] bNodes = new TableNode[broadcast.length];
-                for (int i = 0; i < broadcast.length; i++) {
-                    bNodes[i] = new TableNode(broadcast[i], matedataTable);
+        try {
+            SchemaConfig sc = configuration.getSchemaConfig();
+            List<TableConfig> ctList = sc.getTables();
+            for (TableConfig tableConfig : ctList) {
+                String matedataNode = tableConfig.getMetadataNode();
+                String matedataTable = tableConfig.getNameWithSchemaName();
+                TableMate tableMate = metaLoader.loadTableMeta(tableConfig);
+                tableMate.setTableRouter(tableConfig.getTableRouter());
+                tableMate.validationRuleColumn();
+                tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
+                tableMate.setScanLevel(tableConfig.getScanLevel());
+                String[] broadcast = tableConfig.getBroadcast();
+                if (broadcast.length > 0) {
+                    TableNode[] bNodes = new TableNode[broadcast.length];
+                    for (int i = 0; i < broadcast.length; i++) {
+                        bNodes[i] = new TableNode(broadcast[i], matedataTable);
+                    }
+                    tableMate.setBroadcastNode(bNodes);
                 }
-                tableMate.setBroadcastNode(bNodes);
+                this.addSchemaObject(tableMate);
             }
-            this.addSchemaObject(tableMate);
+        } finally {
+            metaLoader.close();
         }
+        
 
     }
 
@@ -361,7 +341,7 @@ public class Database {
     public synchronized Session createSession(User user) {
         Session session = new Session(this, user, ++nextSessionId);
         userSessions.add(session);
-        trace.info("create session #{0}", session.getId(),"engine");
+        trace.info("create session #{0}", session.getId(), "engine");
         return session;
     }
 
@@ -652,21 +632,6 @@ public class Database {
         obj.getSchema().remove(obj);
     }
 
-    public synchronized void addDataNode(String name, DataSource dataSource) {
-        if (dataNodes.containsKey(name)) {
-            DbException.throwInternalError("data node already exists: " + name);
-        }
-        dataNodes.put(name, dataSource);
-    }
-
-    public DataSource getDataNode(String name) {
-        DataSource dataSource = dataNodes.get(name);
-        if (dataSource == null) {
-            DbException.throwInternalError("data node not exists: " + name);
-        }
-        return dataSource;
-    }
-
     public synchronized DataSource removeDataNode(String name) {
         DataSource dataSource = dataNodes.get(name);
         if (dataSource == null) {
@@ -774,6 +739,13 @@ public class Database {
         return false;
     }
 
+    /**
+     * @return the configuration
+     */
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
     public SourceCompiler getCompiler() {
         if (compiler == null) {
             compiler = new SourceCompiler();
@@ -787,5 +759,14 @@ public class Database {
         }
         return routingHandler;
     }
+    
+    /**
+     * @return the dataSourceManager
+     */
+    public DataSourceRepository getDataSourceRepository() {
+        return dsRepository;
+    }
+    
+    
 
 }

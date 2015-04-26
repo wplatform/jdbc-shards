@@ -1,8 +1,8 @@
 package com.suning.snfddal.config;
 
-public class DataSourceException extends ConfigurationException {
+public class DataSourceException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -5251396250407091334L;
 
     public DataSourceException() {
         super();
@@ -21,3 +21,4 @@ public class DataSourceException extends ConfigurationException {
     }
 
 }
+

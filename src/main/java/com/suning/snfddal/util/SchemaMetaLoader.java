@@ -32,11 +32,13 @@ import javax.sql.DataSource;
 
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.config.TableConfig;
+import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.index.IndexType;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.engine.Database;
+import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
@@ -61,12 +63,15 @@ public class SchemaMetaLoader {
 
     private Database database;
     private Schema currentSchema;
+    private Session initSession;
     private Trace trace;
     
     
     public SchemaMetaLoader(Schema schema) {
         this.currentSchema = schema;
         this.database = schema.getDatabase();
+        User user = database.getUser(Database.SYSTEM_USER_NAME);
+        this.initSession = database.createSession(user);
         this.trace = database.getTrace(Trace.SCHEMA);
     }
     
@@ -108,9 +113,8 @@ public class SchemaMetaLoader {
             try {
                 Connection conn = null;
                 try {
-                    trace.debug("Try to load {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);
-                    DataSource ds = database.getDataNode(metadataNode);
-                    conn = ds.getConnection();
+                    trace.debug("Try to load {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);                    
+                    conn = initSession.applyConnection(metadataNode);
                     TableMate tableMate = tryReadMetaData(conn, tableConfig);
                     trace.debug("Load the {0} metadata success.",name);
                     return tableMate;
@@ -344,18 +348,10 @@ public class SchemaMetaLoader {
         return columnName;
     }
     
-    
-    
-    /**
-     * Wrap a SQL exception that occurred while accessing a linked table.
-     *
-     * @param sql the SQL statement
-     * @param ex the exception from the remote database
-     * @return the wrapped exception
-     */
-    public static DbException wrapException(String sql, Exception ex) {
-        SQLException e = DbException.toSQLException(ex);
-        return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
+
+
+    public void close() {
+        this.initSession.close();
     }
 
 }

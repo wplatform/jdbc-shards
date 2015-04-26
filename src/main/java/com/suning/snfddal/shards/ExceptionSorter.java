@@ -1,4 +1,4 @@
-package com.suning.snfddal.shards.vendor;
+package com.suning.snfddal.shards;
 
 import java.sql.SQLException;
 

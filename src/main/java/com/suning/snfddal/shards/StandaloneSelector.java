@@ -22,23 +22,31 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class StandaloneSelector implements DataSourceSelector {
-    
-    private String shardName;
+public class StandaloneSelector extends DataSourceSelector {
 
-    private DataSourceMarker standalone;
-    
-    public StandaloneSelector(String shardName, DataSourceMarker standalone) {
+    private String shardName;
+    private SmartDataSource standalone;
+
+    private volatile boolean abnormal;
+
+    public StandaloneSelector(String shardName, SmartDataSource standalone) {
         super();
         this.shardName = shardName;
         this.standalone = standalone;
     }
 
     @Override
-    public DataSourceMarker doSelect(Optional option) {
+    public SmartDataSource doSelect(Optional option) {
+        if (abnormal) {
+            return null;
+        }
         return standalone;
+    }
+
+    @Override
+    public SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive) {
+        return doSelect(option);
     }
 
     @Override
@@ -46,26 +54,23 @@ public class StandaloneSelector implements DataSourceSelector {
         return shardName;
     }
 
-
     @Override
-    public void doHandleAbnormal(DataSourceMarker source) {
-        // TODO Auto-generated method stub
-        
+    public void doHandleAbnormal(SmartDataSource source) {
+        if (!standalone.equals(source)) {
+            throw new IllegalStateException("DataSource not matched." + standalone.toString()
+                    + source.toString());
+        }
+        abnormal = true;
+
     }
 
     @Override
-    public void doHandleWakeup(DataSourceMarker source) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.shards.DataSourceSelector#doSelect(com.suning.snfddal.shards.Optional, java.util.List)
-     */
-    @Override
-    public DataSourceMarker doSelect(Optional option, List<DataSourceMarker> exclusive) {
-        // TODO Auto-generated method stub
-        return null;
+    public void doHandleWakeup(SmartDataSource source) {
+        if (!standalone.equals(source)) {
+            throw new IllegalStateException("DataSource not matched." + standalone.toString()
+                    + source.toString());
+        }
+        abnormal = false;
     }
 
 }
