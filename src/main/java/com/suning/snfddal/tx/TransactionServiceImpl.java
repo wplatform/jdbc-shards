@@ -18,6 +18,8 @@
 
 package com.suning.snfddal.tx;
 
+import java.sql.Connection;
+
 import com.suning.snfddal.shards.DataSourceDispatcher;
 
 /**
@@ -31,15 +33,6 @@ public class TransactionServiceImpl implements TransactionService, TransactionMa
      */
     @Override
     public TransactionManager getTransactionManager() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.tx.TransactionService#getManagedResource()
-     */
-    @Override
-    public DataSourceDispatcher getManagedResource() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -69,6 +62,15 @@ public class TransactionServiceImpl implements TransactionService, TransactionMa
     public void rollback() throws TransactionException {
         // TODO Auto-generated method stub
         
+    }
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.tx.TransactionService#getManagedConnection()
+     */
+    @Override
+    public Connection getManagedConnection() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

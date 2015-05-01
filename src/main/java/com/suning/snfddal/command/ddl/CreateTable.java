@@ -151,25 +151,9 @@ public class CreateTable extends SchemaCommand {
              * } */
             for (DefineCommand command : constraintCommands) {
                 command.setTransactional(transactional);
-                int type = command.getType();
-                switch (type) {
-                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
-                    
-                }
-                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
-                    
-                }
-                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
-                    
-                }
-                case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
-                    
-                }
-                }
                 command.update();
             }
             if (asQuery != null) {
-                session.startStatementWithinTransaction();
                 Insert insert = new Insert(session);
                 insert.setSortedInsertMode(sortedInsertMode);
                 insert.setQuery(asQuery);

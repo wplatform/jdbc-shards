@@ -179,7 +179,7 @@ public class SmartDataSource implements DataSourceMarker {
 
     @Override
     public String toString() {
-        return "[shardName=" + shardName + ", id=" + uid + "]";
+        return "[" + uid + "]";
     }
 
     @Override

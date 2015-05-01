@@ -54,6 +54,7 @@ public class Database {
 
     public static final String SYSTEM_USER_NAME = "MASTER";
 
+    private final String databaseName;
     private final HashMap<String, Role> roles = New.hashMap();
     private final HashMap<String, User> users = New.hashMap();
     private final HashMap<String, Setting> settings = New.hashMap();
@@ -100,7 +101,7 @@ public class Database {
                 TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
 
         String traceFile = configuration.getProperty(SetTypes.TRACE_FILE_NAME, null);
-
+        databaseName = configuration.getSchemaConfig().getName();
         traceSystem = new TraceSystem(traceFile);
         traceSystem.setLevelFile(traceLevelFile);
         traceSystem.setLevelSystemOut(traceLevelSystemOut);
@@ -153,7 +154,7 @@ public class Database {
         } finally {
             metaLoader.close();
         }
-        
+        trace.info("opened {0}", databaseName);
 
     }
 
@@ -389,7 +390,7 @@ public class Database {
                 }
             }
         }
-        trace.info("Database closed");
+        trace.info("Database {0} closed", databaseName);
         traceSystem.close();
     }
 

@@ -104,6 +104,8 @@ public class DataSourceRepository implements DataSourceDispatcher {
             shardMaping.put(value.getName(), selector);
         }
 
+        DataSourceMonitor monitor = new DataSourceMonitor(database);
+        monitor.start();
     }
 
     @Override
@@ -272,8 +274,8 @@ public class DataSourceRepository implements DataSourceDispatcher {
 
     }
 
-    class DataSourceMonitor extends Thread {
-        DataSourceMonitor(Database db) {
+   private class DataSourceMonitor extends Thread {
+       private DataSourceMonitor(Database db) {
             super("datasource-monitor-thread");
         }
 

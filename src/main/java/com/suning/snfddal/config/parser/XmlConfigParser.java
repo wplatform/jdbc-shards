@@ -92,11 +92,11 @@ public class XmlConfigParser {
             List<ShardItem> shardItems = New.arrayList(children.size());
             for (XNode child : children) {
                 ShardItem shardItem = new ShardItem();
-                String nodename = xNode.getName();
+                String nodename = child.getName();
                 if ("standalone".equals(nodename) || "master".equals(nodename)) {
                     shardItem.setReadOnly(false);
                 } else if ("slave".equals(nodename)) {
-                    shardItem.setReadOnly(false);
+                    shardItem.setReadOnly(true);
                 }
                 String ref = child.getStringAttribute("ref");
                 int wWeight = child.getIntAttribute("wWeight", 1);
@@ -347,6 +347,9 @@ public class XmlConfigParser {
             broadcast = template.get("broadcast");
         }
         String tableName = tableNode.getStringAttribute("name");
+        String catalog = tableNode.getStringAttribute("catalog");
+        String schema = tableNode.getStringAttribute("schema");
+        
         tableMetadata = tableNode.getStringAttribute("metadata");
         String routerChild = tableNode.getStringAttribute("router", router);
         validation = tableNode.getBooleanAttribute("validation", validation);
@@ -364,6 +367,8 @@ public class XmlConfigParser {
         }
         router = routerChild;
         config.setName(tableName);
+        config.setOriginalCatalog(catalog);
+        config.setOriginalSchema(schema);
         config.setValidation(validation);
 
         Set<String> nodes = New.linkedHashSet();

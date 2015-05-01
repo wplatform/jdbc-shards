@@ -11,7 +11,7 @@
 
 		<tableGroup router="order_group" validation="false">
 			<table name="orders" metadata="shard1.orders_01"/>
-			<table name="order_items" metadata="shard1.order_items_01"/>
+			<table name="order_items"  metadata="shard1.order_items_01"/>
 			<table name="order_status" metadata="shard1.order_status_01"/>
 		</tableGroup>
 		
@@ -30,11 +30,12 @@
 			<slave ref="db2s" rWeight="2"/>
 		</shard>
 		<shard name="shard3">
+			<master ref="db3m" rWeight="1"/>
 			<slave ref="db3s" rWeight="2"/>
-			<slave ref="db4s" rWeight="2"/>
 		</shard>
 		<shard name="shard4">
-			<standalone ref="db4m"/>
+			<master ref="db4m" rWeight="1"/>
+			<slave ref="db4s" rWeight="2"/>
 		</shard>
 	</cluster>
 
@@ -42,7 +43,7 @@
 	<dataNodes>
 		<datasource id="db1m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.76:3306/ddal_test1" />
+			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test1" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
@@ -54,7 +55,7 @@
 		</datasource>
 		<datasource id="db2m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.76:3306/ddal_test2" />
+			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test2" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
@@ -66,7 +67,7 @@
 		</datasource>
 		<datasource id="db3m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.76:3306/ddal_test3" />
+			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test3" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
@@ -78,7 +79,7 @@
 		</datasource>
 		<datasource id="db4m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.76:3306/ddal_test4" />
+			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test4" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>

@@ -1005,12 +1005,6 @@ public class Session implements SessionInterface {
     }
 
     /**
-     * Start a new statement within a transaction.
-     */
-    public void startStatementWithinTransaction() {
-    }
-
-    /**
      * Mark the statement as completed. This also close all temporary result
      * set, and deletes all temporary files held by the result sets.
      */

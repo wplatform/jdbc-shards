@@ -28,8 +28,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.sql.DataSource;
-
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.config.TableConfig;
 import com.suning.snfddal.dbobject.User;
@@ -113,16 +111,16 @@ public class SchemaMetaLoader {
             try {
                 Connection conn = null;
                 try {
-                    trace.debug("Try to load {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);                    
+                    trace.debug("Try to load {0} metadata from table {1}.{2}.",name,metadataNode, qualified);                    
                     conn = initSession.applyConnection(metadataNode);
                     TableMate tableMate = tryReadMetaData(conn, tableConfig);
                     trace.debug("Load the {0} metadata success.",name);
                     return tableMate;
                 } catch (Exception e) {
-                    trace.error(e,"an error occurred when loading the {0} metadata from table {1} of shard {2}.",name,qualified, metadataNode);
+                    trace.debug("Fail to load {0} metadata from table {1}.{2}.",name,metadataNode, qualified);
                     throw DbException.convert(e);
                 } finally {
-                    JdbcUtils.closeSilently(conn);
+                    //JdbcUtils.closeSilently(conn); initSession.close();
                 }
             } catch (DbException e) {
                 if (retry >= MAX_RETRY) {

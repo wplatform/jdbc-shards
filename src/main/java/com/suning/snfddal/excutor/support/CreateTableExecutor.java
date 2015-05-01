@@ -19,19 +19,11 @@
 package com.suning.snfddal.excutor.support;
 
 import com.suning.snfddal.command.ddl.CreateTable;
-import com.suning.snfddal.dbobject.table.Column;
-import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.dispatch.rule.GroupTableNode;
 import com.suning.snfddal.dispatch.rule.RoutingResult;
 import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.excutor.CommonPreparedExecutor;
-import com.suning.snfddal.excutor.PreparedExecutor;
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.result.ResultInterface;
-import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.util.StringUtils;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -59,6 +59,8 @@ class CDATA #REQUIRED
 <!ELEMENT table (#PCDATA)>
 <!ATTLIST table
 name CDATA #REQUIRED
+catalog CDATA #IMPLIED
+schema CDATA #IMPLIED
 metadata CDATA #IMPLIED
 router CDATA #IMPLIED
 validation (true|false) #IMPLIED

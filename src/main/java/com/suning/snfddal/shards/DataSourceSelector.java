@@ -52,7 +52,7 @@ public abstract class DataSourceSelector implements Failover {
             readableDb.add(item);
         }
         if(writableDb.isEmpty() || readableDb.isEmpty()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("No writable datasource.");
         }
         if(writableDb.size() == 1) {
             selector =  new OneMasterSelector(shardName, items);

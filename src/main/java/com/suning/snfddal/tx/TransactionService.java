@@ -18,7 +18,7 @@
 
 package com.suning.snfddal.tx;
 
-import com.suning.snfddal.shards.DataSourceDispatcher;
+import java.sql.Connection;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -27,6 +27,6 @@ public interface TransactionService {
     
     TransactionManager getTransactionManager();
     
-    DataSourceDispatcher getManagedResource();
+    Connection getManagedConnection();
     
 }
