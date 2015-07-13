@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -14,6 +12,8 @@ import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
+
+import java.util.List;
 
 /**
  * A list of expressions, as in (ID, NAME).
@@ -89,7 +89,7 @@ public class ExpressionList extends Expression {
     @Override
     public String getSQL() {
         StatementBuilder buff = new StatementBuilder("(");
-        for (Expression e: list) {
+        for (Expression e : list) {
             buff.appendExceptFirst(", ");
             buff.append(e.getSQL());
         }
@@ -141,9 +141,9 @@ public class ExpressionList extends Expression {
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         StatementBuilder buff = new StatementBuilder("(");
-        for (Expression e: list) {
+        for (Expression e : list) {
             buff.appendExceptFirst(", ");
-            buff.append(e.exportParameters(filter,container));
+            buff.append(e.exportParameters(filter, container));
         }
         if (list.length == 1) {
             buff.append(',');

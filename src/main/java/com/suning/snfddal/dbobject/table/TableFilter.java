@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.dbobject.table;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.dml.Select;
 import com.suning.snfddal.command.expression.Comparison;
@@ -30,6 +28,8 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueLong;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+
 /**
  * A table filter represents a table that is used in a query. There is one such
  * object whenever a table (or view) is used in a query. For example the
@@ -39,82 +39,69 @@ public class TableFilter implements ColumnResolver {
 
     private static final int BEFORE_FIRST = 0, FOUND = 1, AFTER_LAST = 2,
             NULL_ROW = 3;
-
-    /**
-     * Whether this is a direct or indirect (nested) outer join
-     */
-    protected boolean joinOuterIndirect;
-
-    private Session session;
-
     private final Table table;
     private final Select select;
-    private String alias;
-    private Index index;
-    private int scanCount;
-    private boolean evaluatable;
-
-    /**
-     * Indicates that this filter is used in the plan.
-     */
-    private boolean used;
-
     /**
      * The filter used to walk through the index.
      */
     private final IndexCursor cursor;
-
     /**
      * The index conditions used for direct index lookup (start or end).
      */
     private final ArrayList<IndexCondition> indexConditions = New.arrayList();
-
+    private final int hashCode;
+    /**
+     * Whether this is a direct or indirect (nested) outer join
+     */
+    protected boolean joinOuterIndirect;
+    private Session session;
+    private String alias;
+    private Index index;
+    private int scanCount;
+    private boolean evaluatable;
+    /**
+     * Indicates that this filter is used in the plan.
+     */
+    private boolean used;
     /**
      * Additional conditions that can't be used for index lookup, but for row
      * filter for this table (ID=ID, NAME LIKE '%X%')
      */
     private Expression filterCondition;
-
     /**
      * The complete join condition.
      */
     private Expression joinCondition;
-
     private SearchRow currentSearchRow;
     private Row current;
     private int state;
-
     /**
      * The joined table (if there is one).
      */
     private TableFilter join;
-
     /**
      * Whether this is an outer join.
      */
     private boolean joinOuter;
-
     /**
      * The nested joined table (if there is one).
      */
     private TableFilter nestedJoin;
-
     private ArrayList<Column> naturalJoinColumns;
     private boolean foundOne;
     private Expression fullCondition;
-    private final int hashCode;
 
     /**
      * Create a new table filter object.
      *
-     * @param session the session
-     * @param table the table from where to read data
-     * @param alias the alias name
+     * @param session       the session
+     * @param table         the table from where to read data
+     * @param alias         the alias name
      * @param rightsChecked true if rights are already checked
-     * @param select the select statement
+     * @param select        the select statement
      */
     public TableFilter(Session session, Table table, String alias,
-            boolean rightsChecked, Select select) {
+                       boolean rightsChecked, Select select) {
         this.session = session;
         this.table = table;
         this.alias = alias;
@@ -138,8 +125,8 @@ public class TableFilter implements ColumnResolver {
     /**
      * Lock the table. This will also lock joined tables.
      *
-     * @param s the session
-     * @param exclusive true if an exclusive lock is required
+     * @param s                   the session
+     * @param exclusive           true if an exclusive lock is required
      * @param forceLockEvenInMvcc lock even in the MVCC mode
      */
     public void lock(Session s, boolean exclusive, boolean forceLockEvenInMvcc) {
@@ -153,7 +140,7 @@ public class TableFilter implements ColumnResolver {
      * Get the best plan item (index, cost) to use use for the current join
      * order.
      *
-     * @param s the session
+     * @param s     the session
      * @param level 1 for the first table in a join, 2 for the second, and so on
      * @return the best plan item
      */
@@ -490,7 +477,7 @@ public class TableFilter implements ColumnResolver {
      * Add a filter condition.
      *
      * @param condition the condition
-     * @param isJoin if this is in fact a join condition
+     * @param isJoin    if this is in fact a join condition
      */
     public void addFilterCondition(Expression condition, boolean isJoin) {
         if (isJoin) {
@@ -514,12 +501,12 @@ public class TableFilter implements ColumnResolver {
      * Add a joined table.
      *
      * @param filter the joined table filter
-     * @param outer if this is an outer join
+     * @param outer  if this is an outer join
      * @param nested if this is a nested join
-     * @param on the join condition
+     * @param on     the join condition
      */
     public void addJoin(TableFilter filter, boolean outer, boolean nested,
-            final Expression on) {
+                        final Expression on) {
         if (on != null) {
             on.mapColumns(this, 0);
             if (session.getDatabase().getSettings().nestedJoins) {
@@ -737,21 +724,12 @@ public class TableFilter implements ColumnResolver {
         cursor.setIndex(index);
     }
 
-    public void setUsed(boolean used) {
-        this.used = used;
-    }
-
     public boolean isUsed() {
         return used;
     }
 
-    /**
-     * Set the session of this table filter.
-     *
-     * @param session the new session
-     */
-    void setSession(Session session) {
-        this.session = session;
+    public void setUsed(boolean used) {
+        this.used = used;
     }
 
     /**
@@ -814,7 +792,7 @@ public class TableFilter implements ColumnResolver {
      * return rows or not.
      *
      * @param filter the table filter
-     * @param b the new flag
+     * @param b      the new flag
      */
     public void setEvaluatable(TableFilter filter, boolean b) {
         filter.setEvaluatable(b);
@@ -834,10 +812,6 @@ public class TableFilter implements ColumnResolver {
         if (join != null) {
             join.setEvaluatable(filter, b);
         }
-    }
-
-    public void setEvaluatable(boolean evaluatable) {
-        this.evaluatable = evaluatable;
     }
 
     @Override
@@ -990,8 +964,6 @@ public class TableFilter implements ColumnResolver {
     public TableFilter getNestedJoin() {
         return nestedJoin;
     }
-    
-    
 
     /**
      * @return the indexConditions
@@ -1021,8 +993,21 @@ public class TableFilter implements ColumnResolver {
         return evaluatable;
     }
 
+    public void setEvaluatable(boolean evaluatable) {
+        this.evaluatable = evaluatable;
+    }
+
     public Session getSession() {
         return session;
+    }
+
+    /**
+     * Set the session of this table filter.
+     *
+     * @param session the new session
+     */
+    void setSession(Session session) {
+        this.session = session;
     }
 
     /**

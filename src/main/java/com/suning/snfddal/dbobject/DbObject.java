@@ -5,10 +5,10 @@
  */
 package com.suning.snfddal.dbobject;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
+
+import java.util.ArrayList;
 
 /**
  * A database object such as a table, an index, or a user.
@@ -168,17 +168,17 @@ public interface DbObject {
     void setTemporary(boolean temporary);
 
     /**
-     * Change the comment of this object.
-     *
-     * @param comment the new comment, or null for no comment
-     */
-    void setComment(String comment);
-
-    /**
      * Get the current comment of this object.
      *
      * @return the comment, or null if not set
      */
     String getComment();
+
+    /**
+     * Change the comment of this object.
+     *
+     * @param comment the new comment, or null for no comment
+     */
+    void setComment(String comment);
 
 }

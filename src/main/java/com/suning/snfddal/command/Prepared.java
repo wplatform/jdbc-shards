@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.engine.Session;
@@ -16,6 +14,8 @@ import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * A prepared statement.
@@ -64,6 +64,40 @@ public abstract class Prepared {
     }
 
     /**
+     * Get the SQL snippet of the value list.
+     *
+     * @param values the value list
+     * @return the SQL snippet
+     */
+    protected static String getSQL(Value[] values) {
+        StatementBuilder buff = new StatementBuilder();
+        for (Value v : values) {
+            buff.appendExceptFirst(", ");
+            if (v != null) {
+                buff.append(v.getSQL());
+            }
+        }
+        return buff.toString();
+    }
+
+    /**
+     * Get the SQL snippet of the expression list.
+     *
+     * @param list the expression list
+     * @return the SQL snippet
+     */
+    protected static String getSQL(Expression[] list) {
+        StatementBuilder buff = new StatementBuilder();
+        for (Expression e : list) {
+            buff.appendExceptFirst(", ");
+            if (e != null) {
+                buff.append(e.getSQL());
+            }
+        }
+        return buff.toString();
+    }
+
+    /**
      * Check if this command is transactional.
      * If it is not, then it forces the current transaction to commit.
      *
@@ -77,7 +111,6 @@ public abstract class Prepared {
      * @return the result set
      */
     public abstract ResultInterface queryMeta();
-
 
     /**
      * Get the command type as defined in CommandInterface
@@ -183,21 +216,21 @@ public abstract class Prepared {
     }
 
     /**
-     * Set the SQL statement.
-     *
-     * @param sql the SQL statement
-     */
-    public void setSQL(String sql) {
-        this.sqlStatement = sql;
-    }
-
-    /**
      * Get the SQL statement.
      *
      * @return the SQL statement
      */
     public String getSQL() {
         return sqlStatement;
+    }
+
+    /**
+     * Set the SQL statement.
+     *
+     * @param sql the SQL statement
+     */
+    public void setSQL(String sql) {
+        this.sqlStatement = sql;
     }
 
     /**
@@ -228,6 +261,16 @@ public abstract class Prepared {
     }
 
     /**
+     * Set the object id for this statement.
+     *
+     * @param i the object id
+     */
+    public void setObjectId(int i) {
+        this.objectId = i;
+        this.create = false;
+    }
+
+    /**
      * Get the SQL statement with the execution plan.
      *
      * @return the execution plan
@@ -250,16 +293,6 @@ public abstract class Prepared {
     }
 
     /**
-     * Set the object id for this statement.
-     *
-     * @param i the object id
-     */
-    public void setObjectId(int i) {
-        this.objectId = i;
-        this.create = false;
-    }
-
-    /**
      * Set the session for this statement.
      *
      * @param currentSession the new session
@@ -273,7 +306,7 @@ public abstract class Prepared {
      * enabled.
      *
      * @param startTime when the statement was started
-     * @param rowCount the query or update row count
+     * @param rowCount  the query or update row count
      */
     void trace(long startTime, int rowCount) {
         if (session.getTrace().isInfoEnabled() && startTime > 0) {
@@ -294,6 +327,15 @@ public abstract class Prepared {
     }
 
     /**
+     * Get the current row number.
+     *
+     * @return the row number
+     */
+    public int getCurrentRowNumber() {
+        return currentRowNumber;
+    }
+
+    /**
      * Set the current row number.
      *
      * @param rowNumber the row number
@@ -303,15 +345,6 @@ public abstract class Prepared {
             checkCanceled();
         }
         this.currentRowNumber = rowNumber;
-    }
-
-    /**
-     * Get the current row number.
-     *
-     * @return the row number
-     */
-    public int getCurrentRowNumber() {
-        return currentRowNumber;
     }
 
     /**
@@ -325,44 +358,10 @@ public abstract class Prepared {
     }
 
     /**
-     * Get the SQL snippet of the value list.
-     *
-     * @param values the value list
-     * @return the SQL snippet
-     */
-    protected static String getSQL(Value[] values) {
-        StatementBuilder buff = new StatementBuilder();
-        for (Value v : values) {
-            buff.appendExceptFirst(", ");
-            if (v != null) {
-                buff.append(v.getSQL());
-            }
-        }
-        return buff.toString();
-    }
-
-    /**
-     * Get the SQL snippet of the expression list.
-     *
-     * @param list the expression list
-     * @return the SQL snippet
-     */
-    protected static String getSQL(Expression[] list) {
-        StatementBuilder buff = new StatementBuilder();
-        for (Expression e : list) {
-            buff.appendExceptFirst(", ");
-            if (e != null) {
-                buff.append(e.getSQL());
-            }
-        }
-        return buff.toString();
-    }
-
-    /**
      * Set the SQL statement of the exception to the given row.
      *
-     * @param e the exception
-     * @param rowId the row number
+     * @param e      the exception
+     * @param rowId  the row number
      * @param values the values of the row
      * @return the exception
      */

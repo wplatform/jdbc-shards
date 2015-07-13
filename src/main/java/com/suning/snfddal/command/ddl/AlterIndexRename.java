@@ -30,8 +30,8 @@ public class AlterIndexRename extends DefineCommand {
     public void setNewName(String name) {
         newIndexName = name;
     }
-    
-    
+
+
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");

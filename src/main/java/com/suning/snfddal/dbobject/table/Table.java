@@ -83,20 +83,6 @@ public abstract class Table extends SchemaObjectBase {
     }
 
     /**
-     * Create add index for this table
-     *
-     * @param session the session
-     * @param indexName the name of the index
-     * @param indexId the id
-     * @param cols the index columns
-     * @param indexType the index type
-     * @param create whether this is a new index
-     * @param indexComment the comment
-     * @return the index
-     */
-    public abstract Index addIndex(ArrayList<Column> list, IndexType indexType);
-
-    /**
      * Get the table type name
      *
      * @return the table type name

@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.dbobject.FunctionAlias;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
@@ -14,11 +12,9 @@ import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.value.DataType;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueArray;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueResultSet;
+import com.suning.snfddal.value.*;
+
+import java.util.List;
 
 /**
  * This class wraps a user-defined function.
@@ -124,7 +120,7 @@ public class JavaFunction extends Expression implements FunctionCall {
 
     @Override
     public ValueResultSet getValueForColumnList(Session session,
-            Expression[] argList) {
+                                                Expression[] argList) {
         Value v = javaMethod.getValue(session, argList, true);
         return v == ValueNull.INSTANCE ? null : (ValueResultSet) v;
     }
@@ -136,17 +132,17 @@ public class JavaFunction extends Expression implements FunctionCall {
 
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
-        switch(visitor.getType()) {
-        case ExpressionVisitor.DETERMINISTIC:
-            if (!isDeterministic()) {
-                return false;
-            }
-            // only if all parameters are deterministic as well
-            break;
-        case ExpressionVisitor.GET_DEPENDENCIES:
-            visitor.addDependency(functionAlias);
-            break;
-        default:
+        switch (visitor.getType()) {
+            case ExpressionVisitor.DETERMINISTIC:
+                if (!isDeterministic()) {
+                    return false;
+                }
+                // only if all parameters are deterministic as well
+                break;
+            case ExpressionVisitor.GET_DEPENDENCIES:
+                visitor.addDependency(functionAlias);
+                break;
+            default:
         }
         for (Expression e : args) {
             if (e != null && !e.isEverything(visitor)) {
@@ -173,11 +169,11 @@ public class JavaFunction extends Expression implements FunctionCall {
     @Override
     public Expression[] getExpressionColumns(Session session) {
         switch (getType()) {
-        case Value.RESULT_SET:
-            ValueResultSet rs = getValueForColumnList(session, getArgs());
-            return getExpressionColumns(session, rs.getResultSet());
-        case Value.ARRAY:
-            return getExpressionColumns(session, (ValueArray) getValue(session));
+            case Value.RESULT_SET:
+                ValueResultSet rs = getValueForColumnList(session, getArgs());
+                return getExpressionColumns(session, rs.getResultSet());
+            case Value.ARRAY:
+                return getExpressionColumns(session, (ValueArray) getValue(session));
         }
         return super.getExpressionColumns(session);
     }
@@ -187,7 +183,7 @@ public class JavaFunction extends Expression implements FunctionCall {
         return functionAlias.isBufferResultSetToLocalTemp();
     }
 
-    
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         StatementBuilder buff = new StatementBuilder();

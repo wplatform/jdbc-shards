@@ -5,17 +5,17 @@
  */
 package com.suning.snfddal.dbobject.index;
 
-import java.util.List;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class MergedCursor implements Cursor {
-    
+
     private List<ResultCursor> cursors;
     private ResultCursor currentCursor;
     private Row currentRow;
@@ -39,13 +39,13 @@ public class MergedCursor implements Cursor {
     @Override
     public boolean next() {
         while (index < cursors.size()) {
-            if(currentCursor == null) {
+            if (currentCursor == null) {
                 currentCursor = cursors.get(index);
             }
             boolean result = currentCursor.next();
             if (!result) {
                 currentCursor = null;
-                ++ index;
+                ++index;
             } else {
                 currentRow = currentCursor.get();
                 return true;
@@ -58,5 +58,5 @@ public class MergedCursor implements Cursor {
     public boolean previous() {
         throw DbException.throwInternalError();
     }
-    
+
 }

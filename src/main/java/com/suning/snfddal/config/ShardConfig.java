@@ -22,11 +22,12 @@ import java.io.Serializable;
 import java.util.List;
 
 public class ShardConfig implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     private String name;
     private List<ShardItem> shardItems;
+
     /**
      * @return the name
      */
@@ -79,58 +80,65 @@ public class ShardConfig implements Serializable {
             return false;
         return true;
     }
-    
-    
-    public static class ShardItem implements Serializable {        
+
+
+    public static class ShardItem implements Serializable {
         private static final long serialVersionUID = 1L;
         private boolean readOnly;
         private int rWeight;
         private int wWeight;
         private String ref;
-        
-        
+
+
         /**
          * @return the readOnly
          */
         public boolean isReadOnly() {
             return readOnly;
         }
+
         /**
          * @param readOnly the readOnly to set
          */
         public void setReadOnly(boolean readOnly) {
             this.readOnly = readOnly;
         }
+
         /**
          * @return the rWeight
          */
         public int getrWeight() {
             return rWeight;
         }
+
         /**
          * @param rWeight the rWeight to set
          */
         public void setrWeight(int rWeight) {
             this.rWeight = rWeight;
         }
+
         /**
          * @return the wWeight
          */
         public int getwWeight() {
             return wWeight;
         }
+
         /**
          * @param wWeight the wWeight to set
          */
         public void setwWeight(int wWeight) {
             this.wWeight = wWeight;
         }
+
         /**
          * @return the ref
          */
         public String getRef() {
             return ref;
         }
+
         /**
          * @param ref the ref to set
          */
@@ -162,8 +170,8 @@ public class ShardConfig implements Serializable {
                 return false;
             return true;
         }
-        
-        
+
+
     }
 
 }

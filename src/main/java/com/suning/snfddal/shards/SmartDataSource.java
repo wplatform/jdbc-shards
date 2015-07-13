@@ -18,31 +18,27 @@
 
 package com.suning.snfddal.shards;
 
+import com.suning.snfddal.util.StringUtils;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.sql.DataSource;
-
-import com.suning.snfddal.util.StringUtils;
-
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class SmartDataSource implements DataSourceMarker {
-    
+
     private final DataSourceRepository dsMgr;
 
     private final String uid;
     private final String shardName;
     private final DataSource dataSource;
-    
+    private final AtomicInteger failedCount = new AtomicInteger(0);
     private boolean readOnly;
     private int rWeight;
     private int wWeight;
-
-    private final AtomicInteger failedCount = new AtomicInteger(0);
 
     /**
      * @param uid
@@ -50,8 +46,8 @@ public class SmartDataSource implements DataSourceMarker {
      * @param readable
      * @param datasource
      */
-    public SmartDataSource(DataSourceRepository dsMgr,String uid, String shardName, DataSource datasource) {
-        if(dsMgr == null) {
+    public SmartDataSource(DataSourceRepository dsMgr, String uid, String shardName, DataSource datasource) {
+        if (dsMgr == null) {
             throw new IllegalArgumentException("No SmartDataSourceManager specified");
         }
         if (StringUtils.isNullOrEmpty(uid)) {

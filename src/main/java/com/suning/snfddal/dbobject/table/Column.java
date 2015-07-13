@@ -5,14 +5,8 @@
  */
 package com.suning.snfddal.dbobject.table;
 
-import java.sql.ResultSetMetaData;
-
 import com.suning.snfddal.command.Parser;
-import com.suning.snfddal.command.expression.ConditionAndOr;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.command.expression.ExpressionVisitor;
-import com.suning.snfddal.command.expression.SequenceValue;
-import com.suning.snfddal.command.expression.ValueExpression;
+import com.suning.snfddal.command.expression.*;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.schema.Sequence;
 import com.suning.snfddal.engine.Constants;
@@ -23,16 +17,9 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.value.DataType;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueDate;
-import com.suning.snfddal.value.ValueInt;
-import com.suning.snfddal.value.ValueLong;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueString;
-import com.suning.snfddal.value.ValueTime;
-import com.suning.snfddal.value.ValueTimestamp;
-import com.suning.snfddal.value.ValueUuid;
+import com.suning.snfddal.value.*;
+
+import java.sql.ResultSetMetaData;
 
 /**
  * This class represents a column in a table.
@@ -91,7 +78,7 @@ public class Column {
     }
 
     public Column(String name, int type, long precision, int scale,
-            int displaySize) {
+                  int displaySize) {
         this.name = name;
         this.type = type;
         if (precision == -1 && scale == -1 && displaySize == -1) {
@@ -166,7 +153,7 @@ public class Column {
      * Compute the value of this computed column.
      *
      * @param session the session
-     * @param row the row
+     * @param row     the row
      * @return the value
      */
     synchronized Value computeValue(Session session, Row row) {
@@ -189,7 +176,7 @@ public class Column {
     /**
      * Set the table and column id.
      *
-     * @param table the table
+     * @param table    the table
      * @param columnId the column index
      */
     public void setTable(Table table, int columnId) {
@@ -204,11 +191,11 @@ public class Column {
     /**
      * Set the default expression.
      *
-     * @param session the session
+     * @param session           the session
      * @param defaultExpression the default expression
      */
     public void setDefaultExpression(Session session,
-            Expression defaultExpression) {
+                                     Expression defaultExpression) {
         // also to test that no column names are used
         if (defaultExpression != null) {
             defaultExpression = defaultExpression.optimize(session);
@@ -252,17 +239,13 @@ public class Column {
         return scale;
     }
 
-    public void setNullable(boolean b) {
-        nullable = b;
-    }
-
     /**
      * Validate the value, convert it if required, and update the sequence value
      * if required. If the value is null, the default value (NULL if no default
      * is set) is returned. Check constraints are validated as well.
      *
      * @param session the session
-     * @param value the value or null
+     * @param value   the value or null
      * @return the new or converted value
      */
     public Value validateConvertUpdateSequence(Session session, Value value) {
@@ -355,14 +338,14 @@ public class Column {
      * Convert the auto-increment flag to a sequence that is linked with this
      * table.
      *
-     * @param session the session
-     * @param schema the schema where the sequence should be generated
-     * @param id the object id
+     * @param session   the session
+     * @param schema    the schema where the sequence should be generated
+     * @param id        the object id
      * @param temporary true if the sequence is temporary and does not need to
-     *            be stored
+     *                  be stored
      */
     public void convertAutoIncrementToSequence(Session session, Schema schema,
-            int id, boolean temporary) {
+                                               int id, boolean temporary) {
         if (!autoIncrement) {
             DbException.throwInternalError();
         }
@@ -416,18 +399,18 @@ public class Column {
         } else {
             buff.append(DataType.getDataType(type).name);
             switch (type) {
-            case Value.DECIMAL:
-                buff.append('(').append(precision).append(", ").append(scale).append(')');
-                break;
-            case Value.BYTES:
-            case Value.STRING:
-            case Value.STRING_IGNORECASE:
-            case Value.STRING_FIXED:
-                if (precision < Integer.MAX_VALUE) {
-                    buff.append('(').append(precision).append(')');
-                }
-                break;
-            default:
+                case Value.DECIMAL:
+                    buff.append('(').append(precision).append(", ").append(scale).append(')');
+                    break;
+                case Value.BYTES:
+                case Value.STRING:
+                case Value.STRING_IGNORECASE:
+                case Value.STRING_FIXED:
+                    if (precision < Integer.MAX_VALUE) {
+                        buff.append('(').append(precision).append(')');
+                    }
+                    break;
+                default:
             }
         }
         if (defaultExpression != null) {
@@ -465,12 +448,16 @@ public class Column {
         return nullable;
     }
 
-    public void setOriginalSQL(String original) {
-        originalSQL = original;
+    public void setNullable(boolean b) {
+        nullable = b;
     }
 
     public String getOriginalSQL() {
         return originalSQL;
+    }
+
+    public void setOriginalSQL(String original) {
+        originalSQL = original;
     }
 
     public Expression getDefaultExpression() {
@@ -484,8 +471,8 @@ public class Column {
     /**
      * Set the autoincrement flag and related properties of this column.
      *
-     * @param autoInc the new autoincrement flag
-     * @param start the sequence start value
+     * @param autoInc   the new autoincrement flag
+     * @param start     the sequence start value
      * @param increment the sequence increment
      */
     public void setAutoIncrement(boolean autoInc, long start, long increment) {
@@ -512,12 +499,12 @@ public class Column {
         this.name = newName;
     }
 
-    public void setSequence(Sequence sequence) {
-        this.sequence = sequence;
-    }
-
     public Sequence getSequence() {
         return sequence;
+    }
+
+    public void setSequence(Sequence sequence) {
+        this.sequence = sequence;
     }
 
     /**
@@ -545,7 +532,7 @@ public class Column {
      * constraint constraint is added using AND.
      *
      * @param session the session
-     * @param expr the (additional) constraint
+     * @param expr    the (additional) constraint
      */
     public void addCheckConstraint(Session session, Expression expr) {
         if (expr == null) {
@@ -585,7 +572,7 @@ public class Column {
     /**
      * Get the check constraint expression for this column if set.
      *
-     * @param session the session
+     * @param session      the session
      * @param asColumnName the column name to use
      * @return the constraint expression
      */
@@ -620,7 +607,7 @@ public class Column {
     /**
      * Get the check constraint SQL snippet.
      *
-     * @param session the session
+     * @param session      the session
      * @param asColumnName the column name to use
      * @return the SQL snippet
      */
@@ -629,16 +616,12 @@ public class Column {
         return constraint == null ? "" : constraint.getSQL();
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
     public String getComment() {
         return comment;
     }
 
-    public void setPrimaryKey(boolean primaryKey) {
-        this.primaryKey = primaryKey;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     /**
@@ -647,7 +630,7 @@ public class Column {
      *
      * @param visitor the visitor
      * @return true if every visited expression returned true, or if there are
-     *         no expressions
+     * no expressions
      */
     boolean isEverything(ExpressionVisitor visitor) {
         if (visitor.getType() == ExpressionVisitor.GET_DEPENDENCIES) {
@@ -658,14 +641,15 @@ public class Column {
         if (defaultExpression != null && !defaultExpression.isEverything(visitor)) {
             return false;
         }
-        if (checkConstraint != null && !checkConstraint.isEverything(visitor)) {
-            return false;
-        }
-        return true;
+        return !(checkConstraint != null && !checkConstraint.isEverything(visitor));
     }
 
     public boolean isPrimaryKey() {
         return primaryKey;
+    }
+
+    public void setPrimaryKey(boolean primaryKey) {
+        this.primaryKey = primaryKey;
     }
 
     @Override
@@ -711,10 +695,7 @@ public class Column {
         if (defaultExpression != null || newColumn.defaultExpression != null) {
             return false;
         }
-        if (isComputed || newColumn.isComputed) {
-            return false;
-        }
-        return true;
+        return !(isComputed || newColumn.isComputed);
     }
 
     /**

@@ -40,13 +40,13 @@ public abstract class DefineCommand extends Prepared {
         return null;
     }
 
-    public void setTransactional(boolean transactional) {
-        this.transactional = transactional;
-    }
-
     @Override
     public boolean isTransactional() {
         return transactional;
+    }
+
+    public void setTransactional(boolean transactional) {
+        this.transactional = transactional;
     }
 
 }

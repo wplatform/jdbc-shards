@@ -18,15 +18,15 @@
 
 package com.suning.snfddal.config;
 
+import com.suning.snfddal.util.New;
+
 import java.io.Serializable;
 import java.util.List;
-
-import com.suning.snfddal.util.New;
 
 public class SchemaConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
-    private String metadata;
+    private String shard;
     private boolean validation;
     private List<TableConfig> tables = New.arrayList();
 
@@ -45,17 +45,17 @@ public class SchemaConfig implements Serializable {
     }
 
     /**
-     * @return the metadata
+     * @return the shard
      */
-    public String getMetadata() {
-        return metadata;
+    public String getShard() {
+        return shard;
     }
 
     /**
-     * @param metadata the metadata to set
+     * @param shard the shard to set
      */
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
+    public void setShard(String shard) {
+        this.shard = shard;
     }
 
     /**

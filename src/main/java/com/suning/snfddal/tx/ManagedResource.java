@@ -18,12 +18,11 @@
 
 package com.suning.snfddal.tx;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import com.suning.snfddal.shards.DataSourceDispatcher;
 import com.suning.snfddal.shards.DataSourceMarker;
 import com.suning.snfddal.shards.Optional;
+
+import java.sql.SQLException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

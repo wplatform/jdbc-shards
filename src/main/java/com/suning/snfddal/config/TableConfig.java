@@ -18,23 +18,18 @@
 
 package com.suning.snfddal.config;
 
+import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.util.StringUtils;
 
 public class TableConfig {
 
-    
 
     private SchemaConfig schemaConfig;
-    private String name;
-    private String originalCatalog;
-    private String originalSchema;
-    private String originalTable;
-    private String metadataNode;
-    private String[] broadcast;
+    private String name;    
     private int scanLevel = Constants.SCANLEVEL_ANYINDEX;
     private boolean validation;
+    private TableNode[] shards;
     private TableRouter tableRouter;
 
     /**
@@ -42,19 +37,6 @@ public class TableConfig {
      */
     public String getName() {
         return name;
-    }
-    
-    public String getNameWithSchemaName() {
-        StringBuilder fullName = new StringBuilder();
-        if (!StringUtils.isNullOrEmpty(originalCatalog)) {
-            fullName.append(originalCatalog).append(".");
-        }
-        if (!StringUtils.isNullOrEmpty(originalSchema)) {
-            fullName.append(originalSchema).append(".");
-        }
-        fullName.append(name);
-        return fullName.toString();
-    
     }
 
     /**
@@ -79,74 +61,6 @@ public class TableConfig {
     }
 
     /**
-     * @return the originalSchema
-     */
-    public String getOriginalSchema() {
-        return originalSchema;
-    }
-
-    /**
-     * @param originalSchema the originalSchema to set
-     */
-    public void setOriginalSchema(String originalSchema) {
-        this.originalSchema = originalSchema;
-    }
-
-    public String getQualifiedTableName() {
-        StringBuilder qualifiedName = new StringBuilder();
-        if (!StringUtils.isNullOrEmpty(originalCatalog)) {
-            qualifiedName.append(originalCatalog).append(".");
-        }
-        if (!StringUtils.isNullOrEmpty(originalSchema)) {
-            qualifiedName.append(originalSchema).append(".");
-        }
-        qualifiedName.append(originalTable);
-        return qualifiedName.toString();
-    }
-    
-    /**
-     * @return the metadataNode
-     */
-    public String getMetadataNode() {
-        return metadataNode;
-    }
-
-    /**
-     * @param metadataNode the metadataNode to set
-     */
-    public void setMetadataNode(String metadataNode) {
-        this.metadataNode = metadataNode;
-    }
-
-    /**
-     * @return the originalTable
-     */
-    public String getOriginalTable() {
-        return originalTable;
-    }
-
-    /**
-     * @param originalTable the originalTable to set
-     */
-    public void setOriginalTable(String originalTable) {
-        this.originalTable = originalTable;
-    }
-
-    /**
-     * @return the originalCatalog
-     */
-    public String getOriginalCatalog() {
-        return originalCatalog;
-    }
-
-    /**
-     * @param originalCatalog the originalCatalog to set
-     */
-    public void setOriginalCatalog(String originalCatalog) {
-        this.originalCatalog = originalCatalog;
-    }
-
-    /**
      * @return the validation
      */
     public boolean isValidation() {
@@ -161,18 +75,19 @@ public class TableConfig {
     }
 
     /**
-     * @return the broadcast
+     * @return the shards
      */
-    public String[] getBroadcast() {
-        return broadcast;
+    public TableNode[] getShards() {
+        return shards;
     }
 
     /**
-     * @param broadcast the broadcast to set
+     * @param shards the shards to set
      */
-    public void setBroadcast(String[] broadcast) {
-        this.broadcast = broadcast;
+    public void setShards(TableNode[] shards) {
+        this.shards = shards;
     }
+
     /**
      * @return the scanLevel
      */
@@ -233,8 +148,6 @@ public class TableConfig {
             return false;
         return true;
     }
-    
-    
-    
+
 
 }

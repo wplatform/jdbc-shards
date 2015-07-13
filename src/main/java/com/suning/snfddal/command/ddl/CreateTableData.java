@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * The data required to create a table.

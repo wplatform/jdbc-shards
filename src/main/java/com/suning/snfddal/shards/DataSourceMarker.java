@@ -28,37 +28,38 @@ public interface DataSourceMarker {
     /**
      * @return the xid
      */
-    public String getUid();
+    String getUid();
 
     /**
      * @return the shardName
      */
-    public String getShardName();
+    String getShardName();
 
 
     /**
      * @return the readOnly
      */
-    public boolean isReadOnly();
+    boolean isReadOnly();
 
 
     /**
      * @return the rWeight
      */
-    public int getrWeight();
+    int getrWeight();
 
 
     /**
      * @return the wWeight
      */
-    public int getwWeight();
+    int getwWeight();
 
-    
+
     /**
      * do get database connection form managed data source
+     *
      * @return database connection
-     * @throws SQLException 
+     * @throws SQLException
      */
-    public Connection doGetConnection() throws SQLException;
+    Connection doGetConnection() throws SQLException;
 
 }

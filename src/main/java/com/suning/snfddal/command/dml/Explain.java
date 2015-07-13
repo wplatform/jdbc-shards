@@ -54,7 +54,7 @@ public class Explain extends Prepared {
         Column column = new Column("PLAN", Value.STRING);
         Database db = session.getDatabase();
         ExpressionColumn expr = new ExpressionColumn(db, column);
-        Expression[] expressions = { expr };
+        Expression[] expressions = {expr};
         result = new LocalResult(session, expressions, 1);
         if (maxrows >= 0) {
             String plan;
@@ -75,7 +75,7 @@ public class Explain extends Prepared {
     }
 
     private void add(String text) {
-        Value[] row = { ValueString.get(text) };
+        Value[] row = {ValueString.get(text)};
         result.addRow(row);
     }
 

@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Arrays;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * Implementation of the BINARY data type.

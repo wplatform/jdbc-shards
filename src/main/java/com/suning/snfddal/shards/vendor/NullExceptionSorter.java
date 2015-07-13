@@ -1,8 +1,8 @@
 package com.suning.snfddal.shards.vendor;
 
-import java.sql.SQLException;
-
 import com.suning.snfddal.shards.ExceptionSorter;
+
+import java.sql.SQLException;
 
 public class NullExceptionSorter implements ExceptionSorter {
 

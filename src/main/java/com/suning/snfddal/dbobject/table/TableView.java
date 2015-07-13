@@ -5,16 +5,9 @@
  */
 package com.suning.snfddal.dbobject.table;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.dml.Query;
-import com.suning.snfddal.command.expression.Alias;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.command.expression.ExpressionColumn;
-import com.suning.snfddal.command.expression.ExpressionVisitor;
-import com.suning.snfddal.command.expression.Parameter;
+import com.suning.snfddal.command.expression.*;
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.User;
 import com.suning.snfddal.dbobject.index.Index;
@@ -31,8 +24,12 @@ import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 /**
  * A view is a virtual table that is defined by a query.
+ *
  * @author Thomas Mueller
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
@@ -52,18 +49,10 @@ public class TableView extends Table {
     private boolean tableExpression;
 
     public TableView(Schema schema, int id, String name, String querySQL,
-            ArrayList<Parameter> params, String[] columnNames, Session session,
-            boolean recursive) {
+                     ArrayList<Parameter> params, String[] columnNames, Session session,
+                     boolean recursive) {
         super(schema, id, name);
         init(querySQL, params, columnNames, session, recursive);
-    }
-
-    private synchronized void init(String querySQL, ArrayList<Parameter> params,
-            String[] columnNames, Session session, boolean recursive) {
-        this.querySQL = querySQL;
-        this.columnNames = columnNames;
-        this.recursive = recursive;
-        initColumnsAndTables(session);
     }
 
     private static Query compileViewQuery(Session session, String sql) {
@@ -72,6 +61,40 @@ public class TableView extends Table {
             throw DbException.getSyntaxError(sql, 0);
         }
         return (Query) p;
+    }
+
+    /**
+     * Create a temporary view out of the given query.
+     *
+     * @param session  the session
+     * @param owner    the owner of the query
+     * @param name     the view name
+     * @param query    the query
+     * @param topQuery the top level query
+     * @return the view table
+     */
+    public static TableView createTempView(Session session, User owner,
+                                           String name, Query query, Query topQuery) {
+        Schema mainSchema = session.getDatabase().getSchema(Constants.SCHEMA_MAIN);
+        String querySQL = query.getPlanSQL();
+        TableView v = new TableView(mainSchema, 0, name,
+                querySQL, query.getParameters(), null, session,
+                false);
+        if (v.createException != null) {
+            throw v.createException;
+        }
+        v.setTopQuery(topQuery);
+        v.setOwner(owner);
+        v.setTemporary(true);
+        return v;
+    }
+
+    private synchronized void init(String querySQL, ArrayList<Parameter> params,
+                                   String[] columnNames, Session session, boolean recursive) {
+        this.querySQL = querySQL;
+        this.columnNames = columnNames;
+        this.recursive = recursive;
+        initColumnsAndTables(session);
     }
 
     private void initColumnsAndTables(Session session) {
@@ -163,18 +186,15 @@ public class TableView extends Table {
                 return false;
             }
         }
-        if (topQuery != null &&
-                !topQuery.isEverything(ExpressionVisitor.QUERY_COMPARABLE_VISITOR)) {
-            return false;
-        }
-        return true;
+        return !(topQuery != null &&
+                !topQuery.isEverything(ExpressionVisitor.QUERY_COMPARABLE_VISITOR));
     }
 
     /**
      * Generate "CREATE" SQL statement for the view.
      *
      * @param orReplace if true, then include the OR REPLACE clause
-     * @param force if true, then include the FORCE clause
+     * @param force     if true, then include the FORCE clause
      * @return the SQL statement
      */
     public String getCreateSQL(boolean orReplace, boolean force) {
@@ -182,7 +202,7 @@ public class TableView extends Table {
     }
 
     private String getCreateSQL(boolean orReplace, boolean force,
-            String quotedName) {
+                                String quotedName) {
         StatementBuilder buff = new StatementBuilder("CREATE ");
         if (orReplace) {
             buff.append("OR REPLACE ");
@@ -222,7 +242,7 @@ public class TableView extends Table {
     public long getRowCount(Session session) {
         throw DbException.throwInternalError();
     }
-    
+
     @Override
     public boolean canGetRowCount() {
         return false;
@@ -259,7 +279,7 @@ public class TableView extends Table {
             throw DbException.get(ErrorCode.VIEW_IS_INVALID_2,
                     createException, getSQL(), msg);
         }
-        return new IndexMate(this, 0, null,IndexColumn.wrap(columns),IndexType.createScan());
+        return new IndexMate(this, 0, null, IndexColumn.wrap(columns), IndexType.createScan());
     }
 
     @Override
@@ -272,39 +292,12 @@ public class TableView extends Table {
         return null;
     }
 
-
-    private void setOwner(User owner) {
-        this.owner = owner;
-    }
-
     public User getOwner() {
         return owner;
     }
 
-    /**
-     * Create a temporary view out of the given query.
-     *
-     * @param session the session
-     * @param owner the owner of the query
-     * @param name the view name
-     * @param query the query
-     * @param topQuery the top level query
-     * @return the view table
-     */
-    public static TableView createTempView(Session session, User owner,
-            String name, Query query, Query topQuery) {
-        Schema mainSchema = session.getDatabase().getSchema(Constants.SCHEMA_MAIN);
-        String querySQL = query.getPlanSQL();
-        TableView v = new TableView(mainSchema, 0, name,
-                querySQL, query.getParameters(), null, session,
-                false);
-        if (v.createException != null) {
-            throw v.createException;
-        }
-        v.setTopQuery(topQuery);
-        v.setOwner(owner);
-        v.setTemporary(true);
-        return v;
+    private void setOwner(User owner) {
+        this.owner = owner;
     }
 
     private void setTopQuery(Query topQuery) {
@@ -328,6 +321,10 @@ public class TableView extends Table {
         return viewQuery.isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR);
     }
 
+    public LocalResult getRecursiveResult() {
+        return recursiveResult;
+    }
+
     public void setRecursiveResult(LocalResult value) {
         if (recursiveResult != null) {
             recursiveResult.close();
@@ -335,16 +332,12 @@ public class TableView extends Table {
         this.recursiveResult = value;
     }
 
-    public LocalResult getRecursiveResult() {
-        return recursiveResult;
+    public boolean isTableExpression() {
+        return tableExpression;
     }
 
     public void setTableExpression(boolean tableExpression) {
         this.tableExpression = tableExpression;
-    }
-
-    public boolean isTableExpression() {
-        return tableExpression;
     }
 
     @Override
@@ -357,12 +350,6 @@ public class TableView extends Table {
                 }
             }
         }
-    }
-
-    @Override
-    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
-        throw DbException.getUnsupportedException("VIEW");
-        
     }
 
 }

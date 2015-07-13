@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.dbobject.RightOwner;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
@@ -14,6 +12,8 @@ import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statements
@@ -24,10 +24,10 @@ import com.suning.snfddal.util.New;
  */
 public class GrantRevoke extends DefineCommand {
 
+    private final ArrayList<Table> tables = New.arrayList();
     private ArrayList<String> roleNames;
     private int operationType;
     private int rightMask;
-    private final ArrayList<Table> tables = New.arrayList();
     private RightOwner grantee;
 
     public GrantRevoke(Session session) {

@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.command.dml.Query;
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
@@ -22,22 +20,24 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.List;
+
 /**
  * An 'in' condition with a subquery, as in WHERE ID IN(SELECT ...)
  */
 public class ConditionInSelect extends Condition {
 
     private final Database database;
-    private Expression left;
     private final Query query;
     private final boolean all;
     private final int compareType;
+    private Expression left;
     private int queryLevel;
-    
+
     private LocalResult cachedResult;
 
     public ConditionInSelect(Database database, Expression left, Query query,
-            boolean all, int compareType) {
+                             boolean all, int compareType) {
         this.database = database;
         this.left = left;
         this.query = query;
@@ -67,10 +67,10 @@ public class ConditionInSelect extends Condition {
                 return ValueBoolean.get(false);
             }
             l = l.convertTo(dataType);
-            if (rows.containsDistinct(new Value[] { l })) {
+            if (rows.containsDistinct(new Value[]{l})) {
                 return ValueBoolean.get(true);
             }
-            if (rows.containsDistinct(new Value[] { ValueNull.INSTANCE })) {
+            if (rows.containsDistinct(new Value[]{ValueNull.INSTANCE})) {
                 return ValueNull.INSTANCE;
             }
             return ValueBoolean.get(false);
@@ -138,17 +138,17 @@ public class ConditionInSelect extends Condition {
         buff.append('(').append(left.getSQL()).append(' ');
         if (all) {
             buff.append(Comparison.getCompareOperator(compareType)).
-                append(" ALL");
+                    append(" ALL");
         } else {
             if (compareType == Comparison.EQUAL) {
                 buff.append("IN");
             } else {
                 buff.append(Comparison.getCompareOperator(compareType)).
-                    append(" ANY");
+                        append(" ANY");
             }
         }
         buff.append("(\n").append(StringUtils.indent(query.getPlanSQL(), 4, false)).
-            append("))");
+                append("))");
         return buff.toString();
     }
 
@@ -194,12 +194,12 @@ public class ConditionInSelect extends Condition {
         LocalResult rows = query(session);
         if (rows.getRowCount() > 0) {
             StatementBuilder buff = new StatementBuilder();
-            buff.append('(').append(left.exportParameters(filter,container)).append(' ');
+            buff.append('(').append(left.exportParameters(filter, container)).append(' ');
             if (all) {
                 //由于all代表全部，所以<all表示小于子查询中返回全部值中的最小值；
                 //>all表示大于子查询中返回全部值中的最大值。
                 buff.append(Comparison.getCompareOperator(compareType)).
-                    append(" ALL");
+                        append(" ALL");
             } else {
                 if (compareType == Comparison.EQUAL) {
                     buff.append("IN");
@@ -207,7 +207,7 @@ public class ConditionInSelect extends Condition {
                     //<any可以理解为小于子查询中返回的任意一个值，因此只要小于最大值即可
                     //>any可以理解为大于子查询中返回的任意一个值，因此只要大于最小值即可
                     buff.append(Comparison.getCompareOperator(compareType)).
-                        append(" ANY");
+                            append(" ANY");
                 }
             }
             buff.append("(");
@@ -222,13 +222,13 @@ public class ConditionInSelect extends Condition {
         } else {
             return "1 = 0";
         }
-        
-        
+
+
     }
-    
-    
+
+
     private LocalResult query(Session session) {
-        if(cachedResult == null) {
+        if (cachedResult == null) {
             query.setSession(session);
             query.setDistinct(true);
             cachedResult = query.query(0);

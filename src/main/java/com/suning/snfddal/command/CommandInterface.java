@@ -5,10 +5,10 @@
  */
 package com.suning.snfddal.command;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.result.ResultInterface;
+
+import java.util.ArrayList;
 
 /**
  * Represents a SQL statement.
@@ -476,7 +476,7 @@ public interface CommandInterface {
     /**
      * Execute the query.
      *
-     * @param maxRows the maximum number of rows returned
+     * @param maxRows    the maximum number of rows returned
      * @param scrollable if the result set must be scrollable
      * @return the result
      */

@@ -5,17 +5,10 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
-import com.suning.snfddal.command.expression.Comparison;
-import com.suning.snfddal.command.expression.ConditionAndOr;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.command.expression.ExpressionColumn;
-import com.suning.snfddal.command.expression.Parameter;
+import com.suning.snfddal.command.expression.*;
 import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.table.Column;
@@ -31,15 +24,18 @@ import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * This class represents the statement
  * INSERT
  */
 public class Insert extends Prepared implements ResultTarget {
 
+    private final ArrayList<Expression[]> list = New.arrayList();
     private Table table;
     private Column[] columns;
-    private final ArrayList<Expression[]> list = New.arrayList();
     private Query query;
     private boolean sortedInsertMode;
     private int rowNumber;
@@ -78,7 +74,7 @@ public class Insert extends Prepared implements ResultTarget {
      * Keep a collection of the columns to pass to update if a duplicate key
      * happens, for MySQL-style INSERT ... ON DUPLICATE KEY UPDATE ....
      *
-     * @param column the column
+     * @param column     the column
      * @param expression the expression
      */
     public void addAssignmentForDuplicate(Column column, Expression expression) {
@@ -145,7 +141,7 @@ public class Insert extends Prepared implements ResultTarget {
                 //    handleOnDuplicate(de);
                 //}
                 //table.fireAfterRow(session, null, newRow, false);
-            
+
             }
         } else {
             //table.lock(session, true, false);
@@ -182,7 +178,7 @@ public class Insert extends Prepared implements ResultTarget {
         //boolean done = table.fireBeforeRow(session, null, newRow);
         //table.addRow(session, newRow);
         //if (!done) {
-            //table.fireAfterRow(session, null, newRow, false);
+        //table.fireAfterRow(session, null, newRow, false);
         //}
     }
 
@@ -380,7 +376,7 @@ public class Insert extends Prepared implements ResultTarget {
                     } else {
                         condition = new ConditionAndOr(ConditionAndOr.AND, condition,
                                 new Comparison(session, Comparison.EQUAL,
-                                expr, list.get(0)[i++]));
+                                        expr, list.get(0)[i++]));
                     }
                 }
             }

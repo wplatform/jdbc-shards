@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.util.ValueHashMap;
@@ -15,6 +12,9 @@ import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 import com.suning.snfddal.value.ValueLong;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Data stored while calculating a HISTOGRAM aggregate.
@@ -50,7 +50,7 @@ class AggregateDataHistogram extends AggregateData {
         int i = 0;
         for (Value dv : distinctValues.keys()) {
             AggregateDataHistogram d = distinctValues.get(dv);
-            values[i] = ValueArray.get(new Value[] { dv, ValueLong.get(d.count) });
+            values[i] = ValueArray.get(new Value[]{dv, ValueLong.get(d.count)});
             i++;
         }
         final CompareMode compareMode = database.getCompareMode();

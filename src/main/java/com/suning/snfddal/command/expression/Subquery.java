@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.dml.Query;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -17,6 +15,8 @@ import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * A query returning a single value.

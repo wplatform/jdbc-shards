@@ -23,8 +23,8 @@ package com.suning.snfddal.shards;
  */
 public interface Failover {
 
-    public void doHandleAbnormal(SmartDataSource source);
+    void doHandleAbnormal(SmartDataSource source);
 
-    public void doHandleWakeup(SmartDataSource source);
+    void doHandleWakeup(SmartDataSource source);
 
 }

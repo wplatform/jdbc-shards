@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
@@ -15,6 +13,8 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * An 'and' or 'or' condition as in WHERE ID=1 AND NAME=?
@@ -47,14 +47,14 @@ public class ConditionAndOr extends Condition {
     public String getSQL() {
         String sql;
         switch (andOrType) {
-        case AND:
-            sql = left.getSQL() + "\n    AND " + right.getSQL();
-            break;
-        case OR:
-            sql = left.getSQL() + "\n    OR " + right.getSQL();
-            break;
-        default:
-            throw DbException.throwInternalError("andOrType=" + andOrType);
+            case AND:
+                sql = left.getSQL() + "\n    AND " + right.getSQL();
+                break;
+            case OR:
+                sql = left.getSQL() + "\n    OR " + right.getSQL();
+                break;
+            default:
+                throw DbException.throwInternalError("andOrType=" + andOrType);
         }
         return "(" + sql + ")";
     }
@@ -88,40 +88,40 @@ public class ConditionAndOr extends Condition {
         Value l = left.getValue(session);
         Value r;
         switch (andOrType) {
-        case AND: {
-            if (Boolean.FALSE.equals(l.getBoolean())) {
-                return l;
+            case AND: {
+                if (Boolean.FALSE.equals(l.getBoolean())) {
+                    return l;
+                }
+                r = right.getValue(session);
+                if (Boolean.FALSE.equals(r.getBoolean())) {
+                    return r;
+                }
+                if (l == ValueNull.INSTANCE) {
+                    return l;
+                }
+                if (r == ValueNull.INSTANCE) {
+                    return r;
+                }
+                return ValueBoolean.get(true);
             }
-            r = right.getValue(session);
-            if (Boolean.FALSE.equals(r.getBoolean())) {
-                return r;
+            case OR: {
+                if (Boolean.TRUE.equals(l.getBoolean())) {
+                    return l;
+                }
+                r = right.getValue(session);
+                if (Boolean.TRUE.equals(r.getBoolean())) {
+                    return r;
+                }
+                if (l == ValueNull.INSTANCE) {
+                    return l;
+                }
+                if (r == ValueNull.INSTANCE) {
+                    return r;
+                }
+                return ValueBoolean.get(false);
             }
-            if (l == ValueNull.INSTANCE) {
-                return l;
-            }
-            if (r == ValueNull.INSTANCE) {
-                return r;
-            }
-            return ValueBoolean.get(true);
-        }
-        case OR: {
-            if (Boolean.TRUE.equals(l.getBoolean())) {
-                return l;
-            }
-            r = right.getValue(session);
-            if (Boolean.TRUE.equals(r.getBoolean())) {
-                return r;
-            }
-            if (l == ValueNull.INSTANCE) {
-                return l;
-            }
-            if (r == ValueNull.INSTANCE) {
-                return r;
-            }
-            return ValueBoolean.get(false);
-        }
-        default:
-            throw DbException.throwInternalError("type=" + andOrType);
+            default:
+                throw DbException.throwInternalError("type=" + andOrType);
         }
     }
 
@@ -212,38 +212,38 @@ public class ConditionAndOr extends Condition {
             return ValueExpression.get(getValue(session));
         }
         switch (andOrType) {
-        case AND:
-            if (l != null) {
-                if (Boolean.FALSE.equals(l.getBoolean())) {
-                    return ValueExpression.get(l);
-                } else if (Boolean.TRUE.equals(l.getBoolean())) {
-                    return right;
+            case AND:
+                if (l != null) {
+                    if (Boolean.FALSE.equals(l.getBoolean())) {
+                        return ValueExpression.get(l);
+                    } else if (Boolean.TRUE.equals(l.getBoolean())) {
+                        return right;
+                    }
+                } else if (r != null) {
+                    if (Boolean.FALSE.equals(r.getBoolean())) {
+                        return ValueExpression.get(r);
+                    } else if (Boolean.TRUE.equals(r.getBoolean())) {
+                        return left;
+                    }
                 }
-            } else if (r != null) {
-                if (Boolean.FALSE.equals(r.getBoolean())) {
-                    return ValueExpression.get(r);
-                } else if (Boolean.TRUE.equals(r.getBoolean())) {
-                    return left;
+                break;
+            case OR:
+                if (l != null) {
+                    if (Boolean.TRUE.equals(l.getBoolean())) {
+                        return ValueExpression.get(l);
+                    } else if (Boolean.FALSE.equals(l.getBoolean())) {
+                        return right;
+                    }
+                } else if (r != null) {
+                    if (Boolean.TRUE.equals(r.getBoolean())) {
+                        return ValueExpression.get(r);
+                    } else if (Boolean.FALSE.equals(r.getBoolean())) {
+                        return left;
+                    }
                 }
-            }
-            break;
-        case OR:
-            if (l != null) {
-                if (Boolean.TRUE.equals(l.getBoolean())) {
-                    return ValueExpression.get(l);
-                } else if (Boolean.FALSE.equals(l.getBoolean())) {
-                    return right;
-                }
-            } else if (r != null) {
-                if (Boolean.TRUE.equals(r.getBoolean())) {
-                    return ValueExpression.get(r);
-                } else if (Boolean.FALSE.equals(r.getBoolean())) {
-                    return left;
-                }
-            }
-            break;
-        default:
-            DbException.throwInternalError("type=" + andOrType);
+                break;
+            default:
+                DbException.throwInternalError("type=" + andOrType);
         }
         return this;
     }
@@ -290,7 +290,7 @@ public class ConditionAndOr extends Condition {
      * Get the left or the right sub-expression of this condition.
      *
      * @param getLeft true to get the left sub-expression, false to get the
-     *            right sub-expression.
+     *                right sub-expression.
      * @return the sub-expression
      */
     public Expression getExpression(boolean getLeft) {
@@ -299,17 +299,17 @@ public class ConditionAndOr extends Condition {
 
 
     @Override
-    public String exportParameters(TableFilter filter,List<Value> container) {
+    public String exportParameters(TableFilter filter, List<Value> container) {
         String sql;
         switch (andOrType) {
-        case AND:
-            sql = left.exportParameters(filter,container) + "\n    AND " + right.exportParameters(filter,container);
-            break;
-        case OR:
-            sql = left.exportParameters(filter,container) + "\n    OR " + right.exportParameters(filter,container);
-            break;
-        default:
-            throw DbException.throwInternalError("andOrType=" + andOrType);
+            case AND:
+                sql = left.exportParameters(filter, container) + "\n    AND " + right.exportParameters(filter, container);
+                break;
+            case OR:
+                sql = left.exportParameters(filter, container) + "\n    OR " + right.exportParameters(filter, container);
+                break;
+            default:
+                throw DbException.throwInternalError("andOrType=" + andOrType);
         }
         return "(" + sql + ")";
     }

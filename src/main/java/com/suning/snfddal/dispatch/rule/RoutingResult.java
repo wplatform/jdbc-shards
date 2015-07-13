@@ -18,12 +18,12 @@
 
 package com.suning.snfddal.dispatch.rule;
 
+import com.suning.snfddal.dispatch.TableRoutingException;
+import com.suning.snfddal.util.New;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
-
-import com.suning.snfddal.dispatch.TableRoutingException;
-import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -37,29 +37,29 @@ public class RoutingResult implements Serializable {
     private List<TableNode> selected;
 
     RoutingResult(List<TableNode> all, List<TableNode> selected) {
-        if(selected.isEmpty()) {
+        if (selected.isEmpty()) {
             throw new TableRoutingException("Empty table node.");
         }
-        if(selected.size() > all.size()) {
+        if (selected.size() > all.size()) {
             throw new IllegalArgumentException();
         }
         this.all = selected;
         this.selected = selected;
     }
-    
-    
+
+
     public static RoutingResult fixedResult(TableNode tableNode) {
         List<TableNode> nodes = New.arrayList(1);
         nodes.add(tableNode);
-        return new RoutingResult(nodes,nodes);
+        return new RoutingResult(nodes, nodes);
     }
-    
+
     public static RoutingResult fixedResult(TableNode[] tableNode) {
         List<TableNode> nodes = New.arrayList(tableNode.length);
         for (TableNode node : nodes) {
             nodes.add(node);
         }
-        return new RoutingResult(nodes,nodes);
+        return new RoutingResult(nodes, nodes);
     }
 
     public boolean isMultipleNode() {
@@ -72,7 +72,7 @@ public class RoutingResult implements Serializable {
         }
         return selected.get(0);
     }
-    
+
     public TableNode[] getSelectNodes() {
         return selected.toArray(new TableNode[selected.size()]);
     }
@@ -84,13 +84,13 @@ public class RoutingResult implements Serializable {
     public int tableNodeCount() {
         return selected.size();
     }
-    
+
     public TableNode[] group() {
         List<TableNode> result = null;
-        if(isMultipleNode()) {
+        if (isMultipleNode()) {
             Set<String> shards = shardNames();
             result = New.arrayList(shards.size());
-            for(String shardName : shardNames()) {
+            for (String shardName : shardNames()) {
                 List<String> tables = New.arrayList();
                 List<String> suffixes = New.arrayList();
                 for (TableNode tableNode : selected) {
@@ -103,12 +103,12 @@ public class RoutingResult implements Serializable {
                     }
                 }
                 TableNode tableNode;
-                if(tables.size() > 1) {
-                    String[] t =tables.toArray(new String[tables.size()]);
-                    String[] s =suffixes.toArray(new String[suffixes.size()]);
-                    tableNode = new GroupTableNode(shardName, t,s);
+                if (tables.size() > 1) {
+                    String[] t = tables.toArray(new String[tables.size()]);
+                    String[] s = suffixes.toArray(new String[suffixes.size()]);
+                    tableNode = new GroupTableNode(shardName, t, s);
                 } else {
-                    tableNode = new TableNode(shardName, tables.get(0),suffixes.get(0));
+                    tableNode = new TableNode(shardName, tables.get(0), suffixes.get(0));
                 }
                 result.add(tableNode);
             }

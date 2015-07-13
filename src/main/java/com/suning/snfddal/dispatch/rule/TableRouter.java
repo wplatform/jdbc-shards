@@ -18,28 +18,24 @@
 
 package com.suning.snfddal.dispatch.rule;
 
+import com.suning.snfddal.config.Configuration;
+import com.suning.snfddal.util.New;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
-import com.suning.snfddal.config.Configuration;
-import com.suning.snfddal.util.New;
-
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class TableRouter implements Serializable{
+public class TableRouter implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
-    private String id;
-    
-    private List<TableNode> partition;
-        
-    private RuleExpression ruleExpression;
-    
     private final Configuration configuration;
-    
+    private String id;
+    private List<TableNode> partition;
+    private RuleExpression ruleExpression;
+
     /**
      * @param configuration
      */
@@ -107,8 +103,5 @@ public class TableRouter implements Serializable{
         return configuration;
     }
 
-    
-    
-    
-    
+
 }

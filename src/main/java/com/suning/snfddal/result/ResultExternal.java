@@ -5,9 +5,9 @@
  */
 package com.suning.snfddal.result;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * This interface is used to extend the LocalResult class, if data does not fit

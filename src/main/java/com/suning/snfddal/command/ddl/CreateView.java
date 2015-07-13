@@ -5,19 +5,11 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.dml.Query;
-import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.dbobject.table.Table;
-import com.suning.snfddal.dbobject.table.TableView;
-import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class represents the statement

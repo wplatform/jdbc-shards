@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
 import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.ConfigurationException;
@@ -33,7 +31,6 @@ import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableMate;
 import com.suning.snfddal.dispatch.RoutingHandler;
 import com.suning.snfddal.dispatch.RoutingHandlerImpl;
-import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
@@ -41,7 +38,6 @@ import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.shards.DataSourceRepository;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.util.SchemaMetaLoader;
 import com.suning.snfddal.util.SourceCompiler;
 import com.suning.snfddal.value.CaseInsensitiveMap;
 import com.suning.snfddal.value.CompareMode;
@@ -61,16 +57,16 @@ public class Database {
     private final HashMap<String, Schema> schemas = New.hashMap();
     private final HashMap<String, Right> rights = New.hashMap();
     private final HashMap<String, Comment> comments = New.hashMap();
-    private final HashMap<String, DataSource> dataNodes = New.hashMap();
 
     private final Set<Session> userSessions = Collections.synchronizedSet(new HashSet<Session>());
 
     private final BitField objectIds = new BitField();
+    private final DbSettings dbSettings;
+    private final DataSourceRepository dsRepository;
+    private final Configuration configuration;
     private int nextSessionId;
-
     private TraceSystem traceSystem;
     private Trace trace;
-
     private CompareMode compareMode;
     private int allowLiterals = Constants.ALLOW_LITERALS_ALL;
     private volatile boolean closing;
@@ -78,10 +74,6 @@ public class Database {
     private Mode mode = Mode.getInstance(Mode.REGULAR);
     private int maxMemoryRows = SysProperties.MAX_MEMORY_ROWS;
     private int maxOperationMemory = Constants.DEFAULT_MAX_OPERATION_MEMORY;
-    private final DbSettings dbSettings;
-    private final DataSourceRepository dsRepository;
-    private final Configuration configuration;
-
     private SourceCompiler compiler;
     private RoutingHandler routingHandler;
 
@@ -107,7 +99,7 @@ public class Database {
         traceSystem.setLevelSystemOut(traceLevelSystemOut);
         trace = traceSystem.getTrace(Trace.DATABASE);
         dsRepository = new DataSourceRepository(this);
-        
+
         openDatabase();
 
     }
@@ -129,32 +121,29 @@ public class Database {
         if (dataSourceProvider == null) {
             throw new ConfigurationException("No configuration data source.");
         }
-        SchemaMetaLoader metaLoader = new SchemaMetaLoader(schema);
+        Session sysSession = createSession(systemUser);
         try {
             SchemaConfig sc = configuration.getSchemaConfig();
             List<TableConfig> ctList = sc.getTables();
             for (TableConfig tableConfig : ctList) {
-                String matedataNode = tableConfig.getMetadataNode();
-                String matedataTable = tableConfig.getNameWithSchemaName();
-                TableMate tableMate = metaLoader.loadTableMeta(tableConfig);
+                TableMate tableMate = new TableMate(schema, allocateObjectId(), tableConfig.getName());
                 tableMate.setTableRouter(tableConfig.getTableRouter());
                 tableMate.validationRuleColumn();
-                tableMate.setMatedataNode(new TableNode(matedataNode, matedataTable));
+                tableMate.setShards(tableConfig.getShards());
                 tableMate.setScanLevel(tableConfig.getScanLevel());
-                String[] broadcast = tableConfig.getBroadcast();
-                if (broadcast.length > 0) {
-                    TableNode[] bNodes = new TableNode[broadcast.length];
-                    for (int i = 0; i < broadcast.length; i++) {
-                        bNodes[i] = new TableNode(broadcast[i], matedataTable);
-                    }
-                    tableMate.setBroadcastNode(bNodes);
+                tableMate.loadMataData(sysSession);
+                if (tableConfig.isValidation()) {
+                    tableMate.check();
+                    tableMate.validationRuleColumn();
                 }
+                
                 this.addSchemaObject(tableMate);
             }
+            trace.info("opened {0}", databaseName);
         } finally {
-            metaLoader.close();
+            sysSession.close();
         }
-        trace.info("opened {0}", databaseName);
+        
 
     }
 
@@ -177,7 +166,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     *         1 otherwise
+     * 1 otherwise
      */
     public int compare(Value a, Value b) {
         return a.compareTo(b, compareMode);
@@ -190,7 +179,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     *         1 otherwise
+     * 1 otherwise
      */
     public int compareTypeSave(Value a, Value b) {
         return a.compareTypeSave(b, compareMode);
@@ -210,26 +199,26 @@ public class Database {
     private HashMap<String, DbObject> getMap(int type) {
         HashMap<String, ? extends DbObject> result;
         switch (type) {
-        case DbObject.USER:
-            result = users;
-            break;
-        case DbObject.SETTING:
-            result = settings;
-            break;
-        case DbObject.ROLE:
-            result = roles;
-            break;
-        case DbObject.RIGHT:
-            result = rights;
-            break;
-        case DbObject.SCHEMA:
-            result = schemas;
-            break;
-        case DbObject.COMMENT:
-            result = comments;
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case DbObject.USER:
+                result = users;
+                break;
+            case DbObject.SETTING:
+                result = settings;
+                break;
+            case DbObject.ROLE:
+                result = roles;
+                break;
+            case DbObject.RIGHT:
+                result = rights;
+                break;
+            case DbObject.SCHEMA:
+                result = schemas;
+                break;
+            case DbObject.COMMENT:
+                result = comments;
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         return (HashMap<String, DbObject>) result;
     }
@@ -238,7 +227,7 @@ public class Database {
      * Add a schema object to the database.
      *
      * @param session the session
-     * @param obj the object to add
+     * @param obj     the object to add
      */
     public synchronized void addSchemaObject(SchemaObject obj) {
         obj.getSchema().add(obj);
@@ -249,7 +238,7 @@ public class Database {
      * Add an object to the database.
      *
      * @param session the session
-     * @param obj the object to add
+     * @param obj     the object to add
      */
     public synchronized void addDatabaseObject(DbObject obj) {
         HashMap<String, DbObject> map = getMap(obj.getType());
@@ -368,7 +357,7 @@ public class Database {
      * Close the database.
      *
      * @param fromShutdownHook true if this method is called from the shutdown
-     *            hook
+     *                         hook
      */
     public synchronized void close() {
         if (closing) {
@@ -413,6 +402,10 @@ public class Database {
         return allowLiterals;
     }
 
+    public void setAllowLiterals(int value) {
+        this.allowLiterals = value;
+    }
+
     public ArrayList<Right> getAllRights() {
         return New.arrayList(rights.values());
     }
@@ -452,8 +445,8 @@ public class Database {
      * Get all tables and views.
      *
      * @param includeMeta whether to force including the meta data tables (if
-     *            true, metadata tables are always included; if false, metadata
-     *            tables are only included if they are already initialized)
+     *                    true, metadata tables are always included; if false, metadata
+     *                    tables are only included if they are already initialized)
      * @return all objects of that type
      */
     public ArrayList<Table> getAllTablesAndViews() {
@@ -480,11 +473,15 @@ public class Database {
         return compareMode;
     }
 
+    public void setCompareMode(CompareMode compareMode) {
+        this.compareMode = compareMode;
+    }
+
     /**
      * Get all sessions that are currently connected to the database.
      *
      * @param includingSystemSession if the system session should also be
-     *            included
+     *                               included
      * @return the list of sessions
      */
     public Session[] getSessions() {
@@ -503,7 +500,7 @@ public class Database {
      * Rename a schema object.
      *
      * @param session the session
-     * @param obj the object
+     * @param obj     the object
      * @param newName the new name
      */
     public synchronized void renameSchemaObject(Session session, SchemaObject obj, String newName) {
@@ -514,7 +511,7 @@ public class Database {
      * Rename a database object.
      *
      * @param session the session
-     * @param obj the object
+     * @param obj     the object
      * @param newName the new name
      */
     public synchronized void renameDatabaseObject(Session session, DbObject obj, String newName) {
@@ -553,7 +550,7 @@ public class Database {
      * Remove the object from the database.
      *
      * @param session the session
-     * @param obj the object to remove
+     * @param obj     the object to remove
      */
     public synchronized void removeDatabaseObject(Session session, DbObject obj) {
         String objName = obj.getName();
@@ -573,20 +570,20 @@ public class Database {
     /**
      * Get the first table that depends on this object.
      *
-     * @param obj the object to find
+     * @param obj    the object to find
      * @param except the table to exclude (or null)
      * @return the first dependent table, or null
      */
     public Table getDependentTable(SchemaObject obj, Table except) {
         switch (obj.getType()) {
-        case DbObject.COMMENT:
-        case DbObject.CONSTRAINT:
-        case DbObject.INDEX:
-        case DbObject.RIGHT:
-        case DbObject.TRIGGER:
-        case DbObject.USER:
-            return null;
-        default:
+            case DbObject.COMMENT:
+            case DbObject.CONSTRAINT:
+            case DbObject.INDEX:
+            case DbObject.RIGHT:
+            case DbObject.TRIGGER:
+            case DbObject.USER:
+                return null;
+            default:
         }
         HashSet<DbObject> set = New.hashSet();
         for (Table t : getAllTablesAndViews()) {
@@ -608,7 +605,7 @@ public class Database {
      * Remove an object from the system table.
      *
      * @param session the session
-     * @param obj the object to be removed
+     * @param obj     the object to be removed
      */
     public synchronized void removeSchemaObject(Session session, SchemaObject obj) {
         int type = obj.getType();
@@ -633,20 +630,8 @@ public class Database {
         obj.getSchema().remove(obj);
     }
 
-    public synchronized DataSource removeDataNode(String name) {
-        DataSource dataSource = dataNodes.get(name);
-        if (dataSource == null) {
-            DbException.throwInternalError("data node not found: " + name);
-        }
-        return dataNodes.remove(name);
-    }
-
     public TraceSystem getTraceSystem() {
         return traceSystem;
-    }
-
-    public void setCompareMode(CompareMode compareMode) {
-        this.compareMode = compareMode;
     }
 
     /**
@@ -667,36 +652,32 @@ public class Database {
         return closing;
     }
 
-    public void setIgnoreCase(boolean b) {
-        ignoreCase = b;
-    }
-
     public boolean getIgnoreCase() {
         return ignoreCase;
     }
 
-    public void setAllowLiterals(int value) {
-        this.allowLiterals = value;
+    public void setIgnoreCase(boolean b) {
+        ignoreCase = b;
     }
 
     public int getSessionCount() {
         return userSessions.size();
     }
 
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
     public Mode getMode() {
         return mode;
     }
 
-    public void setMaxOperationMemory(int maxOperationMemory) {
-        this.maxOperationMemory = maxOperationMemory;
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     public int getMaxOperationMemory() {
         return maxOperationMemory;
+    }
+
+    public void setMaxOperationMemory(int maxOperationMemory) {
+        this.maxOperationMemory = maxOperationMemory;
     }
 
     public int getMaxMemoryRows() {
@@ -734,10 +715,7 @@ public class Database {
         if (a == b || a.equals(b)) {
             return true;
         }
-        if (!dbSettings.databaseToUpper && a.equalsIgnoreCase(b)) {
-            return true;
-        }
-        return false;
+        return !dbSettings.databaseToUpper && a.equalsIgnoreCase(b);
     }
 
     /**
@@ -760,14 +738,13 @@ public class Database {
         }
         return routingHandler;
     }
-    
+
     /**
      * @return the dataSourceManager
      */
     public DataSourceRepository getDataSourceRepository() {
         return dsRepository;
     }
-    
-    
+
 
 }

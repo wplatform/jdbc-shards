@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.text.Collator;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -21,6 +19,8 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.value.CompareMode;
 import com.suning.snfddal.value.ValueInt;
+
+import java.text.Collator;
 
 /**
  * This class represents the statement
@@ -45,18 +45,18 @@ public class Set extends Prepared {
     @Override
     public boolean isTransactional() {
         switch (type) {
-        case SetTypes.CLUSTER:
-        case SetTypes.VARIABLE:
-        case SetTypes.QUERY_TIMEOUT:
-        case SetTypes.LOCK_TIMEOUT:
-        case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
-        case SetTypes.TRACE_LEVEL_FILE:
-        case SetTypes.THROTTLE:
-        case SetTypes.SCHEMA:
-        case SetTypes.SCHEMA_SEARCH_PATH:
-        case SetTypes.RETENTION_TIME:
-            return true;
-        default:
+            case SetTypes.CLUSTER:
+            case SetTypes.VARIABLE:
+            case SetTypes.QUERY_TIMEOUT:
+            case SetTypes.LOCK_TIMEOUT:
+            case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
+            case SetTypes.TRACE_LEVEL_FILE:
+            case SetTypes.THROTTLE:
+            case SetTypes.SCHEMA:
+            case SetTypes.SCHEMA_SEARCH_PATH:
+            case SetTypes.RETENTION_TIME:
+                return true;
+            default:
         }
         return false;
     }
@@ -66,199 +66,199 @@ public class Set extends Prepared {
         Database database = session.getDatabase();
         String name = SetTypes.getTypeName(type);
         switch (type) {
-        case SetTypes.ALLOW_LITERALS: {
-            session.getUser().checkAdmin();
-            int value = getIntValue();
-            if (value < 0 || value > 2) {
-                throw DbException.getInvalidValueException("ALLOW_LITERALS",
-                        getIntValue());
-            }
-            database.setAllowLiterals(value);
-            addOrUpdateSetting(name, null, value);
-            break;
-        }
-        case SetTypes.COLLATION: {
-            session.getUser().checkAdmin();
-            final boolean binaryUnsigned = database.
-                    getCompareMode().isBinaryUnsigned();
-            CompareMode compareMode;
-            StringBuilder buff = new StringBuilder(stringValue);
-            if (stringValue.equals(CompareMode.OFF)) {
-                compareMode = CompareMode.getInstance(null, 0, binaryUnsigned);
-            } else {
-                int strength = getIntValue();
-                buff.append(" STRENGTH ");
-                if (strength == Collator.IDENTICAL) {
-                    buff.append("IDENTICAL");
-                } else if (strength == Collator.PRIMARY) {
-                    buff.append("PRIMARY");
-                } else if (strength == Collator.SECONDARY) {
-                    buff.append("SECONDARY");
-                } else if (strength == Collator.TERTIARY) {
-                    buff.append("TERTIARY");
+            case SetTypes.ALLOW_LITERALS: {
+                session.getUser().checkAdmin();
+                int value = getIntValue();
+                if (value < 0 || value > 2) {
+                    throw DbException.getInvalidValueException("ALLOW_LITERALS",
+                            getIntValue());
                 }
-                compareMode = CompareMode.getInstance(stringValue, strength,
-                        binaryUnsigned);
-            }
-            CompareMode old = database.getCompareMode();
-            if (old.equals(compareMode)) {
+                database.setAllowLiterals(value);
+                addOrUpdateSetting(name, null, value);
                 break;
             }
-            addOrUpdateSetting(name, buff.toString(), 0);
-            database.setCompareMode(compareMode);
-            break;
-        }
-        case SetTypes.BINARY_COLLATION: {
-            session.getUser().checkAdmin();
-            CompareMode currentMode = database.getCompareMode();
-            CompareMode newMode;
-            if (stringValue.equals(CompareMode.SIGNED)) {
-                newMode = CompareMode.getInstance(currentMode.getName(),
-                        currentMode.getStrength(), false);
-            } else if (stringValue.equals(CompareMode.UNSIGNED)) {
-                newMode = CompareMode.getInstance(currentMode.getName(),
-                        currentMode.getStrength(), true);
-            } else {
-                throw DbException.getInvalidValueException("BINARY_COLLATION",
-                        stringValue);
-            }
-            addOrUpdateSetting(name, stringValue, 0);
-            database.setCompareMode(newMode);
-            break;
-        }
-        case SetTypes.IGNORECASE:
-            session.getUser().checkAdmin();
-            database.setIgnoreCase(getIntValue() == 1);
-            addOrUpdateSetting(name, null, getIntValue());
-            break;
-        case SetTypes.LOCK_MODE:
-            session.getUser().checkAdmin();
-            addOrUpdateSetting(name, null, getIntValue());
-            break;
-        case SetTypes.LOCK_TIMEOUT:
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("LOCK_TIMEOUT",
-                        getIntValue());
-            }
-            session.setLockTimeout(getIntValue());
-            break;
-        case SetTypes.MAX_MEMORY_ROWS: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("MAX_MEMORY_ROWS",
-                        getIntValue());
-            }
-            session.getUser().checkAdmin();
-            database.setMaxMemoryRows(getIntValue());
-            addOrUpdateSetting(name, null, getIntValue());
-            break;
-        }
-        case SetTypes.MAX_OPERATION_MEMORY: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException(
-                        "MAX_OPERATION_MEMORY", getIntValue());
-            }
-            session.getUser().checkAdmin();
-            int value = getIntValue();
-            database.setMaxOperationMemory(value);
-            break;
-        }
-        case SetTypes.MODE:
-            Mode mode = Mode.getInstance(stringValue);
-            if (mode == null) {
-                throw DbException.get(ErrorCode.UNKNOWN_MODE_1, stringValue);
-            }
-            if (database.getMode() != mode) {
+            case SetTypes.COLLATION: {
                 session.getUser().checkAdmin();
-                database.setMode(mode);
+                final boolean binaryUnsigned = database.
+                        getCompareMode().isBinaryUnsigned();
+                CompareMode compareMode;
+                StringBuilder buff = new StringBuilder(stringValue);
+                if (stringValue.equals(CompareMode.OFF)) {
+                    compareMode = CompareMode.getInstance(null, 0, binaryUnsigned);
+                } else {
+                    int strength = getIntValue();
+                    buff.append(" STRENGTH ");
+                    if (strength == Collator.IDENTICAL) {
+                        buff.append("IDENTICAL");
+                    } else if (strength == Collator.PRIMARY) {
+                        buff.append("PRIMARY");
+                    } else if (strength == Collator.SECONDARY) {
+                        buff.append("SECONDARY");
+                    } else if (strength == Collator.TERTIARY) {
+                        buff.append("TERTIARY");
+                    }
+                    compareMode = CompareMode.getInstance(stringValue, strength,
+                            binaryUnsigned);
+                }
+                CompareMode old = database.getCompareMode();
+                if (old.equals(compareMode)) {
+                    break;
+                }
+                addOrUpdateSetting(name, buff.toString(), 0);
+                database.setCompareMode(compareMode);
+                break;
             }
-            break;
-        case SetTypes.QUERY_TIMEOUT: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("QUERY_TIMEOUT",
-                        getIntValue());
+            case SetTypes.BINARY_COLLATION: {
+                session.getUser().checkAdmin();
+                CompareMode currentMode = database.getCompareMode();
+                CompareMode newMode;
+                if (stringValue.equals(CompareMode.SIGNED)) {
+                    newMode = CompareMode.getInstance(currentMode.getName(),
+                            currentMode.getStrength(), false);
+                } else if (stringValue.equals(CompareMode.UNSIGNED)) {
+                    newMode = CompareMode.getInstance(currentMode.getName(),
+                            currentMode.getStrength(), true);
+                } else {
+                    throw DbException.getInvalidValueException("BINARY_COLLATION",
+                            stringValue);
+                }
+                addOrUpdateSetting(name, stringValue, 0);
+                database.setCompareMode(newMode);
+                break;
             }
-            int value = getIntValue();
-            session.setQueryTimeout(value);
-            break;
-        }
-        case SetTypes.SCHEMA: {
-            Schema schema = database.getSchema(stringValue);
-            session.setCurrentSchema(schema);
-            break;
-        }
-        case SetTypes.SCHEMA_SEARCH_PATH: {
-            session.setSchemaSearchPath(stringValueList);
-            break;
-        }
-        case SetTypes.TRACE_LEVEL_FILE:
-            session.getUser().checkAdmin();
-            if (getCurrentObjectId() == 0) {
-                // don't set the property when opening the database
-                // this is for compatibility with older versions, because
-                // this setting was persistent
-                database.getTraceSystem().setLevelFile(getIntValue());
+            case SetTypes.IGNORECASE:
+                session.getUser().checkAdmin();
+                database.setIgnoreCase(getIntValue() == 1);
+                addOrUpdateSetting(name, null, getIntValue());
+                break;
+            case SetTypes.LOCK_MODE:
+                session.getUser().checkAdmin();
+                addOrUpdateSetting(name, null, getIntValue());
+                break;
+            case SetTypes.LOCK_TIMEOUT:
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("LOCK_TIMEOUT",
+                            getIntValue());
+                }
+                session.setLockTimeout(getIntValue());
+                break;
+            case SetTypes.MAX_MEMORY_ROWS: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("MAX_MEMORY_ROWS",
+                            getIntValue());
+                }
+                session.getUser().checkAdmin();
+                database.setMaxMemoryRows(getIntValue());
+                addOrUpdateSetting(name, null, getIntValue());
+                break;
             }
-            break;
-        case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
-            session.getUser().checkAdmin();
-            if (getCurrentObjectId() == 0) {
-                // don't set the property when opening the database
-                // this is for compatibility with older versions, because
-                // this setting was persistent
-                database.getTraceSystem().setLevelSystemOut(getIntValue());
+            case SetTypes.MAX_OPERATION_MEMORY: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException(
+                            "MAX_OPERATION_MEMORY", getIntValue());
+                }
+                session.getUser().checkAdmin();
+                int value = getIntValue();
+                database.setMaxOperationMemory(value);
+                break;
             }
-            break;
-        case SetTypes.TRACE_MAX_FILE_SIZE: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException(
-                        "TRACE_MAX_FILE_SIZE", getIntValue());
+            case SetTypes.MODE:
+                Mode mode = Mode.getInstance(stringValue);
+                if (mode == null) {
+                    throw DbException.get(ErrorCode.UNKNOWN_MODE_1, stringValue);
+                }
+                if (database.getMode() != mode) {
+                    session.getUser().checkAdmin();
+                    database.setMode(mode);
+                }
+                break;
+            case SetTypes.QUERY_TIMEOUT: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("QUERY_TIMEOUT",
+                            getIntValue());
+                }
+                int value = getIntValue();
+                session.setQueryTimeout(value);
+                break;
             }
-            session.getUser().checkAdmin();
-            int size = getIntValue() * 1024 * 1024;
-            database.getTraceSystem().setMaxFileSize(size);
-            addOrUpdateSetting(name, null, getIntValue());
-            break;
-        }
-        case SetTypes.THROTTLE: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("THROTTLE",
-                        getIntValue());
+            case SetTypes.SCHEMA: {
+                Schema schema = database.getSchema(stringValue);
+                session.setCurrentSchema(schema);
+                break;
             }
-            session.setThrottle(getIntValue());
-            break;
-        }
-        case SetTypes.VARIABLE: {
-            Expression expr = expression.optimize(session);
-            session.setVariable(stringValue, expr.getValue(session));
-            break;
-        }
-        case SetTypes.COMPRESS_LOB:
-        case SetTypes.CREATE_BUILD:
-        case SetTypes.DATABASE_EVENT_LISTENER:
-        case SetTypes.DB_CLOSE_DELAY:
-        case SetTypes.DEFAULT_LOCK_TIMEOUT:
-        case SetTypes.DEFAULT_TABLE_TYPE:
-        case SetTypes.EXCLUSIVE:
-        case SetTypes.JAVA_OBJECT_SERIALIZER:
-        case SetTypes.LOG: 
-        case SetTypes.MAX_LENGTH_INPLACE_LOB: 
-        case SetTypes.MAX_LOG_SIZE:
-        case SetTypes.MAX_MEMORY_UNDO: 
-        case SetTypes.MULTI_THREADED: 
-        case SetTypes.MVCC: 
-        case SetTypes.OPTIMIZE_REUSE_RESULTS: 
-        case SetTypes.REDO_LOG_BINARY:
-        case SetTypes.REFERENTIAL_INTEGRITY: 
-        case SetTypes.QUERY_STATISTICS: 
-        case SetTypes.UNDO_LOG: 
-        case SetTypes.CACHE_SIZE:
-        case SetTypes.CLUSTER: 
-        case SetTypes.WRITE_DELAY: 
-        case SetTypes.RETENTION_TIME: 
-            DbException.throwInternalError("type="+type);
-            break;
-        default:
-            DbException.throwInternalError("type="+type);
+            case SetTypes.SCHEMA_SEARCH_PATH: {
+                session.setSchemaSearchPath(stringValueList);
+                break;
+            }
+            case SetTypes.TRACE_LEVEL_FILE:
+                session.getUser().checkAdmin();
+                if (getCurrentObjectId() == 0) {
+                    // don't set the property when opening the database
+                    // this is for compatibility with older versions, because
+                    // this setting was persistent
+                    database.getTraceSystem().setLevelFile(getIntValue());
+                }
+                break;
+            case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
+                session.getUser().checkAdmin();
+                if (getCurrentObjectId() == 0) {
+                    // don't set the property when opening the database
+                    // this is for compatibility with older versions, because
+                    // this setting was persistent
+                    database.getTraceSystem().setLevelSystemOut(getIntValue());
+                }
+                break;
+            case SetTypes.TRACE_MAX_FILE_SIZE: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException(
+                            "TRACE_MAX_FILE_SIZE", getIntValue());
+                }
+                session.getUser().checkAdmin();
+                int size = getIntValue() * 1024 * 1024;
+                database.getTraceSystem().setMaxFileSize(size);
+                addOrUpdateSetting(name, null, getIntValue());
+                break;
+            }
+            case SetTypes.THROTTLE: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("THROTTLE",
+                            getIntValue());
+                }
+                session.setThrottle(getIntValue());
+                break;
+            }
+            case SetTypes.VARIABLE: {
+                Expression expr = expression.optimize(session);
+                session.setVariable(stringValue, expr.getValue(session));
+                break;
+            }
+            case SetTypes.COMPRESS_LOB:
+            case SetTypes.CREATE_BUILD:
+            case SetTypes.DATABASE_EVENT_LISTENER:
+            case SetTypes.DB_CLOSE_DELAY:
+            case SetTypes.DEFAULT_LOCK_TIMEOUT:
+            case SetTypes.DEFAULT_TABLE_TYPE:
+            case SetTypes.EXCLUSIVE:
+            case SetTypes.JAVA_OBJECT_SERIALIZER:
+            case SetTypes.LOG:
+            case SetTypes.MAX_LENGTH_INPLACE_LOB:
+            case SetTypes.MAX_LOG_SIZE:
+            case SetTypes.MAX_MEMORY_UNDO:
+            case SetTypes.MULTI_THREADED:
+            case SetTypes.MVCC:
+            case SetTypes.OPTIMIZE_REUSE_RESULTS:
+            case SetTypes.REDO_LOG_BINARY:
+            case SetTypes.REFERENTIAL_INTEGRITY:
+            case SetTypes.QUERY_STATISTICS:
+            case SetTypes.UNDO_LOG:
+            case SetTypes.CACHE_SIZE:
+            case SetTypes.CLUSTER:
+            case SetTypes.WRITE_DELAY:
+            case SetTypes.RETENTION_TIME:
+                DbException.throwInternalError("type=" + type);
+                break;
+            default:
+                DbException.throwInternalError("type=" + type);
         }
         return 0;
     }
@@ -281,7 +281,7 @@ public class Set extends Prepared {
     }
 
     private void addOrUpdateSetting(Session session, String name, String s,
-            int v) {
+                                    int v) {
         Database database = session.getDatabase();
         Setting setting = database.findSetting(name);
         boolean addNew = false;

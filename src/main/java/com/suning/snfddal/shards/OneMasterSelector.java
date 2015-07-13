@@ -18,10 +18,10 @@
 
 package com.suning.snfddal.shards;
 
+import com.suning.snfddal.util.New;
+
 import java.util.List;
 import java.util.Set;
-
-import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -44,17 +44,17 @@ public class OneMasterSelector extends DataSourceSelector {
         List<SmartDataSource> writable = New.arrayList(1);
         List<SmartDataSource> readable = New.arrayList(registered.size());
         for (SmartDataSource item : registered) {
-            if(!item.isReadOnly() && item.getwWeight() > 0) {
+            if (!item.isReadOnly() && item.getwWeight() > 0) {
                 writable.add(item);
             }
-            if(item.getrWeight() > 0) {
+            if (item.getrWeight() > 0) {
                 readable.add(item);
             }
         }
-        if(writable.size() != 1) {
+        if (writable.size() != 1) {
             throw new IllegalStateException();
         }
-        if(readable.size() < 1) {
+        if (readable.size() < 1) {
             throw new IllegalStateException();
         }
         this.master = writable.get(0);
@@ -79,7 +79,7 @@ public class OneMasterSelector extends DataSourceSelector {
             return master;
         }
         for (SmartDataSource marker : registered) {
-            if(exclusive.contains(marker)) {
+            if (exclusive.contains(marker)) {
                 continue;
             }
             return marker;
@@ -97,14 +97,14 @@ public class OneMasterSelector extends DataSourceSelector {
         if (!registered.contains(source)) {
             throw new IllegalStateException(shardName + "datasource not matched. " + source);
         }
-        if(!source.isReadOnly()) {
+        if (!source.isReadOnly()) {
             master = null;
         }
-        if(readable.remove(source)) {
+        if (readable.remove(source)) {
             readableLoadBalance = new LoadBalance(readable, true);
         }
-        
-        
+
+
     }
 
     @Override
@@ -112,13 +112,13 @@ public class OneMasterSelector extends DataSourceSelector {
         if (!registered.contains(source)) {
             throw new IllegalStateException(shardName + " datasource not matched. " + source);
         }
-        if(!source.isReadOnly()) {
+        if (!source.isReadOnly()) {
             master = source;
         }
-        if(source.getrWeight() > 0 && readable.add(source)) {
+        if (source.getrWeight() > 0 && readable.add(source)) {
             this.readableLoadBalance = new LoadBalance(readable, true);
         }
-        
+
     }
-    
+
 }

@@ -5,10 +5,10 @@
  */
 package com.suning.snfddal.engine;
 
-import java.util.HashMap;
-
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
+
+import java.util.HashMap;
 
 /**
  * The compatibility modes. There is a fixed set of modes (for example
@@ -55,126 +55,11 @@ public class Mode {
      * The name of the REGULAR mode.
      */
     public static final String REGULAR = "REGULAR";
-    
+
 
     private static final HashMap<String, Mode> MODES = New.hashMap();
 
     // Modes are also documented in the features section
-
-    /**
-     * When enabled, aliased columns (as in SELECT ID AS I FROM TEST) return the
-     * alias (I in this case) in ResultSetMetaData.getColumnName() and 'null' in
-     * getTableName(). If disabled, the real column name (ID in this case) and
-     * table name is returned.
-     */
-    public boolean aliasColumnName;
-
-    /**
-     * When inserting data, if a column is defined to be NOT NULL and NULL is
-     * inserted, then a 0 (or empty string, or the current timestamp for
-     * timestamp columns) value is used. Usually, this operation is not allowed
-     * and an exception is thrown.
-     */
-    public boolean convertInsertNullToZero;
-
-    /**
-     * When converting the scale of decimal data, the number is only converted
-     * if the new scale is smaller than the current scale. Usually, the scale is
-     * converted and 0s are added if required.
-     */
-    public boolean convertOnlyToSmallerScale;
-
-    /**
-     * Creating indexes in the CREATE TABLE statement is allowed using
-     * <code>INDEX(..)</code> or <code>KEY(..)</code>.
-     * Example: <code>create table test(id int primary key, name varchar(255),
-     * key idx_name(name));</code>
-     */
-    public boolean indexDefinitionInCreateTable;
-
-    /**
-     * Meta data calls return identifiers in lower case.
-     */
-    public boolean lowerCaseIdentifiers;
-
-    /**
-     * Concatenation with NULL results in NULL. Usually, NULL is treated as an
-     * empty string if only one of the operands is NULL, and NULL is only
-     * returned if both operands are NULL.
-     */
-    public boolean nullConcatIsNull;
-
-    /**
-     * Identifiers may be quoted using square brackets as in [Test].
-     */
-    public boolean squareBracketQuotedNames;
-
-    /**
-     * Support for the syntax
-     * [OFFSET .. ROW|ROWS] [FETCH FIRST .. ROW|ROWS ONLY]
-     * as an alternative for LIMIT .. OFFSET.
-     */
-    public boolean supportOffsetFetch = true;
-
-    /**
-     * The system columns 'CTID' and 'OID' are supported.
-     */
-    public boolean systemColumns;
-
-    /**
-     * For unique indexes, NULL is distinct. That means only one row with NULL
-     * in one of the columns is allowed.
-     */
-    public boolean uniqueIndexSingleNull;
-
-    /**
-     * When using unique indexes, multiple rows with NULL in all columns
-     * are allowed, however it is not allowed to have multiple rows with the
-     * same values otherwise.
-     */
-    public boolean uniqueIndexSingleNullExceptAllColumnsAreNull;
-
-    /**
-     * Empty strings are treated like NULL values. Useful for Oracle emulation.
-     */
-    public boolean treatEmptyStringsAsNull;
-
-    /**
-     * Support the pseudo-table SYSIBM.SYSDUMMY1.
-     */
-    public boolean sysDummy1;
-
-    /**
-     * Text can be concatenated using '+'.
-     */
-    public boolean allowPlusForStringConcat;
-
-    /**
-     * The function LOG() uses base 10 instead of E.
-     */
-    public boolean logIsLogBase10;
-
-    /**
-     * SERIAL and BIGSERIAL columns are not automatically primary keys.
-     */
-    public boolean serialColumnIsNotPK;
-
-    /**
-     * Swap the parameters of the CONVERT function.
-     */
-    public boolean swapConvertFunctionParameters;
-
-    /**
-     * can set the isolation level using WITH {RR|RS|CS|UR}
-     */
-    public boolean isolationLevelInSelectOrInsertStatement;
-
-    /**
-     * MySQL style INSERT ... ON DUPLICATE KEY UPDATE ...
-     */
-    public boolean onDuplicateKeyUpdate;
-
-    private final String name;
 
     static {
         Mode mode = new Mode(REGULAR);
@@ -235,6 +120,102 @@ public class Mode {
         mode.serialColumnIsNotPK = true;
         add(mode);
     }
+
+    private final String name;
+    /**
+     * When enabled, aliased columns (as in SELECT ID AS I FROM TEST) return the
+     * alias (I in this case) in ResultSetMetaData.getColumnName() and 'null' in
+     * getTableName(). If disabled, the real column name (ID in this case) and
+     * table name is returned.
+     */
+    public boolean aliasColumnName;
+    /**
+     * When inserting data, if a column is defined to be NOT NULL and NULL is
+     * inserted, then a 0 (or empty string, or the current timestamp for
+     * timestamp columns) value is used. Usually, this operation is not allowed
+     * and an exception is thrown.
+     */
+    public boolean convertInsertNullToZero;
+    /**
+     * When converting the scale of decimal data, the number is only converted
+     * if the new scale is smaller than the current scale. Usually, the scale is
+     * converted and 0s are added if required.
+     */
+    public boolean convertOnlyToSmallerScale;
+    /**
+     * Creating indexes in the CREATE TABLE statement is allowed using
+     * <code>INDEX(..)</code> or <code>KEY(..)</code>.
+     * Example: <code>create table test(id int primary key, name varchar(255),
+     * key idx_name(name));</code>
+     */
+    public boolean indexDefinitionInCreateTable;
+    /**
+     * Meta data calls return identifiers in lower case.
+     */
+    public boolean lowerCaseIdentifiers;
+    /**
+     * Concatenation with NULL results in NULL. Usually, NULL is treated as an
+     * empty string if only one of the operands is NULL, and NULL is only
+     * returned if both operands are NULL.
+     */
+    public boolean nullConcatIsNull;
+    /**
+     * Identifiers may be quoted using square brackets as in [Test].
+     */
+    public boolean squareBracketQuotedNames;
+    /**
+     * Support for the syntax
+     * [OFFSET .. ROW|ROWS] [FETCH FIRST .. ROW|ROWS ONLY]
+     * as an alternative for LIMIT .. OFFSET.
+     */
+    public boolean supportOffsetFetch = true;
+    /**
+     * The system columns 'CTID' and 'OID' are supported.
+     */
+    public boolean systemColumns;
+    /**
+     * For unique indexes, NULL is distinct. That means only one row with NULL
+     * in one of the columns is allowed.
+     */
+    public boolean uniqueIndexSingleNull;
+    /**
+     * When using unique indexes, multiple rows with NULL in all columns
+     * are allowed, however it is not allowed to have multiple rows with the
+     * same values otherwise.
+     */
+    public boolean uniqueIndexSingleNullExceptAllColumnsAreNull;
+    /**
+     * Empty strings are treated like NULL values. Useful for Oracle emulation.
+     */
+    public boolean treatEmptyStringsAsNull;
+    /**
+     * Support the pseudo-table SYSIBM.SYSDUMMY1.
+     */
+    public boolean sysDummy1;
+    /**
+     * Text can be concatenated using '+'.
+     */
+    public boolean allowPlusForStringConcat;
+    /**
+     * The function LOG() uses base 10 instead of E.
+     */
+    public boolean logIsLogBase10;
+    /**
+     * SERIAL and BIGSERIAL columns are not automatically primary keys.
+     */
+    public boolean serialColumnIsNotPK;
+    /**
+     * Swap the parameters of the CONVERT function.
+     */
+    public boolean swapConvertFunctionParameters;
+    /**
+     * can set the isolation level using WITH {RR|RS|CS|UR}
+     */
+    public boolean isolationLevelInSelectOrInsertStatement;
+    /**
+     * MySQL style INSERT ... ON DUPLICATE KEY UPDATE ...
+     */
+    public boolean onDuplicateKeyUpdate;
 
     private Mode(String name) {
         this.name = name;

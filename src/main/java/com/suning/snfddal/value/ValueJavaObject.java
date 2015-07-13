@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * Implementation of the OBJECT data type.
@@ -29,8 +29,8 @@ public class ValueJavaObject extends ValueBytes {
      * Get or create a java object value for the given byte array.
      * Do not clone the data.
      *
-     * @param javaObject the object
-     * @param b the byte array
+     * @param javaObject  the object
+     * @param b           the byte array
      * @param dataHandler provides the object serializer
      * @return the value
      */

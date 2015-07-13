@@ -5,18 +5,18 @@
  */
 package com.suning.snfddal.message;
 
+import com.suning.snfddal.engine.Constants;
+import com.suning.snfddal.jdbc.JdbcSQLException;
+import com.suning.snfddal.util.FileUtils;
+import com.suning.snfddal.util.IOUtils;
+import com.suning.snfddal.util.New;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-
-import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.jdbc.JdbcSQLException;
-import com.suning.snfddal.util.FileUtils;
-import com.suning.snfddal.util.IOUtils;
-import com.suning.snfddal.util.New;
 
 /**
  * The trace mechanism is the logging facility of this database. There is
@@ -171,6 +171,10 @@ public class TraceSystem implements TraceWriter {
         updateLevel();
     }
 
+    public int getLevelFile() {
+        return levelFile;
+    }
+
     /**
      * Set the file trace level.
      *
@@ -200,10 +204,6 @@ public class TraceSystem implements TraceWriter {
         }
         levelFile = level;
         updateLevel();
-    }
-
-    public int getLevelFile() {
-        return levelFile;
     }
 
     private synchronized String format(String module, String s) {

@@ -5,19 +5,9 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.CommandInterface;
-import com.suning.snfddal.dbobject.DbObject;
-import com.suning.snfddal.dbobject.Role;
-import com.suning.snfddal.dbobject.User;
-import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.dbobject.schema.SchemaObject;
-import com.suning.snfddal.dbobject.table.Table;
-import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.util.New;
 
 /**
  * This class represents the statement

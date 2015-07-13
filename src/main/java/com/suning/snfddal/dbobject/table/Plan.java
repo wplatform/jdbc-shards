@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.dbobject.table;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.ExpressionVisitor;
 import com.suning.snfddal.dbobject.table.TableFilter.TableFilterVisitor;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A possible query execution plan. The time required to execute a query depends
@@ -28,8 +28,8 @@ public class Plan {
     /**
      * Create a query plan with the given order.
      *
-     * @param filters the tables of the query
-     * @param count the number of table items
+     * @param filters   the tables of the query
+     * @param count     the number of table items
      * @param condition the condition in the WHERE clause
      */
     public Plan(TableFilter[] filters, int count, Expression condition) {

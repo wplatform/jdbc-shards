@@ -5,11 +5,6 @@
  */
 package com.suning.snfddal.dbobject.table;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.FunctionCall;
 import com.suning.snfddal.command.expression.TableFunction;
@@ -27,6 +22,11 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
 import com.suning.snfddal.value.ValueResultSet;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 /**
  * A table backed by a system or user-defined function that returns a result
  * set.
@@ -40,7 +40,7 @@ public class FunctionTable extends Table {
     private Value cachedValue;
 
     public FunctionTable(Schema schema, Session session,
-            Expression functionExpr, FunctionCall function) {
+                         Expression functionExpr, FunctionCall function) {
         super(schema, 0, function.getName());
         this.functionExpr = functionExpr;
         this.function = function;
@@ -85,7 +85,7 @@ public class FunctionTable extends Table {
         }
     }
 
-    
+
     @Override
     public String getTableType() {
         return null;
@@ -93,7 +93,7 @@ public class FunctionTable extends Table {
 
     @Override
     public Index getScanIndex(Session session) {
-        return new IndexMate(this, 0, null,IndexColumn.wrap(columns),IndexType.createScan());
+        return new IndexMate(this, 0, null, IndexColumn.wrap(columns), IndexType.createScan());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class FunctionTable extends Table {
             cachedResult.reset();
             return cachedResult;
         }
-        LocalResult result = LocalResult.read(session,  v.getResultSet(), 0);
+        LocalResult result = LocalResult.read(session, v.getResultSet(), 0);
         if (function.isDeterministic()) {
             cachedResult = result;
             cachedValue = v;
@@ -182,15 +182,6 @@ public class FunctionTable extends Table {
     @Override
     public boolean isDeterministic() {
         return function.isDeterministic();
-    }
-
-
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.dbobject.table.Table#addIndex(java.util.ArrayList, com.suning.snfddal.dbobject.index.IndexType)
-     */
-    @Override
-    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
-        throw DbException.getUnsupportedException("Function Table");
     }
 
 }

@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.engine;
 
-import java.io.Closeable;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.value.Value;
+
+import java.io.Closeable;
 
 /**
  * A local or remote session. A session represents a database connection.
@@ -18,7 +18,7 @@ public interface SessionInterface extends Closeable {
     /**
      * Parse a command and prepare it for execution.
      *
-     * @param sql the SQL statement
+     * @param sql       the SQL statement
      * @param fetchSize the number of rows to fetch in one step
      * @return the prepared command
      */
@@ -43,6 +43,7 @@ public interface SessionInterface extends Closeable {
      * @return if the session has been closed
      */
     boolean isClosed();
+
     /**
      * Check whether this session has a pending transaction.
      *
@@ -85,35 +86,37 @@ public interface SessionInterface extends Closeable {
      * @param autoCommit the new value
      */
     void setAutoCommit(boolean autoCommit);
-    
+
     /**
      * Add a temporary LOB, which is closed when the session commits.
      *
      * @param v the value
      */
     void addTemporaryLob(Value v);
-    
+
+    /**
+     * Get transaction isolation level
+     *
+     * @return return the transaction isolation
+     */
+    int getTransactionIsolation();
+
     /**
      * Set the transaction isolation level for the current transaction.
+     *
      * @param level isolation value
      */
     void setTransactionIsolation(int level);
 
-    /**
-     * Get transaction isolation level
-     * @return return the transaction isolation
-     */
-    int getTransactionIsolation();
-    
     /**
      * Check if this session is in read-only mode.
      *
      * @return true if the session is in read-only mode.
      */
     boolean isReadOnly();
-    
+
     /**
-     * Set the read-only mode. 
+     * Set the read-only mode.
      *
      * @param readOnly the new value
      */

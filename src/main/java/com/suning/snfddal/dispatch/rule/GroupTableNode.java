@@ -31,11 +31,11 @@ public class GroupTableNode extends TableNode {
     private final String[] suffixes;
 
     public GroupTableNode(String shardName, String[] tableNames, String[] suffixes) {
-        super(shardName, null,null);
+        super(shardName, null, null);
         this.tableNames = tableNames;
         this.suffixes = suffixes;
     }
-    
+
     @Override
     public String getTableName() {
         throw new UnsupportedOperationException();
@@ -59,7 +59,6 @@ public class GroupTableNode extends TableNode {
     public String[] getSuffixes() {
         return suffixes;
     }
-    
-    
-    
+
+
 }

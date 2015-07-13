@@ -1,16 +1,10 @@
 package com.suning.snfddal.shards;
 
+import com.suning.snfddal.message.Trace;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import com.suning.snfddal.message.Trace;
+import java.util.*;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -19,27 +13,6 @@ public class SmartSupport {
 
     protected static final Set<String> SET_METHODS = new HashSet<String>();
     protected static final Set<String> EXECUTE_METHODS = new HashSet<String>();
-
-    private Map<Object, Object> columnMap = new HashMap<Object, Object>();
-
-    private List<Object> columnNames = new ArrayList<Object>();
-    private List<Object> columnValues = new ArrayList<Object>();
-
-    protected final DataSourceRepository database;
-    protected final SmartDataSource dataSource;
-    protected final Trace trace;
-
-    /**
-     * @param database
-     * @param dataSource
-     * @param connection
-     * @param trace
-     */
-    protected SmartSupport(DataSourceRepository database, SmartDataSource dataSource) {
-        this.database = database;
-        this.dataSource = dataSource;
-        this.trace = database.getTrace();
-    }
 
     static {
         SET_METHODS.add("setString");
@@ -68,6 +41,38 @@ public class SmartSupport {
         EXECUTE_METHODS.add("executeUpdate");
         EXECUTE_METHODS.add("executeQuery");
         EXECUTE_METHODS.add("addBatch");
+    }
+
+    protected final DataSourceRepository database;
+    protected final SmartDataSource dataSource;
+    protected final Trace trace;
+    private Map<Object, Object> columnMap = new HashMap<Object, Object>();
+    private List<Object> columnNames = new ArrayList<Object>();
+    private List<Object> columnValues = new ArrayList<Object>();
+
+    /**
+     * @param database
+     * @param dataSource
+     * @param connection
+     * @param trace
+     */
+    protected SmartSupport(DataSourceRepository database, SmartDataSource dataSource) {
+        this.database = database;
+        this.dataSource = dataSource;
+        this.trace = database.getTrace();
+    }
+
+    protected static Throwable unwrapThrowable(Throwable wrapped) {
+        Throwable unwrapped = wrapped;
+        while (true) {
+            if (unwrapped instanceof InvocationTargetException) {
+                unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
+            } else if (unwrapped instanceof UndeclaredThrowableException) {
+                unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
+            } else {
+                return unwrapped;
+            }
+        }
     }
 
     protected void setColumn(Object key, Object value) {
@@ -120,19 +125,6 @@ public class SmartSupport {
     protected void debug(String text) {
         if (trace.isDebugEnabled()) {
             trace.debug(dataSource.toString() + text);
-        }
-    }
-
-    protected static Throwable unwrapThrowable(Throwable wrapped) {
-        Throwable unwrapped = wrapped;
-        while (true) {
-            if (unwrapped instanceof InvocationTargetException) {
-                unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
-            } else if (unwrapped instanceof UndeclaredThrowableException) {
-                unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
-            } else {
-                return unwrapped;
-            }
         }
     }
 

@@ -24,7 +24,7 @@ public interface FunctionCall {
     /**
      * Get an empty result set with the column names set.
      *
-     * @param session the session
+     * @param session  the session
      * @param nullArgs the argument list (some arguments may be null)
      * @return the empty result set
      */

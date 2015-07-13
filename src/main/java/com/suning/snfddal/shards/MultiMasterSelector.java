@@ -18,15 +18,14 @@
 
 package com.suning.snfddal.shards;
 
+import com.suning.snfddal.util.New;
+
 import java.util.List;
 import java.util.Set;
-
-import com.suning.snfddal.util.New;
 
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class MultiMasterSelector extends DataSourceSelector {
     private String shardName;
@@ -35,7 +34,7 @@ public class MultiMasterSelector extends DataSourceSelector {
     private Set<SmartDataSource> writable = New.copyOnWriteArraySet();
     private volatile LoadBalance writableLoadBalance;
     private volatile LoadBalance readableLoadBalance;
-    
+
     /**
      * @param shardName
      * @param writable
@@ -45,17 +44,17 @@ public class MultiMasterSelector extends DataSourceSelector {
         List<SmartDataSource> writable = New.arrayList();
         List<SmartDataSource> readable = New.arrayList();
         for (SmartDataSource item : registered) {
-            if(!item.isReadOnly() && item.getwWeight() > 0) {
+            if (!item.isReadOnly() && item.getwWeight() > 0) {
                 writable.add(item);
             }
-            if(item.getrWeight() > 0) {
+            if (item.getrWeight() > 0) {
                 readable.add(item);
             }
         }
-        if(writable.size() < 1) {
+        if (writable.size() < 1) {
             throw new IllegalStateException();
         }
-        if(readable.size() < 1) {
+        if (readable.size() < 1) {
             throw new IllegalStateException();
         }
         this.registered = registered;
@@ -79,7 +78,7 @@ public class MultiMasterSelector extends DataSourceSelector {
     @Override
     public SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive) {
         for (SmartDataSource marker : registered) {
-            if(exclusive.contains(marker)) {
+            if (exclusive.contains(marker)) {
                 continue;
             }
             if (!option.readOnly && marker.isReadOnly()) {
@@ -100,14 +99,14 @@ public class MultiMasterSelector extends DataSourceSelector {
         if (!registered.contains(source)) {
             throw new IllegalStateException(shardName + "datasource not matched. " + source);
         }
-        if(!source.isReadOnly() && writable.remove(source)) {
+        if (!source.isReadOnly() && writable.remove(source)) {
             this.writableLoadBalance = new LoadBalance(writable, false);
         }
-        if(readable.remove(source)) {
+        if (readable.remove(source)) {
             readableLoadBalance = new LoadBalance(readable, true);
         }
-        
-        
+
+
     }
 
     @Override
@@ -115,13 +114,13 @@ public class MultiMasterSelector extends DataSourceSelector {
         if (!registered.contains(source)) {
             throw new IllegalStateException(shardName + " datasource not matched. " + source);
         }
-        if(!source.isReadOnly() && source.getwWeight() > 0 && writable.add(source)) {
+        if (!source.isReadOnly() && source.getwWeight() > 0 && writable.add(source)) {
             this.writableLoadBalance = new LoadBalance(writable, true);
         }
-        if(source.getrWeight() > 0 && readable.add(source)) {
+        if (source.getrWeight() > 0 && readable.add(source)) {
             this.readableLoadBalance = new LoadBalance(readable, true);
         }
-        
+
     }
-    
+
 }

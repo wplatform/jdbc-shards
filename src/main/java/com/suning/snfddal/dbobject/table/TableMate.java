@@ -17,25 +17,43 @@
 // $Id$
 package com.suning.snfddal.dbobject.table;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.dbobject.index.Index;
 import com.suning.snfddal.dbobject.index.IndexMate;
 import com.suning.snfddal.dbobject.index.IndexType;
+import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dispatch.rule.RuleColumn;
 import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
+import com.suning.snfddal.util.JdbcUtils;
+import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.New;
+import com.suning.snfddal.util.StringUtils;
+import com.suning.snfddal.value.DataType;
+import com.suning.snfddal.value.ValueDate;
+import com.suning.snfddal.value.ValueTime;
+import com.suning.snfddal.value.ValueTimestamp;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class TableMate extends Table {
 
+    private static final int MAX_RETRY = 2;
     private static final long ROW_COUNT_APPROXIMATION = 100000;
     
     private final boolean globalTemporary;
@@ -44,9 +62,15 @@ public class TableMate extends Table {
     
     
     private TableRouter tableRouter;
-    private TableNode matedataNode;
-    private TableNode[] broadcastNode;
+    private TableNode[] shards;
     private int scanLevel;
+    
+    private DbException initException;
+    private boolean storesLowerCase;
+    private boolean storesMixedCase;
+    private boolean storesMixedCaseQuoted;
+    private boolean supportsMixedCaseIdentifiers;
+    
     
     public TableMate(CreateTableData data) {
         super(data.schema, data.id, data.tableName);
@@ -57,6 +81,11 @@ public class TableMate extends Table {
         setColumns(cols);
         scanIndex = new IndexMate(this, data.id, null, IndexColumn.wrap(cols), IndexType.createScan());
         indexes.add(scanIndex);
+    }
+    
+    public TableMate(Schema schema, int id, String name) {
+        super(schema, id, name);
+        this.globalTemporary = false;
     }
     
     /**
@@ -102,33 +131,19 @@ public class TableMate extends Table {
     }
     
     /**
-     * @return the matedataNode
+     * @return the shards
      */
-    public TableNode getMatedataNode() {
-        return matedataNode;
+    public TableNode[] getShards() {
+        return shards;
     }
 
     /**
-     * @param matedataNode the matedataNode to set
+     * @param shards the shards to set
      */
-    public void setMatedataNode(TableNode matedataNode) {
-        this.matedataNode = matedataNode;
+    public void setShards(TableNode[] shards) {
+        this.shards = shards;
     }
 
-    /**
-     * @return the broadcastNode
-     */
-    public TableNode[] getBroadcastNode() {
-        return broadcastNode;
-    }
-
-    /**
-     * @param broadcastNode the broadcastNode to set
-     */
-    public void setBroadcastNode(TableNode[] broadcastNode) {
-        this.broadcastNode = broadcastNode;
-    }
-    
     /**
      * @return
      * @see com.suning.snfddal.dispatch.rule.TableRouter#getPartition()
@@ -138,10 +153,7 @@ public class TableMate extends Table {
             List<TableNode> partition = tableRouter.getPartition();
             return partition.toArray(new TableNode[partition.size()]);
         }
-        if(broadcastNode != null) {
-            return broadcastNode;
-        }
-        return new TableNode[]{matedataNode};
+        return shards;
         
     }
     /**
@@ -150,7 +162,7 @@ public class TableMate extends Table {
      * @param columns
      */
     public void validationRuleColumn() {
-        if(isLoadFailed()) {
+        if(initException != null) {
            return; 
         }
         if(tableRouter != null) {
@@ -172,26 +184,21 @@ public class TableMate extends Table {
     }
 
 
-    /**
-     * @return the loadFailed
-     */
-    public boolean isLoadFailed() {
-        return this.columns.length == 0;
+
+    public void check() {
+        if(initException != null) {
+            throw initException;
+        }
+    }
+    
+    public boolean canAccess() {
+        return initException != null;
     }
 
     @Override
     public boolean isGlobalTemporary() {
         return globalTemporary;
     }
-    
-    @Override
-    public Index addIndex(ArrayList<Column> list, IndexType indexType) {
-        Column[] cols = new Column[list.size()];
-        list.toArray(cols);
-        Index index = new IndexMate(this, 0, null, IndexColumn.wrap(cols), indexType);
-        indexes.add(index);
-        return index;
-   }
 
     @Override
     public String getTableType() {
@@ -248,6 +255,282 @@ public class TableMate extends Table {
     @Override
     public Index getScanIndex(Session session) {
         return scanIndex;
+    }
+    
+    private Index addIndex(ArrayList<Column> list, IndexType indexType) {
+        Column[] cols = new Column[list.size()];
+        list.toArray(cols);
+        Index index = new IndexMate(this, 0, null, IndexColumn.wrap(cols), indexType);
+        indexes.add(index);
+        return index;
+   }
+    
+    
+    public void loadMataData(Session session) {
+        TableNode[] nodes = getPartitionNode();
+        if(nodes == null || nodes.length < 1) {
+            throw new IllegalStateException();
+        }
+        TableNode matadataNode = nodes[1];
+        try {
+            readMataData(session, matadataNode);
+            initException = null;
+        } catch (DbException e) {
+            initException = e;
+            Column[] cols = { };
+            setColumns(cols);
+            scanIndex = new IndexMate(this, 0, null, IndexColumn.wrap(cols),
+                    IndexType.createNonUnique());
+            indexes.add(scanIndex);
+        }
+    }
+
+    /**
+     * @param session
+     */
+    public void readMataData(Session session, TableNode matadataNode) {
+        for (int retry = 0; ; retry++) {
+            try {
+                Connection conn = null;
+                String tableName = matadataNode.getCompositeTableName();
+                String shardName = matadataNode.getShardName();
+                try {
+                    trace.debug("Try to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);
+                    conn = session.applyConnection(shardName);
+                    tryReadMetaData(conn, tableName);
+                    trace.debug("Load the {0} metadata success.", getName());
+                } catch (Exception e) {
+                    trace.debug("Fail to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);
+                    throw DbException.convert(e);
+                } finally {
+                    //JdbcUtils.closeSilently(conn); initSession.close();
+                }
+            } catch (DbException e) {
+                if (retry >= MAX_RETRY) {
+                    throw e;
+                }
+            }
+        }
+        
+    }
+    
+    
+    private void tryReadMetaData(Connection conn, String tableName) throws SQLException {
+
+        DatabaseMetaData meta = conn.getMetaData();
+        storesLowerCase = meta.storesLowerCaseIdentifiers();
+        storesMixedCase = meta.storesMixedCaseIdentifiers();
+        storesMixedCaseQuoted = meta.storesMixedCaseQuotedIdentifiers();
+        supportsMixedCaseIdentifiers = meta.supportsMixedCaseIdentifiers();
+
+        ResultSet rs = meta.getTables(null, null, tableName, null);
+        if (rs.next() && rs.next()) {
+            throw DbException.get(ErrorCode.SCHEMA_NAME_MUST_MATCH, tableName);
+        }
+        rs.close();
+        rs = meta.getColumns(null, null, tableName, null);
+        int i = 0;
+        ArrayList<Column> columnList = New.arrayList();
+        HashMap<String, Column> columnMap = New.hashMap();
+        String catalog = null, schema = null;
+        while (rs.next()) {
+            String thisCatalog = rs.getString("TABLE_CAT");
+            if (catalog == null) {
+                catalog = thisCatalog;
+            }
+            String thisSchema = rs.getString("TABLE_SCHEM");
+            if (schema == null) {
+                schema = thisSchema;
+            }
+            if (!StringUtils.equals(catalog, thisCatalog) || !StringUtils.equals(schema, thisSchema)) {
+                // if the table exists in multiple schemas or tables,
+                // use the alternative solution
+                columnMap.clear();
+                columnList.clear();
+                break;
+            }
+            String n = rs.getString("COLUMN_NAME");
+            n = convertColumnName(n);
+            int sqlType = rs.getInt("DATA_TYPE");
+            long precision = rs.getInt("COLUMN_SIZE");
+            precision = convertPrecision(sqlType, precision);
+            int scale = rs.getInt("DECIMAL_DIGITS");
+            scale = convertScale(sqlType, scale);
+            int displaySize = MathUtils.convertLongToInt(precision);
+            int type = DataType.convertSQLTypeToValueType(sqlType);
+            Column col = new Column(n, type, precision, scale, displaySize);
+            col.setTable(this, i++);
+            columnList.add(col);
+            columnMap.put(n, col);
+        }
+        rs.close();
+        // check if the table is accessible
+        Statement stat = null;
+        try {
+            stat = conn.createStatement();
+            rs = stat.executeQuery("SELECT * FROM " + tableName + " T WHERE 1=0");
+            if (columnList.size() == 0) {
+                // alternative solution
+                ResultSetMetaData rsMeta = rs.getMetaData();
+                for (i = 0; i < rsMeta.getColumnCount();) {
+                    String n = rsMeta.getColumnName(i + 1);
+                    n = convertColumnName(n);
+                    int sqlType = rsMeta.getColumnType(i + 1);
+                    long precision = rsMeta.getPrecision(i + 1);
+                    precision = convertPrecision(sqlType, precision);
+                    int scale = rsMeta.getScale(i + 1);
+                    scale = convertScale(sqlType, scale);
+                    int displaySize = rsMeta.getColumnDisplaySize(i + 1);
+                    int type = DataType.getValueTypeFromResultSet(rsMeta, i + 1);
+                    Column col = new Column(n, type, precision, scale, displaySize);
+                    col.setTable(this, i++);
+                    columnList.add(col);
+                    columnMap.put(n, col);
+                }
+            }
+            rs.close();
+        } catch (Exception e) {
+            throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, e, tableName + "(" + e.toString() + ")");
+        } finally {
+            JdbcUtils.closeSilently(stat);
+        }
+        Column[] cols = new Column[columnList.size()];
+        columnList.toArray(cols);
+        setColumns(cols);
+        int id = getId();
+        scanIndex = new IndexMate(this, id, null, IndexColumn.wrap(cols),
+                IndexType.createNonUnique());
+        indexes.add(scanIndex);
+        //load primary keys
+        try {
+            rs = meta.getPrimaryKeys(null, null, tableName);
+        } catch (Exception e) {
+            // Some ODBC bridge drivers don't support it:
+            // some combinations of "DataDirect SequeLink(R) for JDBC"
+            // http://www.datadirect.com/index.ssp
+            rs = null;
+        }
+        String pkName = "";
+        ArrayList<Column> list;
+        if (rs != null && rs.next()) {
+            // the problem is, the rows are not sorted by KEY_SEQ
+            list = New.arrayList();
+            do {
+                int idx = rs.getInt("KEY_SEQ");
+                if (pkName == null) {
+                    pkName = rs.getString("PK_NAME");
+                }
+                while (list.size() < idx) {
+                    list.add(null);
+                }
+                String col = rs.getString("COLUMN_NAME");
+                col = convertColumnName(col);
+                Column column = columnMap.get(col);
+                if (idx == 0) {
+                    // workaround for a bug in the SQLite JDBC driver
+                    list.add(column);
+                } else {
+                    list.set(idx - 1, column);
+                }
+            } while (rs.next());
+            addIndex(list, IndexType.createPrimaryKey(false));
+            rs.close();
+        }
+
+        try {
+            rs = meta.getIndexInfo(null, null, tableName, false, true);
+        } catch (Exception e) {
+            // Oracle throws an exception if the table is not found or is a
+            // SYNONYM
+            rs = null;
+        }
+        String indexName = null;
+        list = New.arrayList();
+        IndexType indexType = null;
+        if (rs != null) {
+            while (rs.next()) {
+                if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
+                    // ignore index statistics
+                    continue;
+                }
+                String newIndex = rs.getString("INDEX_NAME");
+                if (pkName.equals(newIndex)) {
+                    continue;
+                }
+                if (indexName != null && !indexName.equals(newIndex)) {
+                    addIndex(list, indexType);
+                    indexName = null;
+                }
+                if (indexName == null) {
+                    indexName = newIndex;
+                    list.clear();
+                }
+                boolean unique = !rs.getBoolean("NON_UNIQUE");
+                indexType = unique ? IndexType.createUnique(false) : IndexType.createNonUnique();
+                String col = rs.getString("COLUMN_NAME");
+                col = convertColumnName(col);
+                Column column = columnMap.get(col);
+                list.add(column);
+            }
+            rs.close();
+        }
+        if (indexName != null) {
+            addIndex(list, indexType);
+        }
+    }
+    
+    
+    
+    private String convertColumnName(String columnName) {
+        if ((storesMixedCase || storesLowerCase) && columnName.equals(StringUtils.toLowerEnglish(columnName))) {
+            columnName = StringUtils.toUpperEnglish(columnName);
+        } else if (storesMixedCase && !supportsMixedCaseIdentifiers) {
+            // TeraData
+            columnName = StringUtils.toUpperEnglish(columnName);
+        } else if (storesMixedCase && storesMixedCaseQuoted) {
+            // MS SQL Server (identifiers are case insensitive even if quoted)
+            columnName = StringUtils.toUpperEnglish(columnName);
+        }
+        return columnName;
+    }
+    
+    
+    private static long convertPrecision(int sqlType, long precision) {
+        // workaround for an Oracle problem:
+        // for DATE columns, the reported precision is 7
+        // for DECIMAL columns, the reported precision is 0
+        switch (sqlType) {
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                if (precision == 0) {
+                    precision = 65535;
+                }
+                break;
+            case Types.DATE:
+                precision = Math.max(ValueDate.PRECISION, precision);
+                break;
+            case Types.TIMESTAMP:
+                precision = Math.max(ValueTimestamp.PRECISION, precision);
+                break;
+            case Types.TIME:
+                precision = Math.max(ValueTime.PRECISION, precision);
+                break;
+        }
+        return precision;
+    }
+
+    private static int convertScale(int sqlType, int scale) {
+        // workaround for an Oracle problem:
+        // for DECIMAL columns, the reported precision is -127
+        switch (sqlType) {
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                if (scale < 0) {
+                    scale = 32767;
+                }
+                break;
+        }
+        return scale;
     }
 
     

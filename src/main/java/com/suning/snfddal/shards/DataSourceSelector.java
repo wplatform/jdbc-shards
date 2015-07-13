@@ -18,48 +18,47 @@
 
 package com.suning.snfddal.shards;
 
-import java.util.List;
-
 import com.suning.snfddal.util.New;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public abstract class DataSourceSelector implements Failover {
-    
-    public abstract String getShardName();
 
-    public abstract SmartDataSource doSelect(Optional option);
-    
-    public abstract SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive);
-    
-    
     public static DataSourceSelector create(String shardName, List<SmartDataSource> items) {
         DataSourceSelector selector;
-        if(items.size() == 1) {
+        if (items.size() == 1) {
             SmartDataSource ds = items.get(0);
-            if(ds.isReadOnly()) {
+            if (ds.isReadOnly()) {
                 throw new IllegalArgumentException();
             }
-            selector =  new StandaloneSelector(shardName, ds);
+            selector = new StandaloneSelector(shardName, ds);
         }
         List<DataSourceMarker> writableDb = New.arrayList(items.size());
         List<DataSourceMarker> readableDb = New.arrayList(items.size());
         for (DataSourceMarker item : items) {
-            if(!item.isReadOnly()) {
+            if (!item.isReadOnly()) {
                 writableDb.add(item);
             }
             readableDb.add(item);
         }
-        if(writableDb.isEmpty() || readableDb.isEmpty()) {
+        if (writableDb.isEmpty() || readableDb.isEmpty()) {
             throw new IllegalArgumentException("No writable datasource.");
         }
-        if(writableDb.size() == 1) {
-            selector =  new OneMasterSelector(shardName, items);
+        if (writableDb.size() == 1) {
+            selector = new OneMasterSelector(shardName, items);
         } else {
-            selector =  new MultiMasterSelector(shardName, items);
+            selector = new MultiMasterSelector(shardName, items);
         }
         return selector;
     }
+
+    public abstract String getShardName();
+
+    public abstract SmartDataSource doSelect(Optional option);
+
+    public abstract SmartDataSource doSelect(Optional option, List<SmartDataSource> exclusive);
 
 }

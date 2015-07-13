@@ -1,13 +1,9 @@
 /*
- * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0,
- * and the EPL 1.0 (http://h2database.com/html/license.html).
- * Initial Developer: H2 Group
+ * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0, and the
+ * EPL 1.0 (http://h2database.com/html/license.html). Initial Developer: H2
+ * Group
  */
 package com.suning.snfddal.dbobject.schema;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import com.suning.snfddal.command.ddl.CreateTableData;
 import com.suning.snfddal.dbobject.DbObject;
@@ -25,29 +21,29 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.util.New;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
- * A schema as created by the SQL statement
- * CREATE SCHEMA
+ * A schema as created by the SQL statement CREATE SCHEMA
  */
 public class Schema extends DbObjectBase {
 
-    private User owner;
     private final boolean system;
-
     private final HashMap<String, Table> tablesAndViews;
     private final HashMap<String, Index> indexes;
     private final HashMap<String, Sequence> sequences;
     private final HashMap<String, Constant> constants;
     private final HashMap<String, FunctionAlias> functions;
-    
-    private TableNode matedataNode;
-
     /**
      * The set of returned unique names that are not yet stored. It is used to
      * avoid returning the same unique name twice when multiple threads
      * concurrently create objects.
      */
     private final HashSet<String> temporaryUniqueNames = New.hashSet();
+    private User owner;
+    private TableNode matedataNode;
 
     /**
      * Create a new schema object.
@@ -59,8 +55,7 @@ public class Schema extends DbObjectBase {
      * @param system if this is a system schema (such a schema can not be
      *            dropped)
      */
-    public Schema(Database database, int id, String schemaName, User owner,
-            boolean system) {
+    public Schema(Database database, int id, String schemaName, User owner, boolean system) {
         tablesAndViews = database.newStringMap();
         indexes = database.newStringMap();
         sequences = database.newStringMap();
@@ -167,9 +162,8 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Add an object to this schema.
-     * This method must not be called within CreateSchemaObject;
-     * use Database.addSchemaObject() instead
+     * Add an object to this schema. This method must not be called within
+     * CreateSchemaObject; use Database.addSchemaObject() instead
      *
      * @param obj the object to add
      */
@@ -229,8 +223,8 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Try to find an index with this name. This method returns null if
-     * no object with this name exists.
+     * Try to find an index with this name. This method returns null if no
+     * object with this name exists.
      *
      * @param session the session
      * @param name the object name
@@ -245,8 +239,8 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Try to find a sequence with this name. This method returns null if
-     * no object with this name exists.
+     * Try to find a sequence with this name. This method returns null if no
+     * object with this name exists.
      *
      * @param sequenceName the object name
      * @return the object or null
@@ -290,8 +284,8 @@ public class Schema extends DbObjectBase {
         }
     }
 
-    private String getUniqueName(DbObject obj,
-            HashMap<String, ? extends SchemaObject> map, String prefix) {
+    private String getUniqueName(DbObject obj, HashMap<String, ? extends SchemaObject> map,
+            String prefix) {
         String hash = Integer.toHexString(obj.getName().hashCode()).toUpperCase();
         String name = null;
         synchronized (temporaryUniqueNames) {
@@ -335,8 +329,8 @@ public class Schema extends DbObjectBase {
     }
 
     /**
-     * Get the table or view with the given name.
-     * Local temporary tables are also returned.
+     * Get the table or view with the given name. Local temporary tables are
+     * also returned.
      *
      * @param session the session
      * @param name the table or view name
@@ -481,8 +475,5 @@ public class Schema extends DbObjectBase {
     public void setMatedataNode(TableNode matedataNode) {
         this.matedataNode = matedataNode;
     }
-    
-    
-    
 
 }

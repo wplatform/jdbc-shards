@@ -1,11 +1,5 @@
 package com.suning.snfddal.result;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
@@ -15,11 +9,16 @@ import com.suning.snfddal.util.FileUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+
 /**
  * This class implements the disk buffer for the LocalResult class.
  */
 class ResultDiskBuffer implements ResultExternal {
-
 
 
     private static final int READ_AHEAD = 128;
@@ -30,42 +29,13 @@ class ResultDiskBuffer implements ResultExternal {
     private final SortOrder sort;
     private final int columnCount;
     private final int maxBufferSize;
-
+    private final ResultDiskBuffer parent;
     private FileChannel file;
     private int rowCount;
-
-    private final ResultDiskBuffer parent;
     private boolean closed;
     private int childCount;
 
     private String fileName;
-
-    /**
-     * Represents a virtual disk tape for the merge sort algorithm.
-     * Each virtual disk tape is a region of the temp file.
-     */
-    static class ResultDiskTape {
-
-        /**
-         * The start position of this tape in the file.
-         */
-        long start;
-
-        /**
-         * The end position of this tape in the file.
-         */
-        long end;
-
-        /**
-         * The current read position.
-         */
-        long pos;
-
-        /**
-         * A list of rows in the buffer.
-         */
-        ArrayList<Value[]> buffer = New.arrayList();
-    }
 
     ResultDiskBuffer(Session session, SortOrder sort, int columnCount) {
         this.parent = null;
@@ -294,9 +264,6 @@ class ResultDiskBuffer implements ResultExternal {
         throw DbException.throwInternalError();
     }
 
-
-    
-    
     /**
      * Create a temporary file in the database folder.
      *
@@ -311,7 +278,7 @@ class ResultDiskBuffer implements ResultExternal {
             throw DbException.convertIOException(e, e.getMessage());
         }
     }
-    
+
     /**
      * Get the current location of the file pointer.
      *
@@ -324,7 +291,7 @@ class ResultDiskBuffer implements ResultExternal {
             throw DbException.convertIOException(e, fileName);
         }
     }
-    
+
     /**
      * Go to the specified file location.
      *
@@ -342,11 +309,11 @@ class ResultDiskBuffer implements ResultExternal {
             throw DbException.convertIOException(e, fileName);
         }
     }
-    
+
     /**
      * Write a number of bytes.
      *
-     * @param b the source buffer
+     * @param b   the source buffer
      * @param off the offset
      * @param len the number of bytes to write
      */
@@ -363,11 +330,11 @@ class ResultDiskBuffer implements ResultExternal {
             throw DbException.convertIOException(e, fileName);
         }
     }
-    
+
     /**
      * Read a number of bytes.
      *
-     * @param b the target buffer
+     * @param b   the target buffer
      * @param off the offset
      * @param len the number of bytes to read
      */
@@ -383,7 +350,7 @@ class ResultDiskBuffer implements ResultExternal {
             throw DbException.convertIOException(e, fileName);
         }
     }
-    
+
     private void closeFileSilently() {
         try {
             file.close();
@@ -391,7 +358,7 @@ class ResultDiskBuffer implements ResultExternal {
             // ignore
         }
     }
-    
+
     /**
      * Close the file (ignoring exceptions) and delete the file.
      */
@@ -404,6 +371,33 @@ class ResultDiskBuffer implements ResultExternal {
                 // TODO log such errors?
             }
         }
+    }
+
+    /**
+     * Represents a virtual disk tape for the merge sort algorithm.
+     * Each virtual disk tape is a region of the temp file.
+     */
+    static class ResultDiskTape {
+
+        /**
+         * The start position of this tape in the file.
+         */
+        long start;
+
+        /**
+         * The end position of this tape in the file.
+         */
+        long end;
+
+        /**
+         * The current read position.
+         */
+        long pos;
+
+        /**
+         * A list of rows in the buffer.
+         */
+        ArrayList<Value[]> buffer = New.arrayList();
     }
 
 }

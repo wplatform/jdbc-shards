@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statements
@@ -64,10 +64,6 @@ public class AlterTableAlterColumn extends SchemaCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
     public void setSelectivity(Expression selectivity) {
         newSelectivity = selectivity;
     }
@@ -83,6 +79,10 @@ public class AlterTableAlterColumn extends SchemaCommand {
     @Override
     public int getType() {
         return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public void setIfNotExists(boolean ifNotExists) {

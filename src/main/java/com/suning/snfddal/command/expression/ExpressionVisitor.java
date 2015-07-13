@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.HashSet;
-
 import com.suning.snfddal.dbobject.DbObject;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.Table;
+
+import java.util.HashSet;
 
 /**
  * The visitor pattern is used to iterate through all expressions of a query
@@ -99,8 +99,8 @@ public class ExpressionVisitor {
      * Get all referenced columns.
      */
     public static final int GET_COLUMNS = 9;
-    
-    
+
+
     /**
      * Get all referenced columns.
      */
@@ -120,10 +120,10 @@ public class ExpressionVisitor {
     private final ColumnResolver resolver;
 
     private ExpressionVisitor(int type,
-            int queryLevel,
-            HashSet<DbObject> dependencies,
-            HashSet<Column> columns,
-            Table table, ColumnResolver resolver) {
+                              int queryLevel,
+                              HashSet<DbObject> dependencies,
+                              HashSet<Column> columns,
+                              Table table, ColumnResolver resolver) {
         this.type = type;
         this.queryLevel = queryLevel;
         this.dependencies = dependencies;
@@ -190,7 +190,7 @@ public class ExpressionVisitor {
         return new ExpressionVisitor(SET_MAX_DATA_MODIFICATION_ID, 0, null,
                 null, null, null);
     }
-    
+
     public static ExpressionVisitor getExportParameterVisitor() {
         return new ExpressionVisitor(EXPORT_PARAMETER, 0, null,
                 null, null, null);
@@ -269,5 +269,5 @@ public class ExpressionVisitor {
     public int getType() {
         return type;
     }
-    
+
 }

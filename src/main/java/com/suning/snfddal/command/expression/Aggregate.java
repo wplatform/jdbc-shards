@@ -5,12 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
 import com.suning.snfddal.command.dml.Select;
 import com.suning.snfddal.command.dml.SelectOrderBy;
 import com.suning.snfddal.dbobject.index.Index;
@@ -25,15 +19,9 @@ import com.suning.snfddal.result.SortOrder;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.value.DataType;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueArray;
-import com.suning.snfddal.value.ValueBoolean;
-import com.suning.snfddal.value.ValueDouble;
-import com.suning.snfddal.value.ValueInt;
-import com.suning.snfddal.value.ValueLong;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueString;
+import com.suning.snfddal.value.*;
+
+import java.util.*;
 
 /**
  * Implements the integrated aggregate functions, such as COUNT, MAX, SUM.
@@ -117,34 +105,6 @@ public class Aggregate extends Expression {
 
     private static final HashMap<String, Integer> AGGREGATES = New.hashMap();
 
-    private final int type;
-    private final Select select;
-    private final boolean distinct;
-
-    private Expression on;
-    private Expression groupConcatSeparator;
-    private ArrayList<SelectOrderBy> groupConcatOrderList;
-    private SortOrder groupConcatSort;
-    private int dataType, scale;
-    private long precision;
-    private int displaySize;
-    private int lastGroupRowId;
-
-    /**
-     * Create a new aggregate object.
-     *
-     * @param type the aggregate type
-     * @param on the aggregated expression
-     * @param select the select statement
-     * @param distinct if distinct is used
-     */
-    public Aggregate(int type, Expression on, Select select, boolean distinct) {
-        this.type = type;
-        this.on = on;
-        this.select = select;
-        this.distinct = distinct;
-    }
-
     static {
         addAggregate("COUNT", COUNT);
         addAggregate("SUM", SUM);
@@ -169,6 +129,33 @@ public class Aggregate extends Expression {
         addAggregate("EVERY", BOOL_AND);
         addAggregate("SELECTIVITY", SELECTIVITY);
         addAggregate("HISTOGRAM", HISTOGRAM);
+    }
+
+    private final int type;
+    private final Select select;
+    private final boolean distinct;
+    private Expression on;
+    private Expression groupConcatSeparator;
+    private ArrayList<SelectOrderBy> groupConcatOrderList;
+    private SortOrder groupConcatSort;
+    private int dataType, scale;
+    private long precision;
+    private int displaySize;
+    private int lastGroupRowId;
+
+    /**
+     * Create a new aggregate object.
+     *
+     * @param type     the aggregate type
+     * @param on       the aggregated expression
+     * @param select   the select statement
+     * @param distinct if distinct is used
+     */
+    public Aggregate(int type, Expression on, Select select, boolean distinct) {
+        this.type = type;
+        this.on = on;
+        this.select = select;
+        this.distinct = distinct;
     }
 
     private static void addAggregate(String name, int type) {
@@ -265,29 +252,29 @@ public class Aggregate extends Expression {
     public Value getValue(Session session) {
         if (select.isQuickAggregateQuery()) {
             switch (type) {
-            case COUNT:
-            case COUNT_ALL:
-                Table table = select.getTopTableFilter().getTable();
-                return ValueLong.get(table.getRowCount(session));
-            case MIN:
-            case MAX:
-                boolean first = type == MIN;
-                Index index = getColumnIndex();
-                int sortType = index.getIndexColumns()[0].sortType;
-                if ((sortType & SortOrder.DESCENDING) != 0) {
-                    first = !first;
-                }
-                //Cursor cursor = index.findFirstOrLast(session, first);
-                //SearchRow row = cursor.getSearchRow();
-                //Value v;
-                //if (row == null) {
-                //    v = ValueNull.INSTANCE;
-                //} else {
-                //    v = row.getValue(index.getColumns()[0].getColumnId());
-                //}
-                return null;
-            default:
-                DbException.throwInternalError("type=" + type);
+                case COUNT:
+                case COUNT_ALL:
+                    Table table = select.getTopTableFilter().getTable();
+                    return ValueLong.get(table.getRowCount(session));
+                case MIN:
+                case MAX:
+                    boolean first = type == MIN;
+                    Index index = getColumnIndex();
+                    int sortType = index.getIndexColumns()[0].sortType;
+                    if ((sortType & SortOrder.DESCENDING) != 0) {
+                        first = !first;
+                    }
+                    //Cursor cursor = index.findFirstOrLast(session, first);
+                    //SearchRow row = cursor.getSearchRow();
+                    //Value v;
+                    //if (row == null) {
+                    //    v = ValueNull.INSTANCE;
+                    //} else {
+                    //    v = row.getValue(index.getColumns()[0].getColumnId());
+                    //}
+                    return null;
+                default:
+                    DbException.throwInternalError("type=" + type);
             }
         }
         HashMap<Expression, Object> group = select.getCurrentGroup();
@@ -377,65 +364,65 @@ public class Aggregate extends Expression {
             groupConcatSeparator = groupConcatSeparator.optimize(session);
         }
         switch (type) {
-        case GROUP_CONCAT:
-            dataType = Value.STRING;
-            scale = 0;
-            precision = displaySize = Integer.MAX_VALUE;
-            break;
-        case COUNT_ALL:
-        case COUNT:
-            dataType = Value.LONG;
-            scale = 0;
-            precision = ValueLong.PRECISION;
-            displaySize = ValueLong.DISPLAY_SIZE;
-            break;
-        case SELECTIVITY:
-            dataType = Value.INT;
-            scale = 0;
-            precision = ValueInt.PRECISION;
-            displaySize = ValueInt.DISPLAY_SIZE;
-            break;
-        case HISTOGRAM:
-            dataType = Value.ARRAY;
-            scale = 0;
-            precision = displaySize = Integer.MAX_VALUE;
-            break;
-        case SUM:
-            if (dataType == Value.BOOLEAN) {
-                // example: sum(id > 3) (count the rows)
+            case GROUP_CONCAT:
+                dataType = Value.STRING;
+                scale = 0;
+                precision = displaySize = Integer.MAX_VALUE;
+                break;
+            case COUNT_ALL:
+            case COUNT:
                 dataType = Value.LONG;
-            } else if (!DataType.supportsAdd(dataType)) {
-                throw DbException.get(ErrorCode.SUM_OR_AVG_ON_WRONG_DATATYPE_1, getSQL());
-            } else {
-                dataType = DataType.getAddProofType(dataType);
-            }
-            break;
-        case AVG:
-            if (!DataType.supportsAdd(dataType)) {
-                throw DbException.get(ErrorCode.SUM_OR_AVG_ON_WRONG_DATATYPE_1, getSQL());
-            }
-            break;
-        case MIN:
-        case MAX:
-            break;
-        case STDDEV_POP:
-        case STDDEV_SAMP:
-        case VAR_POP:
-        case VAR_SAMP:
-            dataType = Value.DOUBLE;
-            precision = ValueDouble.PRECISION;
-            displaySize = ValueDouble.DISPLAY_SIZE;
-            scale = 0;
-            break;
-        case BOOL_AND:
-        case BOOL_OR:
-            dataType = Value.BOOLEAN;
-            precision = ValueBoolean.PRECISION;
-            displaySize = ValueBoolean.DISPLAY_SIZE;
-            scale = 0;
-            break;
-        default:
-            DbException.throwInternalError("type=" + type);
+                scale = 0;
+                precision = ValueLong.PRECISION;
+                displaySize = ValueLong.DISPLAY_SIZE;
+                break;
+            case SELECTIVITY:
+                dataType = Value.INT;
+                scale = 0;
+                precision = ValueInt.PRECISION;
+                displaySize = ValueInt.DISPLAY_SIZE;
+                break;
+            case HISTOGRAM:
+                dataType = Value.ARRAY;
+                scale = 0;
+                precision = displaySize = Integer.MAX_VALUE;
+                break;
+            case SUM:
+                if (dataType == Value.BOOLEAN) {
+                    // example: sum(id > 3) (count the rows)
+                    dataType = Value.LONG;
+                } else if (!DataType.supportsAdd(dataType)) {
+                    throw DbException.get(ErrorCode.SUM_OR_AVG_ON_WRONG_DATATYPE_1, getSQL());
+                } else {
+                    dataType = DataType.getAddProofType(dataType);
+                }
+                break;
+            case AVG:
+                if (!DataType.supportsAdd(dataType)) {
+                    throw DbException.get(ErrorCode.SUM_OR_AVG_ON_WRONG_DATATYPE_1, getSQL());
+                }
+                break;
+            case MIN:
+            case MAX:
+                break;
+            case STDDEV_POP:
+            case STDDEV_SAMP:
+            case VAR_POP:
+            case VAR_SAMP:
+                dataType = Value.DOUBLE;
+                precision = ValueDouble.PRECISION;
+                displaySize = ValueDouble.DISPLAY_SIZE;
+                scale = 0;
+                break;
+            case BOOL_AND:
+            case BOOL_OR:
+                dataType = Value.BOOLEAN;
+                precision = ValueBoolean.PRECISION;
+                displaySize = ValueBoolean.DISPLAY_SIZE;
+                scale = 0;
+                break;
+            default:
+                DbException.throwInternalError("type=" + type);
         }
         return this;
     }
@@ -496,51 +483,51 @@ public class Aggregate extends Expression {
     public String getSQL() {
         String text;
         switch (type) {
-        case GROUP_CONCAT:
-            return getSQLGroupConcat();
-        case COUNT_ALL:
-            return "COUNT(*)";
-        case COUNT:
-            text = "COUNT";
-            break;
-        case SELECTIVITY:
-            text = "SELECTIVITY";
-            break;
-        case HISTOGRAM:
-            text = "HISTOGRAM";
-            break;
-        case SUM:
-            text = "SUM";
-            break;
-        case MIN:
-            text = "MIN";
-            break;
-        case MAX:
-            text = "MAX";
-            break;
-        case AVG:
-            text = "AVG";
-            break;
-        case STDDEV_POP:
-            text = "STDDEV_POP";
-            break;
-        case STDDEV_SAMP:
-            text = "STDDEV_SAMP";
-            break;
-        case VAR_POP:
-            text = "VAR_POP";
-            break;
-        case VAR_SAMP:
-            text = "VAR_SAMP";
-            break;
-        case BOOL_AND:
-            text = "BOOL_AND";
-            break;
-        case BOOL_OR:
-            text = "BOOL_OR";
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case GROUP_CONCAT:
+                return getSQLGroupConcat();
+            case COUNT_ALL:
+                return "COUNT(*)";
+            case COUNT:
+                text = "COUNT";
+                break;
+            case SELECTIVITY:
+                text = "SELECTIVITY";
+                break;
+            case HISTOGRAM:
+                text = "HISTOGRAM";
+                break;
+            case SUM:
+                text = "SUM";
+                break;
+            case MIN:
+                text = "MIN";
+                break;
+            case MAX:
+                text = "MAX";
+                break;
+            case AVG:
+                text = "AVG";
+                break;
+            case STDDEV_POP:
+                text = "STDDEV_POP";
+                break;
+            case STDDEV_SAMP:
+                text = "STDDEV_SAMP";
+                break;
+            case VAR_POP:
+                text = "VAR_POP";
+                break;
+            case VAR_SAMP:
+                text = "VAR_SAMP";
+                break;
+            case BOOL_AND:
+                text = "BOOL_AND";
+                break;
+            case BOOL_OR:
+                text = "BOOL_OR";
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         if (distinct) {
             return text + "(DISTINCT " + on.getSQL() + ")";
@@ -566,19 +553,19 @@ public class Aggregate extends Expression {
     public boolean isEverything(ExpressionVisitor visitor) {
         if (visitor.getType() == ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL) {
             switch (type) {
-            case COUNT:
-                if (!distinct && on.getNullable() == Column.NOT_NULLABLE) {
+                case COUNT:
+                    if (!distinct && on.getNullable() == Column.NOT_NULLABLE) {
+                        return visitor.getTable().canGetRowCount();
+                    }
+                    return false;
+                case COUNT_ALL:
                     return visitor.getTable().canGetRowCount();
-                }
-                return false;
-            case COUNT_ALL:
-                return visitor.getTable().canGetRowCount();
-            case MIN:
-            case MAX:
-                Index index = getColumnIndex();
-                return index != null;
-            default:
-                return false;
+                case MIN:
+                case MAX:
+                    Index index = getColumnIndex();
+                    return index != null;
+                default:
+                    return false;
             }
         }
         if (on != null && !on.isEverything(visitor)) {
@@ -611,56 +598,56 @@ public class Aggregate extends Expression {
     public String exportParameters(TableFilter filter, List<Value> container) {
         String text;
         switch (type) {
-        case GROUP_CONCAT:
-            return getSQLGroupConcat();
-        case COUNT_ALL:
-            return "COUNT(*)";
-        case COUNT:
-            text = "COUNT";
-            break;
-        case SELECTIVITY:
-            text = "SELECTIVITY";
-            break;
-        case HISTOGRAM:
-            text = "HISTOGRAM";
-            break;
-        case SUM:
-            text = "SUM";
-            break;
-        case MIN:
-            text = "MIN";
-            break;
-        case MAX:
-            text = "MAX";
-            break;
-        case AVG:
-            text = "AVG";
-            break;
-        case STDDEV_POP:
-            text = "STDDEV_POP";
-            break;
-        case STDDEV_SAMP:
-            text = "STDDEV_SAMP";
-            break;
-        case VAR_POP:
-            text = "VAR_POP";
-            break;
-        case VAR_SAMP:
-            text = "VAR_SAMP";
-            break;
-        case BOOL_AND:
-            text = "BOOL_AND";
-            break;
-        case BOOL_OR:
-            text = "BOOL_OR";
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case GROUP_CONCAT:
+                return getSQLGroupConcat();
+            case COUNT_ALL:
+                return "COUNT(*)";
+            case COUNT:
+                text = "COUNT";
+                break;
+            case SELECTIVITY:
+                text = "SELECTIVITY";
+                break;
+            case HISTOGRAM:
+                text = "HISTOGRAM";
+                break;
+            case SUM:
+                text = "SUM";
+                break;
+            case MIN:
+                text = "MIN";
+                break;
+            case MAX:
+                text = "MAX";
+                break;
+            case AVG:
+                text = "AVG";
+                break;
+            case STDDEV_POP:
+                text = "STDDEV_POP";
+                break;
+            case STDDEV_SAMP:
+                text = "STDDEV_SAMP";
+                break;
+            case VAR_POP:
+                text = "VAR_POP";
+                break;
+            case VAR_SAMP:
+                text = "VAR_SAMP";
+                break;
+            case BOOL_AND:
+                text = "BOOL_AND";
+                break;
+            case BOOL_OR:
+                text = "BOOL_OR";
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         if (distinct) {
             return text + "(DISTINCT " + on.exportParameters(filter, container) + ")";
         }
-        return text + StringUtils.enclose(on.exportParameters(filter,container));
+        return text + StringUtils.enclose(on.exportParameters(filter, container));
     }
 
 }

@@ -20,13 +20,10 @@ package com.suning.snfddal.tx;
 
 import java.sql.Connection;
 
-import com.suning.snfddal.shards.DataSourceDispatcher;
-
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class TransactionServiceImpl implements TransactionService, TransactionManager{
+public class TransactionServiceImpl implements TransactionService, TransactionManager {
 
     /* (non-Javadoc)
      * @see com.suning.snfddal.tx.TransactionService#getTransactionManager()
@@ -43,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService, TransactionMa
     @Override
     public void begin() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -52,7 +49,7 @@ public class TransactionServiceImpl implements TransactionService, TransactionMa
     @Override
     public void commit() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -61,7 +58,7 @@ public class TransactionServiceImpl implements TransactionService, TransactionMa
     @Override
     public void rollback() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)

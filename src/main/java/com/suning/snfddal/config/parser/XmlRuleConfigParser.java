@@ -1,29 +1,22 @@
 /*
  * Copyright 2014 suning.com Holding Ltd.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 // Created on 2014年3月25日
 // $Id$
 
 package com.suning.snfddal.config.parser;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.dispatch.rule.RuleColumn;
@@ -32,6 +25,12 @@ import com.suning.snfddal.dispatch.rule.TableNode;
 import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlRuleConfigParser {
 
@@ -46,6 +45,24 @@ public class XmlRuleConfigParser {
     public XmlRuleConfigParser(XPathParser parser, Configuration configuration) {
         this.configuration = configuration;
         this.parser = parser;
+    }
+
+    public static RuleColumn newRuleColumn(String name, String required, String type) {
+        RuleColumn ruleColumn = new RuleColumn();
+        if (StringUtils.isNullOrEmpty(name) || name.contains("=")) {
+            throw new ParsingException(
+                    " Error parsing rule element in rule XML. Cause: the RuleColumn's name is required , and should "
+                            + "in the first place .");
+        } else {
+            ruleColumn.setName(name);
+        }
+        if (!StringUtils.isNullOrEmpty(required)) {
+            ruleColumn.setRequired(Boolean.valueOf(required));
+        }
+        if (!StringUtils.isNullOrEmpty(type)) {
+            ruleColumn.setType(type.toLowerCase());
+        }
+        return ruleColumn;
     }
 
     public void parse() {
@@ -83,7 +100,8 @@ public class XmlRuleConfigParser {
             } else if ("tableRule".equals(xNode.getName())) {
                 RuleExpression ruleExpr = parseRuleExpression(xNode);
                 if (ruleExpr.getRuleColumns().isEmpty()) {
-                    throw new ParsingException("The table router '" + tableRouter.getId() + "' has no sharding column.");
+                    throw new ParsingException("The table router '" + tableRouter.getId()
+                            + "' has no sharding column.");
                 }
                 tableRouter.setRuleExpression(ruleExpr);
             }
@@ -147,25 +165,6 @@ public class XmlRuleConfigParser {
         return rule;
     }
 
-
-    public static RuleColumn newRuleColumn(String name, String required, String type) {
-        RuleColumn ruleColumn = new RuleColumn();
-        if (StringUtils.isNullOrEmpty(name) || name.contains("=")) {
-            throw new ParsingException(
-                    " Error parsing rule element in rule XML. Cause: the RuleColumn's name is required , and should "
-                            + "in the first place .");
-        } else {
-            ruleColumn.setName(name);
-        }
-        if (!StringUtils.isNullOrEmpty(required)) {
-            ruleColumn.setRequired(Boolean.valueOf(required));
-        }
-        if (!StringUtils.isNullOrEmpty(type)) {
-            ruleColumn.setType(type.toLowerCase());
-        }
-        return ruleColumn;
-    }
-
     private void parsePartition(TableRouter tableRouter, List<XNode> list) {
         List<TableNode> tableNodes = New.arrayList();
         for (XNode xNode : list) {
@@ -181,9 +180,9 @@ public class XmlRuleConfigParser {
             List<String> suffixes = collectItems(suffix);
             if (suffixes.isEmpty()) {
                 for (String shardItem : shards) {
-                    TableNode node = new TableNode(shardItem,null,null);
-                    if(tableNodes.contains(node)) {
-                        throw new ParsingException("Duplicate " + node + " defined in " 
+                    TableNode node = new TableNode(shardItem, null, null);
+                    if (tableNodes.contains(node)) {
+                        throw new ParsingException("Duplicate " + node + " defined in "
                                 + tableRouter.getId() + "'s partition");
                     }
                     tableNodes.add(node);
@@ -191,9 +190,9 @@ public class XmlRuleConfigParser {
             } else {
                 for (String shardItem : shards) {
                     for (String suffixItem : suffixes) {
-                        TableNode node = new TableNode(shardItem,null,suffixItem);
-                        if(tableNodes.contains(node)) {
-                            throw new ParsingException("Duplicate " + node + " defined in " 
+                        TableNode node = new TableNode(shardItem, null, suffixItem);
+                        if (tableNodes.contains(node)) {
+                            throw new ParsingException("Duplicate " + node + " defined in "
                                     + tableRouter.getId() + "'s partition");
                         }
                         tableNodes.add(node);
@@ -218,7 +217,8 @@ public class XmlRuleConfigParser {
                     continue;
                 }
                 if (result.contains(string)) {
-                    throw new ParsingException("Error parsing ddal-rule XML . Duplicate item '" + items + "'");
+                    throw new ParsingException(
+                            "Error parsing ddal-rule XML . Duplicate item '" + items + "'");
                 }
                 result.add(string);
             }

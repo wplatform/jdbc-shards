@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * A NOT condition.
@@ -102,7 +102,7 @@ public class ConditionNot extends Condition {
 
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
-        return "(NOT " + condition.exportParameters(filter,container) + ")";
+        return "(NOT " + condition.exportParameters(filter, container) + ")";
     }
 
 }

@@ -5,10 +5,6 @@
  */
 package com.suning.snfddal.jdbc;
 
-import java.sql.ParameterMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.message.DbException;
@@ -17,6 +13,10 @@ import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
+
+import java.sql.ParameterMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Information about the parameters of a prepared statement.
@@ -29,7 +29,7 @@ public class JdbcParameterMetaData extends TraceObject implements
     private final ArrayList<? extends ParameterInterface> parameters;
 
     JdbcParameterMetaData(Trace trace, JdbcPreparedStatement prep,
-            CommandInterface command, int id) {
+                          CommandInterface command, int id) {
         setTrace(trace, TraceObject.PARAMETER_META_DATA, id);
         this.prep = prep;
         this.parameters = command.getParameters();

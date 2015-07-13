@@ -29,11 +29,6 @@ public class ValueStringFixed extends ValueString {
         return s;
     }
 
-    @Override
-    public int getType() {
-        return Value.STRING_FIXED;
-    }
-
     /**
      * Get or create a fixed length string value for the given string.
      * Spaces at the end of the string will be removed.
@@ -51,6 +46,11 @@ public class ValueStringFixed extends ValueString {
             return obj;
         }
         return (ValueStringFixed) Value.cache(obj);
+    }
+
+    @Override
+    public int getType() {
+        return Value.STRING_FIXED;
     }
 
     @Override

@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
@@ -25,16 +23,18 @@ import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.value.Value;
 
+import java.util.ArrayList;
+
 /**
  * This class represents the statement
  * MERGE
  */
 public class Merge extends Prepared {
 
+    private final ArrayList<Expression[]> list = New.arrayList();
     private Table table;
     private Column[] columns;
     private Column[] keys;
-    private final ArrayList<Expression[]> list = New.arrayList();
     private Query query;
     private Prepared update;
 

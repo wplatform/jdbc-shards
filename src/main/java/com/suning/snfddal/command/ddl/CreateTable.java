@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.dml.Insert;
 import com.suning.snfddal.command.dml.Query;
@@ -23,13 +20,14 @@ import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.New;
-import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.DataType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * This class represents the statement CREATE TABLE
- * 
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class CreateTable extends SchemaCommand {
@@ -101,7 +99,7 @@ public class CreateTable extends SchemaCommand {
     public int update() {
         //Database db = session.getDatabase();
         TableMate tableOrView = finalTableMate(data.tableName);
-        if (tableOrView != null && !tableOrView.isLoadFailed()) {
+        if (tableOrView != null && !tableOrView.canAccess()) {
             if (ifNotExists) {
                 return 0;
             }

@@ -30,6 +30,7 @@ import com.suning.snfddal.message.ErrorCode;
 /**
  * This class represents the statement
  * DROP TABLE
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class DropTable extends SchemaCommand {
@@ -44,7 +45,7 @@ public class DropTable extends SchemaCommand {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
                 Constants.RESTRICT :
-                    Constants.CASCADE;
+                Constants.CASCADE;
     }
 
     /**
@@ -90,8 +91,8 @@ public class DropTable extends SchemaCommand {
     public int getType() {
         return CommandInterface.DROP_TABLE;
     }
-    
-    
+
+
     private void prepareDrop() {
         table = finalTableMate(tableName);
         if (table == null) {
@@ -101,13 +102,13 @@ public class DropTable extends SchemaCommand {
         }
         session.getUser().checkRight(table, Right.ALL);
         if (dropAction == Constants.CASCADE) {
-            
+
         }
         if (next != null) {
             next.prepareDrop();
         }
     }
-    
+
     private void executeDrop() {
         table = finalTableMate(tableName);
         if (table != null) {
@@ -118,7 +119,6 @@ public class DropTable extends SchemaCommand {
             next.executeDrop();
         }
     }
-    
-    
+
 
 }

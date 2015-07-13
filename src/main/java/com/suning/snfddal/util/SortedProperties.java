@@ -5,22 +5,9 @@
  */
 package com.suning.snfddal.util;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.Enumeration;
+import java.io.*;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.Vector;
 
 /**
  * Sorted properties file.
@@ -30,26 +17,16 @@ public class SortedProperties extends Properties {
 
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public synchronized Enumeration<Object> keys() {
-        Vector<String> v = new Vector<String>();
-        for (Object o : keySet()) {
-            v.add(o.toString());
-        }
-        Collections.sort(v);
-        return new Vector<Object>(v).elements();
-    }
-
     /**
      * Get a boolean property value from a properties object.
      *
      * @param prop the properties object
-     * @param key the key
-     * @param def the default value
+     * @param key  the key
+     * @param def  the default value
      * @return the value if set, or the default value if not
      */
     public static boolean getBooleanProperty(Properties prop, String key,
-            boolean def) {
+                                             boolean def) {
         String value = prop.getProperty(key, "" + def);
         try {
             return Boolean.parseBoolean(value);
@@ -63,8 +40,8 @@ public class SortedProperties extends Properties {
      * Get an int property value from a properties object.
      *
      * @param prop the properties object
-     * @param key the key
-     * @param def the default value
+     * @param key  the key
+     * @param def  the default value
      * @return the value if set, or the default value if not
      */
     public static int getIntProperty(Properties prop, String key, int def) {
@@ -98,6 +75,33 @@ public class SortedProperties extends Properties {
             }
         }
         return prop;
+    }
+
+    /**
+     * Convert a String to a map.
+     *
+     * @param s the string
+     * @return the map
+     */
+    public static SortedProperties fromLines(String s) {
+        SortedProperties p = new SortedProperties();
+        for (String line : StringUtils.arraySplit(s, '\n', true)) {
+            int idx = line.indexOf('=');
+            if (idx > 0) {
+                p.put(line.substring(0, idx), line.substring(idx + 1));
+            }
+        }
+        return p;
+    }
+
+    @Override
+    public synchronized Enumeration<Object> keys() {
+        Vector<String> v = new Vector<String>();
+        for (Object o : keySet()) {
+            v.add(o.toString());
+        }
+        Collections.sort(v);
+        return new Vector<Object>(v).elements();
     }
 
     /**
@@ -141,23 +145,6 @@ public class SortedProperties extends Properties {
             buff.append(e.getKey()).append('=').append(e.getValue()).append('\n');
         }
         return buff.toString();
-    }
-
-    /**
-     * Convert a String to a map.
-     *
-     * @param s the string
-     * @return the map
-     */
-    public static SortedProperties fromLines(String s) {
-        SortedProperties p = new SortedProperties();
-        for (String line : StringUtils.arraySplit(s, '\n', true)) {
-            int idx = line.indexOf('=');
-            if (idx > 0) {
-                p.put(line.substring(0, idx), line.substring(idx + 1));
-            }
-        }
-        return p;
     }
 
 }

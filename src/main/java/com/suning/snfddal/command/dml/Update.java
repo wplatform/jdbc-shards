@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -30,20 +27,23 @@ import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * This class represents the statement
  * UPDATE
  */
 public class Update extends Prepared {
 
+    private final ArrayList<Column> columns = New.arrayList();
+    private final HashMap<Column, Expression> expressionMap = New.hashMap();
     private Expression condition;
     private TableFilter tableFilter;
-
-    /** The limit expression as specified in the LIMIT clause. */
+    /**
+     * The limit expression as specified in the LIMIT clause.
+     */
     private Expression limitExpr;
-
-    private final ArrayList<Column> columns = New.arrayList();
-    private final HashMap<Column, Expression> expressionMap  = New.hashMap();
 
     public Update(Session session) {
         super(session);
@@ -60,7 +60,7 @@ public class Update extends Prepared {
     /**
      * Add an assignment of the form column = expression.
      *
-     * @param column the column
+     * @param column     the column
      * @param expression the expression
      */
     public void setAssignment(Column column, Expression expression) {
@@ -75,6 +75,7 @@ public class Update extends Prepared {
             p.setColumn(column);
         }
     }
+
     @Override
     public int update() {
         return updateRows();
@@ -101,7 +102,7 @@ public class Update extends Prepared {
                 }
             }
             while (tableFilter.next()) {
-                setCurrentRowNumber(count+1);
+                setCurrentRowNumber(count + 1);
                 if (limitRows >= 0 && count >= limitRows) {
                     break;
                 }

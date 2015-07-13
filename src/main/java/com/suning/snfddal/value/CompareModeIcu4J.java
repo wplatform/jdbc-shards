@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.value;
 
-import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.Locale;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * An implementation of CompareMode that uses the ICU4J Collator.
@@ -23,22 +23,6 @@ public class CompareModeIcu4J extends CompareMode {
     protected CompareModeIcu4J(String name, int strength, boolean binaryUnsigned) {
         super(name, strength, binaryUnsigned);
         collator = getIcu4jCollator(name, strength);
-    }
-
-    @Override
-    public int compareString(String a, String b, boolean ignoreCase) {
-        if (ignoreCase) {
-            a = a.toUpperCase();
-            b = b.toUpperCase();
-        }
-        return collator.compare(a, b);
-    }
-
-    @Override
-    public boolean equalsChars(String a, int ai, String b, int bi,
-            boolean ignoreCase) {
-        return compareString(a.substring(ai, ai + 1), b.substring(bi, bi + 1),
-                ignoreCase) == 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -83,6 +67,22 @@ public class CompareModeIcu4J extends CompareMode {
         } catch (Exception e) {
             throw DbException.convert(e);
         }
+    }
+
+    @Override
+    public int compareString(String a, String b, boolean ignoreCase) {
+        if (ignoreCase) {
+            a = a.toUpperCase();
+            b = b.toUpperCase();
+        }
+        return collator.compare(a, b);
+    }
+
+    @Override
+    public boolean equalsChars(String a, int ai, String b, int bi,
+                               boolean ignoreCase) {
+        return compareString(a.substring(ai, ai + 1), b.substring(bi, bi + 1),
+                ignoreCase) == 0;
     }
 
 }

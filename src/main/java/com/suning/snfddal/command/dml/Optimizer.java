@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.Random;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.table.Plan;
 import com.suning.snfddal.dbobject.table.PlanItem;
@@ -14,6 +12,8 @@ import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.util.BitField;
 import com.suning.snfddal.util.Permutations;
+
+import java.util.Random;
 
 /**
  * The optimizer is responsible to find the best execution plan
@@ -24,8 +24,8 @@ class Optimizer {
     private static final int MAX_BRUTE_FORCE_FILTERS = 7;
     private static final int MAX_BRUTE_FORCE = 2000;
     private static final int MAX_GENETIC = 500;
-    private long start;
-    private BitField switched;
+    private final TableFilter[] filters;
+    private final Expression condition;
 
     //  possible plans for filters, if using brute force:
     //  1 filter 1 plan
@@ -38,11 +38,9 @@ class Optimizer {
     //  8 filters 40320 plan
     //  9 filters 362880 plans
     // 10 filters 3628800 filters
-
-    private final TableFilter[] filters;
-    private final Expression condition;
     private final Session session;
-
+    private long start;
+    private BitField switched;
     private Plan bestPlan;
     private TableFilter topFilter;
     private double cost;
@@ -130,7 +128,7 @@ class Optimizer {
                             break;
                         }
                         list[i] = filters[j];
-                        Plan part = new Plan(list, i+1, condition);
+                        Plan part = new Plan(list, i + 1, condition);
                         double costNow = part.calculateCost(session);
                         if (costPart < 0 || costNow < costPart) {
                             costPart = costNow;

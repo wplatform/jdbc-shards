@@ -5,16 +5,8 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.suning.snfddal.command.Prepared;
-import com.suning.snfddal.command.expression.Alias;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.command.expression.ExpressionColumn;
-import com.suning.snfddal.command.expression.ExpressionVisitor;
-import com.suning.snfddal.command.expression.Parameter;
-import com.suning.snfddal.command.expression.ValueExpression;
+import com.suning.snfddal.command.expression.*;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -29,6 +21,9 @@ import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueInt;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Represents a SELECT statement (simple, or union).
@@ -59,281 +54,35 @@ public abstract class Query extends Prepared {
      * Whether the result needs to support random access.
      */
     protected boolean randomAccessResult;
-    
+
     private boolean noCache;
     private int lastLimit;
     private LocalResult lastResult;
     private Value[] lastParameters;
     private boolean cacheableChecked;
-    
+
     Query(Session session) {
         super(session);
     }
 
     /**
-     * Execute the query without checking the cache. If a target is specified,
-     * the results are written to it, and the method returns null. If no target
-     * is specified, a new LocalResult is created and returned.
-     *
-     * @param limit the limit as specified in the JDBC method call
-     * @param target the target to write results to
-     * @return the result
-     */
-    protected abstract LocalResult queryWithoutCache(int limit,
-            ResultTarget target);
-
-    /**
-     * Initialize the query.
-     */
-    public abstract void init();
-
-    /**
-     * The the list of select expressions.
-     * This may include invisible expressions such as order by expressions.
-     *
-     * @return the list of expressions
-     */
-    public abstract ArrayList<Expression> getExpressions();
-
-    /**
-     * Calculate the cost to execute this query.
-     *
-     * @return the cost
-     */
-    public abstract double getCost();
-
-    /**
-     * Calculate the cost when used as a subquery.
-     * This method returns a value between 10 and 1000000,
-     * to ensure adding other values can't result in an integer overflow.
-     *
-     * @return the estimated cost as an integer
-     */
-    public int getCostAsExpression() {
-        // ensure the cost is not larger than 1 million,
-        // so that adding other values can't overflow
-        return (int) Math.min(1000000.0, 10.0 + 10.0 * getCost());
-    }
-
-    /**
-     * Get all tables that are involved in this query.
-     *
-     * @return the set of tables
-     */
-    public abstract HashSet<Table> getTables();
-
-    /**
-     * Set the order by list.
-     *
-     * @param order the order by list
-     */
-    public abstract void setOrder(ArrayList<SelectOrderBy> order);
-
-    /**
-     * Set the 'for update' flag.
-     *
-     * @param forUpdate the new setting
-     */
-    public abstract void setForUpdate(boolean forUpdate);
-
-    /**
-     * Get the column count of this query.
-     *
-     * @return the column count
-     */
-    public abstract int getColumnCount();
-
-    /**
-     * Map the columns to the given column resolver.
-     *
-     * @param resolver
-     *            the resolver
-     * @param level
-     *            the subquery level (0 is the top level query, 1 is the first
-     *            subquery level)
-     */
-    public abstract void mapColumns(ColumnResolver resolver, int level);
-
-    /**
-     * Change the evaluatable flag. This is used when building the execution
-     * plan.
-     *
-     * @param tableFilter the table filter
-     * @param b the new value
-     */
-    public abstract void setEvaluatable(TableFilter tableFilter, boolean b);
-
-    /**
-     * Add a condition to the query. This is used for views.
-     *
-     * @param param the parameter
-     * @param columnId the column index (0 meaning the first column)
-     * @param comparisonType the comparison type
-     */
-    public abstract void addGlobalCondition(Parameter param, int columnId,
-            int comparisonType);
-
-    /**
-     * Check whether adding condition to the query is allowed. This is not
-     * allowed for views that have an order by and a limit, as it would affect
-     * the returned results.
-     *
-     * @return true if adding global conditions is allowed
-     */
-    public abstract boolean allowGlobalConditions();
-
-    /**
-     * Check if this expression and all sub-expressions can fulfill a criteria.
-     * If any part returns false, the result is false.
-     *
-     * @param visitor the visitor
-     * @return if the criteria can be fulfilled
-     */
-    public abstract boolean isEverything(ExpressionVisitor visitor);
-
-    /**
-     * Update all aggregate function values.
-     *
-     * @param s the session
-     */
-    public abstract void updateAggregate(Session s);
-
-    /**
-     * Set the distinct flag.
-     *
-     * @param b the new value
-     */
-    public void setDistinct(boolean b) {
-        distinct = b;
-    }
-
-    public boolean isDistinct() {
-        return distinct;
-    }
-
-    /**
-     * Whether results need to support random access.
-     *
-     * @param b the new value
-     */
-    public void setRandomAccessResult(boolean b) {
-        randomAccessResult = b;
-    }
-
-    @Override
-    public boolean isQuery() {
-        return true;
-    }
-
-    @Override
-    public boolean isTransactional() {
-        return true;
-    }
-    
-    /**
-     * Disable caching of result sets.
-     */
-    public void disableCache() {
-        this.noCache = true;
-    }
-    
-    private boolean sameResultAsLast(Session s, Value[] params,
-            Value[] lastParams) {
-        if (!cacheableChecked) {
-            cacheableChecked = true;
-        }
-        if (noCache) {
-            return false;
-        }
-        Database db = s.getDatabase();
-        for (int i = 0; i < params.length; i++) {
-            Value a = lastParams[i], b = params[i];
-            if (a.getType() != b.getType() || !db.areEqual(a, b)) {
-                return false;
-            }
-        }
-        if (!isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR) ||
-                !isEverything(ExpressionVisitor.INDEPENDENT_VISITOR)) {
-            return false;
-        }
-        return true;
-    }    
-    
-    public final Value[] getParameterValues() {
-        ArrayList<Parameter> list = getParameters();
-        if (list == null) {
-            list = New.arrayList();
-        }
-        int size = list.size();
-        Value[] params = new Value[size];
-        for (int i = 0; i < size; i++) {
-            Value v = list.get(i).getParamValue();
-            params[i] = v;
-        }
-        return params;
-    }
-
-    @Override
-    public LocalResult query(int maxrows) {
-        return query(maxrows, null);
-    }
-
-    /**
-     * Execute the query, writing the result to the target result.
-     *
-     * @param limit the maximum number of rows to return
-     * @param target the target result (null will return the result)
-     * @return the result set (if the target is not set).
-     */
-    LocalResult query(int limit, ResultTarget target) {
-        if (noCache) {
-            return queryWithoutCache(limit, target);
-        }
-        Value[] params = getParameterValues();
-        if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {
-            if (lastResult != null && !lastResult.isClosed() &&
-                    limit == lastLimit) {
-                if (sameResultAsLast(session, params, lastParameters)) {
-                    lastResult = lastResult.createShallowCopy(session);
-                    if (lastResult != null) {
-                        lastResult.reset();
-                        return lastResult;
-                    }
-                }
-            }
-        }
-        lastParameters = params;
-        closeLastResult();
-        LocalResult r = queryWithoutCache(limit, target);
-        lastResult = r;
-        lastLimit = limit;
-        return r;
-    }
-    
-    private void closeLastResult() {
-        if (lastResult != null) {
-            lastResult.close();
-        }
-    }
-
-    /**
      * Initialize the order by list. This call may extend the expressions list.
      *
-     * @param session the session
-     * @param expressions the select list expressions
-     * @param expressionSQL the select list SQL snippets
-     * @param orderList the order by list
-     * @param visible the number of visible columns in the select list
+     * @param session        the session
+     * @param expressions    the select list expressions
+     * @param expressionSQL  the select list SQL snippets
+     * @param orderList      the order by list
+     * @param visible        the number of visible columns in the select list
      * @param mustBeInResult all order by expressions must be in the select list
-     * @param filters the table filters
+     * @param filters        the table filters
      */
     static void initOrder(Session session,
-            ArrayList<Expression> expressions,
-            ArrayList<String> expressionSQL,
-            ArrayList<SelectOrderBy> orderList,
-            int visible,
-            boolean mustBeInResult,
-            ArrayList<TableFilter> filters) {
+                          ArrayList<Expression> expressions,
+                          ArrayList<String> expressionSQL,
+                          ArrayList<SelectOrderBy> orderList,
+                          int visible,
+                          boolean mustBeInResult,
+                          ArrayList<TableFilter> filters) {
         Database db = session.getDatabase();
         for (SelectOrderBy o : orderList) {
             Expression e = o.expression;
@@ -428,15 +177,256 @@ public abstract class Query extends Prepared {
     }
 
     /**
+     * Execute the query without checking the cache. If a target is specified,
+     * the results are written to it, and the method returns null. If no target
+     * is specified, a new LocalResult is created and returned.
+     *
+     * @param limit  the limit as specified in the JDBC method call
+     * @param target the target to write results to
+     * @return the result
+     */
+    protected abstract LocalResult queryWithoutCache(int limit,
+                                                     ResultTarget target);
+
+    /**
+     * Initialize the query.
+     */
+    public abstract void init();
+
+    /**
+     * The the list of select expressions.
+     * This may include invisible expressions such as order by expressions.
+     *
+     * @return the list of expressions
+     */
+    public abstract ArrayList<Expression> getExpressions();
+
+    /**
+     * Calculate the cost to execute this query.
+     *
+     * @return the cost
+     */
+    public abstract double getCost();
+
+    /**
+     * Calculate the cost when used as a subquery.
+     * This method returns a value between 10 and 1000000,
+     * to ensure adding other values can't result in an integer overflow.
+     *
+     * @return the estimated cost as an integer
+     */
+    public int getCostAsExpression() {
+        // ensure the cost is not larger than 1 million,
+        // so that adding other values can't overflow
+        return (int) Math.min(1000000.0, 10.0 + 10.0 * getCost());
+    }
+
+    /**
+     * Get all tables that are involved in this query.
+     *
+     * @return the set of tables
+     */
+    public abstract HashSet<Table> getTables();
+
+    /**
+     * Set the order by list.
+     *
+     * @param order the order by list
+     */
+    public abstract void setOrder(ArrayList<SelectOrderBy> order);
+
+    /**
+     * Set the 'for update' flag.
+     *
+     * @param forUpdate the new setting
+     */
+    public abstract void setForUpdate(boolean forUpdate);
+
+    /**
+     * Get the column count of this query.
+     *
+     * @return the column count
+     */
+    public abstract int getColumnCount();
+
+    /**
+     * Map the columns to the given column resolver.
+     *
+     * @param resolver the resolver
+     * @param level    the subquery level (0 is the top level query, 1 is the first
+     *                 subquery level)
+     */
+    public abstract void mapColumns(ColumnResolver resolver, int level);
+
+    /**
+     * Change the evaluatable flag. This is used when building the execution
+     * plan.
+     *
+     * @param tableFilter the table filter
+     * @param b           the new value
+     */
+    public abstract void setEvaluatable(TableFilter tableFilter, boolean b);
+
+    /**
+     * Add a condition to the query. This is used for views.
+     *
+     * @param param          the parameter
+     * @param columnId       the column index (0 meaning the first column)
+     * @param comparisonType the comparison type
+     */
+    public abstract void addGlobalCondition(Parameter param, int columnId,
+                                            int comparisonType);
+
+    /**
+     * Check whether adding condition to the query is allowed. This is not
+     * allowed for views that have an order by and a limit, as it would affect
+     * the returned results.
+     *
+     * @return true if adding global conditions is allowed
+     */
+    public abstract boolean allowGlobalConditions();
+
+    /**
+     * Check if this expression and all sub-expressions can fulfill a criteria.
+     * If any part returns false, the result is false.
+     *
+     * @param visitor the visitor
+     * @return if the criteria can be fulfilled
+     */
+    public abstract boolean isEverything(ExpressionVisitor visitor);
+
+    /**
+     * Update all aggregate function values.
+     *
+     * @param s the session
+     */
+    public abstract void updateAggregate(Session s);
+
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    /**
+     * Set the distinct flag.
+     *
+     * @param b the new value
+     */
+    public void setDistinct(boolean b) {
+        distinct = b;
+    }
+
+    /**
+     * Whether results need to support random access.
+     *
+     * @param b the new value
+     */
+    public void setRandomAccessResult(boolean b) {
+        randomAccessResult = b;
+    }
+
+    @Override
+    public boolean isQuery() {
+        return true;
+    }
+
+    @Override
+    public boolean isTransactional() {
+        return true;
+    }
+
+    /**
+     * Disable caching of result sets.
+     */
+    public void disableCache() {
+        this.noCache = true;
+    }
+
+    private boolean sameResultAsLast(Session s, Value[] params,
+                                     Value[] lastParams) {
+        if (!cacheableChecked) {
+            cacheableChecked = true;
+        }
+        if (noCache) {
+            return false;
+        }
+        Database db = s.getDatabase();
+        for (int i = 0; i < params.length; i++) {
+            Value a = lastParams[i], b = params[i];
+            if (a.getType() != b.getType() || !db.areEqual(a, b)) {
+                return false;
+            }
+        }
+        return !(!isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR) ||
+                !isEverything(ExpressionVisitor.INDEPENDENT_VISITOR));
+    }
+
+    public final Value[] getParameterValues() {
+        ArrayList<Parameter> list = getParameters();
+        if (list == null) {
+            list = New.arrayList();
+        }
+        int size = list.size();
+        Value[] params = new Value[size];
+        for (int i = 0; i < size; i++) {
+            Value v = list.get(i).getParamValue();
+            params[i] = v;
+        }
+        return params;
+    }
+
+    @Override
+    public LocalResult query(int maxrows) {
+        return query(maxrows, null);
+    }
+
+    /**
+     * Execute the query, writing the result to the target result.
+     *
+     * @param limit  the maximum number of rows to return
+     * @param target the target result (null will return the result)
+     * @return the result set (if the target is not set).
+     */
+    LocalResult query(int limit, ResultTarget target) {
+        if (noCache) {
+            return queryWithoutCache(limit, target);
+        }
+        Value[] params = getParameterValues();
+        if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {
+            if (lastResult != null && !lastResult.isClosed() &&
+                    limit == lastLimit) {
+                if (sameResultAsLast(session, params, lastParameters)) {
+                    lastResult = lastResult.createShallowCopy(session);
+                    if (lastResult != null) {
+                        lastResult.reset();
+                        return lastResult;
+                    }
+                }
+            }
+        }
+        lastParameters = params;
+        closeLastResult();
+        LocalResult r = queryWithoutCache(limit, target);
+        lastResult = r;
+        lastLimit = limit;
+        return r;
+    }
+
+    private void closeLastResult() {
+        if (lastResult != null) {
+            lastResult.close();
+        }
+    }
+
+    /**
      * Create a {@link SortOrder} object given the list of {@link SelectOrderBy}
      * objects. The expression list is extended if necessary.
      *
-     * @param orderList a list of {@link SelectOrderBy} elements
+     * @param orderList       a list of {@link SelectOrderBy} elements
      * @param expressionCount the number of columns in the query
      * @return the {@link SortOrder} object
      */
     public SortOrder prepareOrder(ArrayList<SelectOrderBy> orderList,
-            int expressionCount) {
+                                  int expressionCount) {
         int size = orderList.size();
         int[] index = new int[size];
         int[] sortType = new int[size];
@@ -476,20 +466,20 @@ public abstract class Query extends Prepared {
         return new SortOrder(session.getDatabase(), index, sortType, orderList);
     }
 
-    public void setOffset(Expression offset) {
-        this.offsetExpr = offset;
-    }
-
     public Expression getOffset() {
         return offsetExpr;
     }
 
-    public void setLimit(Expression limit) {
-        this.limitExpr = limit;
+    public void setOffset(Expression offset) {
+        this.offsetExpr = offset;
     }
 
     public Expression getLimit() {
         return limitExpr;
+    }
+
+    public void setLimit(Expression limit) {
+        this.limitExpr = limit;
     }
 
     /**

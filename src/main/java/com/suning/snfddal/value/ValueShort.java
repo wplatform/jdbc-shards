@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.MathUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the SMALLINT data type.
@@ -34,18 +34,28 @@ public class ValueShort extends Value {
         this.value = value;
     }
 
-    @Override
-    public Value add(Value v) {
-        ValueShort other = (ValueShort) v;
-        return checkRange(value + other.value);
-    }
-
     private static ValueShort checkRange(int x) {
         if (x < Short.MIN_VALUE || x > Short.MAX_VALUE) {
             throw DbException.get(ErrorCode.NUMERIC_VALUE_OUT_OF_RANGE_1,
                     Integer.toString(x));
         }
         return ValueShort.get((short) x);
+    }
+
+    /**
+     * Get or create a short value for the given short.
+     *
+     * @param i the short
+     * @return the value
+     */
+    public static ValueShort get(short i) {
+        return (ValueShort) Value.cache(new ValueShort(i));
+    }
+
+    @Override
+    public Value add(Value v) {
+        ValueShort other = (ValueShort) v;
+        return checkRange(value + other.value);
     }
 
     @Override
@@ -133,16 +143,6 @@ public class ValueShort extends Value {
     public void set(PreparedStatement prep, int parameterIndex)
             throws SQLException {
         prep.setShort(parameterIndex, value);
-    }
-
-    /**
-     * Get or create a short value for the given short.
-     *
-     * @param i the short
-     * @return the value
-     */
-    public static ValueShort get(short i) {
-        return (ValueShort) Value.cache(new ValueShort(i));
     }
 
     @Override

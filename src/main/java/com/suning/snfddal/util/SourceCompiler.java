@@ -5,16 +5,14 @@
  */
 package com.suning.snfddal.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import com.suning.snfddal.engine.Constants;
+import com.suning.snfddal.engine.SysProperties;
+import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
+
+import javax.tools.*;
+import javax.tools.JavaFileObject.Kind;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -22,21 +20,6 @@ import java.net.URI;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileManager;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-
-import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.engine.SysProperties;
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
 
 /**
  * This class allows to convert source code to a class. It uses one class loader
@@ -53,21 +36,6 @@ public class SourceCompiler {
 
     private static final String COMPILE_DIR =
             Utils.getProperty("java.io.tmpdir", ".");
-
-    /**
-     * The class name to source code map.
-     */
-    final HashMap<String, String> sources = New.hashMap();
-
-    /**
-     * The class name to byte code map.
-     */
-    final HashMap<String, Class<?>> compiled = New.hashMap();
-
-    /**
-     * Whether to use the ToolProvider.getSystemJavaCompiler().
-     */
-    boolean useJavaSystemCompiler = SysProperties.JAVA_SYSTEM_COMPILER;
 
     static {
         JavaCompiler c;
@@ -88,11 +56,135 @@ public class SourceCompiler {
     }
 
     /**
+     * The class name to source code map.
+     */
+    final HashMap<String, String> sources = New.hashMap();
+    /**
+     * The class name to byte code map.
+     */
+    final HashMap<String, Class<?>> compiled = New.hashMap();
+    /**
+     * Whether to use the ToolProvider.getSystemJavaCompiler().
+     */
+    boolean useJavaSystemCompiler = SysProperties.JAVA_SYSTEM_COMPILER;
+
+    private static boolean isGroovySource(String source) {
+        return source.startsWith("//groovy") || source.startsWith("@groovy");
+    }
+
+    /**
+     * Get the complete source code (including package name, imports, and so
+     * on).
+     *
+     * @param packageName the package name
+     * @param className   the class name
+     * @param source      the (possibly shortened) source code
+     * @return the full source code
+     */
+    static String getCompleteSourceCode(String packageName, String className,
+                                        String source) {
+        if (source.startsWith("package ")) {
+            return source;
+        }
+        StringBuilder buff = new StringBuilder();
+        if (packageName != null) {
+            buff.append("package ").append(packageName).append(";\n");
+        }
+        int endImport = source.indexOf("@CODE");
+        String importCode =
+                "import java.util.*;\n" +
+                        "import java.math.*;\n" +
+                        "import java.sql.*;\n";
+        if (endImport >= 0) {
+            importCode = source.substring(0, endImport);
+            source = source.substring("@CODE".length() + endImport);
+        }
+        buff.append(importCode);
+        buff.append("public class ").append(className).append(
+                " {\n" +
+                        "    public static ").append(source).append("\n" +
+                "}\n");
+        return buff.toString();
+    }
+
+    private static void javacProcess(File javaFile) {
+        exec("javac",
+                "-sourcepath", COMPILE_DIR,
+                "-d", COMPILE_DIR,
+                "-encoding", "UTF-8",
+                javaFile.getAbsolutePath());
+    }
+
+    private static int exec(String... args) {
+        ByteArrayOutputStream buff = new ByteArrayOutputStream();
+        try {
+            ProcessBuilder builder = new ProcessBuilder();
+            // The javac executable allows some of it's flags
+            // to be smuggled in via environment variables.
+            // But if it sees those flags, it will write out a message
+            // to stderr, which messes up our parsing of the output.
+            builder.environment().remove("JAVA_TOOL_OPTIONS");
+            builder.command(args);
+
+            Process p = builder.start();
+            copyInThread(p.getInputStream(), buff);
+            copyInThread(p.getErrorStream(), buff);
+            p.waitFor();
+            String err = new String(buff.toByteArray(), Constants.UTF8);
+            throwSyntaxError(err);
+            return p.exitValue();
+        } catch (Exception e) {
+            throw DbException.convert(e);
+        }
+    }
+
+    private static void copyInThread(final InputStream in, final OutputStream out) {
+        new Task() {
+            @Override
+            public void call() throws IOException {
+                IOUtils.copy(in, out);
+            }
+        }.execute();
+    }
+
+    private static void javacSun(File javaFile) {
+        PrintStream old = System.err;
+        ByteArrayOutputStream buff = new ByteArrayOutputStream();
+        PrintStream temp = new PrintStream(buff);
+        try {
+            System.setErr(temp);
+            Method compile;
+            compile = JAVAC_SUN.getMethod("compile", String[].class);
+            Object javac = JAVAC_SUN.newInstance();
+            compile.invoke(javac, (Object) new String[]{
+                    "-sourcepath", COMPILE_DIR,
+                    "-d", COMPILE_DIR,
+                    "-encoding", "UTF-8",
+                    javaFile.getAbsolutePath()});
+            String err = new String(buff.toByteArray(), Constants.UTF8);
+            throwSyntaxError(err);
+        } catch (Exception e) {
+            throw DbException.convert(e);
+        } finally {
+            System.setErr(old);
+        }
+    }
+
+    private static void throwSyntaxError(String err) {
+        if (err.startsWith("Note:")) {
+            // unchecked or unsafe operations - just a warning
+        } else if (err.length() > 0) {
+            err = StringUtils.replaceAll(err, COMPILE_DIR, "");
+            throw DbException.get(ErrorCode.SYNTAX_ERROR_1, err);
+        }
+    }
+
+    /**
      * Set the source code for the specified class.
      * This will reset all compiled classes.
      *
      * @param className the class name
-     * @param source the source code
+     * @param source    the source code
      */
     public void setSource(String className, String source) {
         sources.put(className, source);
@@ -163,10 +255,6 @@ public class SourceCompiler {
         return classLoader.loadClass(packageAndClassName);
     }
 
-    private static boolean isGroovySource(String source) {
-        return source.startsWith("//groovy") || source.startsWith("@groovy");
-    }
-
     /**
      * Get the first public static method of the given class.
      *
@@ -194,8 +282,8 @@ public class SourceCompiler {
      * in a separate process.
      *
      * @param packageName the package name
-     * @param className the class name
-     * @param source the source code
+     * @param className   the class name
+     * @param source      the source code
      * @return the class file
      */
     byte[] javacCompile(String packageName, String className, String source) {
@@ -231,46 +319,11 @@ public class SourceCompiler {
     }
 
     /**
-     * Get the complete source code (including package name, imports, and so
-     * on).
-     *
-     * @param packageName the package name
-     * @param className the class name
-     * @param source the (possibly shortened) source code
-     * @return the full source code
-     */
-    static String getCompleteSourceCode(String packageName, String className,
-            String source) {
-        if (source.startsWith("package ")) {
-            return source;
-        }
-        StringBuilder buff = new StringBuilder();
-        if (packageName != null) {
-            buff.append("package ").append(packageName).append(";\n");
-        }
-        int endImport = source.indexOf("@CODE");
-        String importCode =
-            "import java.util.*;\n" +
-            "import java.math.*;\n" +
-            "import java.sql.*;\n";
-        if (endImport >= 0) {
-            importCode = source.substring(0, endImport);
-            source = source.substring("@CODE".length() + endImport);
-        }
-        buff.append(importCode);
-        buff.append("public class ").append(className).append(
-                " {\n" +
-                "    public static ").append(source).append("\n" +
-                "}\n");
-        return buff.toString();
-    }
-
-    /**
      * Compile using the standard java compiler.
      *
      * @param packageName the package name
-     * @param className the class name
-     * @param source the source code
+     * @param className   the class name
+     * @param source      the source code
      * @return the class
      */
     Class<?> javaxToolsJavac(String packageName, String className, String source) {
@@ -278,7 +331,7 @@ public class SourceCompiler {
         StringWriter writer = new StringWriter();
         JavaFileManager fileManager = new
                 ClassFileManager(JAVA_COMPILER
-                    .getStandardFileManager(null, null, null));
+                .getStandardFileManager(null, null, null));
         ArrayList<JavaFileObject> compilationUnits = new ArrayList<JavaFileObject>();
         compilationUnits.add(new StringJavaFileObject(fullClassName, source));
         JAVA_COMPILER.getTask(writer, fileManager, null, null,
@@ -291,79 +344,6 @@ public class SourceCompiler {
             throw DbException.convert(e);
         }
     }
-
-    private static void javacProcess(File javaFile) {
-        exec("javac",
-                "-sourcepath", COMPILE_DIR,
-                "-d", COMPILE_DIR,
-                "-encoding", "UTF-8",
-                javaFile.getAbsolutePath());
-    }
-
-    private static int exec(String... args) {
-        ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        try {
-            ProcessBuilder builder = new ProcessBuilder();
-            // The javac executable allows some of it's flags
-            // to be smuggled in via environment variables.
-            // But if it sees those flags, it will write out a message
-            // to stderr, which messes up our parsing of the output.
-            builder.environment().remove("JAVA_TOOL_OPTIONS");
-            builder.command(args);
-
-            Process p = builder.start();
-            copyInThread(p.getInputStream(), buff);
-            copyInThread(p.getErrorStream(), buff);
-            p.waitFor();
-            String err = new String(buff.toByteArray(), Constants.UTF8);
-            throwSyntaxError(err);
-            return p.exitValue();
-        } catch (Exception e) {
-            throw DbException.convert(e);
-        }
-    }
-
-    private static void copyInThread(final InputStream in, final OutputStream out) {
-        new Task() {
-            @Override
-            public void call() throws IOException {
-                IOUtils.copy(in, out);
-            }
-        }.execute();
-    }
-
-    private static void javacSun(File javaFile) {
-        PrintStream old = System.err;
-        ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        PrintStream temp = new PrintStream(buff);
-        try {
-            System.setErr(temp);
-            Method compile;
-            compile = JAVAC_SUN.getMethod("compile", String[].class);
-            Object javac = JAVAC_SUN.newInstance();
-            compile.invoke(javac, (Object) new String[] {
-                    "-sourcepath", COMPILE_DIR,
-                    "-d", COMPILE_DIR,
-                    "-encoding", "UTF-8",
-                    javaFile.getAbsolutePath() });
-            String err = new String(buff.toByteArray(), Constants.UTF8);
-            throwSyntaxError(err);
-        } catch (Exception e) {
-            throw DbException.convert(e);
-        } finally {
-            System.setErr(old);
-        }
-    }
-
-    private static void throwSyntaxError(String err) {
-        if (err.startsWith("Note:")) {
-            // unchecked or unsafe operations - just a warning
-        } else if (err.length() > 0) {
-            err = StringUtils.replaceAll(err, COMPILE_DIR, "");
-            throw DbException.get(ErrorCode.SYNTAX_ERROR_1, err);
-        }
-    }
-
 
     /**
      * Access the Groovy compiler using reflection, so that we do not gain a
@@ -384,14 +364,14 @@ public class SourceCompiler {
                 Object importCustomizer = Utils.newInstance(
                         "org.codehaus.groovy.control.customizers.ImportCustomizer");
                 // Call the method ImportCustomizer.addImports(String[])
-                String[] importsArray = new String[] {
+                String[] importsArray = new String[]{
                         "java.sql.Connection",
                         "java.sql.Types",
                         "java.sql.ResultSet",
                         "groovy.sql.Sql",
                         "org.h2.tools.SimpleResultSet"
                 };
-                Utils.callMethod(importCustomizer, "addImports", new Object[] { importsArray });
+                Utils.callMethod(importCustomizer, "addImports", new Object[]{importsArray});
 
                 // Call the method
                 // CompilerConfiguration.addCompilationCustomizers(
@@ -401,7 +381,7 @@ public class SourceCompiler {
                 Object configuration = Utils.newInstance(
                         "org.codehaus.groovy.control.CompilerConfiguration");
                 Utils.callMethod(configuration,
-                        "addCompilationCustomizers", new Object[] { importCustomizerArray });
+                        "addCompilationCustomizers", importCustomizerArray);
 
                 ClassLoader parent = GroovyCompiler.class.getClassLoader();
                 loader = Utils.newInstance(
@@ -414,7 +394,7 @@ public class SourceCompiler {
         }
 
         public static Class<?> parseClass(String source,
-                String packageAndClassName) {
+                                          String packageAndClassName) {
             if (LOADER == null) {
                 throw new RuntimeException(
                         "Compile fail: no Groovy jar in the classpath", INIT_FAIL_EXCEPTION);
@@ -441,7 +421,7 @@ public class SourceCompiler {
 
         public StringJavaFileObject(String className, String sourceCode) {
             super(URI.create("string:///" + className.replace('.', '/')
-                + Kind.SOURCE.extension), Kind.SOURCE);
+                    + Kind.SOURCE.extension), Kind.SOURCE);
             this.sourceCode = sourceCode;
         }
 
@@ -461,7 +441,7 @@ public class SourceCompiler {
 
         public JavaClassObject(String name, Kind kind) {
             super(URI.create("string:///" + name.replace('.', '/')
-                + kind.extension), kind);
+                    + kind.extension), kind);
         }
 
         public byte[] getBytes() {
@@ -504,7 +484,7 @@ public class SourceCompiler {
 
         @Override
         public JavaFileObject getJavaFileForOutput(Location location,
-                String className, Kind kind, FileObject sibling) throws IOException {
+                                                   String className, Kind kind, FileObject sibling) throws IOException {
             classObject = new JavaClassObject(className, kind);
             return classObject;
         }

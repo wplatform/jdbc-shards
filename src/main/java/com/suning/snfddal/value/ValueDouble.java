@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the DOUBLE data type.
@@ -40,6 +40,27 @@ public class ValueDouble extends Value {
 
     private ValueDouble(double value) {
         this.value = value;
+    }
+
+    /**
+     * Get or create double value for the given double.
+     *
+     * @param d the double
+     * @return the value
+     */
+    public static ValueDouble get(double d) {
+        if (d == 1.0) {
+            return ONE;
+        } else if (d == 0.0) {
+            // unfortunately, -0.0 == 0.0, but we don't want to return
+            // 0.0 in this case
+            if (Double.doubleToLongBits(d) == ZERO_BITS) {
+                return ZERO;
+            }
+        } else if (Double.isNaN(d)) {
+            return NAN;
+        }
+        return (ValueDouble) Value.cache(new ValueDouble(d));
     }
 
     @Override
@@ -150,27 +171,6 @@ public class ValueDouble extends Value {
     public void set(PreparedStatement prep, int parameterIndex)
             throws SQLException {
         prep.setDouble(parameterIndex, value);
-    }
-
-    /**
-     * Get or create double value for the given double.
-     *
-     * @param d the double
-     * @return the value
-     */
-    public static ValueDouble get(double d) {
-        if (d == 1.0) {
-            return ONE;
-        } else if (d == 0.0) {
-            // unfortunately, -0.0 == 0.0, but we don't want to return
-            // 0.0 in this case
-            if (Double.doubleToLongBits(d) == ZERO_BITS) {
-                return ZERO;
-            }
-        } else if (Double.isNaN(d)) {
-            return NAN;
-        }
-        return (ValueDouble) Value.cache(new ValueDouble(d));
     }
 
     @Override

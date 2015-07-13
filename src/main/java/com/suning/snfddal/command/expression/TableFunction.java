@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
@@ -17,11 +15,9 @@ import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.result.SimpleResultSet;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.value.DataType;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueArray;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueResultSet;
+import com.suning.snfddal.value.*;
+
+import java.util.ArrayList;
 
 /**
  * Implementation of the functions TABLE(..) and TABLE_DISTINCT(..).
@@ -35,6 +31,29 @@ public class TableFunction extends Function {
         super(database, info);
         distinct = info.type == Function.TABLE_DISTINCT;
         this.rowCount = rowCount;
+    }
+
+    private static SimpleResultSet getSimpleResultSet(ResultInterface rs,
+                                                      int maxrows) {
+        int columnCount = rs.getVisibleColumnCount();
+        SimpleResultSet simple = new SimpleResultSet();
+        simple.setAutoClose(false);
+        for (int i = 0; i < columnCount; i++) {
+            String name = rs.getColumnName(i);
+            int sqlType = DataType.convertTypeToSQLType(rs.getColumnType(i));
+            int precision = MathUtils.convertLongToInt(rs.getColumnPrecision(i));
+            int scale = rs.getColumnScale(i);
+            simple.addColumn(name, sqlType, precision, scale);
+        }
+        rs.reset();
+        for (int i = 0; i < maxrows && rs.next(); i++) {
+            Object[] list = new Object[columnCount];
+            for (int j = 0; j < columnCount; j++) {
+                list[j] = rs.currentRow()[j].getObject();
+            }
+            simple.addRow(list);
+        }
+        return simple;
     }
 
     @Override
@@ -61,7 +80,6 @@ public class TableFunction extends Function {
         return buff.append(')').toString();
     }
 
-
     @Override
     public String getName() {
         return distinct ? "TABLE_DISTINCT" : "TABLE";
@@ -69,7 +87,7 @@ public class TableFunction extends Function {
 
     @Override
     public ValueResultSet getValueForColumnList(Session session,
-            Expression[] nullArgs) {
+                                                Expression[] nullArgs) {
         return getTable(session, args, true, false);
     }
 
@@ -79,7 +97,7 @@ public class TableFunction extends Function {
     }
 
     private ValueResultSet getTable(Session session, Expression[] argList,
-            boolean onlyColumnList, boolean distinctRows) {
+                                    boolean onlyColumnList, boolean distinctRows) {
         int len = columnList.length;
         Expression[] header = new Expression[len];
         Database db = session.getDatabase();
@@ -129,29 +147,6 @@ public class TableFunction extends Function {
         ValueResultSet vr = ValueResultSet.get(getSimpleResultSet(result,
                 Integer.MAX_VALUE));
         return vr;
-    }
-
-    private static SimpleResultSet getSimpleResultSet(ResultInterface rs,
-            int maxrows) {
-        int columnCount = rs.getVisibleColumnCount();
-        SimpleResultSet simple = new SimpleResultSet();
-        simple.setAutoClose(false);
-        for (int i = 0; i < columnCount; i++) {
-            String name = rs.getColumnName(i);
-            int sqlType = DataType.convertTypeToSQLType(rs.getColumnType(i));
-            int precision = MathUtils.convertLongToInt(rs.getColumnPrecision(i));
-            int scale = rs.getColumnScale(i);
-            simple.addColumn(name, sqlType, precision, scale);
-        }
-        rs.reset();
-        for (int i = 0; i < maxrows && rs.next(); i++) {
-            Object[] list = new Object[columnCount];
-            for (int j = 0; j < columnCount; j++) {
-                list[j] = rs.currentRow()[j].getObject();
-            }
-            simple.addRow(list);
-        }
-        return simple;
     }
 
     public long getRowCount() {

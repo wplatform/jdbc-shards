@@ -5,16 +5,16 @@
  */
 package com.suning.snfddal.dbobject.index;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * A cursor for a function that returns a JDBC result set.

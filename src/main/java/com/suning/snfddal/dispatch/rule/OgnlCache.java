@@ -1,18 +1,11 @@
 package com.suning.snfddal.dispatch.rule;
 
+import com.suning.snfddal.config.parser.ParsingException;
+import ognl.*;
+
 import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import ognl.ExpressionSyntaxException;
-import ognl.Node;
-import ognl.Ognl;
-import ognl.OgnlException;
-import ognl.OgnlParser;
-import ognl.ParseException;
-import ognl.TokenMgrError;
-
-import com.suning.snfddal.config.parser.ParsingException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

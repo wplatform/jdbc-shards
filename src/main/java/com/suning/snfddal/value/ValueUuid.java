@@ -5,15 +5,15 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.UUID;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * Implementation of the UUID data type.
@@ -36,11 +36,6 @@ public class ValueUuid extends Value {
     private ValueUuid(long high, long low) {
         this.high = high;
         this.low = low;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) ((high >>> 32) ^ high ^ (low >>> 32) ^ low);
     }
 
     /**
@@ -77,7 +72,7 @@ public class ValueUuid extends Value {
      * Get or create a UUID for the given high and low order values.
      *
      * @param high the most significant bits
-     * @param low the least significant bits
+     * @param low  the least significant bits
      * @return the UUID
      */
     public static ValueUuid get(long high, long low) {
@@ -115,6 +110,18 @@ public class ValueUuid extends Value {
         return (ValueUuid) Value.cache(new ValueUuid(high, low));
     }
 
+    private static void appendHex(StringBuilder buff, long x, int bytes) {
+        for (int i = bytes * 8 - 4; i >= 0; i -= 8) {
+            buff.append(Integer.toHexString((int) (x >> i) & 0xf)).
+                    append(Integer.toHexString((int) (x >> (i - 4)) & 0xf));
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) ((high >>> 32) ^ high ^ (low >>> 32) ^ low);
+    }
+
     @Override
     public String getSQL() {
         return StringUtils.quoteStringSQL(getString());
@@ -128,13 +135,6 @@ public class ValueUuid extends Value {
     @Override
     public long getPrecision() {
         return PRECISION;
-    }
-
-    private static void appendHex(StringBuilder buff, long x, int bytes) {
-        for (int i = bytes * 8 - 4; i >= 0; i -= 8) {
-            buff.append(Integer.toHexString((int) (x >> i) & 0xf)).
-                append(Integer.toHexString((int) (x >> (i - 4)) & 0xf));
-        }
     }
 
     @Override

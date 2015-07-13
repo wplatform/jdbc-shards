@@ -25,6 +25,6 @@ import javax.sql.DataSource;
  */
 public interface DataSourceProvider {
 
-    public DataSource lookup(String uid) throws DataSourceException;
+    DataSource lookup(String uid) throws DataSourceException;
 
 }

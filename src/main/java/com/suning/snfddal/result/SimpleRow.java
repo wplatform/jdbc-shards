@@ -14,9 +14,9 @@ import com.suning.snfddal.value.Value;
  */
 public class SimpleRow implements SearchRow {
 
+    private final Value[] data;
     private long key;
     private int version;
-    private final Value[] data;
     private int memory;
 
     public SimpleRow(Value[] data) {

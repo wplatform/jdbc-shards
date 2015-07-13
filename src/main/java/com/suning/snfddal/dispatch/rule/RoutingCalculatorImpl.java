@@ -18,13 +18,13 @@
 
 package com.suning.snfddal.dispatch.rule;
 
+import com.suning.snfddal.util.New;
+import com.suning.snfddal.value.Value;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.suning.snfddal.util.New;
-import com.suning.snfddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -137,16 +137,16 @@ public class RoutingCalculatorImpl implements RoutingCalculator {
 
     /**
      * 将列的值域通过笛卡尔积运算，转化为参数一一对应的值域
-     * <p/>
-     * 
+     * <p>
+     * <p>
      * <pre>
      * 如输入参数： {
      *        column1:{ 1, 2, 3 },
      *        column2:{ a, b, c, d }
      * }
      * </pre>
-     * <p/>
-     * 
+     * <p>
+     * <p>
      * <pre>
      * 输出结果：{
      *      {column1=1, column2=a}
@@ -214,8 +214,8 @@ public class RoutingCalculatorImpl implements RoutingCalculator {
          * 产生笛卡尔积当前行索引记录.
          *
          * @param sourceArgs 要产生笛卡尔积的源数据
-         * @param record 每行笛卡尔积的索引组合
-         * @param level 索引组合的当前计算层级
+         * @param record     每行笛卡尔积的索引组合
+         * @param level      索引组合的当前计算层级
          */
         private void crossRecord(List<String> columnNames, Map<String, List<Value>> crossSource, int[] record, int level) {
             record[level] = record[level] + 1;

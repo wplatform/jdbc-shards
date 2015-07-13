@@ -5,15 +5,6 @@
  */
 package com.suning.snfddal.engine;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Parser;
@@ -41,6 +32,10 @@ import com.suning.snfddal.value.ValueLong;
 import com.suning.snfddal.value.ValueNull;
 import com.suning.snfddal.value.ValueString;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+
 /**
  * A session represents an embedded database connection. When using the server
  * mode, this object resides on the server side and communicates with a
@@ -64,6 +59,9 @@ public class Session implements SessionInterface {
     private final Database database;
     private final User user;
     private final int id;
+    private final long sessionStart = System.currentTimeMillis();
+    private final int queryCacheSize;
+    private final Map<String, Connection> connectionHolder = New.concurrentHashMap();
     private boolean autoCommit = true;
     private Random random;
     private int lockTimeout;
@@ -88,7 +86,6 @@ public class Session implements SessionInterface {
     private String currentTransactionName;
     private volatile long cancelAt;
     private boolean closed;
-    private final long sessionStart = System.currentTimeMillis();
     private long transactionStart;
     private long currentCommandStart;
     private HashMap<String, Value> variables;
@@ -99,15 +96,11 @@ public class Session implements SessionInterface {
     private Thread waitForLockThread;
     private int modificationId;
     private int objectId;
-    private final int queryCacheSize;
     private SmallLRUCache<String, Command> queryCache;
     private ArrayList<Value> temporaryLobs;
     private boolean readOnly;
     private int transactionIsolation;
     private volatile DataSourceDispatcher dsDispatcher;
-
-    
-    private final Map<String, Connection> connectionHolder = New.concurrentHashMap();
 
     public Session(Database database, User user, int id) {
         this.database = database;
@@ -138,7 +131,7 @@ public class Session implements SessionInterface {
     /**
      * Set the value of the given variable for this session.
      *
-     * @param name the name of the variable (may not be null)
+     * @param name  the name of the variable (may not be null)
      * @param value the new value (may not be null)
      */
     public void setVariable(String name, Value value) {
@@ -293,17 +286,14 @@ public class Session implements SessionInterface {
         return autoCommit;
     }
 
-    public User getUser() {
-        return user;
-    }
-
     @Override
     public void setAutoCommit(boolean b) {
         autoCommit = b;
     }
-    
-    
-    
+
+    public User getUser() {
+        return user;
+    }
 
     public int getLockTimeout() {
         return lockTimeout;
@@ -315,7 +305,7 @@ public class Session implements SessionInterface {
 
     @Override
     public synchronized CommandInterface prepareCommand(String sql,
-            int fetchSize) {
+                                                        int fetchSize) {
         return prepareLocal(sql);
     }
 
@@ -333,7 +323,7 @@ public class Session implements SessionInterface {
     /**
      * Parse and prepare the given SQL statement.
      *
-     * @param sql the SQL statement
+     * @param sql           the SQL statement
      * @param rightsChecked true if the rights have already been checked
      * @return the prepared statement
      */
@@ -419,7 +409,7 @@ public class Session implements SessionInterface {
             }
         }
         endTransaction();
-        
+
         boolean commit = true;
         List<SQLException> commitExceptions = New.arrayList();
         StringBuilder buf = new StringBuilder();
@@ -447,11 +437,11 @@ public class Session implements SessionInterface {
         if (commitExceptions.isEmpty()) {
             trace.debug("commit multiple group transaction succeed. commit track list:{0}", buf);
         } else {
-            trace.error(commitExceptions.get(0),"fail to commit multiple group transaction. commit track list:{0}", buf);
+            trace.error(commitExceptions.get(0), "fail to commit multiple group transaction. commit track list:{0}", buf);
             DbException.convert(commitExceptions.get(0));
         }
-    
-        
+
+
     }
 
 
@@ -475,7 +465,7 @@ public class Session implements SessionInterface {
             autoCommitAtTransactionEnd = false;
         }
         endTransaction();
-        
+
         List<SQLException> rollbackExceptions = New.arrayList();
         for (Map.Entry<String, Connection> entry : connectionHolder.entrySet()) {
             try {
@@ -486,13 +476,13 @@ public class Session implements SessionInterface {
         }
         if (!rollbackExceptions.isEmpty()) {
             throw DbException.convert(rollbackExceptions.get(0));
-        } 
+        }
     }
 
     /**
      * Partially roll back the current transaction.
      *
-     * @param savepoint the savepoint to which should be rolled back
+     * @param savepoint  the savepoint to which should be rolled back
      * @param trimToSize if the list should be trimmed
      */
     public void rollbackTo(Savepoint savepoint, boolean trimToSize) {
@@ -588,21 +578,21 @@ public class Session implements SessionInterface {
         return trace;
     }
 
+    public Value getLastIdentity() {
+        return lastIdentity;
+    }
+
     public void setLastIdentity(Value last) {
         this.lastIdentity = last;
         this.lastScopeIdentity = last;
     }
 
-    public Value getLastIdentity() {
-        return lastIdentity;
+    public Value getLastScopeIdentity() {
+        return lastScopeIdentity;
     }
 
     public void setLastScopeIdentity(Value last) {
         this.lastScopeIdentity = last;
-    }
-
-    public Value getLastScopeIdentity() {
-        return lastScopeIdentity;
     }
 
     /**
@@ -611,7 +601,7 @@ public class Session implements SessionInterface {
      * committed.
      *
      * @param logId the transaction log id
-     * @param pos the position of the log entry in the transaction log
+     * @param pos   the position of the log entry in the transaction log
      */
     public void addLogPos(int logId, int pos) {
         if (firstUncommittedLog == Session.LOG_WRITTEN) {
@@ -684,7 +674,7 @@ public class Session implements SessionInterface {
      * Commit or roll back the given transaction.
      *
      * @param transactionName the name of the transaction
-     * @param commit true for commit, false for rollback
+     * @param commit          true for commit, false for rollback
      */
     public void setPreparedTransaction(String transactionName, boolean commit) {
         if (currentTransactionName != null &&
@@ -729,21 +719,6 @@ public class Session implements SessionInterface {
     }
 
     /**
-     * Set the current command of this session. This is done just before
-     * executing the statement.
-     *
-     * @param command the command
-     */
-    public void setCurrentCommand(Command command) {
-        this.currentCommand = command;
-        if (queryTimeout > 0 && command != null) {
-            long now = System.currentTimeMillis();
-            currentCommandStart = now;
-            cancelAt = now + queryTimeout;
-        }
-    }
-
-    /**
      * Check if the current transaction is canceled by calling
      * Statement.cancel() or because a session timeout was set and expired.
      *
@@ -772,6 +747,21 @@ public class Session implements SessionInterface {
 
     public Command getCurrentCommand() {
         return currentCommand;
+    }
+
+    /**
+     * Set the current command of this session. This is done just before
+     * executing the statement.
+     *
+     * @param command the command
+     */
+    public void setCurrentCommand(Command command) {
+        this.currentCommand = command;
+        if (queryTimeout > 0 && command != null) {
+            long now = System.currentTimeMillis();
+            currentCommandStart = now;
+            cancelAt = now + queryTimeout;
+        }
     }
 
     public long getCurrentCommandStart() {
@@ -869,13 +859,13 @@ public class Session implements SessionInterface {
         return procedures.get(name);
     }
 
+    public String[] getSchemaSearchPath() {
+        return schemaSearchPath;
+    }
+
     public void setSchemaSearchPath(String[] schemas) {
         modificationId++;
         this.schemaSearchPath = schemas;
-    }
-
-    public String[] getSchemaSearchPath() {
-        return schemaSearchPath;
     }
 
     @Override
@@ -937,6 +927,10 @@ public class Session implements SessionInterface {
         }
     }
 
+    public int getQueryTimeout() {
+        return queryTimeout;
+    }
+
     public void setQueryTimeout(int queryTimeout) {
         int max = database.getSettings().maxQueryTimeout;
         if (max != 0 && (max < queryTimeout || queryTimeout == 0)) {
@@ -949,15 +943,11 @@ public class Session implements SessionInterface {
         this.cancelAt = 0;
     }
 
-    public int getQueryTimeout() {
-        return queryTimeout;
-    }
-
     /**
      * Set the table this session is waiting for, and the thread that is
      * waiting.
      *
-     * @param waitForLock the table
+     * @param waitForLock       the table
      * @param waitForLockThread the current thread (the one that is waiting)
      */
     public void setWaitForLock(Table waitForLock, Thread waitForLockThread) {
@@ -1019,25 +1009,25 @@ public class Session implements SessionInterface {
         }
         temporaryLobs.add(v);
     }
-    
-    @Override
-    public void setTransactionIsolation(int level) {
-        switch (level) {
-        case Connection.TRANSACTION_NONE:
-        case Connection.TRANSACTION_READ_UNCOMMITTED:
-        case Connection.TRANSACTION_READ_COMMITTED:
-        case Connection.TRANSACTION_REPEATABLE_READ:
-        case Connection.TRANSACTION_SERIALIZABLE:
-            break;
-        default:
-            throw DbException.getInvalidValueException("transaction isolation", level);
-        }
-        transactionIsolation = level;
-    }
 
     @Override
     public int getTransactionIsolation() {
         return transactionIsolation;
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) {
+        switch (level) {
+            case Connection.TRANSACTION_NONE:
+            case Connection.TRANSACTION_READ_UNCOMMITTED:
+            case Connection.TRANSACTION_READ_COMMITTED:
+            case Connection.TRANSACTION_REPEATABLE_READ:
+            case Connection.TRANSACTION_SERIALIZABLE:
+                break;
+            default:
+                throw DbException.getInvalidValueException("transaction isolation", level);
+        }
+        transactionIsolation = level;
     }
 
     @Override
@@ -1049,13 +1039,13 @@ public class Session implements SessionInterface {
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }
-    
-    
+
+
     public Connection applyConnection(String shardName) throws SQLException {
         Optional optional = Optional.create();
         optional.shardName = shardName;
         optional.readOnly = false;
-        
+
         Connection result = connectionHolder.get(shardName);
         if (result == null) {
             DataSourceMarker dsMarker = dsDispatcher.doDispatch(optional);
@@ -1067,7 +1057,7 @@ public class Session implements SessionInterface {
         }
         return result;
     }
-    
+
     public Connection applyConnection(Optional optional) throws SQLException {
         Connection result = connectionHolder.get(optional.shardName);
         if (result == null) {

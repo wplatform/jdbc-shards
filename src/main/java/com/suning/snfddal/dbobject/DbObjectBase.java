@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.dbobject;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.Trace;
+
+import java.util.ArrayList;
 
 /**
  * The base class for all database objects.
@@ -39,13 +39,13 @@ public abstract class DbObjectBase implements DbObject {
     /**
      * Initialize some attributes of this object.
      *
-     * @param db the database
-     * @param objectId the object id
-     * @param name the name
+     * @param db          the database
+     * @param objectId    the object id
+     * @param name        the name
      * @param traceModule the trace module name
      */
     protected void initDbObjectBase(Database db, int objectId, String name,
-            String traceModule) {
+                                    String traceModule) {
         this.database = db;
         this.trace = db.getTrace(traceModule);
         this.id = objectId;
@@ -125,13 +125,13 @@ public abstract class DbObjectBase implements DbObject {
     }
 
     @Override
-    public void setComment(String comment) {
-        this.comment = comment;
+    public String getComment() {
+        return comment;
     }
 
     @Override
-    public String getComment() {
-        return comment;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @Override

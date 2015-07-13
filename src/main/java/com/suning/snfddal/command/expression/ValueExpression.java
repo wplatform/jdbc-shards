@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -16,6 +14,8 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * An expression representing a constant value.
@@ -83,7 +83,7 @@ public class ValueExpression extends Expression {
     @Override
     public void createIndexConditions(Session session, TableFilter filter) {
         if (value.getType() == Value.BOOLEAN) {
-            boolean v = ((ValueBoolean) value).getBoolean().booleanValue();
+            boolean v = value.getBoolean().booleanValue();
             if (!v) {
                 filter.addIndexCondition(IndexCondition.get(Comparison.FALSE, null, this));
             }
@@ -152,19 +152,19 @@ public class ValueExpression extends Expression {
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
         switch (visitor.getType()) {
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.INDEPENDENT:
-        case ExpressionVisitor.EVALUATABLE:
-        case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.GET_DEPENDENCIES:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        default:
-            throw DbException.throwInternalError("type=" + visitor.getType());
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.INDEPENDENT:
+            case ExpressionVisitor.EVALUATABLE:
+            case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.GET_DEPENDENCIES:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 
@@ -180,7 +180,7 @@ public class ValueExpression extends Expression {
         }
         return super.getExpressionColumns(session);
     }
-    
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         if (this == DEFAULT) {

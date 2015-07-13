@@ -27,11 +27,11 @@ import com.suning.snfddal.excutor.CommonPreparedExecutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
 
     private CreateTable createTable;
+
     /**
      * @param session
      * @param prepared
@@ -43,15 +43,15 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
 
     @Override
     protected RoutingResult doRoute() {
-        
-        
+
+
         return null;
     }
 
 
     @Override
     protected String doTranslate(TableNode tableNode) {
-        
+
         CreateTable createTable = getPrepared();
         return null;
     }
@@ -61,10 +61,11 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
     protected String doTranslate(GroupTableNode tableNode) {
         return null;
     }
-    
-    
-    public String getPlanSQL() {return null;}
-    
-    
-    
+
+
+    public String getPlanSQL() {
+        return null;
+    }
+
+
 }

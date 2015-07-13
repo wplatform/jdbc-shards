@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Parameter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statement

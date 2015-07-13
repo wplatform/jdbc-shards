@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.dbobject;
 
-import java.util.HashMap;
-
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.util.New;
+
+import java.util.HashMap;
 
 /**
  * A right owner (sometimes called principal).
@@ -27,7 +27,7 @@ public abstract class RightOwner extends DbObjectBase {
     private HashMap<Table, Right> grantedRights;
 
     protected RightOwner(Database database, int id, String name,
-            String traceModule) {
+                         String traceModule) {
         initDbObjectBase(database, id, name, traceModule);
     }
 
@@ -58,7 +58,7 @@ public abstract class RightOwner extends DbObjectBase {
      * Check if a right is already granted to this object or to objects that
      * were granted to this object.
      *
-     * @param table the table to check
+     * @param table     the table to check
      * @param rightMask the right mask to check
      * @return true if the right was already granted
      */
@@ -114,7 +114,7 @@ public abstract class RightOwner extends DbObjectBase {
     /**
      * Grant a role to this object.
      *
-     * @param role the role
+     * @param role  the role
      * @param right the right to grant
      */
     public void grantRole(Role role, Right right) {

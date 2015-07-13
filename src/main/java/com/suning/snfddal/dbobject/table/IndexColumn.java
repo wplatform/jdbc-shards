@@ -30,24 +30,6 @@ public class IndexColumn {
     public int sortType = SortOrder.ASCENDING;
 
     /**
-     * Get the SQL snippet for this index column.
-     *
-     * @return the SQL snippet
-     */
-    public String getSQL() {
-        StringBuilder buff = new StringBuilder(column.getSQL());
-        if ((sortType & SortOrder.DESCENDING) != 0) {
-            buff.append(" DESC");
-        }
-        if ((sortType & SortOrder.NULLS_FIRST) != 0) {
-            buff.append(" NULLS FIRST");
-        } else if ((sortType & SortOrder.NULLS_LAST) != 0) {
-            buff.append(" NULLS LAST");
-        }
-        return buff.toString();
-    }
-
-    /**
      * Create an array of index columns from a list of columns. The default sort
      * type is used.
      *
@@ -67,11 +49,29 @@ public class IndexColumn {
      * Map the columns using the column names and the specified table.
      *
      * @param indexColumns the column list with column names set
-     * @param table the table from where to map the column names to columns
+     * @param table        the table from where to map the column names to columns
      */
     public static void mapColumns(IndexColumn[] indexColumns, Table table) {
         for (IndexColumn col : indexColumns) {
             col.column = table.getColumn(col.columnName);
         }
+    }
+
+    /**
+     * Get the SQL snippet for this index column.
+     *
+     * @return the SQL snippet
+     */
+    public String getSQL() {
+        StringBuilder buff = new StringBuilder(column.getSQL());
+        if ((sortType & SortOrder.DESCENDING) != 0) {
+            buff.append(" DESC");
+        }
+        if ((sortType & SortOrder.NULLS_FIRST) != 0) {
+            buff.append(" NULLS FIRST");
+        } else if ((sortType & SortOrder.NULLS_LAST) != 0) {
+            buff.append(" NULLS LAST");
+        }
+        return buff.toString();
     }
 }

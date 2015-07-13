@@ -18,10 +18,10 @@
 
 package com.suning.snfddal.dispatch.rule;
 
+import com.suning.snfddal.value.Value;
+
 import java.util.List;
 import java.util.Map;
-
-import com.suning.snfddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -24,7 +24,7 @@ import java.sql.SQLException;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class TransactionException extends SQLException {
-        
+
     private static final long serialVersionUID = 1L;
 
     /**

@@ -18,9 +18,9 @@
 
 package com.suning.snfddal.dispatch.rule;
 
-import java.util.Map;
-
 import com.suning.snfddal.value.Value;
+
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

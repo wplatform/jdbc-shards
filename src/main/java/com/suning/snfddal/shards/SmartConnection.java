@@ -24,6 +24,18 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
         this.connection = connection;
     }
 
+    /**
+     * Creates a exception trace version of a connection
+     *
+     * @param conn - the original connection
+     * @return - the connection with exception trace
+     */
+    public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource, Connection connection) {
+        InvocationHandler handler = new SmartConnection(database, dataSource, connection);
+        ClassLoader cl = Connection.class.getClassLoader();
+        return (Connection) Proxy.newProxyInstance(cl, new Class[]{Connection.class}, handler);
+    }
+
     public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
         try {
             if ("prepareStatement".equals(method.getName())) {
@@ -60,20 +72,8 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
     }
 
     /**
-     * Creates a exception trace version of a connection
-     * 
-     * @param conn - the original connection
-     * @return - the connection with exception trace
-     */
-    public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource, Connection connection) {
-        InvocationHandler handler = new SmartConnection(database, dataSource, connection);
-        ClassLoader cl = Connection.class.getClassLoader();
-        return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);
-    }
-
-    /**
      * return the wrapped connection
-     * 
+     *
      * @return the connection
      */
     public Connection getConnection() {

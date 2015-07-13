@@ -5,26 +5,26 @@
  */
 package com.suning.snfddal.util;
 
-import java.lang.ref.SoftReference;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
+
+import java.lang.ref.SoftReference;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * A few String utility functions.
  */
 public class StringUtils {
 
+    private static final char[] HEX = "0123456789abcdef".toCharArray();
+    private static final int[] HEX_DECODE = new int['f' + 1];
     private static SoftReference<String[]> softCache =
             new SoftReference<String[]>(null);
     private static long softCacheCreated;
-    private static final char[] HEX = "0123456789abcdef".toCharArray();
-    private static final int[] HEX_DECODE = new int['f' + 1];
 
     static {
         for (int i = 0; i < HEX_DECODE.length; i++) {
@@ -105,7 +105,7 @@ public class StringUtils {
     /**
      * Check is a string starts with another string, ignoring the case.
      *
-     * @param s the string to check (must be longer than start)
+     * @param s     the string to check (must be longer than start)
      * @param start the prefix of s
      * @return true if start is a prefix of s
      */
@@ -165,48 +165,48 @@ public class StringUtils {
 //                // not supported in properties files
 //                buff.append("\\b");
 //                break;
-            case '\t':
-                // HT horizontal tab
-                buff.append("\\t");
-                break;
-            case '\n':
-                // LF linefeed
-                buff.append("\\n");
-                break;
-            case '\f':
-                // FF form feed
-                buff.append("\\f");
-                break;
-            case '\r':
-                // CR carriage return
-                buff.append("\\r");
-                break;
-            case '"':
-                // double quote
-                buff.append("\\\"");
-                break;
-            case '\\':
-                // backslash
-                buff.append("\\\\");
-                break;
-            default:
-                int ch = c & 0xffff;
-                if (ch >= ' ' && (ch < 0x80)) {
-                    buff.append(c);
-                // not supported in properties files
-                // } else if (ch < 0xff) {
-                // buff.append("\\");
-                // // make sure it's three characters (0x200 is octal 1000)
-                // buff.append(Integer.toOctalString(0x200 | ch).substring(1));
-                } else {
-                    buff.append("\\u");
-                    String hex = Integer.toHexString(ch);
-                    // make sure it's four characters
-                    for (int len = hex.length(); len < 4; len++) {
-                        buff.append('0');
+                case '\t':
+                    // HT horizontal tab
+                    buff.append("\\t");
+                    break;
+                case '\n':
+                    // LF linefeed
+                    buff.append("\\n");
+                    break;
+                case '\f':
+                    // FF form feed
+                    buff.append("\\f");
+                    break;
+                case '\r':
+                    // CR carriage return
+                    buff.append("\\r");
+                    break;
+                case '"':
+                    // double quote
+                    buff.append("\\\"");
+                    break;
+                case '\\':
+                    // backslash
+                    buff.append("\\\\");
+                    break;
+                default:
+                    int ch = c & 0xffff;
+                    if (ch >= ' ' && (ch < 0x80)) {
+                        buff.append(c);
+                        // not supported in properties files
+                        // } else if (ch < 0xff) {
+                        // buff.append("\\");
+                        // // make sure it's three characters (0x200 is octal 1000)
+                        // buff.append(Integer.toOctalString(0x200 | ch).substring(1));
+                    } else {
+                        buff.append("\\u");
+                        String hex = Integer.toHexString(ch);
+                        // make sure it's four characters
+                        for (int len = hex.length(); len < 4; len++) {
+                            buff.append('0');
+                        }
+                        buff.append(hex);
                     }
-                    buff.append(hex);
-                }
             }
         }
         return buff.toString();
@@ -216,7 +216,7 @@ public class StringUtils {
      * Add an asterisk ('[*]') at the given position. This format is used to
      * show where parsing failed in a statement.
      *
-     * @param s the text
+     * @param s     the text
      * @param index the position
      * @return the text with asterisk
      */
@@ -250,61 +250,61 @@ public class StringUtils {
                 }
                 c = s.charAt(++i);
                 switch (c) {
-                case 't':
-                    buff.append('\t');
-                    break;
-                case 'r':
-                    buff.append('\r');
-                    break;
-                case 'n':
-                    buff.append('\n');
-                    break;
-                case 'b':
-                    buff.append('\b');
-                    break;
-                case 'f':
-                    buff.append('\f');
-                    break;
-                case '#':
-                    // for properties files
-                    buff.append('#');
-                    break;
-                case '=':
-                    // for properties files
-                    buff.append('=');
-                    break;
-                case ':':
-                    // for properties files
-                    buff.append(':');
-                    break;
-                case '"':
-                    buff.append('"');
-                    break;
-                case '\\':
-                    buff.append('\\');
-                    break;
-                case 'u': {
-                    try {
-                        c = (char) (Integer.parseInt(s.substring(i + 1, i + 5), 16));
-                    } catch (NumberFormatException e) {
-                        throw getFormatException(s, i);
-                    }
-                    i += 4;
-                    buff.append(c);
-                    break;
-                }
-                default:
-                    if (c >= '0' && c <= '9') {
+                    case 't':
+                        buff.append('\t');
+                        break;
+                    case 'r':
+                        buff.append('\r');
+                        break;
+                    case 'n':
+                        buff.append('\n');
+                        break;
+                    case 'b':
+                        buff.append('\b');
+                        break;
+                    case 'f':
+                        buff.append('\f');
+                        break;
+                    case '#':
+                        // for properties files
+                        buff.append('#');
+                        break;
+                    case '=':
+                        // for properties files
+                        buff.append('=');
+                        break;
+                    case ':':
+                        // for properties files
+                        buff.append(':');
+                        break;
+                    case '"':
+                        buff.append('"');
+                        break;
+                    case '\\':
+                        buff.append('\\');
+                        break;
+                    case 'u': {
                         try {
-                            c = (char) (Integer.parseInt(s.substring(i, i + 3), 8));
+                            c = (char) (Integer.parseInt(s.substring(i + 1, i + 5), 16));
                         } catch (NumberFormatException e) {
                             throw getFormatException(s, i);
                         }
-                        i += 2;
+                        i += 4;
                         buff.append(c);
-                    } else {
-                        throw getFormatException(s, i);
+                        break;
                     }
+                    default:
+                        if (c >= '0' && c <= '9') {
+                            try {
+                                c = (char) (Integer.parseInt(s.substring(i, i + 3), 8));
+                            } catch (NumberFormatException e) {
+                                throw getFormatException(s, i);
+                            }
+                            i += 2;
+                            buff.append(c);
+                        } else {
+                            throw getFormatException(s, i);
+                        }
                 }
             } else {
                 buff.append(c);
@@ -442,9 +442,9 @@ public class StringUtils {
      * string will result in a null array, and an empty string in a zero element
      * array.
      *
-     * @param s the string to split
+     * @param s             the string to split
      * @param separatorChar the separator character
-     * @param trim whether each element should be trimmed
+     * @param trim          whether each element should be trimmed
      * @return the array list
      */
     public static String[] arraySplit(String s, char separatorChar, boolean trim) {
@@ -481,7 +481,7 @@ public class StringUtils {
      * character. A backslash and the separator character and escaped using a
      * backslash.
      *
-     * @param list the string array
+     * @param list          the string array
      * @param separatorChar the separator character
      * @return the combined string
      */
@@ -507,7 +507,8 @@ public class StringUtils {
      * Creates an XML attribute of the form name="value".
      * A single space is prepended to the name,
      * so that multiple attributes can be concatenated.
-     * @param name the attribute name
+     *
+     * @param name  the attribute name
      * @param value the attribute value
      * @return the attribute
      */
@@ -519,9 +520,9 @@ public class StringUtils {
      * Create an XML node with optional attributes and content.
      * The data is indented with 4 spaces if it contains a newline character.
      *
-     * @param name the element name
+     * @param name       the element name
      * @param attributes the attributes (may be null)
-     * @param content the content (may be null)
+     * @param content    the content (may be null)
      * @return the node
      */
     public static String xmlNode(String name, String attributes, String content) {
@@ -533,14 +534,14 @@ public class StringUtils {
      * indented with 4 spaces if it contains a newline character and the indent
      * parameter is set to true.
      *
-     * @param name the element name
+     * @param name       the element name
      * @param attributes the attributes (may be null)
-     * @param content the content (may be null)
-     * @param indent whether to indent the content if it contains a newline
+     * @param content    the content (may be null)
+     * @param indent     whether to indent the content if it contains a newline
      * @return the node
      */
     public static String xmlNode(String name, String attributes,
-            String content, boolean indent) {
+                                 String content, boolean indent) {
         String start = attributes == null ? name : name + attributes;
         if (content == null) {
             return "<" + start + "/>\n";
@@ -564,14 +565,14 @@ public class StringUtils {
     /**
      * Indents a string with spaces.
      *
-     * @param s the string
-     * @param spaces the number of spaces
+     * @param s       the string
+     * @param spaces  the number of spaces
      * @param newline append a newline if there is none
      * @return the indented string
      */
     public static String indent(String s, int spaces, boolean newline) {
         StringBuilder buff = new StringBuilder(s.length() + spaces);
-        for (int i = 0; i < s.length();) {
+        for (int i = 0; i < s.length(); ) {
             for (int j = 0; j < spaces; j++) {
                 buff.append(' ');
             }
@@ -629,6 +630,7 @@ public class StringUtils {
 
     /**
      * Returns <?xml version="1.0"?>
+     *
      * @return <?xml version="1.0"?>
      */
     public static String xmlStartDoc() {
@@ -648,7 +650,7 @@ public class StringUtils {
     /**
      * Escapes an XML text element.
      *
-     * @param text the text data
+     * @param text          the text data
      * @param escapeNewline whether to escape newlines
      * @return the escaped text
      */
@@ -658,42 +660,42 @@ public class StringUtils {
         for (int i = 0; i < length; i++) {
             char ch = text.charAt(i);
             switch (ch) {
-            case '<':
-                buff.append("&lt;");
-                break;
-            case '>':
-                buff.append("&gt;");
-                break;
-            case '&':
-                buff.append("&amp;");
-                break;
-            case '\'':
-                buff.append("&apos;");
-                break;
-            case '\"':
-                buff.append("&quot;");
-                break;
-            case '\r':
-            case '\n':
-                if (escapeNewline) {
-                    buff.append("&#x").
-                        append(Integer.toHexString(ch)).
-                        append(';');
-                } else {
+                case '<':
+                    buff.append("&lt;");
+                    break;
+                case '>':
+                    buff.append("&gt;");
+                    break;
+                case '&':
+                    buff.append("&amp;");
+                    break;
+                case '\'':
+                    buff.append("&apos;");
+                    break;
+                case '\"':
+                    buff.append("&quot;");
+                    break;
+                case '\r':
+                case '\n':
+                    if (escapeNewline) {
+                        buff.append("&#x").
+                                append(Integer.toHexString(ch)).
+                                append(';');
+                    } else {
+                        buff.append(ch);
+                    }
+                    break;
+                case '\t':
                     buff.append(ch);
-                }
-                break;
-            case '\t':
-                buff.append(ch);
-                break;
-            default:
-                if (ch < ' ' || ch > 127) {
-                    buff.append("&#x").
-                        append(Integer.toHexString(ch)).
-                        append(';');
-                } else {
-                    buff.append(ch);
-                }
+                    break;
+                default:
+                    if (ch < ' ' || ch > 127) {
+                        buff.append("&#x").
+                                append(Integer.toHexString(ch)).
+                                append(';');
+                    } else {
+                        buff.append(ch);
+                    }
             }
         }
         return buff.toString();
@@ -702,9 +704,9 @@ public class StringUtils {
     /**
      * Replace all occurrences of the before string with the after string.
      *
-     * @param s the string
+     * @param s      the string
      * @param before the old text
-     * @param after the new text
+     * @param after  the new text
      * @return the string with the before string replaced
      */
     public static String replaceAll(String s, String before, String after) {
@@ -772,10 +774,10 @@ public class StringUtils {
     /**
      * Pad a string. This method is used for the SQL function RPAD and LPAD.
      *
-     * @param string the original string
-     * @param n the target length
+     * @param string  the original string
+     * @param n       the target length
      * @param padding the padding string
-     * @param right true if the padding should be appended at the end
+     * @param right   true if the padding should be appended at the end
      * @return the padded string
      */
     public static String pad(String string, int n, String padding, boolean right) {
@@ -830,15 +832,15 @@ public class StringUtils {
     /**
      * Trim a character from a string.
      *
-     * @param s the string
-     * @param leading if leading characters should be removed
+     * @param s        the string
+     * @param leading  if leading characters should be removed
      * @param trailing if trailing characters should be removed
-     * @param sp what to remove (only the first character is used)
-     *      or null for a space
+     * @param sp       what to remove (only the first character is used)
+     *                 or null for a space
      * @return the trimmed string
      */
     public static String trim(String s, boolean leading, boolean trailing,
-            String sp) {
+                              String sp) {
         char space = (sp == null || sp.length() < 1) ? ' ' : sp.charAt(0);
         if (leading) {
             int len = s.length(), i = 0;
@@ -982,7 +984,7 @@ public class StringUtils {
      * Convert a byte array to a hex encoded string.
      *
      * @param value the byte array
-     * @param len the number of bytes to encode
+     * @param len   the number of bytes to encode
      * @return the hex encoded string
      */
     public static String convertBytesToHex(byte[] value, int len) {
@@ -1017,12 +1019,12 @@ public class StringUtils {
     /**
      * Append a zero-padded number to a string builder.
      *
-     * @param buff the string builder
-     * @param length the number of characters to append
+     * @param buff          the string builder
+     * @param length        the number of characters to append
      * @param positiveValue the number to append
      */
     public static void appendZeroPadded(StringBuilder buff, int length,
-            long positiveValue) {
+                                        long positiveValue) {
         if (length == 2) {
             if (positiveValue < 10) {
                 buff.append('0');

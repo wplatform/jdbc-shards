@@ -69,24 +69,12 @@ public class DbSettings extends SettingsBase {
      * shutdown hook.
      */
     public final boolean dbCloseOnExit = get("DB_CLOSE_ON_EXIT", true);
-
-    /**
-     * Database setting <code>DEFAULT_CONNECTION</code> (default: false).<br />
-     * Whether Java functions can use
-     * <code>DriverManager.getConnection("jdbc:default:connection")</code> to
-     * get a database connection. This feature is disabled by default for
-     * performance reasons. Please note the Oracle JDBC driver will try to
-     * resolve this database URL if it is loaded before the H2 driver.
-     */
-    public boolean defaultConnection = get("DEFAULT_CONNECTION", false);
-
     /**
      * Database setting <code>DEFAULT_ESCAPE</code> (default: \).<br />
      * The default escape character for LIKE comparisons. To select no escape
      * character, use an empty string.
      */
     public final String defaultEscape = get("DEFAULT_ESCAPE", "\\");
-
     /**
      * Database setting <code>DEFRAG_ALWAYS</code> (default: false).<br />
      * Each time the database is closed normally, it is fully defragmented (the
@@ -94,20 +82,17 @@ public class DbSettings extends SettingsBase {
      * setting is ignored.
      */
     public final boolean defragAlways = get("DEFRAG_ALWAYS", false);
-
     /**
      * Database setting <code>DROP_RESTRICT</code> (default: true).<br />
      * Whether the default action for DROP TABLE and DROP VIEW is RESTRICT.
      */
     public final boolean dropRestrict = get("DROP_RESTRICT", true);
-
     /**
      * Database setting <code>EARLY_FILTER</code> (default: false).<br />
      * This setting allows table implementations to apply filter conditions
      * early on.
      */
     public final boolean earlyFilter = get("EARLY_FILTER", true);
-
     /**
      * Database setting <code>ESTIMATED_FUNCTION_TABLE_ROWS</code> (default:
      * 1000).<br />
@@ -116,7 +101,6 @@ public class DbSettings extends SettingsBase {
      */
     public final int estimatedFunctionTableRows = get(
             "ESTIMATED_FUNCTION_TABLE_ROWS", 1000);
-
     /**
      * Database setting <code>FUNCTIONS_IN_SCHEMA</code>
      * (default: true).<br />
@@ -126,13 +110,11 @@ public class DbSettings extends SettingsBase {
      * older.
      */
     public final boolean functionsInSchema = get("FUNCTIONS_IN_SCHEMA", true);
-
     /**
      * Database setting <code>LARGE_TRANSACTIONS</code> (default: true).<br />
      * Support very large transactions
      */
     public final boolean largeTransactions = get("LARGE_TRANSACTIONS", true);
-
     /**
      * Database setting <code>MAX_COMPACT_COUNT</code>
      * (default: Integer.MAX_VALUE).<br />
@@ -140,27 +122,16 @@ public class DbSettings extends SettingsBase {
      */
     public final int maxCompactCount = get("MAX_COMPACT_COUNT",
             Integer.MAX_VALUE);
-
     /**
      * Database setting <code>MAX_COMPACT_TIME</code> (default: 200).<br />
      * The maximum time in milliseconds used to compact a database when closing.
      */
     public final int maxCompactTime = get("MAX_COMPACT_TIME", 200);
-
-    /**
-     * Database setting <code>MAX_QUERY_TIMEOUT</code> (default: 0).<br />
-     * The maximum timeout of a query in milliseconds. The default is 0, meaning
-     * no limit. Please note the actual query timeout may be set to a lower
-     * value.
-     */
-    public int maxQueryTimeout = get("MAX_QUERY_TIMEOUT", 0);
-
     /**
      * Database setting <code>NESTED_JOINS</code> (default: true).<br />
      * Whether nested joins should be supported.
      */
     public final boolean nestedJoins = get("NESTED_JOINS", true);
-
     /**
      * Database setting <code>OPTIMIZE_DISTINCT</code> (default: true).<br />
      * Improve the performance of simple DISTINCT queries if an index is
@@ -174,7 +145,6 @@ public class DbSettings extends SettingsBase {
      * </ul>
      */
     public final boolean optimizeDistinct = get("OPTIMIZE_DISTINCT", true);
-
     /**
      * Database setting <code>OPTIMIZE_EVALUATABLE_SUBQUERIES</code> (default:
      * true).<br />
@@ -182,7 +152,6 @@ public class DbSettings extends SettingsBase {
      */
     public final boolean optimizeEvaluatableSubqueries = get(
             "OPTIMIZE_EVALUATABLE_SUBQUERIES", true);
-
     /**
      * Database setting <code>OPTIMIZE_INSERT_FROM_SELECT</code>
      * (default: true).<br />
@@ -191,47 +160,40 @@ public class DbSettings extends SettingsBase {
      */
     public final boolean optimizeInsertFromSelect = get(
             "OPTIMIZE_INSERT_FROM_SELECT", true);
-
     /**
      * Database setting <code>OPTIMIZE_IN_LIST</code> (default: true).<br />
      * Optimize IN(...) and IN(SELECT ...) comparisons. This includes
      * optimization for SELECT, DELETE, and UPDATE.
      */
     public final boolean optimizeInList = get("OPTIMIZE_IN_LIST", true);
-
     /**
      * Database setting <code>OPTIMIZE_IN_SELECT</code> (default: true).<br />
      * Optimize IN(SELECT ...) comparisons. This includes
      * optimization for SELECT, DELETE, and UPDATE.
      */
     public final boolean optimizeInSelect = get("OPTIMIZE_IN_SELECT", true);
-
     /**
      * Database setting <code>OPTIMIZE_IS_NULL</code> (default: false).<br />
      * Use an index for condition of the form columnName IS NULL.
      */
     public final boolean optimizeIsNull = get("OPTIMIZE_IS_NULL", true);
-
     /**
      * Database setting <code>OPTIMIZE_OR</code> (default: true).<br />
      * Convert (C=? OR C=?) to (C IN(?, ?)).
      */
     public final boolean optimizeOr = get("OPTIMIZE_OR", true);
-
     /**
      * Database setting <code>OPTIMIZE_TWO_EQUALS</code> (default: true).<br />
      * Optimize expressions of the form A=B AND B=1. In this case, AND A=1 is
      * added so an index on A can be used.
      */
     public final boolean optimizeTwoEquals = get("OPTIMIZE_TWO_EQUALS", true);
-
     /**
      * Database setting <code>OPTIMIZE_UPDATE</code> (default: true).<br />
      * Speed up inserts, updates, and deletes by not reading all rows from a
      * page unless necessary.
      */
     public final boolean optimizeUpdate = get("OPTIMIZE_UPDATE", true);
-
     /**
      * Database setting <code>PAGE_STORE_MAX_GROWTH</code>
      * (default: 128 * 1024).<br />
@@ -239,7 +201,6 @@ public class DbSettings extends SettingsBase {
      */
     public final int pageStoreMaxGrowth = get("PAGE_STORE_MAX_GROWTH",
             128 * 1024);
-
     /**
      * Database setting <code>PAGE_STORE_INTERNAL_COUNT</code>
      * (default: false).<br />
@@ -247,13 +208,11 @@ public class DbSettings extends SettingsBase {
      */
     public final boolean pageStoreInternalCount = get(
             "PAGE_STORE_INTERNAL_COUNT", false);
-
     /**
      * Database setting <code>PAGE_STORE_TRIM</code> (default: true).<br />
      * Trim the database size when closing.
      */
     public final boolean pageStoreTrim = get("PAGE_STORE_TRIM", true);
-
     /**
      * Database setting <code>QUERY_CACHE_SIZE</code> (default: 8).<br />
      * The size of the query cache, in number of cached statements. Each session
@@ -266,13 +225,11 @@ public class DbSettings extends SettingsBase {
      * and prepared statement.
      */
     public final int queryCacheSize = get("QUERY_CACHE_SIZE", 8);
-
     /**
      * Database setting <code>RECOMPILE_ALWAYS</code> (default: false).<br />
      * Always recompile prepared statements.
      */
     public final boolean recompileAlways = get("RECOMPILE_ALWAYS", false);
-
     /**
      * Database setting <code>RECONNECT_CHECK_DELAY</code> (default: 200).<br />
      * Check the .lock.db file every this many milliseconds to detect that the
@@ -281,13 +238,11 @@ public class DbSettings extends SettingsBase {
      * milliseconds before updating the database.
      */
     public final int reconnectCheckDelay = get("RECONNECT_CHECK_DELAY", 200);
-
     /**
      * Database setting <code>ROWID</code> (default: true).<br />
      * If set, each table has a pseudo-column _ROWID_.
      */
     public final boolean rowId = get("ROWID", true);
-
     /**
      * Database setting <code>SELECT_FOR_UPDATE_MVCC</code>
      * (default: true).<br />
@@ -295,7 +250,6 @@ public class DbSettings extends SettingsBase {
      * using MVCC.
      */
     public final boolean selectForUpdateMvcc = get("SELECT_FOR_UPDATE_MVCC", true);
-
     /**
      * Database setting <code>SHARE_LINKED_CONNECTIONS</code>
      * (default: true).<br />
@@ -305,19 +259,34 @@ public class DbSettings extends SettingsBase {
      */
     public final boolean shareLinkedConnections = get(
             "SHARE_LINKED_CONNECTIONS", true);
-
-    /**
-     * Database setting <code>DEFAULT_TABLE_ENGINE</code>
-     * (default: null).<br />
-     * The default table engine to use for new tables.
-     */
-    public String defaultTableEngine = get("DEFAULT_TABLE_ENGINE", null);
     /**
      * Database setting <code>COMPRESS</code>
      * (default: false).<br />
      * Compress data when storing.
      */
     public final boolean compressData = get("COMPRESS", false);
+    /**
+     * Database setting <code>DEFAULT_CONNECTION</code> (default: false).<br />
+     * Whether Java functions can use
+     * <code>DriverManager.getConnection("jdbc:default:connection")</code> to
+     * get a database connection. This feature is disabled by default for
+     * performance reasons. Please note the Oracle JDBC driver will try to
+     * resolve this database URL if it is loaded before the H2 driver.
+     */
+    public boolean defaultConnection = get("DEFAULT_CONNECTION", false);
+    /**
+     * Database setting <code>MAX_QUERY_TIMEOUT</code> (default: 0).<br />
+     * The maximum timeout of a query in milliseconds. The default is 0, meaning
+     * no limit. Please note the actual query timeout may be set to a lower
+     * value.
+     */
+    public int maxQueryTimeout = get("MAX_QUERY_TIMEOUT", 0);
+    /**
+     * Database setting <code>DEFAULT_TABLE_ENGINE</code>
+     * (default: null).<br />
+     * The default table engine to use for new tables.
+     */
+    public String defaultTableEngine = get("DEFAULT_TABLE_ENGINE", null);
 
     private DbSettings(HashMap<String, String> s) {
         super(s);

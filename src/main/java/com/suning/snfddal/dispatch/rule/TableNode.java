@@ -1,22 +1,24 @@
 /*
  * Copyright 2015 suning.com Holding Ltd.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 // Created on 2015年3月27日
 // $Id$
 
 package com.suning.snfddal.dispatch.rule;
+
+import com.suning.snfddal.util.StringUtils;
 
 import java.io.Serializable;
 
@@ -28,9 +30,9 @@ public class TableNode implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String shardName;
-    
+
     private final String tableName;
-    
+
     private final String suffix;
 
     /**
@@ -40,10 +42,8 @@ public class TableNode implements Serializable {
     public TableNode(String shardName, String tableName) {
         this(shardName, tableName, null);
     }
-    
-    
-    public TableNode(String shardName, String tableName,String suffix) {
-        super();
+
+    public TableNode(String shardName, String tableName, String suffix) {
         this.shardName = shardName;
         this.tableName = tableName;
         this.suffix = suffix;
@@ -71,6 +71,22 @@ public class TableNode implements Serializable {
     }
 
 
+    public String getCompositeTableName() {
+        StringBuilder fullName = new StringBuilder();
+        fullName.append(tableName);
+        if (!StringUtils.isNullOrEmpty(suffix)) {
+            fullName.append(suffix);
+        }
+        return fullName.toString();
+    }
+    
+    
+    
+
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -81,6 +97,9 @@ public class TableNode implements Serializable {
         return result;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -110,7 +129,9 @@ public class TableNode implements Serializable {
 
     @Override
     public String toString() {
-        return "tableNode[" + shardName + "." + tableName + "]";
+        return getShardName() + "." + getCompositeTableName();
     }
+
+    
 
 }

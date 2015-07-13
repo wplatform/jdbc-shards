@@ -16,10 +16,10 @@ import com.suning.snfddal.value.ValueLong;
  */
 class RangeCursor implements Cursor {
 
+    private final long min, max;
     private boolean beforeFirst;
     private long current;
     private Row currentRow;
-    private final long min, max;
 
     RangeCursor(long min, long max) {
         this.min = min;

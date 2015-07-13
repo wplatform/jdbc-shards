@@ -24,9 +24,9 @@ import java.sql.Connection;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface TransactionService {
-    
+
     TransactionManager getTransactionManager();
-    
+
     Connection getManagedConnection();
-    
+
 }

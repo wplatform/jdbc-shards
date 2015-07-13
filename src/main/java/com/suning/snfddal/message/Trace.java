@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.message;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.Value;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
 
 /**
  * This class represents a trace module.
@@ -93,12 +93,12 @@ public class Trace {
      * The trace module name for executor.
      */
     public static final String EXECUTOR = "executor";
-    
+
     /**
      * The trace module name for transaction.
      */
     public static final String TRANSACTION = "transaction";
-    
+
     /**
      * The trace module name for datasource.
      */
@@ -113,6 +113,37 @@ public class Trace {
         this.traceWriter = traceWriter;
         this.module = module;
         this.lineSeparator = SysProperties.LINE_SEPARATOR;
+    }
+
+    /**
+     * Format the parameter list.
+     *
+     * @param parameters the parameter list
+     * @return the formatted text
+     */
+    public static String formatParams(
+            ArrayList<? extends ParameterInterface> parameters) {
+        if (parameters.size() == 0) {
+            return "";
+        }
+        StatementBuilder buff = new StatementBuilder();
+        int i = 0;
+        boolean params = false;
+        for (ParameterInterface p : parameters) {
+            if (p.isValueSet()) {
+                if (!params) {
+                    buff.append(" {");
+                    params = true;
+                }
+                buff.appendExceptFirst(", ");
+                Value v = p.getParamValue();
+                buff.append(++i).append(": ").append(v.getTraceSQL());
+            }
+        }
+        if (params) {
+            buff.append('}');
+        }
+        return buff.toString();
     }
 
     /**
@@ -165,8 +196,8 @@ public class Trace {
     /**
      * Write a message with trace level ERROR to the trace system.
      *
-     * @param t the exception
-     * @param s the message
+     * @param t      the exception
+     * @param s      the message
      * @param params the parameters
      */
     public void error(Throwable t, String s, Object... params) {
@@ -190,7 +221,7 @@ public class Trace {
     /**
      * Write a message with trace level INFO to the trace system.
      *
-     * @param s the message
+     * @param s      the message
      * @param params the parameters
      */
     public void info(String s, Object... params) {
@@ -213,43 +244,12 @@ public class Trace {
     }
 
     /**
-     * Format the parameter list.
-     *
-     * @param parameters the parameter list
-     * @return the formatted text
-     */
-    public static String formatParams(
-            ArrayList<? extends ParameterInterface> parameters) {
-        if (parameters.size() == 0) {
-            return "";
-        }
-        StatementBuilder buff = new StatementBuilder();
-        int i = 0;
-        boolean params = false;
-        for (ParameterInterface p : parameters) {
-            if (p.isValueSet()) {
-                if (!params) {
-                    buff.append(" {");
-                    params = true;
-                }
-                buff.appendExceptFirst(", ");
-                Value v = p.getParamValue();
-                buff.append(++i).append(": ").append(v.getTraceSQL());
-            }
-        }
-        if (params) {
-            buff.append('}');
-        }
-        return buff.toString();
-    }
-
-    /**
      * Write a SQL statement with trace level INFO to the trace system.
      *
-     * @param sql the SQL statement
+     * @param sql    the SQL statement
      * @param params the parameters used, in the for {1:...}
-     * @param count the update count
-     * @param time the time it took to run the statement in ms
+     * @param count  the update count
+     * @param time   the time it took to run the statement in ms
      */
     public void infoSQL(String sql, String params, int count, long time) {
         if (!isEnabled(TraceSystem.INFO)) {
@@ -280,9 +280,9 @@ public class Trace {
             buff.append(' ');
         }
         buff.append("*/").
-            append(StringUtils.javaEncode(sql)).
-            append(StringUtils.javaEncode(params)).
-            append(';');
+                append(StringUtils.javaEncode(sql)).
+                append(StringUtils.javaEncode(params)).
+                append(';');
         sql = buff.toString();
         traceWriter.write(TraceSystem.INFO, module, sql, null);
     }
@@ -290,7 +290,7 @@ public class Trace {
     /**
      * Write a message with trace level DEBUG to the trace system.
      *
-     * @param s the message
+     * @param s      the message
      * @param params the parameters
      */
     public void debug(String s, Object... params) {
@@ -313,6 +313,7 @@ public class Trace {
 
     /**
      * Write a message with trace level DEBUG to the trace system.
+     *
      * @param t the exception
      * @param s the message
      */

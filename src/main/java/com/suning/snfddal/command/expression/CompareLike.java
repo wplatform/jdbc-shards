@@ -5,10 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -16,11 +12,11 @@ import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.value.CompareMode;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueBoolean;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueString;
+import com.suning.snfddal.value.*;
+
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Pattern matching comparison expression: WHERE NAME LIKE ?
@@ -31,18 +27,15 @@ public class CompareLike extends Condition {
 
     private final CompareMode compareMode;
     private final String defaultEscape;
+    private final boolean regexp;
     private Expression left;
     private Expression right;
     private Expression escape;
-
     private boolean isInit;
-
     private char[] patternChars;
     private String patternString;
     private int[] patternTypes;
     private int patternLength;
-
-    private final boolean regexp;
     private Pattern patternRegexp;
 
     private boolean ignoreCase;
@@ -50,13 +43,13 @@ public class CompareLike extends Condition {
     private boolean invalidPattern;
 
     public CompareLike(Database db, Expression left, Expression right,
-            Expression escape, boolean regexp) {
+                       Expression escape, boolean regexp) {
         this(db.getCompareMode(), db.getSettings().defaultEscape, left, right,
                 escape, regexp);
     }
 
     public CompareLike(CompareMode compareMode, String defaultEscape,
-            Expression left, Expression right, Expression escape, boolean regexp) {
+                       Expression left, Expression right, Expression escape, boolean regexp) {
         this.compareMode = compareMode;
         this.defaultEscape = defaultEscape;
         this.regexp = regexp;
@@ -269,33 +262,33 @@ public class CompareLike extends Condition {
     }
 
     private boolean compareAt(String s, int pi, int si, int sLen,
-            char[] pattern, int[] types) {
+                              char[] pattern, int[] types) {
         for (; pi < patternLength; pi++) {
             switch (types[pi]) {
-            case MATCH:
-                if ((si >= sLen) || !compare(pattern, s, pi, si++)) {
-                    return false;
-                }
-                break;
-            case ONE:
-                if (si++ >= sLen) {
-                    return false;
-                }
-                break;
-            case ANY:
-                if (++pi >= patternLength) {
-                    return true;
-                }
-                while (si < sLen) {
-                    if (compare(pattern, s, pi, si) &&
-                            compareAt(s, pi, si, sLen, pattern, types)) {
+                case MATCH:
+                    if ((si >= sLen) || !compare(pattern, s, pi, si++)) {
+                        return false;
+                    }
+                    break;
+                case ONE:
+                    if (si++ >= sLen) {
+                        return false;
+                    }
+                    break;
+                case ANY:
+                    if (++pi >= patternLength) {
                         return true;
                     }
-                    si++;
-                }
-                return false;
-            default:
-                DbException.throwInternalError();
+                    while (si < sLen) {
+                        if (compare(pattern, s, pi, si) &&
+                                compareAt(s, pi, si, sLen, pattern, types)) {
+                            return true;
+                        }
+                        si++;
+                    }
+                    return false;
+                default:
+                    DbException.throwInternalError();
             }
         }
         return si == sLen;
@@ -305,8 +298,8 @@ public class CompareLike extends Condition {
      * Test if the value matches the pattern.
      *
      * @param testPattern the pattern
-     * @param value the value
-     * @param escapeChar the escape character
+     * @param value       the value
+     * @param escapeChar  the escape character
      * @return true if the value matches
      */
     public boolean test(String testPattern, String value, char escapeChar) {

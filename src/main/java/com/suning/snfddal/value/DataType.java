@@ -5,24 +5,6 @@
  */
 package com.suning.snfddal.value;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SessionInterface;
 import com.suning.snfddal.engine.SysProperties;
@@ -35,6 +17,15 @@ import com.suning.snfddal.result.SimpleResultSet;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.Utils;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * This class contains meta data information about data types,
@@ -57,112 +48,6 @@ public class DataType {
     private static final HashMap<String, DataType> TYPES_BY_NAME = New.hashMap();
     private static final ArrayList<DataType> TYPES_BY_VALUE_TYPE = New.arrayList();
 
-    /**
-     * The value type of this data type.
-     */
-    public int type;
-
-    /**
-     * The data type name.
-     */
-    public String name;
-
-    /**
-     * The SQL type.
-     */
-    public int sqlType;
-
-    /**
-     * The Java class name.
-     */
-    public String jdbc;
-
-    /**
-     * How closely the data type maps to the corresponding JDBC SQL type (low is
-     * best).
-     */
-    public int sqlTypePos;
-
-    /**
-     * The maximum supported precision.
-     */
-    public long maxPrecision;
-
-    /**
-     * The lowest possible scale.
-     */
-    public int minScale;
-
-    /**
-     * The highest possible scale.
-     */
-    public int maxScale;
-
-    /**
-     * If this is a numeric type.
-     */
-    public boolean decimal;
-
-    /**
-     * The prefix required for the SQL literal representation.
-     */
-    public String prefix;
-
-    /**
-     * The suffix required for the SQL literal representation.
-     */
-    public String suffix;
-
-    /**
-     * The list of parameters used in the column definition.
-     */
-    public String params;
-
-    /**
-     * If this is an autoincrement type.
-     */
-    public boolean autoIncrement;
-
-    /**
-     * If this data type is an autoincrement type.
-     */
-    public boolean caseSensitive;
-
-    /**
-     * If the precision parameter is supported.
-     */
-    public boolean supportsPrecision;
-
-    /**
-     * If the scale parameter is supported.
-     */
-    public boolean supportsScale;
-
-    /**
-     * The default precision.
-     */
-    public long defaultPrecision;
-
-    /**
-     * The default scale.
-     */
-    public int defaultScale;
-
-    /**
-     * The default display size.
-     */
-    public int defaultDisplaySize;
-
-    /**
-     * If this data type should not be listed in the database meta data.
-     */
-    public boolean hidden;
-
-    /**
-     * The number of bytes required for an object.
-     */
-    public int memory;
-
     static {
         for (int i = 0; i < Value.TYPE_COUNT; i++) {
             TYPES_BY_VALUE_TYPE.add(null);
@@ -176,7 +61,7 @@ public class DataType {
         add(Value.STRING, Types.VARCHAR, "String",
                 createString(true),
                 new String[]{"VARCHAR", "VARCHAR2", "NVARCHAR", "NVARCHAR2",
-                    "VARCHAR_CASESENSITIVE", "CHARACTER VARYING", "TID"},
+                        "VARCHAR_CASESENSITIVE", "CHARACTER VARYING", "TID"},
                 // 24 for ValueString, 24 for String
                 48
         );
@@ -261,19 +146,19 @@ public class DataType {
         add(Value.FLOAT, Types.REAL, "Float",
                 createDecimal(ValueFloat.PRECISION, ValueFloat.PRECISION,
                         0, ValueFloat.DISPLAY_SIZE, false, false),
-                new String[] {"REAL", "FLOAT4"},
+                new String[]{"REAL", "FLOAT4"},
                 24
         );
         add(Value.DOUBLE, Types.DOUBLE, "Double",
                 createDecimal(ValueDouble.PRECISION, ValueDouble.PRECISION,
                         0, ValueDouble.DISPLAY_SIZE, false, false),
-                new String[] { "DOUBLE", "DOUBLE PRECISION" },
+                new String[]{"DOUBLE", "DOUBLE PRECISION"},
                 24
         );
         add(Value.DOUBLE, Types.FLOAT, "Double",
                 createDecimal(ValueDouble.PRECISION, ValueDouble.PRECISION,
                         0, ValueDouble.DISPLAY_SIZE, false, false),
-                new String[] {"FLOAT", "FLOAT8" },
+                new String[]{"FLOAT", "FLOAT8"},
                 24
         );
         add(Value.TIME, Types.TIME, "Time",
@@ -323,14 +208,14 @@ public class DataType {
         add(Value.BLOB, Types.BLOB, "Blob",
                 createLob(),
                 new String[]{"BLOB", "TINYBLOB", "MEDIUMBLOB",
-                    "LONGBLOB", "IMAGE", "OID"},
+                        "LONGBLOB", "IMAGE", "OID"},
                 // 80 for ValueLob, 24 for String
                 104
         );
         add(Value.CLOB, Types.CLOB, "Clob",
                 createLob(),
                 new String[]{"CLOB", "TINYTEXT", "TEXT", "MEDIUMTEXT",
-                    "LONGTEXT", "NTEXT", "NCLOB"},
+                        "LONGTEXT", "NTEXT", "NCLOB"},
                 // 80 for ValueLob, 24 for String
                 104
         );
@@ -357,8 +242,94 @@ public class DataType {
         }
     }
 
+    /**
+     * The value type of this data type.
+     */
+    public int type;
+    /**
+     * The data type name.
+     */
+    public String name;
+    /**
+     * The SQL type.
+     */
+    public int sqlType;
+    /**
+     * The Java class name.
+     */
+    public String jdbc;
+    /**
+     * How closely the data type maps to the corresponding JDBC SQL type (low is
+     * best).
+     */
+    public int sqlTypePos;
+    /**
+     * The maximum supported precision.
+     */
+    public long maxPrecision;
+    /**
+     * The lowest possible scale.
+     */
+    public int minScale;
+    /**
+     * The highest possible scale.
+     */
+    public int maxScale;
+    /**
+     * If this is a numeric type.
+     */
+    public boolean decimal;
+    /**
+     * The prefix required for the SQL literal representation.
+     */
+    public String prefix;
+    /**
+     * The suffix required for the SQL literal representation.
+     */
+    public String suffix;
+    /**
+     * The list of parameters used in the column definition.
+     */
+    public String params;
+    /**
+     * If this is an autoincrement type.
+     */
+    public boolean autoIncrement;
+    /**
+     * If this data type is an autoincrement type.
+     */
+    public boolean caseSensitive;
+    /**
+     * If the precision parameter is supported.
+     */
+    public boolean supportsPrecision;
+    /**
+     * If the scale parameter is supported.
+     */
+    public boolean supportsScale;
+    /**
+     * The default precision.
+     */
+    public long defaultPrecision;
+    /**
+     * The default scale.
+     */
+    public int defaultScale;
+    /**
+     * The default display size.
+     */
+    public int defaultDisplaySize;
+    /**
+     * If this data type should not be listed in the database meta data.
+     */
+    public boolean hidden;
+    /**
+     * The number of bytes required for an object.
+     */
+    public int memory;
+
     private static void add(int type, int sqlType, String jdbc,
-            DataType dataType, String[] names, int memory) {
+                            DataType dataType, String[] names, int memory) {
         for (int i = 0; i < names.length; i++) {
             DataType dt = new DataType();
             dt.type = type;
@@ -395,8 +366,8 @@ public class DataType {
     }
 
     private static DataType createDecimal(int maxPrecision,
-            int defaultPrecision, int defaultScale, int defaultDisplaySize,
-            boolean needsPrecisionAndScale, boolean autoInc) {
+                                          int defaultPrecision, int defaultScale, int defaultDisplaySize,
+                                          boolean needsPrecisionAndScale, boolean autoInc) {
         DataType dataType = new DataType();
         dataType.maxPrecision = maxPrecision;
         dataType.defaultPrecision = defaultPrecision;
@@ -413,7 +384,7 @@ public class DataType {
     }
 
     private static DataType createDate(int precision, String prefix, int scale,
-            int displaySize) {
+                                       int displaySize) {
         DataType dataType = new DataType();
         dataType.prefix = prefix + " '";
         dataType.suffix = "'";
@@ -458,179 +429,179 @@ public class DataType {
     /**
      * Read a value from the given result set.
      *
-     * @param session the session
-     * @param rs the result set
+     * @param session     the session
+     * @param rs          the result set
      * @param columnIndex the column index (1 based)
-     * @param type the data type
+     * @param type        the data type
      * @return the value
      */
     public static Value readValue(SessionInterface session, ResultSet rs,
-            int columnIndex, int type) {
+                                  int columnIndex, int type) {
         try {
             Value v;
-            switch(type) {
-            case Value.NULL: {
-                return ValueNull.INSTANCE;
-            }
-            case Value.BYTES: {
-                byte[] buff = rs.getBytes(columnIndex);
-                v = buff == null ? (Value) ValueNull.INSTANCE :
-                    ValueBytes.getNoCopy(buff);
-                break;
-            }
-            case Value.UUID: {
-                byte[] buff = rs.getBytes(columnIndex);
-                v = buff == null ? (Value) ValueNull.INSTANCE :
-                    ValueUuid.get(buff);
-                break;
-            }
-            case Value.BOOLEAN: {
-                boolean value = rs.getBoolean(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueBoolean.get(value);
-                break;
-            }
-            case Value.BYTE: {
-                byte value = rs.getByte(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueByte.get(value);
-                break;
-            }
-            case Value.DATE: {
-                Date value = rs.getDate(columnIndex);
-                v = value == null ? (Value) ValueNull.INSTANCE :
-                    ValueDate.get(value);
-                break;
-            }
-            case Value.TIME: {
-                Time value = rs.getTime(columnIndex);
-                v = value == null ? (Value) ValueNull.INSTANCE :
-                    ValueTime.get(value);
-                break;
-            }
-            case Value.TIMESTAMP: {
-                Timestamp value = rs.getTimestamp(columnIndex);
-                v = value == null ? (Value) ValueNull.INSTANCE :
-                    ValueTimestamp.get(value);
-                break;
-            }
-            case Value.DECIMAL: {
-                BigDecimal value = rs.getBigDecimal(columnIndex);
-                v = value == null ? (Value) ValueNull.INSTANCE :
-                    ValueDecimal.get(value);
-                break;
-            }
-            case Value.DOUBLE: {
-                double value = rs.getDouble(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueDouble.get(value);
-                break;
-            }
-            case Value.FLOAT: {
-                float value = rs.getFloat(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueFloat.get(value);
-                break;
-            }
-            case Value.INT: {
-                int value = rs.getInt(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueInt.get(value);
-                break;
-            }
-            case Value.LONG: {
-                long value = rs.getLong(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueLong.get(value);
-                break;
-            }
-            case Value.SHORT: {
-                short value = rs.getShort(columnIndex);
-                v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
-                    ValueShort.get(value);
-                break;
-            }
-            case Value.STRING_IGNORECASE: {
-                String s = rs.getString(columnIndex);
-                v = (s == null) ? (Value) ValueNull.INSTANCE :
-                    ValueStringIgnoreCase.get(s);
-                break;
-            }
-            case Value.STRING_FIXED: {
-                String s = rs.getString(columnIndex);
-                v = (s == null) ? (Value) ValueNull.INSTANCE :
-                    ValueStringFixed.get(s);
-                break;
-            }
-            case Value.STRING: {
-                String s = rs.getString(columnIndex);
-                v = (s == null) ? (Value) ValueNull.INSTANCE :
-                    ValueString.get(s);
-                break;
-            }
-            case Value.CLOB: {
-                if (session == null) {
-                    v = ValueLobDb.createSmallLob(
-                            Value.CLOB, rs.getString(columnIndex).getBytes(Constants.UTF8));
-                } else {
-                    Reader in = rs.getCharacterStream(columnIndex);
-                    if (in == null) {
-                        v = ValueNull.INSTANCE;
-                    } else {
-                        v = ValueLobDb.createTempClob(new BufferedReader(in), -1);
-                    }
+            switch (type) {
+                case Value.NULL: {
+                    return ValueNull.INSTANCE;
                 }
-                break;
-            }
-            case Value.BLOB: {
-                if (session == null) {
-                    v = ValueLobDb.createSmallLob(
-                            Value.BLOB, rs.getBytes(columnIndex));
-                } else {
-                    InputStream in = rs.getBinaryStream(columnIndex);
-                    v = (in == null) ? (Value) ValueNull.INSTANCE :
-                        ValueLobDb.createTempBlob(in, -1);
-                }
-                break;
-            }
-            case Value.JAVA_OBJECT: {
-                if (SysProperties.serializeJavaObject) {
+                case Value.BYTES: {
                     byte[] buff = rs.getBytes(columnIndex);
-                    v = buff == null ? ValueNull.INSTANCE :
-                        ValueJavaObject.getNoCopy(null, buff);
-                } else {
-                    Object o = rs.getObject(columnIndex);
-                    v = o == null ? ValueNull.INSTANCE :
-                        ValueJavaObject.getNoCopy(o, null);
+                    v = buff == null ? (Value) ValueNull.INSTANCE :
+                            ValueBytes.getNoCopy(buff);
+                    break;
                 }
-                break;
-            }
-            case Value.ARRAY: {
-                Array array = rs.getArray(columnIndex);
-                if (array == null) {
-                    return ValueNull.INSTANCE;
+                case Value.UUID: {
+                    byte[] buff = rs.getBytes(columnIndex);
+                    v = buff == null ? (Value) ValueNull.INSTANCE :
+                            ValueUuid.get(buff);
+                    break;
                 }
-                Object[] list = (Object[]) array.getArray();
-                if (list == null) {
-                    return ValueNull.INSTANCE;
+                case Value.BOOLEAN: {
+                    boolean value = rs.getBoolean(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueBoolean.get(value);
+                    break;
                 }
-                int len = list.length;
-                Value[] values = new Value[len];
-                for (int i = 0; i < len; i++) {
-                    values[i] = DataType.convertToValue(session, list[i], Value.NULL);
+                case Value.BYTE: {
+                    byte value = rs.getByte(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueByte.get(value);
+                    break;
                 }
-                v = ValueArray.get(values);
-                break;
-            }
-            case Value.RESULT_SET: {
-                ResultSet x = (ResultSet) rs.getObject(columnIndex);
-                if (x == null) {
-                    return ValueNull.INSTANCE;
+                case Value.DATE: {
+                    Date value = rs.getDate(columnIndex);
+                    v = value == null ? (Value) ValueNull.INSTANCE :
+                            ValueDate.get(value);
+                    break;
                 }
-                return ValueResultSet.get(rs);
-            }
-            default:
-                throw DbException.throwInternalError("type="+type);
+                case Value.TIME: {
+                    Time value = rs.getTime(columnIndex);
+                    v = value == null ? (Value) ValueNull.INSTANCE :
+                            ValueTime.get(value);
+                    break;
+                }
+                case Value.TIMESTAMP: {
+                    Timestamp value = rs.getTimestamp(columnIndex);
+                    v = value == null ? (Value) ValueNull.INSTANCE :
+                            ValueTimestamp.get(value);
+                    break;
+                }
+                case Value.DECIMAL: {
+                    BigDecimal value = rs.getBigDecimal(columnIndex);
+                    v = value == null ? (Value) ValueNull.INSTANCE :
+                            ValueDecimal.get(value);
+                    break;
+                }
+                case Value.DOUBLE: {
+                    double value = rs.getDouble(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueDouble.get(value);
+                    break;
+                }
+                case Value.FLOAT: {
+                    float value = rs.getFloat(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueFloat.get(value);
+                    break;
+                }
+                case Value.INT: {
+                    int value = rs.getInt(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueInt.get(value);
+                    break;
+                }
+                case Value.LONG: {
+                    long value = rs.getLong(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueLong.get(value);
+                    break;
+                }
+                case Value.SHORT: {
+                    short value = rs.getShort(columnIndex);
+                    v = rs.wasNull() ? (Value) ValueNull.INSTANCE :
+                            ValueShort.get(value);
+                    break;
+                }
+                case Value.STRING_IGNORECASE: {
+                    String s = rs.getString(columnIndex);
+                    v = (s == null) ? (Value) ValueNull.INSTANCE :
+                            ValueStringIgnoreCase.get(s);
+                    break;
+                }
+                case Value.STRING_FIXED: {
+                    String s = rs.getString(columnIndex);
+                    v = (s == null) ? (Value) ValueNull.INSTANCE :
+                            ValueStringFixed.get(s);
+                    break;
+                }
+                case Value.STRING: {
+                    String s = rs.getString(columnIndex);
+                    v = (s == null) ? ValueNull.INSTANCE :
+                            ValueString.get(s);
+                    break;
+                }
+                case Value.CLOB: {
+                    if (session == null) {
+                        v = ValueLobDb.createSmallLob(
+                                Value.CLOB, rs.getString(columnIndex).getBytes(Constants.UTF8));
+                    } else {
+                        Reader in = rs.getCharacterStream(columnIndex);
+                        if (in == null) {
+                            v = ValueNull.INSTANCE;
+                        } else {
+                            v = ValueLobDb.createTempClob(new BufferedReader(in), -1);
+                        }
+                    }
+                    break;
+                }
+                case Value.BLOB: {
+                    if (session == null) {
+                        v = ValueLobDb.createSmallLob(
+                                Value.BLOB, rs.getBytes(columnIndex));
+                    } else {
+                        InputStream in = rs.getBinaryStream(columnIndex);
+                        v = (in == null) ? (Value) ValueNull.INSTANCE :
+                                ValueLobDb.createTempBlob(in, -1);
+                    }
+                    break;
+                }
+                case Value.JAVA_OBJECT: {
+                    if (SysProperties.serializeJavaObject) {
+                        byte[] buff = rs.getBytes(columnIndex);
+                        v = buff == null ? ValueNull.INSTANCE :
+                                ValueJavaObject.getNoCopy(null, buff);
+                    } else {
+                        Object o = rs.getObject(columnIndex);
+                        v = o == null ? ValueNull.INSTANCE :
+                                ValueJavaObject.getNoCopy(o, null);
+                    }
+                    break;
+                }
+                case Value.ARRAY: {
+                    Array array = rs.getArray(columnIndex);
+                    if (array == null) {
+                        return ValueNull.INSTANCE;
+                    }
+                    Object[] list = (Object[]) array.getArray();
+                    if (list == null) {
+                        return ValueNull.INSTANCE;
+                    }
+                    int len = list.length;
+                    Value[] values = new Value[len];
+                    for (int i = 0; i < len; i++) {
+                        values[i] = DataType.convertToValue(session, list[i], Value.NULL);
+                    }
+                    v = ValueArray.get(values);
+                    break;
+                }
+                case Value.RESULT_SET: {
+                    ResultSet x = (ResultSet) rs.getObject(columnIndex);
+                    if (x == null) {
+                        return ValueNull.INSTANCE;
+                    }
+                    return ValueResultSet.get(rs);
+                }
+                default:
+                    throw DbException.throwInternalError("type=" + type);
             }
             return v;
         } catch (SQLException e) {
@@ -645,69 +616,69 @@ public class DataType {
      * @return the class name
      */
     public static String getTypeClassName(int type) {
-        switch(type) {
-        case Value.BOOLEAN:
-            // "java.lang.Boolean";
-            return Boolean.class.getName();
-        case Value.BYTE:
-            // "java.lang.Byte";
-            return Byte.class.getName();
-        case Value.SHORT:
-            // "java.lang.Short";
-            return Short.class.getName();
-        case Value.INT:
-            // "java.lang.Integer";
-            return Integer.class.getName();
-        case Value.LONG:
-            // "java.lang.Long";
-            return Long.class.getName();
-        case Value.DECIMAL:
-            // "java.math.BigDecimal";
-            return BigDecimal.class.getName();
-        case Value.TIME:
-            // "java.sql.Time";
-            return Time.class.getName();
-        case Value.DATE:
-            // "java.sql.Date";
-            return Date.class.getName();
-        case Value.TIMESTAMP:
-            // "java.sql.Timestamp";
-            return Timestamp.class.getName();
-        case Value.BYTES:
-        case Value.UUID:
-            // "[B", not "byte[]";
-            return byte[].class.getName();
-        case Value.STRING:
-        case Value.STRING_IGNORECASE:
-        case Value.STRING_FIXED:
-            // "java.lang.String";
-            return String.class.getName();
-        case Value.BLOB:
-            // "java.sql.Blob";
-            return java.sql.Blob.class.getName();
-        case Value.CLOB:
-            // "java.sql.Clob";
-            return java.sql.Clob.class.getName();
-        case Value.DOUBLE:
-            // "java.lang.Double";
-            return Double.class.getName();
-        case Value.FLOAT:
-            // "java.lang.Float";
-            return Float.class.getName();
-        case Value.NULL:
-            return null;
-        case Value.JAVA_OBJECT:
-            // "java.lang.Object";
-            return Object.class.getName();
-        case Value.UNKNOWN:
-            // anything
-            return Object.class.getName();
-        case Value.ARRAY:
-            return Array.class.getName();
-        case Value.RESULT_SET:
-            return ResultSet.class.getName();
-        default:
-            throw DbException.throwInternalError("type="+type);
+        switch (type) {
+            case Value.BOOLEAN:
+                // "java.lang.Boolean";
+                return Boolean.class.getName();
+            case Value.BYTE:
+                // "java.lang.Byte";
+                return Byte.class.getName();
+            case Value.SHORT:
+                // "java.lang.Short";
+                return Short.class.getName();
+            case Value.INT:
+                // "java.lang.Integer";
+                return Integer.class.getName();
+            case Value.LONG:
+                // "java.lang.Long";
+                return Long.class.getName();
+            case Value.DECIMAL:
+                // "java.math.BigDecimal";
+                return BigDecimal.class.getName();
+            case Value.TIME:
+                // "java.sql.Time";
+                return Time.class.getName();
+            case Value.DATE:
+                // "java.sql.Date";
+                return Date.class.getName();
+            case Value.TIMESTAMP:
+                // "java.sql.Timestamp";
+                return Timestamp.class.getName();
+            case Value.BYTES:
+            case Value.UUID:
+                // "[B", not "byte[]";
+                return byte[].class.getName();
+            case Value.STRING:
+            case Value.STRING_IGNORECASE:
+            case Value.STRING_FIXED:
+                // "java.lang.String";
+                return String.class.getName();
+            case Value.BLOB:
+                // "java.sql.Blob";
+                return java.sql.Blob.class.getName();
+            case Value.CLOB:
+                // "java.sql.Clob";
+                return java.sql.Clob.class.getName();
+            case Value.DOUBLE:
+                // "java.lang.Double";
+                return Double.class.getName();
+            case Value.FLOAT:
+                // "java.lang.Float";
+                return Float.class.getName();
+            case Value.NULL:
+                return null;
+            case Value.JAVA_OBJECT:
+                // "java.lang.Object";
+                return Object.class.getName();
+            case Value.UNKNOWN:
+                // anything
+                return Object.class.getName();
+            case Value.ARRAY:
+                return Array.class.getName();
+            case Value.RESULT_SET:
+                return ResultSet.class.getName();
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
     }
 
@@ -742,7 +713,7 @@ public class DataType {
      * Convert a SQL type to a value type using SQL type name, in order to
      * manage SQL type extension mechanism.
      *
-     * @param sqlType the SQL type
+     * @param sqlType     the SQL type
      * @param sqlTypeName the SQL type name
      * @return the value type
      */
@@ -754,12 +725,12 @@ public class DataType {
      * Get the SQL type from the result set meta data for the given column. This
      * method uses the SQL type and type name.
      *
-     * @param meta the meta data
+     * @param meta        the meta data
      * @param columnIndex the column index (1, 2,...)
      * @return the value type
      */
     public static int getValueTypeFromResultSet(ResultSetMetaData meta,
-            int columnIndex) throws SQLException {
+                                                int columnIndex) throws SQLException {
         return convertSQLTypeToValueType(
                 meta.getColumnType(columnIndex),
                 meta.getColumnTypeName(columnIndex));
@@ -772,61 +743,61 @@ public class DataType {
      * @return the value type
      */
     public static int convertSQLTypeToValueType(int sqlType) {
-        switch(sqlType) {
-        case Types.CHAR:
-        case Types.NCHAR:
-            return Value.STRING_FIXED;
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.NVARCHAR:
-        case Types.LONGNVARCHAR:
-            return Value.STRING;
-        case Types.NUMERIC:
-        case Types.DECIMAL:
-            return Value.DECIMAL;
-        case Types.BIT:
-        case Types.BOOLEAN:
-            return Value.BOOLEAN;
-        case Types.INTEGER:
-            return Value.INT;
-        case Types.SMALLINT:
-            return Value.SHORT;
-        case Types.TINYINT:
-            return Value.BYTE;
-        case Types.BIGINT:
-            return Value.LONG;
-        case Types.REAL:
-            return Value.FLOAT;
-        case Types.DOUBLE:
-        case Types.FLOAT:
-            return Value.DOUBLE;
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:
-            return Value.BYTES;
-        case Types.OTHER:
-        case Types.JAVA_OBJECT:
-            return Value.JAVA_OBJECT;
-        case Types.DATE:
-            return Value.DATE;
-        case Types.TIME:
-            return Value.TIME;
-        case Types.TIMESTAMP:
-            return Value.TIMESTAMP;
-        case Types.BLOB:
-            return Value.BLOB;
-        case Types.CLOB:
-        case Types.NCLOB:
-            return Value.CLOB;
-        case Types.NULL:
-            return Value.NULL;
-        case Types.ARRAY:
-            return Value.ARRAY;
-        case DataType.TYPE_RESULT_SET:
-            return Value.RESULT_SET;
-        default:
-            throw DbException.get(
-                    ErrorCode.UNKNOWN_DATA_TYPE_1, "" + sqlType);
+        switch (sqlType) {
+            case Types.CHAR:
+            case Types.NCHAR:
+                return Value.STRING_FIXED;
+            case Types.VARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.NVARCHAR:
+            case Types.LONGNVARCHAR:
+                return Value.STRING;
+            case Types.NUMERIC:
+            case Types.DECIMAL:
+                return Value.DECIMAL;
+            case Types.BIT:
+            case Types.BOOLEAN:
+                return Value.BOOLEAN;
+            case Types.INTEGER:
+                return Value.INT;
+            case Types.SMALLINT:
+                return Value.SHORT;
+            case Types.TINYINT:
+                return Value.BYTE;
+            case Types.BIGINT:
+                return Value.LONG;
+            case Types.REAL:
+                return Value.FLOAT;
+            case Types.DOUBLE:
+            case Types.FLOAT:
+                return Value.DOUBLE;
+            case Types.BINARY:
+            case Types.VARBINARY:
+            case Types.LONGVARBINARY:
+                return Value.BYTES;
+            case Types.OTHER:
+            case Types.JAVA_OBJECT:
+                return Value.JAVA_OBJECT;
+            case Types.DATE:
+                return Value.DATE;
+            case Types.TIME:
+                return Value.TIME;
+            case Types.TIMESTAMP:
+                return Value.TIMESTAMP;
+            case Types.BLOB:
+                return Value.BLOB;
+            case Types.CLOB:
+            case Types.NCLOB:
+                return Value.CLOB;
+            case Types.NULL:
+                return Value.NULL;
+            case Types.ARRAY:
+                return Value.ARRAY;
+            case DataType.TYPE_RESULT_SET:
+                return Value.RESULT_SET;
+            default:
+                throw DbException.get(
+                        ErrorCode.UNKNOWN_DATA_TYPE_1, "" + sqlType);
         }
     }
 
@@ -836,7 +807,7 @@ public class DataType {
      * @param x the Java class
      * @return the value type
      */
-    public static int getTypeFromClass(Class <?> x) {
+    public static int getTypeFromClass(Class<?> x) {
         // TODO refactor: too many if/else in functions, can reduce!
         if (x == null || Void.TYPE == x) {
             return Value.NULL;
@@ -905,12 +876,12 @@ public class DataType {
      * Convert a Java object to a value.
      *
      * @param session the session
-     * @param x the value
-     * @param type the value type
+     * @param x       the value
+     * @param type    the value type
      * @return the value
      */
     public static Value convertToValue(SessionInterface session, Object x,
-            int type) {
+                                       int type) {
         if (x == null) {
             return ValueNull.INSTANCE;
         }
@@ -985,7 +956,7 @@ public class DataType {
             }
             return ValueArray.get(x.getClass().getComponentType(), v);
         } else if (x instanceof Character) {
-            return ValueStringFixed.get(((Character) x).toString());
+            return ValueStringFixed.get(x.toString());
         } else {
             return ValueJavaObject.getNoCopy(x, null);
         }
@@ -1008,10 +979,7 @@ public class DataType {
      * @return true if the value type is a lob type
      */
     public static boolean isLargeObject(int type) {
-        if (type == Value.BLOB || type == Value.CLOB) {
-            return true;
-        }
-        return false;
+        return type == Value.BLOB || type == Value.CLOB;
     }
 
     /**
@@ -1021,11 +989,8 @@ public class DataType {
      * @return true if the value type is a String type
      */
     public static boolean isStringType(int type) {
-        if (type == Value.STRING || type == Value.STRING_FIXED
-                || type == Value.STRING_IGNORECASE) {
-            return true;
-        }
-        return false;
+        return type == Value.STRING || type == Value.STRING_FIXED
+                || type == Value.STRING_IGNORECASE;
     }
 
     /**
@@ -1036,16 +1001,16 @@ public class DataType {
      */
     public static boolean supportsAdd(int type) {
         switch (type) {
-        case Value.BYTE:
-        case Value.DECIMAL:
-        case Value.DOUBLE:
-        case Value.FLOAT:
-        case Value.INT:
-        case Value.LONG:
-        case Value.SHORT:
-            return true;
-        default:
-            return false;
+            case Value.BYTE:
+            case Value.DECIMAL:
+            case Value.DOUBLE:
+            case Value.FLOAT:
+            case Value.INT:
+            case Value.LONG:
+            case Value.SHORT:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -1058,18 +1023,18 @@ public class DataType {
      */
     public static int getAddProofType(int type) {
         switch (type) {
-        case Value.BYTE:
-            return Value.LONG;
-        case Value.FLOAT:
-            return Value.DOUBLE;
-        case Value.INT:
-            return Value.LONG;
-        case Value.LONG:
-            return Value.DECIMAL;
-        case Value.SHORT:
-            return Value.LONG;
-        default:
-            return type;
+            case Value.BYTE:
+                return Value.LONG;
+            case Value.FLOAT:
+                return Value.DOUBLE;
+            case Value.INT:
+                return Value.LONG;
+            case Value.LONG:
+                return Value.DECIMAL;
+            case Value.SHORT:
+                return Value.LONG;
+            default:
+                return type;
         }
     }
 
@@ -1105,13 +1070,13 @@ public class DataType {
     /**
      * Convert a value to the specified class.
      *
-     * @param conn the database connection
-     * @param v the value
+     * @param conn       the database connection
+     * @param v          the value
      * @param paramClass the target class
      * @return the converted object
      */
     public static Object convertTo(JdbcConnection conn, Value v,
-            Class<?> paramClass) {
+                                   Class<?> paramClass) {
         if (paramClass == Blob.class) {
             return new JdbcBlob(conn, v, 0);
         } else if (paramClass == Clob.class) {

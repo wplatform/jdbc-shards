@@ -1,9 +1,9 @@
 package com.suning.snfddal.shards.vendor;
 
+import com.suning.snfddal.shards.ExceptionSorter;
+
 import java.io.Serializable;
 import java.sql.SQLException;
-
-import com.suning.snfddal.shards.ExceptionSorter;
 
 public class SybaseExceptionSorter implements ExceptionSorter, Serializable {
 
@@ -20,7 +20,7 @@ public class SybaseExceptionSorter implements ExceptionSorter, Serializable {
 
         if ((errorText.contains("JZ0C0")) || // ERR_CONNECTION_DEAD
                 (errorText.contains("JZ0C1")) // ERR_IOE_KILLED_CONNECTION
-        ) {
+                ) {
             result = true;
         }
 

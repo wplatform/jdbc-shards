@@ -1,9 +1,9 @@
 package com.suning.snfddal.shards.vendor;
 
+import com.suning.snfddal.shards.ExceptionSorter;
+
 import java.io.Serializable;
 import java.sql.SQLException;
-
-import com.suning.snfddal.shards.ExceptionSorter;
 
 public class InformixExceptionSorter implements ExceptionSorter, Serializable {
 
@@ -34,6 +34,6 @@ public class InformixExceptionSorter implements ExceptionSorter, Serializable {
 
         return false;
     }
-    
+
 
 }

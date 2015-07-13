@@ -36,6 +36,16 @@ public class ValueBoolean extends Value {
         this.value = Boolean.valueOf(value);
     }
 
+    /**
+     * Get the boolean value for the given boolean.
+     *
+     * @param b the boolean
+     * @return the value
+     */
+    public static ValueBoolean get(boolean b) {
+        return (ValueBoolean) (b ? TRUE : FALSE);
+    }
+
     @Override
     public int getType() {
         return Value.BOOLEAN;
@@ -87,16 +97,6 @@ public class ValueBoolean extends Value {
     public void set(PreparedStatement prep, int parameterIndex)
             throws SQLException {
         prep.setBoolean(parameterIndex, value.booleanValue());
-    }
-
-    /**
-     * Get the boolean value for the given boolean.
-     *
-     * @param b the boolean
-     * @return the value
-     */
-    public static ValueBoolean get(boolean b) {
-        return (ValueBoolean) (b ? TRUE : FALSE);
     }
 
     @Override

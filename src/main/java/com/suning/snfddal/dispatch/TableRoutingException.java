@@ -27,7 +27,7 @@ public class TableRoutingException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 
+     *
      */
     public TableRoutingException() {
         super();
@@ -58,6 +58,6 @@ public class TableRoutingException extends RuntimeException {
         super(cause);
         // TODO Auto-generated constructor stub
     }
-    
-    
+
+
 }

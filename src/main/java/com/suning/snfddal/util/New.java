@@ -5,18 +5,12 @@
  */
 package com.suning.snfddal.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import com.suning.snfddal.value.CaseInsensitiveMap;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import com.suning.snfddal.value.CaseInsensitiveMap;
 
 /**
  * This class contains static methods to construct commonly used generic objects
@@ -97,6 +91,7 @@ public class New {
     public static <T> CopyOnWriteArrayList<T> copyOnWriteArrayList() {
         return new CopyOnWriteArrayList<T>();
     }
+
     /**
      * Create a new HashMap.
      *

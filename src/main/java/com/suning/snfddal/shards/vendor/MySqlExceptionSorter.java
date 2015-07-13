@@ -1,8 +1,8 @@
 package com.suning.snfddal.shards.vendor;
 
-import java.sql.SQLException;
-
 import com.suning.snfddal.shards.ExceptionSorter;
+
+import java.sql.SQLException;
 
 public class MySqlExceptionSorter implements ExceptionSorter {
 
@@ -15,7 +15,7 @@ public class MySqlExceptionSorter implements ExceptionSorter {
             return true;
         }
         switch (errorCode) {
-        // Communications Errors
+            // Communications Errors
             case 1040: // ER_CON_COUNT_ERROR
             case 1042: // ER_BAD_HOST_ERROR
             case 1043: // ER_HANDSHAKE_ERROR
@@ -38,7 +38,7 @@ public class MySqlExceptionSorter implements ExceptionSorter {
             default:
                 break;
         }
-        
+
         if (errorCode >= -10000 && errorCode <= -9000) {
             return true;
         }
@@ -48,9 +48,9 @@ public class MySqlExceptionSorter implements ExceptionSorter {
             final String errorText = message.toUpperCase();
 
             if ((errorCode == 0 && (errorText.contains("COMMUNICATIONS LINK FAILURE")) //
-            || errorText.contains("COULD NOT CREATE CONNECTION")) //
-                || errorText.contains("NO DATASOURCE") //
-                || errorText.contains("NO ALIVE DATASOURCE")) {
+                    || errorText.contains("COULD NOT CREATE CONNECTION")) //
+                    || errorText.contains("NO DATASOURCE") //
+                    || errorText.contains("NO ALIVE DATASOURCE")) {
                 return true;
             }
         }

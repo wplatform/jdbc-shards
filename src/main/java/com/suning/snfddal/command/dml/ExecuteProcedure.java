@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -15,6 +13,8 @@ import com.suning.snfddal.engine.Procedure;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statement
@@ -37,7 +37,7 @@ public class ExecuteProcedure extends Prepared {
      * Set the expression at the given index.
      *
      * @param index the index (0 based)
-     * @param expr the expression
+     * @param expr  the expression
      */
     public void setExpression(int index, Expression expr) {
         expressions.add(index, expr);

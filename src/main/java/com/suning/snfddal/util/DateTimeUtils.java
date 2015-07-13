@@ -7,6 +7,10 @@
  */
 package com.suning.snfddal.util;
 
+import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
+import com.suning.snfddal.value.*;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -15,14 +19,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueDate;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueTime;
-import com.suning.snfddal.value.ValueTimestamp;
 
 /**
  * This utility class contains time conversion functions.
@@ -42,22 +38,22 @@ public class DateTimeUtils {
     private static final int SHIFT_YEAR = 9;
     private static final int SHIFT_MONTH = 5;
 
-    private static final int[] NORMAL_DAYS_PER_MONTH = { 0, 31, 28, 31, 30, 31,
-            30, 31, 31, 30, 31, 30, 31 };
+    private static final int[] NORMAL_DAYS_PER_MONTH = {0, 31, 28, 31, 30, 31,
+            30, 31, 31, 30, 31, 30, 31};
 
     /**
      * Offsets of month within a year, starting with March, April,...
      */
-    private static final int[] DAYS_OFFSET = { 0, 31, 61, 92, 122, 153, 184,
-            214, 245, 275, 306, 337, 366 };
+    private static final int[] DAYS_OFFSET = {0, 31, 61, 92, 122, 153, 184,
+            214, 245, 275, 306, 337, 366};
 
     private static final ThreadLocal<Calendar> CACHED_CALENDAR =
             new ThreadLocal<Calendar>() {
-        @Override
-        protected Calendar initialValue() {
-            return Calendar.getInstance();
-        }
-    };
+                @Override
+                protected Calendar initialValue() {
+                    return Calendar.getInstance();
+                }
+            };
 
     private DateTimeUtils() {
         // utility class
@@ -73,7 +69,7 @@ public class DateTimeUtils {
     /**
      * Convert the date to the specified time zone.
      *
-     * @param value the date (might be ValueNull)
+     * @param value    the date (might be ValueNull)
      * @param calendar the calendar
      * @return the date using the correct time zone
      */
@@ -97,7 +93,7 @@ public class DateTimeUtils {
     /**
      * Convert the time to the specified time zone.
      *
-     * @param value the time (might be ValueNull)
+     * @param value    the time (might be ValueNull)
      * @param calendar the calendar
      * @return the time using the correct time zone
      */
@@ -127,7 +123,7 @@ public class DateTimeUtils {
     /**
      * Convert the timestamp to the specified time zone.
      *
-     * @param value the timestamp (might be ValueNull)
+     * @param value    the timestamp (might be ValueNull)
      * @param calendar the calendar
      * @return the timestamp using the correct time zone
      */
@@ -162,7 +158,7 @@ public class DateTimeUtils {
     /**
      * Convert the date using the specified calendar.
      *
-     * @param x the date
+     * @param x        the date
      * @param calendar the calendar
      * @return the date
      */
@@ -179,7 +175,7 @@ public class DateTimeUtils {
     /**
      * Convert the time using the specified calendar.
      *
-     * @param x the time
+     * @param x        the time
      * @param calendar the calendar
      * @return the time
      */
@@ -196,7 +192,7 @@ public class DateTimeUtils {
     /**
      * Convert a date to the specified time zone.
      *
-     * @param x the date to convert
+     * @param x      the date to convert
      * @param target the calendar with the target timezone
      * @return the milliseconds in UTC
      */
@@ -227,7 +223,7 @@ public class DateTimeUtils {
     /**
      * Convert the timestamp using the specified calendar.
      *
-     * @param x the time
+     * @param x        the time
      * @param calendar the calendar
      * @return the timestamp
      */
@@ -246,9 +242,9 @@ public class DateTimeUtils {
     /**
      * Parse a date string. The format is: [+|-]year-month-day
      *
-     * @param s the string to parse
+     * @param s     the string to parse
      * @param start the parse index start
-     * @param end the parse index end
+     * @param end   the parse index end
      * @return the date value
      * @throws IllegalArgumentException if there is a problem
      */
@@ -275,16 +271,16 @@ public class DateTimeUtils {
     /**
      * Parse a time string. The format is: [-]hour:minute:second[.nanos]
      *
-     * @param s the string to parse
-     * @param start the parse index start
-     * @param end the parse index end
+     * @param s         the string to parse
+     * @param start     the parse index start
+     * @param end       the parse index end
      * @param timeOfDay whether the result need to be within 0 (inclusive) and 1
-     *            day (exclusive)
+     *                  day (exclusive)
      * @return the time in nanoseconds
      * @throws IllegalArgumentException if there is a problem
      */
     public static long parseTimeNanos(String s, int start, int end,
-            boolean timeOfDay) {
+                                      boolean timeOfDay) {
         int hour = 0, minute = 0, second = 0;
         long nanos = 0;
         int s1 = s.indexOf(':', start);
@@ -327,19 +323,19 @@ public class DateTimeUtils {
      * Calculate the milliseconds since 1970-01-01 (UTC) for the given date and
      * time (in the specified timezone).
      *
-     * @param tz the timezone of the parameters,
- *              or null for the default timezone
-     * @param year the absolute year (positive or negative)
-     * @param month the month (1-12)
-     * @param day the day (1-31)
-     * @param hour the hour (0-23)
+     * @param tz     the timezone of the parameters,
+     *               or null for the default timezone
+     * @param year   the absolute year (positive or negative)
+     * @param month  the month (1-12)
+     * @param day    the day (1-31)
+     * @param hour   the hour (0-23)
      * @param minute the minutes (0-59)
      * @param second the number of seconds (0-59)
      * @param millis the number of milliseconds
      * @return the number of milliseconds (UTC)
      */
     public static long getMillis(TimeZone tz, int year, int month, int day,
-            int hour, int minute, int second, int millis) {
+                                 int hour, int minute, int second, int millis) {
         try {
             return getTimeTry(false, tz, year, month, day, hour, minute, second, millis);
         } catch (IllegalArgumentException e) {
@@ -376,8 +372,8 @@ public class DateTimeUtils {
     }
 
     private static long getTimeTry(boolean lenient, TimeZone tz,
-            int year, int month, int day, int hour, int minute, int second,
-            int millis) {
+                                   int year, int month, int day, int hour, int minute, int second,
+                                   int millis) {
         Calendar c;
         if (tz == null) {
             c = CACHED_CALENDAR.get();
@@ -391,7 +387,7 @@ public class DateTimeUtils {
     }
 
     private static void setCalendarFields(Calendar cal, int year, int month,
-            int day, int hour, int minute, int second, int millis) {
+                                          int day, int hour, int minute, int second, int millis) {
         if (year <= 0) {
             cal.set(Calendar.ERA, GregorianCalendar.BC);
             cal.set(Calendar.YEAR, 1 - year);
@@ -412,7 +408,7 @@ public class DateTimeUtils {
      * Get the specified field of a date, however with years normalized to
      * positive or negative, and month starting with 1.
      *
-     * @param d the date
+     * @param d     the date
      * @param field the field type
      * @return the value
      */
@@ -469,10 +465,9 @@ public class DateTimeUtils {
      * Return the day of week according to the ISO 8601 specification. Week
      * starts at Monday. See also http://en.wikipedia.org/wiki/ISO_8601
      *
-     * @author Robert Rathsack
-     *
      * @param date the date object which day of week should be calculated
      * @return the day of the week, Monday as 1 to Sunday as 7
+     * @author Robert Rathsack
      */
     public static int getIsoDayOfWeek(java.util.Date date) {
         Calendar cal = Calendar.getInstance();
@@ -491,9 +486,9 @@ public class DateTimeUtils {
      * previous year. Hence January 4th always belongs to the first week while
      * the December 28th always belongs to the last week.
      *
-     * @author Robert Rathsack
      * @param date the date object which week of year should be calculated
      * @return the week of the year
+     * @author Robert Rathsack
      */
     public static int getIsoWeek(java.util.Date date) {
         Calendar c = Calendar.getInstance();
@@ -506,10 +501,9 @@ public class DateTimeUtils {
     /**
      * Returns the year according to the ISO week definition.
      *
-     * @author Robert Rathsack
-     *
      * @param date the date object which year should be calculated
      * @return the year
+     * @author Robert Rathsack
      */
     public static int getIsoYear(java.util.Date date) {
         Calendar cal = Calendar.getInstance();
@@ -530,14 +524,14 @@ public class DateTimeUtils {
     /**
      * Formats a date using a format string.
      *
-     * @param date the date to format
-     * @param format the format string
-     * @param locale the locale
+     * @param date     the date to format
+     * @param format   the format string
+     * @param locale   the locale
      * @param timeZone the timezone
      * @return the formatted date
      */
     public static String formatDateTime(java.util.Date date, String format,
-            String locale, String timeZone) {
+                                        String locale, String timeZone) {
         SimpleDateFormat dateFormat = getDateFormat(format, locale, timeZone);
         synchronized (dateFormat) {
             return dateFormat.format(date);
@@ -547,14 +541,14 @@ public class DateTimeUtils {
     /**
      * Parses a date using a format string.
      *
-     * @param date the date to parse
-     * @param format the parsing format
-     * @param locale the locale
+     * @param date     the date to parse
+     * @param format   the parsing format
+     * @param locale   the locale
      * @param timeZone the timeZone
      * @return the parsed date
      */
     public static java.util.Date parseDateTime(String date, String format,
-            String locale, String timeZone) {
+                                               String locale, String timeZone) {
         SimpleDateFormat dateFormat = getDateFormat(format, locale, timeZone);
         try {
             synchronized (dateFormat) {
@@ -567,7 +561,7 @@ public class DateTimeUtils {
     }
 
     private static SimpleDateFormat getDateFormat(String format, String locale,
-            String timeZone) {
+                                                  String timeZone) {
         try {
             // currently, a new instance is create for each call
             // however, could cache the last few instances
@@ -591,9 +585,9 @@ public class DateTimeUtils {
     /**
      * Verify if the specified date is valid.
      *
-     * @param year the year
+     * @param year  the year
      * @param month the month (January is 1)
-     * @param day the day (1 is the first of the month)
+     * @param day   the day (1 is the first of the month)
      * @return true if it is valid
      */
     public static boolean isValidDate(int year, int month, int day) {
@@ -643,7 +637,7 @@ public class DateTimeUtils {
      * @return the timestamp
      */
     public static Timestamp convertDateValueToTimestamp(long dateValue,
-            long timeNanos) {
+                                                        long timeNanos) {
         long millis = timeNanos / 1000000;
         timeNanos -= millis * 1000000;
         long s = millis / 1000;
@@ -715,9 +709,9 @@ public class DateTimeUtils {
     /**
      * Get the date value from a given date.
      *
-     * @param year the year
+     * @param year  the year
      * @param month the month (1..12)
-     * @param day the day (1..31)
+     * @param day   the day (1..31)
      * @return the date value
      */
     public static long dateValue(long year, int month, int day) {
@@ -784,7 +778,7 @@ public class DateTimeUtils {
      * Calculate the normalized timestamp.
      *
      * @param absoluteDay the absolute day
-     * @param nanos the nanoseconds (may be negative or larger than one day)
+     * @param nanos       the nanoseconds (may be negative or larger than one day)
      * @return the timestamp
      */
     public static ValueTimestamp normalizeTimestamp(long absoluteDay, long nanos) {

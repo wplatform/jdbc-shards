@@ -5,12 +5,6 @@
  */
 package com.suning.snfddal.result;
 
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.suning.snfddal.jdbc.JdbcConnection;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
@@ -20,6 +14,12 @@ import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
+
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * This class is used for updatable result sets. An updatable row provides
@@ -39,7 +39,7 @@ public class UpdatableRow {
      * Construct a new object that is linked to the result set. The constructor
      * reads the database meta data to find out if the result set is updatable.
      *
-     * @param conn the database connection
+     * @param conn   the database connection
      * @param result the result
      */
     public UpdatableRow(JdbcConnection conn, ResultInterface result)
@@ -68,7 +68,7 @@ public class UpdatableRow {
         ResultSet rs = meta.getTables(null,
                 StringUtils.escapeMetaDataPattern(schemaName),
                 StringUtils.escapeMetaDataPattern(tableName),
-                new String[] { "TABLE" });
+                new String[]{"TABLE"});
         if (!rs.next()) {
             return;
         }
@@ -259,7 +259,7 @@ public class UpdatableRow {
     /**
      * Update a row in the database.
      *
-     * @param current the old row
+     * @param current   the old row
      * @param updateRow the new row
      * @throws SQLException if the row has been deleted
      */

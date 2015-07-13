@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.result;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * A list of rows. If the list grows too large, it is buffered to disk
@@ -20,9 +20,9 @@ public class RowList {
 
     private final Session session;
     private final ArrayList<Row> list = New.arrayList();
+    private final int maxMemory;
     private int size;
     private int index;
-    private final int maxMemory;
     private int memory;
 
     /**

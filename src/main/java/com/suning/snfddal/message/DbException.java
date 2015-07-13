@@ -5,6 +5,12 @@
  */
 package com.suning.snfddal.message;
 
+import com.suning.snfddal.engine.Constants;
+import com.suning.snfddal.jdbc.JdbcSQLException;
+import com.suning.snfddal.util.SortedProperties;
+import com.suning.snfddal.util.StringUtils;
+import com.suning.snfddal.util.Utils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,12 +22,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import com.suning.snfddal.engine.Constants;
-import com.suning.snfddal.jdbc.JdbcSQLException;
-import com.suning.snfddal.util.SortedProperties;
-import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.util.Utils;
-
 /**
  * This exception wraps a checked exception.
  * It is used in methods where checked exceptions are not supported,
@@ -32,8 +32,6 @@ public class DbException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     private static final Properties MESSAGES = new Properties();
-
-    private Object source;
 
     static {
         try {
@@ -69,6 +67,8 @@ public class DbException extends RuntimeException {
         }
     }
 
+    private Object source;
+
     private DbException(SQLException e) {
         super(e.getMessage(), e);
     }
@@ -95,45 +95,6 @@ public class DbException extends RuntimeException {
     }
 
     /**
-     * Get the SQLException object.
-     *
-     * @return the exception
-     */
-    public SQLException getSQLException() {
-        return (SQLException) getCause();
-    }
-
-    /**
-     * Get the error code.
-     *
-     * @return the error code
-     */
-    public int getErrorCode() {
-        return getSQLException().getErrorCode();
-    }
-
-    /**
-     * Set the SQL statement of the given exception.
-     * This method may create a new object.
-     *
-     * @param sql the SQL statement
-     * @return the exception
-     */
-    public DbException addSQL(String sql) {
-        SQLException e = getSQLException();
-        if (e instanceof JdbcSQLException) {
-            JdbcSQLException j = (JdbcSQLException) e;
-            if (j.getSQL() == null) {
-                j.setSQL(sql);
-            }
-            return this;
-        }
-        e = new JdbcSQLException(e.getMessage(), sql, e.getSQLState(),
-                e.getErrorCode(), e, null);
-        return new DbException(e);
-    }
-
-    /**
      * Create a database exception for a specific error code.
      *
      * @param errorCode the error code
@@ -147,23 +108,23 @@ public class DbException extends RuntimeException {
      * Create a database exception for a specific error code.
      *
      * @param errorCode the error code
-     * @param p1 the first parameter of the message
+     * @param p1        the first parameter of the message
      * @return the exception
      */
     public static DbException get(int errorCode, String p1) {
-        return get(errorCode, new String[] { p1 });
+        return get(errorCode, new String[]{p1});
     }
 
     /**
      * Create a database exception for a specific error code.
      *
      * @param errorCode the error code
-     * @param cause the cause of the exception
-     * @param params the list of parameters of the message
+     * @param cause     the cause of the exception
+     * @param params    the list of parameters of the message
      * @return the exception
      */
     public static DbException get(int errorCode, Throwable cause,
-            String... params) {
+                                  String... params) {
         return new DbException(getJdbcSQLException(errorCode, cause, params));
     }
 
@@ -171,7 +132,7 @@ public class DbException extends RuntimeException {
      * Create a database exception for a specific error code.
      *
      * @param errorCode the error code
-     * @param params the list of parameters of the message
+     * @param params    the list of parameters of the message
      * @return the exception
      */
     public static DbException get(int errorCode, String... params) {
@@ -181,7 +142,7 @@ public class DbException extends RuntimeException {
     /**
      * Create a syntax error exception.
      *
-     * @param sql the SQL statement
+     * @param sql   the SQL statement
      * @param index the position of the error in the SQL statement
      * @return the exception
      */
@@ -193,13 +154,13 @@ public class DbException extends RuntimeException {
     /**
      * Create a syntax error exception.
      *
-     * @param sql the SQL statement
-     * @param index the position of the error in the SQL statement
+     * @param sql     the SQL statement
+     * @param index   the position of the error in the SQL statement
      * @param message the message
      * @return the exception
      */
     public static DbException getSyntaxError(String sql, int index,
-            String message) {
+                                             String message) {
         sql = StringUtils.addAsterisk(sql, index);
         return new DbException(getJdbcSQLException(ErrorCode.SYNTAX_ERROR_2,
                 null, sql, message));
@@ -223,7 +184,7 @@ public class DbException extends RuntimeException {
      * @return the IllegalArgumentException object
      */
     public static DbException getInvalidValueException(String param,
-            Object value) {
+                                                       Object value) {
         return get(ErrorCode.INVALID_VALUE_2,
                 value == null ? "null" : value.toString(), param);
     }
@@ -297,12 +258,12 @@ public class DbException extends RuntimeException {
     /**
      * Convert an InvocationTarget exception to a database exception.
      *
-     * @param te the root cause
+     * @param te      the root cause
      * @param message the added message or null
      * @return the database exception object
      */
     public static DbException convertInvocation(InvocationTargetException te,
-            String message) {
+                                                String message) {
         Throwable t = te.getTargetException();
         if (t instanceof SQLException || t instanceof DbException) {
             return convert(t);
@@ -314,7 +275,7 @@ public class DbException extends RuntimeException {
     /**
      * Convert an IO exception to a database exception.
      *
-     * @param e the root cause
+     * @param e       the root cause
      * @param message the message or null
      * @return the database exception object
      */
@@ -333,12 +294,12 @@ public class DbException extends RuntimeException {
      * Gets the SQL exception object for a specific error code.
      *
      * @param errorCode the error code
-     * @param cause the cause of the exception
-     * @param params the list of parameters of the message
+     * @param cause     the cause of the exception
+     * @param params    the list of parameters of the message
      * @return the SQLException object
      */
     private static JdbcSQLException getJdbcSQLException(int errorCode,
-            Throwable cause, String... params) {
+                                                        Throwable cause, String... params) {
         String sqlstate = ErrorCode.getState(errorCode);
         String message = translate(sqlstate, params);
         return new JdbcSQLException(message, null, sqlstate, errorCode, cause, null);
@@ -363,14 +324,6 @@ public class DbException extends RuntimeException {
         return new IOException(e.toString(), e);
     }
 
-    public Object getSource() {
-        return source;
-    }
-
-    public void setSource(Object source) {
-        this.source = source;
-    }
-
     /**
      * Write the exception to the driver manager log writer if configured.
      *
@@ -381,6 +334,53 @@ public class DbException extends RuntimeException {
         if (writer != null) {
             e.printStackTrace(writer);
         }
+    }
+
+    /**
+     * Get the SQLException object.
+     *
+     * @return the exception
+     */
+    public SQLException getSQLException() {
+        return (SQLException) getCause();
+    }
+
+    /**
+     * Get the error code.
+     *
+     * @return the error code
+     */
+    public int getErrorCode() {
+        return getSQLException().getErrorCode();
+    }
+
+    /**
+     * Set the SQL statement of the given exception.
+     * This method may create a new object.
+     *
+     * @param sql the SQL statement
+     * @return the exception
+     */
+    public DbException addSQL(String sql) {
+        SQLException e = getSQLException();
+        if (e instanceof JdbcSQLException) {
+            JdbcSQLException j = (JdbcSQLException) e;
+            if (j.getSQL() == null) {
+                j.setSQL(sql);
+            }
+            return this;
+        }
+        e = new JdbcSQLException(e.getMessage(), sql, e.getSQLState(),
+                e.getErrorCode(), e, null);
+        return new DbException(e);
+    }
+
+    public Object getSource() {
+        return source;
+    }
+
+    public void setSource(Object source) {
+        this.source = source;
     }
 
 }

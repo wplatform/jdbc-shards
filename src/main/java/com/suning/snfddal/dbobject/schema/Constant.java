@@ -7,9 +7,7 @@ package com.suning.snfddal.dbobject.schema;
 
 import com.suning.snfddal.command.expression.ValueExpression;
 import com.suning.snfddal.dbobject.DbObject;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
-import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.value.Value;
 
@@ -41,13 +39,13 @@ public class Constant extends SchemaObjectBase {
         // ok
     }
 
+    public ValueExpression getValue() {
+        return expression;
+    }
+
     public void setValue(Value value) {
         this.value = value;
         expression = ValueExpression.get(value);
-    }
-
-    public ValueExpression getValue() {
-        return expression;
     }
 
 }

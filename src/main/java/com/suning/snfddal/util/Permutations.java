@@ -59,7 +59,7 @@ public class Permutations<T> {
      * Create a new permutations object.
      *
      * @param <T> the type
-     * @param in the source array
+     * @param in  the source array
      * @param out the target array
      * @return the generated permutations object
      */
@@ -71,9 +71,9 @@ public class Permutations<T> {
      * Create a new permutations object.
      *
      * @param <T> the type
-     * @param in the source array
+     * @param in  the source array
      * @param out the target array
-     * @param m the number of output elements to generate
+     * @param m   the number of output elements to generate
      * @return the generated permutations object
      */
     public static <T> Permutations<T> create(T[] in, T[] out, int m) {

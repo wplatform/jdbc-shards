@@ -21,23 +21,23 @@
 <!ELEMENT settings (property*)>
 
 <!ELEMENT schema (tableGroup* , table*)>
-<!ATTLIST schema 
+<!ATTLIST schema
 name CDATA #REQUIRED
-metadata CDATA #IMPLIED
+shard CDATA #IMPLIED
 validation (true|false) #IMPLIED
 >
 
 
 <!ELEMENT cluster (shard+)>
 <!ELEMENT shard (standalone|(master*,slave*)+)>
-<!ATTLIST shard 
+<!ATTLIST shard
 name CDATA #REQUIRED
 >
 
 
 <!ELEMENT dataNodes (datasource+)>
 <!ELEMENT datasource (property*)>
-<!ATTLIST datasource 
+<!ATTLIST datasource
 id CDATA #REQUIRED
 class CDATA #IMPLIED
 jndi-name CDATA #IMPLIED
@@ -45,13 +45,13 @@ jndi-name CDATA #IMPLIED
 
 <!ELEMENT tableRules (tableRule+)>
 <!ELEMENT tableRule (#PCDATA)>
-<!ATTLIST tableRule 
+<!ATTLIST tableRule
 resource CDATA #REQUIRED
 >
 
 <!ELEMENT ruleAlgorithms (ruleAlgorithm*)>
 <!ELEMENT ruleAlgorithm (property*)>
-<!ATTLIST ruleAlgorithm 
+<!ATTLIST ruleAlgorithm
 name CDATA #REQUIRED
 class CDATA #REQUIRED
 >
@@ -59,44 +59,41 @@ class CDATA #REQUIRED
 <!ELEMENT table (#PCDATA)>
 <!ATTLIST table
 name CDATA #REQUIRED
-catalog CDATA #IMPLIED
-schema CDATA #IMPLIED
-metadata CDATA #IMPLIED
 router CDATA #IMPLIED
+shard CDATA #IMPLIED
 validation (true|false) #IMPLIED
 scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
-broadcast CDATA #IMPLIED
 >
 
 <!ELEMENT tableGroup (table+)>
 <!ATTLIST tableGroup
-metadata CDATA #IMPLIED
+shard CDATA #IMPLIED
 router CDATA #IMPLIED
 validation (true|false) #IMPLIED
 scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
-broadcast CDATA #IMPLIED
 >
 
 <!ELEMENT property (#PCDATA)>
-<!ATTLIST property 
+<!ATTLIST property
 name CDATA #REQUIRED
 value CDATA #REQUIRED
 >
 
 <!ELEMENT standalone (#PCDATA)>
-<!ATTLIST standalone 
+<!ATTLIST standalone
 ref CDATA #REQUIRED
 >
 
 <!ELEMENT master (#PCDATA)>
-<!ATTLIST master 
+<!ATTLIST master
 ref CDATA #REQUIRED
 wWeight CDATA #IMPLIED
-rWeight CDATA #IMPLIED
->
+rWeight CDATA #IMPLIErWeight CDATA #IMPLIE
+
+        >
 
 <!ELEMENT slave (#PCDATA)>
-<!ATTLIST slave 
+<!ATTLIST slave
 ref CDATA #REQUIRED
 rWeight CDATA #IMPLIED
 >

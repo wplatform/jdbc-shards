@@ -5,77 +5,76 @@
  */
 package com.suning.snfddal.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Properties;
-
-import javax.naming.Context;
-import javax.sql.DataSource;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.Utils.ClassFactory;
+
+import javax.naming.Context;
+import javax.sql.DataSource;
+import java.io.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Properties;
 
 /**
  * This is a utility class with JDBC helper functions.
  */
 public class JdbcUtils {
 
+    private static final String[] DRIVERS = {
+            "h2:", "org.h2.Driver",
+            "Cache:", "com.intersys.jdbc.CacheDriver",
+            "daffodilDB://", "in.co.daffodil.db.rmi.RmiDaffodilDBDriver",
+            "daffodil", "in.co.daffodil.db.jdbc.DaffodilDBDriver",
+            "db2:", "COM.ibm.db2.jdbc.net.DB2Driver",
+            "derby:net:", "org.apache.derby.jdbc.ClientDriver",
+            "derby://", "org.apache.derby.jdbc.ClientDriver",
+            "derby:", "org.apache.derby.jdbc.EmbeddedDriver",
+            "FrontBase:", "com.frontbase.jdbc.FBJDriver",
+            "firebirdsql:", "org.firebirdsql.jdbc.FBDriver",
+            "hsqldb:", "org.hsqldb.jdbcDriver",
+            "informix-sqli:", "com.informix.jdbc.IfxDriver",
+            "jtds:", "net.sourceforge.jtds.jdbc.Driver",
+            "microsoft:", "com.microsoft.jdbc.sqlserver.SQLServerDriver",
+            "mimer:", "com.mimer.jdbc.Driver",
+            "mysql:", "com.mysql.jdbc.Driver",
+            "odbc:", "sun.jdbc.odbc.JdbcOdbcDriver",
+            "oracle:", "oracle.jdbc.driver.OracleDriver",
+            "pervasive:", "com.pervasive.jdbc.v2.Driver",
+            "pointbase:micro:", "com.pointbase.me.jdbc.jdbcDriver",
+            "pointbase:", "com.pointbase.jdbc.jdbcUniversalDriver",
+            "postgresql:", "org.postgresql.Driver",
+            "sybase:", "com.sybase.jdbc3.jdbc.SybDriver",
+            "sqlserver:", "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+            "teradata:", "com.ncr.teradata.TeraDriver",
+    };
     /**
      * The serializer to use.
      */
     public static JavaObjectSerializer serializer;
-
-    private static final String[] DRIVERS = {
-        "h2:", "org.h2.Driver",
-        "Cache:", "com.intersys.jdbc.CacheDriver",
-        "daffodilDB://", "in.co.daffodil.db.rmi.RmiDaffodilDBDriver",
-        "daffodil", "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-        "db2:", "COM.ibm.db2.jdbc.net.DB2Driver",
-        "derby:net:", "org.apache.derby.jdbc.ClientDriver",
-        "derby://", "org.apache.derby.jdbc.ClientDriver",
-        "derby:", "org.apache.derby.jdbc.EmbeddedDriver",
-        "FrontBase:", "com.frontbase.jdbc.FBJDriver",
-        "firebirdsql:", "org.firebirdsql.jdbc.FBDriver",
-        "hsqldb:", "org.hsqldb.jdbcDriver",
-        "informix-sqli:", "com.informix.jdbc.IfxDriver",
-        "jtds:", "net.sourceforge.jtds.jdbc.Driver",
-        "microsoft:", "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-        "mimer:", "com.mimer.jdbc.Driver",
-        "mysql:", "com.mysql.jdbc.Driver",
-        "odbc:", "sun.jdbc.odbc.JdbcOdbcDriver",
-        "oracle:", "oracle.jdbc.driver.OracleDriver",
-        "pervasive:", "com.pervasive.jdbc.v2.Driver",
-        "pointbase:micro:", "com.pointbase.me.jdbc.jdbcDriver",
-        "pointbase:", "com.pointbase.jdbc.jdbcUniversalDriver",
-        "postgresql:", "org.postgresql.Driver",
-        "sybase:", "com.sybase.jdbc3.jdbc.SybDriver",
-        "sqlserver:", "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-        "teradata:", "com.ncr.teradata.TeraDriver",
-    };
-
     private static boolean allowAllClasses;
     private static HashSet<String> allowedClassNames;
 
     /**
-     *  In order to manage more than one class loader
+     * In order to manage more than one class loader
      */
     private static ArrayList<ClassFactory> userClassFactories =
             new ArrayList<ClassFactory>();
 
     private static String[] allowedClassNamePrefixes;
+
+    static {
+        String clazz = SysProperties.JAVA_OBJECT_SERIALIZER;
+        if (clazz != null) {
+            try {
+                serializer = (JavaObjectSerializer) loadUserClass(clazz).newInstance();
+            } catch (Exception e) {
+                throw DbException.convert(e);
+            }
+        }
+    }
 
     private JdbcUtils() {
         // utility class
@@ -106,17 +105,6 @@ public class JdbcUtils {
             userClassFactories = new ArrayList<ClassFactory>();
         }
         return userClassFactories;
-    }
-
-    static {
-        String clazz = SysProperties.JAVA_OBJECT_SERIALIZER;
-        if (clazz != null) {
-            try {
-                serializer = (JavaObjectSerializer) loadUserClass(clazz).newInstance();
-            } catch (Exception e) {
-                throw DbException.convert(e);
-            }
-        }
     }
 
     /**
@@ -244,14 +232,14 @@ public class JdbcUtils {
     /**
      * Open a new database connection with the given settings.
      *
-     * @param driver the driver class name
-     * @param url the database URL
-     * @param user the user name
+     * @param driver   the driver class name
+     * @param url      the database URL
+     * @param user     the user name
      * @param password the password
      * @return the database connection
      */
     public static Connection getConnection(String driver, String url,
-            String user, String password) throws SQLException {
+                                           String user, String password) throws SQLException {
         Properties prop = new Properties();
         if (user != null) {
             prop.setProperty("user", user);
@@ -266,12 +254,12 @@ public class JdbcUtils {
      * Open a new database connection with the given settings.
      *
      * @param driver the driver class name
-     * @param url the database URL
-     * @param prop the properties containing at least the user name and password
+     * @param url    the database URL
+     * @param prop   the properties containing at least the user name and password
      * @return the database connection
      */
     public static Connection getConnection(String driver, String url,
-            Properties prop) throws SQLException {
+                                           Properties prop) throws SQLException {
         if (StringUtils.isNullOrEmpty(driver)) {
             JdbcUtils.load(url);
         } else {
@@ -336,7 +324,7 @@ public class JdbcUtils {
      * Serialize the object to a byte array, using the serializer specified by
      * the connection info if set, or the default serializer.
      *
-     * @param obj the object to serialize
+     * @param obj         the object to serialize
      * @param dataHandler provides the object serializer (may be null)
      * @return the byte array
      */
@@ -358,7 +346,7 @@ public class JdbcUtils {
      * De-serialize the byte array to an object, eventually using the serializer
      * specified by the connection info.
      *
-     * @param data the byte array
+     * @param data        the byte array
      * @param dataHandler provides the object serializer (may be null)
      * @return the object
      * @throws DbException if serialization fails

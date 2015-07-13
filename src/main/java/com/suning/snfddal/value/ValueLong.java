@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.value;
 
+import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
+import com.suning.snfddal.util.MathUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.util.MathUtils;
 
 /**
  * Implementation of the BIGINT data type.
@@ -44,8 +44,6 @@ public class ValueLong extends Value {
     private static final int STATIC_SIZE = 100;
     private static final ValueLong[] STATIC_CACHE;
 
-    private final long value;
-
     static {
         STATIC_CACHE = new ValueLong[STATIC_SIZE];
         for (int i = 0; i < STATIC_SIZE; i++) {
@@ -53,8 +51,27 @@ public class ValueLong extends Value {
         }
     }
 
+    private final long value;
+
     private ValueLong(long value) {
         this.value = value;
+    }
+
+    private static boolean isInteger(long a) {
+        return a >= Integer.MIN_VALUE && a <= Integer.MAX_VALUE;
+    }
+
+    /**
+     * Get or create a long value for the given long.
+     *
+     * @param i the long
+     * @return the value
+     */
+    public static ValueLong get(long i) {
+        if (i >= 0 && i < STATIC_SIZE) {
+            return STATIC_CACHE[(int) i];
+        }
+        return (ValueLong) Value.cache(new ValueLong(i));
     }
 
     @Override
@@ -105,10 +122,6 @@ public class ValueLong extends Value {
         // now, if the other value is Long.MIN_VALUE, it must be an overflow
         // x - Long.MIN_VALUE overflows for x>=0
         return add(other.negate());
-    }
-
-    private static boolean isInteger(long a) {
-        return a >= Integer.MIN_VALUE && a <= Integer.MAX_VALUE;
     }
 
     @Override
@@ -198,19 +211,6 @@ public class ValueLong extends Value {
     public void set(PreparedStatement prep, int parameterIndex)
             throws SQLException {
         prep.setLong(parameterIndex, value);
-    }
-
-    /**
-     * Get or create a long value for the given long.
-     *
-     * @param i the long
-     * @return the value
-     */
-    public static ValueLong get(long i) {
-        if (i >= 0 && i < STATIC_SIZE) {
-            return STATIC_CACHE[(int) i];
-        }
-        return (ValueLong) Value.cache(new ValueLong(i));
     }
 
     @Override

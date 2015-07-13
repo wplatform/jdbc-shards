@@ -41,7 +41,7 @@ abstract class AggregateData {
      * @param database the database
      * @param dataType the datatype of the computed result
      * @param distinct if the calculation should be distinct
-     * @param v the value
+     * @param v        the value
      */
     abstract void add(Database database, int dataType, boolean distinct, Value v);
 

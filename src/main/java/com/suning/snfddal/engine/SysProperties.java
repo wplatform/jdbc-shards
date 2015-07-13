@@ -17,14 +17,14 @@ import com.suning.snfddal.util.Utils;
  * <p>
  * System properties can be set when starting the virtual machine:
  * </p>
- *
+ * <p>
  * <pre>
  * java -Dh2.baseDir=/temp
  * </pre>
- *
+ * <p>
  * They can be set within the application, but this must be done before loading
  * any classes of this database (before loading the JDBC driver):
- *
+ * <p>
  * <pre>
  * System.setProperty(&quot;h2.baseDir&quot;, &quot;/temp&quot;);
  * </pre>
@@ -471,8 +471,17 @@ public class SysProperties {
      * current thread-context class loader will be used.
      */
     public static final boolean USE_THREAD_CONTEXT_CLASS_LOADER =
-        Utils.getProperty("h2.useThreadContextClassLoader", false);
-
+            Utils.getProperty("h2.useThreadContextClassLoader", false);
+    /**
+     * System property <code>h2.javaObjectSerializer</code>
+     * (default: null).<br />
+     * The JavaObjectSerializer class name for java objects being stored in
+     * column of type OTHER. It must be the same on client and server to work
+     * correctly.
+     */
+    public static final String JAVA_OBJECT_SERIALIZER =
+            Utils.getProperty("h2.javaObjectSerializer", null);
+    private static final String H2_BASE_DIR = "h2.baseDir";
     /**
      * System property <code>h2.serializeJavaObject</code>
      * (default: true).<br />
@@ -506,20 +515,15 @@ public class SysProperties {
     public static boolean serializeJavaObject =
             Utils.getProperty("h2.serializeJavaObject", true);
 
-    /**
-     * System property <code>h2.javaObjectSerializer</code>
-     * (default: null).<br />
-     * The JavaObjectSerializer class name for java objects being stored in
-     * column of type OTHER. It must be the same on client and server to work
-     * correctly.
-     */
-    public static final String JAVA_OBJECT_SERIALIZER =
-            Utils.getProperty("h2.javaObjectSerializer", null);
-
-    private static final String H2_BASE_DIR = "h2.baseDir";
-
     private SysProperties() {
         // utility class
+    }
+
+    /**
+     * INTERNAL
+     */
+    public static String getBaseDir() {
+        return Utils.getProperty(H2_BASE_DIR, null);
     }
 
     /**
@@ -530,13 +534,6 @@ public class SysProperties {
             dir += "/";
         }
         System.setProperty(H2_BASE_DIR, dir);
-    }
-
-    /**
-     * INTERNAL
-     */
-    public static String getBaseDir() {
-        return Utils.getProperty(H2_BASE_DIR, null);
     }
 
     /**

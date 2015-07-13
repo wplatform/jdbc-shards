@@ -20,30 +20,33 @@ package com.suning.snfddal.excutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class ExecutionPlan {
 
     private ExecutionPlan parent;
     private ExecutionPlan[] children;
+
     /**
      * @return the parent
      */
     protected ExecutionPlan getParent() {
         return parent;
     }
+
     /**
      * @param parent the parent to set
      */
     protected void setParent(ExecutionPlan parent) {
         this.parent = parent;
     }
+
     /**
      * @return the children
      */
     protected ExecutionPlan[] getChildren() {
         return children;
     }
+
     /**
      * @param children the children to set
      */
@@ -51,5 +54,5 @@ public class ExecutionPlan {
         this.children = children;
     }
 
-    
+
 }

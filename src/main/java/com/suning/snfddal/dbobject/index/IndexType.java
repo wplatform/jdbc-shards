@@ -6,7 +6,6 @@
 package com.suning.snfddal.dbobject.index;
 
 
-
 /**
  * Represents information about the properties of an index
  */
@@ -19,7 +18,7 @@ public class IndexType {
      * Create a primary key index.
      *
      * @param persistent if the index is persistent
-     * @param hash if a hash index should be used
+     * @param hash       if a hash index should be used
      * @return the index type
      */
     public static IndexType createPrimaryKey(boolean hash) {
@@ -34,7 +33,7 @@ public class IndexType {
      * Create a unique index.
      *
      * @param persistent if the index is persistent
-     * @param hash if a hash index should be used
+     * @param hash       if a hash index should be used
      * @return the index type
      */
     public static IndexType createUnique(boolean hash) {
@@ -58,12 +57,12 @@ public class IndexType {
      * Create a non-unique index.
      *
      * @param persistent if the index is persistent
-     * @param hash if a hash index should be used
-     * @param spatial if a spatial index should be used
+     * @param hash       if a hash index should be used
+     * @param spatial    if a spatial index should be used
      * @return the index type
      */
     public static IndexType createNonUnique(boolean hash,
-            boolean spatial) {
+                                            boolean spatial) {
         IndexType type = new IndexType();
         type.hash = hash;
         type.spatial = spatial;
@@ -83,15 +82,6 @@ public class IndexType {
     }
 
     /**
-     * Sets if this index belongs to a constraint.
-     *
-     * @param belongsToConstraint if the index belongs to a constraint
-     */
-    public void setBelongsToConstraint(boolean belongsToConstraint) {
-        this.belongsToConstraint = belongsToConstraint;
-    }
-
-    /**
      * If the index is created because of a constraint. Such indexes are to be
      * dropped once the constraint is dropped.
      *
@@ -99,6 +89,15 @@ public class IndexType {
      */
     public boolean getBelongsToConstraint() {
         return belongsToConstraint;
+    }
+
+    /**
+     * Sets if this index belongs to a constraint.
+     *
+     * @param belongsToConstraint if the index belongs to a constraint
+     */
+    public void setBelongsToConstraint(boolean belongsToConstraint) {
+        this.belongsToConstraint = belongsToConstraint;
     }
 
     /**

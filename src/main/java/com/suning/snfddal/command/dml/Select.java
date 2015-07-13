@@ -5,35 +5,16 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import com.suning.snfddal.command.CommandInterface;
-import com.suning.snfddal.command.expression.Comparison;
-import com.suning.snfddal.command.expression.ConditionAndOr;
-import com.suning.snfddal.command.expression.Expression;
-import com.suning.snfddal.command.expression.ExpressionColumn;
-import com.suning.snfddal.command.expression.ExpressionVisitor;
-import com.suning.snfddal.command.expression.Parameter;
-import com.suning.snfddal.command.expression.Wildcard;
+import com.suning.snfddal.command.expression.*;
 import com.suning.snfddal.dbobject.index.Index;
-import com.suning.snfddal.dbobject.table.Column;
-import com.suning.snfddal.dbobject.table.ColumnResolver;
-import com.suning.snfddal.dbobject.table.IndexColumn;
-import com.suning.snfddal.dbobject.table.Table;
-import com.suning.snfddal.dbobject.table.TableFilter;
+import com.suning.snfddal.dbobject.table.*;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.result.LocalResult;
-import com.suning.snfddal.result.ResultInterface;
-import com.suning.snfddal.result.ResultTarget;
-import com.suning.snfddal.result.Row;
-import com.suning.snfddal.result.SortOrder;
+import com.suning.snfddal.result.*;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
 import com.suning.snfddal.util.StringUtils;
@@ -42,23 +23,28 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
 /**
  * This class represents a simple SELECT statement.
- *
+ * <p>
  * For each select statement,
  * visibleColumnCount &lt;= distinctColumnCount &lt;= expressionCount.
  * The expression list count could include ORDER BY and GROUP BY expressions
  * that are not in the select list.
- *
+ * <p>
  * The call sequence is init(), mapColumns() if it's a subquery, prepare().
  *
  * @author Thomas Mueller
  * @author Joel Turkel (Group sorted query)
  */
 public class Select extends Query {
-    private TableFilter topTableFilter;
     private final ArrayList<TableFilter> filters = New.arrayList();
     private final ArrayList<TableFilter> topFilters = New.arrayList();
+    private TableFilter topTableFilter;
     private ArrayList<Expression> expressions;
     private Expression[] expressionArray;
     private Expression having;
@@ -87,7 +73,7 @@ public class Select extends Query {
      * Add a table to the query.
      *
      * @param filter the table to add
-     * @param isTop if the table can be the first table in the query plan
+     * @param isTop  if the table can be the first table in the query plan
      */
     public void addTableFilter(TableFilter filter, boolean isTop) {
         // Oracle doesn't check on duplicate aliases
@@ -107,10 +93,6 @@ public class Select extends Query {
         return topFilters;
     }
 
-    public void setExpressions(ArrayList<Expression> expressions) {
-        this.expressions = expressions;
-    }
-
     /**
      * Called if this query contains aggregate functions.
      */
@@ -118,12 +100,12 @@ public class Select extends Query {
         isGroupQuery = true;
     }
 
-    public void setGroupBy(ArrayList<Expression> group) {
-        this.group = group;
-    }
-
     public ArrayList<Expression> getGroupBy() {
         return group;
+    }
+
+    public void setGroupBy(ArrayList<Expression> group) {
+        this.group = group;
     }
 
     public HashMap<Expression, Object> getCurrentGroup() {
@@ -194,7 +176,7 @@ public class Select extends Query {
     }
 
     private void addGroupSortedRow(Value[] keyValues, int columnCount,
-            ResultTarget result) {
+                                   ResultTarget result) {
         Value[] row = new Value[columnCount];
         for (int j = 0; groupIndex != null && j < groupIndex.length; j++) {
             row[groupIndex[j]] = keyValues[j];
@@ -1109,12 +1091,12 @@ public class Select extends Query {
         return buff.toString();
     }
 
-    public void setHaving(Expression having) {
-        this.having = having;
-    }
-
     public Expression getHaving() {
         return having;
+    }
+
+    public void setHaving(Expression having) {
+        this.having = having;
     }
 
     @Override
@@ -1129,6 +1111,10 @@ public class Select extends Query {
     @Override
     public ArrayList<Expression> getExpressions() {
         return expressions;
+    }
+
+    public void setExpressions(ArrayList<Expression> expressions) {
+        this.expressions = expressions;
     }
 
     @Override
@@ -1173,7 +1159,7 @@ public class Select extends Query {
 
     @Override
     public void addGlobalCondition(Parameter param, int columnId,
-            int comparisonType) {
+                                   int comparisonType) {
         addParameter(param);
         Expression comp;
         Expression col = expressions.get(columnId);
@@ -1230,19 +1216,19 @@ public class Select extends Query {
 
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
-        switch(visitor.getType()) {
-        case ExpressionVisitor.DETERMINISTIC: {
-            if (isForUpdate) {
-                return false;
-            }
-            for (int i = 0, size = filters.size(); i < size; i++) {
-                TableFilter f = filters.get(i);
-                if (!f.getTable().isDeterministic()) {
+        switch (visitor.getType()) {
+            case ExpressionVisitor.DETERMINISTIC: {
+                if (isForUpdate) {
                     return false;
                 }
+                for (int i = 0, size = filters.size(); i < size; i++) {
+                    TableFilter f = filters.get(i);
+                    if (!f.getTable().isDeterministic()) {
+                        return false;
+                    }
+                }
+                break;
             }
-            break;
-        }
         /*case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID: {
             for (int i = 0, size = filters.size(); i < size; i++) {
                 TableFilter f = filters.get(i);
@@ -1251,22 +1237,22 @@ public class Select extends Query {
             }
             break;
         }*/
-        case ExpressionVisitor.EVALUATABLE: {
-            if (!session.getDatabase().getSettings().optimizeEvaluatableSubqueries) {
-                return false;
+            case ExpressionVisitor.EVALUATABLE: {
+                if (!session.getDatabase().getSettings().optimizeEvaluatableSubqueries) {
+                    return false;
+                }
+                break;
             }
-            break;
-        }
-        case ExpressionVisitor.GET_DEPENDENCIES: {
-            for (int i = 0, size = filters.size(); i < size; i++) {
-                TableFilter f = filters.get(i);
-                Table table = f.getTable();
-                visitor.addDependency(table);
-                table.addDependencies(visitor.getDependencies());
+            case ExpressionVisitor.GET_DEPENDENCIES: {
+                for (int i = 0, size = filters.size(); i < size; i++) {
+                    TableFilter f = filters.get(i);
+                    Table table = f.getTable();
+                    visitor.addDependency(table);
+                    table.addDependencies(visitor.getDependencies());
+                }
+                break;
             }
-            break;
-        }
-        default:
+            default:
         }
         ExpressionVisitor v2 = visitor.incrementQueryLevel(1);
         boolean result = true;
@@ -1304,10 +1290,7 @@ public class Select extends Query {
 
     @Override
     public boolean allowGlobalConditions() {
-        if (offsetExpr == null && (limitExpr == null || sort == null)) {
-            return true;
-        }
-        return false;
+        return offsetExpr == null && (limitExpr == null || sort == null);
     }
 
     public SortOrder getSortOrder() {

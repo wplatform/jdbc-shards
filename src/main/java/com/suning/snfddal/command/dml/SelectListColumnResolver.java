@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.command.expression.ExpressionColumn;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * This class represents a column resolver for the column list of a SELECT

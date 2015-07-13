@@ -18,9 +18,6 @@
 
 package com.suning.snfddal.excutor;
 
-import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.dispatch.RoutingHandler;
@@ -32,6 +29,9 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.ResultInterface;
 
+import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
@@ -41,85 +41,80 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected Session session;
     protected ExecutorService executorService;
     protected RoutingHandler routingHandler;
-    
+
     /**
-     * 
      * @param session
      * @param prepared
      */
-    public CommonPreparedExecutor(Session session,T prepared) {
+    public CommonPreparedExecutor(Session session, T prepared) {
         super();
         this.prepared = prepared;
         this.session = session;
     }
 
-
-    @Override
-    public ResultInterface executeQuery(int maxrows) {
-        switch (prepared.getType()) {
-        case CommandInterface.SELECT:
-        case CommandInterface.CALL:
-            RoutingResult rr = doRoute();
-            TableNode[] tableNodes = rr.group();
-            for (TableNode tableNode : tableNodes) {
-                if(tableNode instanceof GroupTableNode) {
-                    doTranslate((GroupTableNode)tableNode);
-                } else {
-                    doTranslate(tableNode);
-                }
-            }
-            
-            throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-        default:
-            throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-        }
-
-    }
-
-    
-    @Override
-    public int executeUpdate() {
-        switch (prepared.getType()) {
-        case CommandInterface.SELECT:
-        case CommandInterface.CALL:
-            throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-        default:
-            RoutingResult rr = doRoute();
-            TableNode[] tableNodes = rr.group();
-            for (TableNode tableNode : tableNodes) {
-                if(tableNode instanceof GroupTableNode) {
-                    doTranslate((GroupTableNode)tableNode);
-                } else {
-                    doTranslate(tableNode);
-                }
-            }
-            return 0;
-        }
-    }
-    
-    
-    protected T getPrepared() {
-        return this.prepared;
-    }
-    
-    
-    protected abstract RoutingResult doRoute();
-    protected abstract String doTranslate(TableNode tableNode);
-    protected abstract String doTranslate(GroupTableNode tableNode);
-    
-    
-    
     /**
      * Wrap a SQL exception that occurred while accessing a linked table.
      *
      * @param sql the SQL statement
-     * @param ex the exception from the remote database
+     * @param ex  the exception from the remote database
      * @return the wrapped exception
      */
     protected static DbException wrapException(String sql, Exception ex) {
         SQLException e = DbException.toSQLException(ex);
         return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
     }
-    
+
+    @Override
+    public ResultInterface executeQuery(int maxrows) {
+        switch (prepared.getType()) {
+            case CommandInterface.SELECT:
+            case CommandInterface.CALL:
+                RoutingResult rr = doRoute();
+                TableNode[] tableNodes = rr.group();
+                for (TableNode tableNode : tableNodes) {
+                    if (tableNode instanceof GroupTableNode) {
+                        doTranslate((GroupTableNode) tableNode);
+                    } else {
+                        doTranslate(tableNode);
+                    }
+                }
+
+                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
+            default:
+                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
+        }
+
+    }
+
+    @Override
+    public int executeUpdate() {
+        switch (prepared.getType()) {
+            case CommandInterface.SELECT:
+            case CommandInterface.CALL:
+                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
+            default:
+                RoutingResult rr = doRoute();
+                TableNode[] tableNodes = rr.group();
+                for (TableNode tableNode : tableNodes) {
+                    if (tableNode instanceof GroupTableNode) {
+                        doTranslate((GroupTableNode) tableNode);
+                    } else {
+                        doTranslate(tableNode);
+                    }
+                }
+                return 0;
+        }
+    }
+
+    protected T getPrepared() {
+        return this.prepared;
+    }
+
+    protected abstract RoutingResult doRoute();
+
+    protected abstract String doTranslate(TableNode tableNode);
+
+    protected abstract String doTranslate(GroupTableNode tableNode);
+
 
 }

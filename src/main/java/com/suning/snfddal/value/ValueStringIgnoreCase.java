@@ -21,6 +21,30 @@ public class ValueStringIgnoreCase extends ValueString {
         super(value);
     }
 
+    /**
+     * Get or create a case insensitive string value for the given string.
+     * The value will have the same case as the passed string.
+     *
+     * @param s the string
+     * @return the value
+     */
+    public static ValueStringIgnoreCase get(String s) {
+        if (s.length() == 0) {
+            return EMPTY;
+        }
+        ValueStringIgnoreCase obj = new ValueStringIgnoreCase(StringUtils.cache(s));
+        if (s.length() > SysProperties.OBJECT_CACHE_MAX_PER_ELEMENT_SIZE) {
+            return obj;
+        }
+        ValueStringIgnoreCase cache = (ValueStringIgnoreCase) Value.cache(obj);
+        // the cached object could have the wrong case
+        // (it would still be 'equal', but we don't like to store it)
+        if (cache.value.equals(s)) {
+            return cache;
+        }
+        return obj;
+    }
+
     @Override
     public int getType() {
         return Value.STRING_IGNORECASE;
@@ -50,30 +74,6 @@ public class ValueStringIgnoreCase extends ValueString {
     @Override
     public String getSQL() {
         return "CAST(" + StringUtils.quoteStringSQL(value) + " AS VARCHAR_IGNORECASE)";
-    }
-
-    /**
-     * Get or create a case insensitive string value for the given string.
-     * The value will have the same case as the passed string.
-     *
-     * @param s the string
-     * @return the value
-     */
-    public static ValueStringIgnoreCase get(String s) {
-        if (s.length() == 0) {
-            return EMPTY;
-        }
-        ValueStringIgnoreCase obj = new ValueStringIgnoreCase(StringUtils.cache(s));
-        if (s.length() > SysProperties.OBJECT_CACHE_MAX_PER_ELEMENT_SIZE) {
-            return obj;
-        }
-        ValueStringIgnoreCase cache = (ValueStringIgnoreCase) Value.cache(obj);
-        // the cached object could have the wrong case
-        // (it would still be 'equal', but we don't like to store it)
-        if (cache.value.equals(s)) {
-            return cache;
-        }
-        return obj;
     }
 
     @Override

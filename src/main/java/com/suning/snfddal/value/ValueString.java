@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.StringUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the VARCHAR data type.
@@ -27,6 +27,37 @@ public class ValueString extends Value {
 
     protected ValueString(String value) {
         this.value = value;
+    }
+
+    /**
+     * Get or create a string value for the given string.
+     *
+     * @param s the string
+     * @return the value
+     */
+    public static Value get(String s) {
+        return get(s, false);
+    }
+
+    /**
+     * Get or create a string value for the given string.
+     *
+     * @param s                       the string
+     * @param treatEmptyStringsAsNull whether or not to treat empty strings as
+     *                                NULL
+     * @return the value
+     */
+    public static Value get(String s, boolean treatEmptyStringsAsNull) {
+        if (s.isEmpty()) {
+            return treatEmptyStringsAsNull ? ValueNull.INSTANCE : EMPTY;
+        }
+        ValueString obj = new ValueString(StringUtils.cache(s));
+        if (s.length() > SysProperties.OBJECT_CACHE_MAX_PER_ELEMENT_SIZE) {
+            return obj;
+        }
+        return Value.cache(obj);
+        // this saves memory, but is really slow
+        // return new ValueString(s.intern());
     }
 
     @Override
@@ -122,37 +153,6 @@ public class ValueString extends Value {
     @Override
     public int getType() {
         return Value.STRING;
-    }
-
-    /**
-     * Get or create a string value for the given string.
-     *
-     * @param s the string
-     * @return the value
-     */
-    public static Value get(String s) {
-        return get(s, false);
-    }
-
-    /**
-     * Get or create a string value for the given string.
-     *
-     * @param s the string
-     * @param treatEmptyStringsAsNull whether or not to treat empty strings as
-     *            NULL
-     * @return the value
-     */
-    public static Value get(String s, boolean treatEmptyStringsAsNull) {
-        if (s.isEmpty()) {
-            return treatEmptyStringsAsNull ? ValueNull.INSTANCE : EMPTY;
-        }
-        ValueString obj = new ValueString(StringUtils.cache(s));
-        if (s.length() > SysProperties.OBJECT_CACHE_MAX_PER_ELEMENT_SIZE) {
-            return obj;
-        }
-        return Value.cache(obj);
-        // this saves memory, but is really slow
-        // return new ValueString(s.intern());
     }
 
     /**

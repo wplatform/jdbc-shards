@@ -5,11 +5,8 @@
  */
 package com.suning.snfddal.command.dml;
 
-import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.ddl.SchemaCommand;
-import com.suning.snfddal.dbobject.Right;
 import com.suning.snfddal.dbobject.schema.Schema;
-import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 
@@ -19,10 +16,9 @@ import com.suning.snfddal.message.DbException;
  */
 public class AlterTableSet extends SchemaCommand {
 
-    private String tableName;
     private final int type;
-
     private final boolean value;
+    private String tableName;
     private boolean checkExisting;
 
     public AlterTableSet(Session session, Schema schema, int type, boolean value) {

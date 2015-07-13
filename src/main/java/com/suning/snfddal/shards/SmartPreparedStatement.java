@@ -24,6 +24,20 @@ public final class SmartPreparedStatement extends SmartSupport implements Invoca
         this.statement = stmt;
     }
 
+    /**
+     * Creates a logging version of a PreparedStatement
+     *
+     * @param stmt - the statement
+     * @param sql  - the sql statement
+     * @return - the proxy
+     */
+    public static PreparedStatement newInstance(SmartSupport parent, PreparedStatement statement) {
+        InvocationHandler handler = new SmartPreparedStatement(parent, statement);
+        ClassLoader cl = PreparedStatement.class.getClassLoader();
+        return (PreparedStatement) Proxy.newProxyInstance(cl, new Class[]{
+                PreparedStatement.class, CallableStatement.class}, handler);
+    }
+
     public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
         try {
             if (EXECUTE_METHODS.contains(method.getName())) {
@@ -74,20 +88,6 @@ public final class SmartPreparedStatement extends SmartSupport implements Invoca
             handleException(t);
             throw t;
         }
-    }
-
-    /**
-     * Creates a logging version of a PreparedStatement
-     *
-     * @param stmt - the statement
-     * @param sql - the sql statement
-     * @return - the proxy
-     */
-    public static PreparedStatement newInstance(SmartSupport parent, PreparedStatement statement) {
-        InvocationHandler handler = new SmartPreparedStatement(parent, statement);
-        ClassLoader cl = PreparedStatement.class.getClassLoader();
-        return (PreparedStatement) Proxy.newProxyInstance(cl, new Class[] {
-                PreparedStatement.class, CallableStatement.class }, handler);
     }
 
     /* Return the wrapped prepared statement

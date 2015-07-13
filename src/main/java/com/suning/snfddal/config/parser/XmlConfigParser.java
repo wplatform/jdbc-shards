@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -71,10 +70,12 @@ public class XmlConfigParser {
             String proName = xNode.getStringAttribute("name");
             String proValue = xNode.getStringAttribute("value");
             if (StringUtils.isNullOrEmpty(proName)) {
-                throw new ParsingException("Error parsing ddal-config XML . Cause: propery's name required.");
+                throw new ParsingException(
+                        "Error parsing ddal-config XML . Cause: propery's name required.");
             }
             if (StringUtils.isNullOrEmpty(proValue)) {
-                throw new ParsingException("Error parsing ddal-config XML . Cause: propery's value required.");
+                throw new ParsingException(
+                        "Error parsing ddal-config XML . Cause: propery's value required.");
             }
             configuration.setProperty(proName, proValue);
         }
@@ -85,7 +86,8 @@ public class XmlConfigParser {
             ShardConfig shardConfig = new ShardConfig();
             String name = xNode.getStringAttribute("name");
             if (StringUtils.isNullOrEmpty(name)) {
-                throw new ParsingException("Error parsing ddal-config XML . Cause: group's name required.");
+                throw new ParsingException(
+                        "Error parsing ddal-config XML . Cause: group's name required.");
             }
             shardConfig.setName(name);
             List<XNode> children = xNode.evalNodes("standalone|master|slave");
@@ -104,13 +106,13 @@ public class XmlConfigParser {
                 if (StringUtils.isNullOrEmpty(ref)) {
                     throw new ParsingException(nodename + "'s ref is required.");
                 }
-                if(wWeight < 0 || rWeight < 0 ) {
+                if (wWeight < 0 || rWeight < 0) {
                     throw new ParsingException(nodename + "'s weight not be less than zero.");
                 }
                 shardItem.setRef(ref);
                 shardItem.setwWeight(wWeight);
                 shardItem.setrWeight(rWeight);
-                if(shardItems.contains(shardItem)) {
+                if (shardItems.contains(shardItem)) {
                     throw new ParsingException("Duplicate datasource reference in " + name);
                 }
                 shardItems.add(shardItem);
@@ -140,7 +142,8 @@ public class XmlConfigParser {
                 DataSource dataSource = constructDataSource(dsConfig);
                 provider.addDataNode(id, dataSource);
             } else {
-                throw new ParsingException("Error parsing ddal-config XML . Cause: datasource attribute 'id' required.");
+                throw new ParsingException(
+                        "Error parsing ddal-config XML . Cause: datasource attribute 'id' required.");
             }
         }
         configuration.setDataSourceProvider(provider);
@@ -197,10 +200,11 @@ public class XmlConfigParser {
             }
             return beanInfo;
         } catch (InvocationTargetException e) {
-            throw new ParsingException("There was an error to construct RuleAlgorithm " + clazz + " Cause: "
-                    + e.getTargetException(), e);
+            throw new ParsingException("There was an error to construct RuleAlgorithm " + clazz
+                    + " Cause: " + e.getTargetException(), e);
         } catch (Exception e) {
-            throw new ParsingException("There was an error to construct RuleAlgorithm " + clazz + " Cause: " + e, e);
+            throw new ParsingException(
+                    "There was an error to construct RuleAlgorithm " + clazz + " Cause: " + e, e);
         }
     }
 
@@ -210,7 +214,8 @@ public class XmlConfigParser {
      */
     private void addToListIfNotDuplicate(List<TableConfig> tableConfings, TableConfig config) {
         if (tableConfings.contains(config)) {
-            throw new ParsingException("Duplicate table name '" + config.getName() + "' in schema.");
+            throw new ParsingException(
+                    "Duplicate table name '" + config.getName() + "' in schema.");
         }
         tableConfings.add(config);
     }
@@ -218,12 +223,12 @@ public class XmlConfigParser {
     private void parseSchemaConfig(XNode xNode) {
         SchemaConfig dsConfig = new SchemaConfig();
         String name = xNode.getStringAttribute("name");
-        String metadata = xNode.getStringAttribute("metadata");
+        String shard = xNode.getStringAttribute("shard");
         if (StringUtils.isNullOrEmpty(name)) {
             throw new ParsingException("schema attribute 'name' is required.");
         }
         dsConfig.setName(name);
-        dsConfig.setMetadata(metadata);
+        dsConfig.setShard(shard);
         List<TableConfig> tableConfings = New.arrayList();
         List<XNode> xNodes = xNode.evalNodes("tableGroup");
         for (XNode tableGroupNode : xNodes) {
@@ -244,7 +249,7 @@ public class XmlConfigParser {
         configuration.getTemporaryTableRouters().clear();
 
     }
-    
+
     /**
      * @param config
      * @param scanLevel
@@ -262,46 +267,6 @@ public class XmlConfigParser {
             config.setScanLevel(Constants.SCANLEVEL_SHARDINGKEY);
         }
     }
-    /**
-     * @param config
-     * @param tableMetadata
-     */
-    private void setTableMetadata(TableConfig config, String tableMetadata) {
-        if (StringUtils.isNullOrEmpty(tableMetadata)) {
-            throw new ParsingException("The table " + config.getName() 
-                    + " attribute 'metadata' is null.");
-        }
-        String[] tokens = tableMetadata.split("\\.");
-        switch (tokens.length) {
-        case 1:
-            config.setMetadataNode(tokens[0]);
-            config.setOriginalTable(config.getName());
-            break;
-        case 2:
-            config.setMetadataNode(tokens[0]);
-            config.setOriginalTable(tokens[1]);
-            break;
-        case 3:
-            config.setMetadataNode(tokens[0]);
-            config.setOriginalSchema(tokens[1]);
-            config.setOriginalTable(tokens[2]);
-            break;
-        case 4:
-            config.setMetadataNode(tokens[0]);
-            config.setOriginalCatalog(tokens[1]);
-            config.setOriginalSchema(tokens[2]);
-            config.setOriginalTable(tokens[3]);
-            break;
-
-        default:
-            throw new ParsingException("The table " + config.getName() 
-                    + " attribute 'metadata' configuration error.");
-        }
-        if(!configuration.getCluster().containsKey(config.getMetadataNode())) {
-            throw new ParsingException("The table " + config.getName() 
-                    + " attribute 'metadata' not match in cluster.");
-        }
-    }
 
     /**
      * @param tableNode
@@ -309,89 +274,78 @@ public class XmlConfigParser {
      */
     private Map<String, String> parseTableGroupAttributs(XNode tableNode) {
         Map<String, String> attributes = New.hashMap();
-        String tableMetadata = tableNode.getStringAttribute("metadata");
+        String shard = tableNode.getStringAttribute("shard");
         String router = tableNode.getStringAttribute("router");
         String validation = tableNode.getStringAttribute("validation");
         String scanLevel = tableNode.getStringAttribute("scanLevel");
-        String broadcast = tableNode.getStringAttribute("broadcast");
 
-        attributes.put("metadata", tableMetadata);
+        attributes.put("shard", shard);
         attributes.put("router", router);
         attributes.put("validation", validation);
         attributes.put("scanLevel", scanLevel);
-        attributes.put("broadcast", broadcast);
         return attributes;
     }
 
     /**
-     * @param xNode
      * @param scConfig
-     * @param tableConfings
+     * @param template
      * @param tableNode
+     * @return
      */
-    private TableConfig newTableConfig(SchemaConfig scConfig, Map<String, String> template, XNode tableNode) {
+    private TableConfig newTableConfig(SchemaConfig scConfig, Map<String, String> template,
+                                       XNode tableNode) {
         TableConfig config = new TableConfig();
-        String tableMetadata = null;
         String router = null;
         boolean validation = scConfig.isValidation();
         String scanLevel = "none";
-        String broadcast = null;
+        String shard = null;
         if (template != null) {
-            tableMetadata = template.get("metadata");
             router = template.get("router");
             String s = template.get("validation");
-            if(!StringUtils.isNullOrEmpty(s)) {
+            if (!StringUtils.isNullOrEmpty(s)) {
                 validation = Boolean.parseBoolean(s);
             }
             scanLevel = template.get("scanLevel");
-            broadcast = template.get("broadcast");
+            shard = template.get("shard");
         }
         String tableName = tableNode.getStringAttribute("name");
-        String catalog = tableNode.getStringAttribute("catalog");
-        String schema = tableNode.getStringAttribute("schema");
-        
-        tableMetadata = tableNode.getStringAttribute("metadata");
+
         String routerChild = tableNode.getStringAttribute("router", router);
         validation = tableNode.getBooleanAttribute("validation", validation);
         scanLevel = tableNode.getStringAttribute("scanLevel", scanLevel);
-        broadcast = tableNode.getStringAttribute("broadcast", broadcast);
+        shard = tableNode.getStringAttribute("shard", shard);
 
         if (StringUtils.isNullOrEmpty(tableName)) {
             throw new ParsingException("table attribute 'name' is required.");
         }
         if (!StringUtils.isNullOrEmpty(router) && !StringUtils.equals(router, routerChild)) {
-            throw new ParsingException("table's attribute 'router' can't override tableGroup's attribute 'router'.");
+            throw new ParsingException(
+                    "table's attribute 'router' can't override tableGroup's attribute 'router'.");
         }
-        if (!StringUtils.isNullOrEmpty(router) && !StringUtils.isNullOrEmpty(broadcast)) {
-            throw new ParsingException("attribute 'broadcast' must be null if attribute 'router' was assigned.");
+        if (!StringUtils.isNullOrEmpty(router) && !StringUtils.isNullOrEmpty(shard)) {
+            throw new ParsingException(
+                    "attribute 'shard' must be null if attribute 'router' was assigned.");
         }
         router = routerChild;
         config.setName(tableName);
-        config.setOriginalCatalog(catalog);
-        config.setOriginalSchema(schema);
         config.setValidation(validation);
+        setTableScanLevel(config, scanLevel);
 
-        Set<String> nodes = New.linkedHashSet();
-        if (!StringUtils.isNullOrEmpty(broadcast)) {
-            for (String string : broadcast.split(",")) {
-                if (!string.trim().isEmpty()) {
+        
+        List<String> nodes = New.arrayList();
+        if (!StringUtils.isNullOrEmpty(shard)) {
+            for (String string : shard.split(",")) {
+                if (!string.trim().isEmpty() && !nodes.contains(string)) {
                     nodes.add(string);
                 }
             }
-            if(nodes.size() < 2) {
-                throw new ParsingException("table's attribute 'broadcast' must be multi-node.");
+            TableNode[] tableNodes = new TableNode[nodes.size()];
+            for (int i = 0; i < nodes.size(); i++) {
+                tableNodes[i] = new TableNode(nodes.get(i), tableName);
             }
+            config.setShards(tableNodes);
         }
-        config.setBroadcast(nodes.toArray(new String[nodes.size()]));
-        setTableScanLevel(config, scanLevel);
         
-        if(StringUtils.isNullOrEmpty(tableMetadata)) {
-            tableMetadata = scConfig.getMetadata();
-        }
-        if(StringUtils.isNullOrEmpty(tableMetadata)) {
-            throw new ParsingException("table's attribute 'metadata' is require.");
-        }
-        setTableMetadata(config, tableMetadata);
         if (!StringUtils.isNullOrEmpty(router)) {
             TableRouter rawRouter = configuration.getTemporaryTableRouters().get(router);
             if (rawRouter == null) {
@@ -401,14 +355,13 @@ public class XmlConfigParser {
             List<TableNode> partition = rawRouter.getPartition();
             List<TableNode> inited = New.arrayList(partition.size());
             for (TableNode item : partition) {
-                String sn = item.getShardName();
-                String tn;
-                if (StringUtils.isNullOrEmpty(item.getSuffix())) {
-                    tn = config.getNameWithSchemaName();
-                } else {
-                    tn = config.getNameWithSchemaName() + item.getSuffix();
+                String shardName = item.getShardName();
+                String name = item.getTableName();
+                String suffix = item.getSuffix();
+                if (StringUtils.isNullOrEmpty(name)) {
+                    name = tableName;
                 }
-                TableNode initedNode = new TableNode(sn, tn, item.getSuffix());
+                TableNode initedNode = new TableNode(shardName, name, suffix);
                 inited.add(initedNode);
             }
 
@@ -420,6 +373,7 @@ public class XmlConfigParser {
             expression.setRuleColumns(rawExpression.getRuleColumns());
             tableRouter.setRuleExpression(expression);
             config.setTableRouter(tableRouter);
+            config.setShards(null);
         }
         config.setSchemaConfig(scConfig);
         return config;
@@ -446,13 +400,17 @@ public class XmlConfigParser {
                 }
             }
         } catch (InstantiationException e) {
-            throw new DataSourceException("There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
+            throw new DataSourceException(
+                    "There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
         } catch (IllegalAccessException e) {
-            throw new DataSourceException("There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
+            throw new DataSourceException(
+                    "There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
         } catch (ClassNotFoundException e) {
-            throw new DataSourceException("There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
+            throw new DataSourceException(
+                    "There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
         } catch (Exception e) {
-            throw new DataSourceException("There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
+            throw new DataSourceException(
+                    "There was an error to construct DataSource id = " + id + ". Cause: " + e, e);
         }
         return dataSource;
 
@@ -479,8 +437,8 @@ public class XmlConfigParser {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private void setPropertyWithAutomaticType(Object ruleAlgorithm, PropertyDescriptor pd, String propertyValue)
-            throws IllegalAccessException, InvocationTargetException {
+    private void setPropertyWithAutomaticType(Object ruleAlgorithm, PropertyDescriptor pd,
+                                              String propertyValue) throws IllegalAccessException, InvocationTargetException {
         Class<?> pType = pd.getPropertyType();
         if (pType == Short.class || pType == short.class) {
             pd.getWriteMethod().invoke(ruleAlgorithm, Short.valueOf(propertyValue));
@@ -497,12 +455,13 @@ public class XmlConfigParser {
         } else if (pType == Long.class || pType == long.class) {
             pd.getWriteMethod().invoke(ruleAlgorithm, Long.valueOf(propertyValue));
         } else if (pType == Character.class || pType == char.class) {
-            pd.getWriteMethod().invoke(ruleAlgorithm, Character.valueOf(propertyValue.toCharArray()[1]));
+            pd.getWriteMethod().invoke(ruleAlgorithm,
+                    Character.valueOf(propertyValue.toCharArray()[1]));
         } else if (pType == String.class) {
             pd.getWriteMethod().invoke(ruleAlgorithm, propertyValue);
         } else {
-            throw new IllegalArgumentException("Can't set " + ruleAlgorithm.getClass().getName() + "'s property "
-                    + pd.getName() + ",the type is " + pType.getName());
+            throw new IllegalArgumentException("Can't set " + ruleAlgorithm.getClass().getName()
+                    + "'s property " + pd.getName() + ",the type is " + pType.getName());
         }
     }
 

@@ -18,12 +18,12 @@
 
 package com.suning.snfddal.shards;
 
+import com.suning.snfddal.util.MurmurHash;
+
 import java.util.Collection;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import com.suning.snfddal.util.MurmurHash;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -46,6 +46,14 @@ public class LoadBalance {
         for (SmartDataSource node : nodes) {
             add(node);
         }
+    }
+
+    private static int hash(final String k) {
+        return MurmurHash.hash32(k);
+    }
+
+    private static String decorateWithCounter(final String input, final int counter) {
+        return new StringBuilder(input).append('%').append(counter).append('%').toString();
     }
 
     public void add(SmartDataSource node) {
@@ -81,13 +89,5 @@ public class LoadBalance {
 
     public boolean hasNodes() {
         return circle.isEmpty();
-    }
-
-    private static int hash(final String k) {
-        return MurmurHash.hash32(k);
-    }
-
-    private static String decorateWithCounter(final String input, final int counter) {
-        return new StringBuilder(input).append('%').append(counter).append('%').toString();
     }
 }

@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.dbobject.index;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.IndexColumn;
@@ -17,13 +15,15 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.result.Row;
 import com.suning.snfddal.result.SearchRow;
 
+import java.util.ArrayList;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class IndexCursor implements Cursor {
 
-    private Session session;
     private final TableFilter tableFilter;
+    private Session session;
     private Index index;
     private Table table;
     private IndexColumn[] indexColumns;
@@ -54,7 +54,7 @@ public class IndexCursor implements Cursor {
     /**
      * Re-evaluate the start and end values of the index search for rows.
      *
-     * @param s the session
+     * @param s               the session
      * @param indexConditions the index conditions
      */
     public void find(Session s, ArrayList<IndexCondition> indexConditions) {
@@ -89,7 +89,7 @@ public class IndexCursor implements Cursor {
     public boolean previous() {
         throw DbException.throwInternalError();
     }
-    
+
     /**
      * Check if the result is empty for sure.
      *

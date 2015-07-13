@@ -18,19 +18,11 @@
 
 package com.suning.snfddal.dispatch;
 
-import java.util.List;
-import java.util.Map;
-
 import com.suning.snfddal.command.expression.Comparison;
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.TableMate;
-import com.suning.snfddal.dispatch.rule.RoutingCalculator;
-import com.suning.snfddal.dispatch.rule.RoutingCalculatorImpl;
-import com.suning.snfddal.dispatch.rule.RoutingResult;
-import com.suning.snfddal.dispatch.rule.RuleColumn;
-import com.suning.snfddal.dispatch.rule.TableNode;
-import com.suning.snfddal.dispatch.rule.TableRouter;
+import com.suning.snfddal.dispatch.rule.*;
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
@@ -40,6 +32,9 @@ import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueLong;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -57,7 +52,6 @@ public class RoutingHandlerImpl implements RoutingHandler {
     @Override
     public RoutingResult doRoute(TableMate table, SearchRow row) {
         TableRouter tr = table.getTableRouter();
-        String shardName, tableName;
         if (tr != null) {
             Map<String, List<Value>> args = getRuleColumnArgs(table, row);
             RoutingResult rr = trc.calculate(tr, args);
@@ -66,9 +60,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
             }
             return rr;
         } else {
-            shardName = table.getMatedataNode().getShardName();
-            tableName = table.getMatedataNode().getTableName();
-            return singleRoutingResult(new TableNode(shardName, tableName));
+            return fixedRoutingResult(table.getShards());
         }
 
     }
@@ -77,9 +69,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
     public RoutingResult doRoute(TableMate table, SearchRow first, SearchRow last) {
         TableRouter tr = table.getTableRouter();
         if (tr == null) {
-            String shardName = table.getMatedataNode().getShardName();
-            String tableName = table.getMatedataNode().getTableName();
-            return singleRoutingResult(new TableNode(shardName, tableName));
+            return fixedRoutingResult(table.getShards());
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
             exportRangeArg(table, first, last, routingArgs);
@@ -89,16 +79,12 @@ public class RoutingHandlerImpl implements RoutingHandler {
 
     }
 
-    
-    
-    
+
     @Override
     public RoutingResult doRoute(TableMate table, Session session, List<IndexCondition> indexConditions) {
         TableRouter tr = table.getTableRouter();
         if (tr == null) {
-            String shardName = table.getMatedataNode().getShardName();
-            String tableName = table.getMatedataNode().getTableName();
-            return singleRoutingResult(new TableNode(shardName, tableName));
+            return fixedRoutingResult(table.getShards());
         } else {
             Map<String, List<Value>> routingArgs = New.hashMap();
             List<RuleColumn> ruleCols = tr.getRuleColumns();
@@ -134,13 +120,13 @@ public class RoutingHandlerImpl implements RoutingHandler {
                             values.add(v);
                         }
                     }
-                } else  {
+                } else {
                     int columnId = column.getColumnId();
                     Value v = condition.getCurrentValue(session);
                     boolean isStart = condition.isStart();
                     boolean isEnd = condition.isEnd();
                     if (isStart) {
-                        start = getSearchRow(table, session,start, columnId, v, true);
+                        start = getSearchRow(table, session, start, columnId, v, true);
                     }
                     if (isEnd) {
                         end = getSearchRow(table, session, end, columnId, v, false);
@@ -151,7 +137,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
             RoutingResult rr = trc.calculate(tr, routingArgs);
             return rr;
         }
-        
+
     }
 
     private Map<String, List<Value>> getRuleColumnArgs(TableMate table, SearchRow row) {
@@ -183,13 +169,12 @@ public class RoutingHandlerImpl implements RoutingHandler {
     /**
      * @param table
      */
-    private RoutingResult singleRoutingResult(TableNode tableNode) {
+    private RoutingResult fixedRoutingResult(TableNode ... tableNode) {
         RoutingResult result = RoutingResult.fixedResult(tableNode);
         return result;
     }
-    
+
     /**
-     * 
      * @param table
      * @param first
      * @param last
@@ -202,8 +187,8 @@ public class RoutingHandlerImpl implements RoutingHandler {
             for (int i = 0; first != null && i < first.getColumnCount(); i++) {
                 Value firstV = first.getValue(i);
                 Value listV = last.getValue(i);
-                if (firstV == null || listV == null 
-                        || firstV == ValueNull.INSTANCE 
+                if (firstV == null || listV == null
+                        || firstV == ValueNull.INSTANCE
                         || listV == ValueNull.INSTANCE) {
                     continue;
                 }
@@ -228,14 +213,14 @@ public class RoutingHandlerImpl implements RoutingHandler {
                     values.add(firstV);
                 } else if (compare < 0) {
                     List<Value> enumValue = enumRange(firstV, listV);
-                    if(enumValue != null) {
+                    if (enumValue != null) {
                         values.addAll(enumValue);
                     }
                 } else {
                     throw new TableRoutingException(table.getName() + " routing error. The conidition "
                             + matched.getName() + " is alwarys false.");
                 }
-                
+
             }
         }
     }
@@ -246,31 +231,31 @@ public class RoutingHandlerImpl implements RoutingHandler {
         }
         int type = firstV.getType();
         switch (type) {
-        case Value.BYTE:
-        case Value.INT:
-        case Value.LONG:
-        case Value.SHORT:
-            if (listV.subtract(firstV).getLong() > 200) {
-                return null;
-            }
-            List<Value> enumValues = New.arrayList(10);
-            Value enumValue = firstV;
-            while (database.compare(enumValue, listV) <= 0) {
-                enumValues.add(enumValue);
-                Value increase = ValueLong.get(1).convertTo(enumValue.getType());
-                enumValue = enumValue.add(increase);
-            }
-            return enumValues;
+            case Value.BYTE:
+            case Value.INT:
+            case Value.LONG:
+            case Value.SHORT:
+                if (listV.subtract(firstV).getLong() > 200) {
+                    return null;
+                }
+                List<Value> enumValues = New.arrayList(10);
+                Value enumValue = firstV;
+                while (database.compare(enumValue, listV) <= 0) {
+                    enumValues.add(enumValue);
+                    Value increase = ValueLong.get(1).convertTo(enumValue.getType());
+                    enumValue = enumValue.add(increase);
+                }
+                return enumValues;
 
-        default:
-            return null;
+            default:
+                return null;
         }
 
     }
-    
-    
-    private SearchRow getSearchRow(TableMate table, Session s,SearchRow row, int columnId, Value v,
-            boolean max) {
+
+
+    private SearchRow getSearchRow(TableMate table, Session s, SearchRow row, int columnId, Value v,
+                                   boolean max) {
         if (row == null) {
             row = table.getTemplateRow();
         } else {
@@ -284,7 +269,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         return row;
     }
 
-    private Value getMax(TableMate table,Session s,Value a, Value b, boolean bigger) {
+    private Value getMax(TableMate table, Session s, Value a, Value b, boolean bigger) {
         if (a == null) {
             return b;
         } else if (b == null) {

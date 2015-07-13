@@ -16,11 +16,11 @@ import com.suning.snfddal.message.DbException;
  */
 public class AlterTableDropConstraint extends SchemaCommand {
 
-    private String constraintName;
     private final boolean ifExists;
+    private String constraintName;
 
     public AlterTableDropConstraint(Session session, Schema schema,
-            boolean ifExists) {
+                                    boolean ifExists) {
         super(session, schema);
         this.ifExists = ifExists;
     }

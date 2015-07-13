@@ -5,6 +5,11 @@
  */
 package com.suning.snfddal.value;
 
+import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
+import com.suning.snfddal.util.DateTimeUtils;
+import com.suning.snfddal.util.MathUtils;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -12,11 +17,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
-import com.suning.snfddal.util.DateTimeUtils;
-import com.suning.snfddal.util.MathUtils;
 
 /**
  * Implementation of the TIMESTAMP data type.
@@ -58,7 +58,7 @@ public class ValueTimestamp extends Value {
      * Get or create a date value for the given date.
      *
      * @param dateValue the date value, a bit field with bits for the year,
-     *            month, and day
+     *                  month, and day
      * @param timeNanos the nanoseconds since midnight
      * @return the value
      */
@@ -83,7 +83,7 @@ public class ValueTimestamp extends Value {
     /**
      * Get or create a timestamp value for the given date/time in millis.
      *
-     * @param ms the milliseconds
+     * @param ms    the milliseconds
      * @param nanos the nanoseconds
      * @return the value
      */

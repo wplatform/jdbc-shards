@@ -5,29 +5,18 @@
  */
 package com.suning.snfddal.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.NonWritableChannelException;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
+
+import java.io.*;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A path to a file. It similar to the Java 7 <code>java.nio.file.Path</code>,
@@ -76,6 +65,7 @@ public abstract class FilePath {
         }
         return p.getPath(path);
     }
+
     /**
      * Register a file provider.
      *
@@ -95,6 +85,19 @@ public abstract class FilePath {
     }
 
     /**
+     * Get the next temporary file name part (the part in the middle).
+     *
+     * @param newRandom if the random part of the filename should change
+     * @return the file name part
+     */
+    protected static synchronized String getNextTempFileNamePart(boolean newRandom) {
+        if (newRandom || tempRandom == null) {
+            tempRandom = MathUtils.randomInt(Integer.MAX_VALUE) + ".";
+        }
+        return tempRandom + tempSequence++;
+    }
+
+    /**
      * Get the size of a file in bytes
      *
      * @return the size in bytes
@@ -104,9 +107,9 @@ public abstract class FilePath {
     /**
      * Rename a file if this is allowed.
      *
-     * @param newName the new fully qualified file name
+     * @param newName       the new fully qualified file name
      * @param atomicReplace whether the move should be atomic, and the target
-     *            file should be replaced if it exists and replacing is possible
+     *                      file should be replaced if it exists and replacing is possible
      */
     public abstract void moveTo(FilePath newName, boolean atomicReplace);
 
@@ -198,7 +201,7 @@ public abstract class FilePath {
      * Create an output stream to write into the file.
      *
      * @param append if true, the file will grow, if false, the file will be
-     *            truncated first
+     *               truncated first
      * @return the output stream
      */
     public abstract OutputStream newOutputStream(boolean append) throws IOException;
@@ -228,10 +231,10 @@ public abstract class FilePath {
     /**
      * Create a new temporary file.
      *
-     * @param suffix the suffix
+     * @param suffix       the suffix
      * @param deleteOnExit if the file should be deleted when the virtual
-     *            machine exists
-     * @param inTempDir if the file should be stored in the temporary directory
+     *                     machine exists
+     * @param inTempDir    if the file should be stored in the temporary directory
      * @return the name of the created file
      */
     public FilePath createTempFile(String suffix, boolean deleteOnExit, boolean inTempDir)
@@ -246,19 +249,6 @@ public abstract class FilePath {
             p.open("rw").close();
             return p;
         }
-    }
-
-    /**
-     * Get the next temporary file name part (the part in the middle).
-     *
-     * @param newRandom if the random part of the filename should change
-     * @return the file name part
-     */
-    protected static synchronized String getNextTempFileNamePart(boolean newRandom) {
-        if (newRandom || tempRandom == null) {
-            tempRandom = MathUtils.randomInt(Integer.MAX_VALUE) + ".";
-        }
-        return tempRandom + tempSequence++;
     }
 
     /**
@@ -309,18 +299,6 @@ public abstract class FilePath {
 
         private static final String CLASSPATH_PREFIX = "classpath:";
 
-        @Override
-        public FilePathDisk getPath(String path) {
-            FilePathDisk p = new FilePathDisk();
-            p.name = translateFileName(path);
-            return p;
-        }
-
-        @Override
-        public long size() {
-            return new File(name).length();
-        }
-
         /**
          * Translate the file name to the native format. This will replace '\'
          * with '/' and expand the home directory ('~').
@@ -351,6 +329,81 @@ public abstract class FilePath {
             return fileName;
         }
 
+        private static void wait(int i) {
+            if (i == 8) {
+                System.gc();
+            }
+            try {
+                // sleep at most 256 ms
+                long sleep = Math.min(256, i * i);
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+
+        private static boolean canWriteInternal(File file) {
+            try {
+                if (!file.canWrite()) {
+                    return false;
+                }
+            } catch (Exception e) {
+                // workaround for GAE which throws a
+                // java.security.AccessControlException
+                return false;
+            }
+            // File.canWrite() does not respect windows user permissions,
+            // so we must try to open it using the mode "rw".
+            // See also
+            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4420020
+            RandomAccessFile r = null;
+            try {
+                r = new RandomAccessFile(file, "rw");
+                return true;
+            } catch (FileNotFoundException e) {
+                return false;
+            } finally {
+                if (r != null) {
+                    try {
+                        r.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            }
+        }
+
+        /**
+         * Call the garbage collection and run finalization. This close all
+         * files that were not closed, and are no longer referenced.
+         */
+        static void freeMemoryAndFinalize() {
+            IOUtils.trace("freeMemoryAndFinalize", null, null);
+            Runtime rt = Runtime.getRuntime();
+            long mem = rt.freeMemory();
+            for (int i = 0; i < 16; i++) {
+                rt.gc();
+                long now = rt.freeMemory();
+                rt.runFinalization();
+                if (now == mem) {
+                    break;
+                }
+                mem = now;
+            }
+        }
+
+        @Override
+        public FilePathDisk getPath(String path) {
+            FilePathDisk p = new FilePathDisk();
+            p.name = translateFileName(path);
+            return p;
+        }
+
+        @Override
+        public long size() {
+            return new File(name).length();
+        }
+
         @Override
         public void moveTo(FilePath newName, boolean atomicReplace) {
             File oldFile = new File(name);
@@ -370,12 +423,12 @@ public abstract class FilePath {
                 if (ok) {
                     return;
                 }
-                throw DbException.get(ErrorCode.FILE_RENAME_FAILED_2, new String[] { name,
-                        newName.name });
+                throw DbException.get(ErrorCode.FILE_RENAME_FAILED_2, name,
+                        newName.name);
             }
             if (newFile.exists()) {
-                throw DbException.get(ErrorCode.FILE_RENAME_FAILED_2, new String[] { name,
-                        newName + " (exists)" });
+                throw DbException.get(ErrorCode.FILE_RENAME_FAILED_2, name,
+                        newName + " (exists)");
             }
             for (int i = 0; i < SysProperties.MAX_FILE_RETRY; i++) {
                 IOUtils.trace("rename", name + " >" + newName, null);
@@ -386,20 +439,7 @@ public abstract class FilePath {
                 wait(i);
             }
             throw DbException.get(ErrorCode.FILE_RENAME_FAILED_2,
-                    new String[] { name, newName.name });
-        }
-
-        private static void wait(int i) {
-            if (i == 8) {
-                System.gc();
-            }
-            try {
-                // sleep at most 256 ms
-                long sleep = Math.min(256, i * i);
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+                    name, newName.name);
         }
 
         @Override
@@ -498,37 +538,6 @@ public abstract class FilePath {
             return new File(name).lastModified();
         }
 
-        private static boolean canWriteInternal(File file) {
-            try {
-                if (!file.canWrite()) {
-                    return false;
-                }
-            } catch (Exception e) {
-                // workaround for GAE which throws a
-                // java.security.AccessControlException
-                return false;
-            }
-            // File.canWrite() does not respect windows user permissions,
-            // so we must try to open it using the mode "rw".
-            // See also
-            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4420020
-            RandomAccessFile r = null;
-            try {
-                r = new RandomAccessFile(file, "rw");
-                return true;
-            } catch (FileNotFoundException e) {
-                return false;
-            } finally {
-                if (r != null) {
-                    try {
-                        r.close();
-                    } catch (IOException e) {
-                        // ignore
-                    }
-                }
-            }
-        }
-
         @Override
         public void createDirectory() {
             File dir = new File(name);
@@ -598,25 +607,6 @@ public abstract class FilePath {
             return in;
         }
 
-        /**
-         * Call the garbage collection and run finalization. This close all
-         * files that were not closed, and are no longer referenced.
-         */
-        static void freeMemoryAndFinalize() {
-            IOUtils.trace("freeMemoryAndFinalize", null, null);
-            Runtime rt = Runtime.getRuntime();
-            long mem = rt.freeMemory();
-            for (int i = 0; i < 16; i++) {
-                rt.gc();
-                long now = rt.freeMemory();
-                rt.runFinalization();
-                if (now == mem) {
-                    break;
-                }
-                mem = now;
-            }
-        }
-
         @Override
         public FileChannel open(String mode) throws IOException {
             FileDisk f;
@@ -674,8 +664,7 @@ public abstract class FilePath {
 
     }
 
-    
-    
+
     /**
      * The base class for file implementations.
      */
@@ -772,8 +761,8 @@ public abstract class FilePath {
         }
 
     }
-    
-    
+
+
     /**
      * Uses java.io.RandomAccessFile to access a file.
      */

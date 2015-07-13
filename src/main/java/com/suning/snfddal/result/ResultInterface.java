@@ -150,17 +150,17 @@ public interface ResultInterface {
     int getNullable(int i);
 
     /**
-     * Set the fetch size for this result set.
-     *
-     * @param fetchSize the new fetch size
-     */
-    void setFetchSize(int fetchSize);
-
-    /**
      * Get the current fetch size for this result set.
      *
      * @return the fetch size
      */
     int getFetchSize();
+
+    /**
+     * Set the fetch size for this result set.
+     *
+     * @param fetchSize the new fetch size
+     */
+    void setFetchSize(int fetchSize);
 
 }

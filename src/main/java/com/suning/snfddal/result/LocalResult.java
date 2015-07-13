@@ -5,10 +5,6 @@
  */
 package com.suning.snfddal.result;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
@@ -17,6 +13,10 @@ import com.suning.snfddal.util.ValueHashMap;
 import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * A local result set contains all row data of a result set.
@@ -53,12 +53,12 @@ public class LocalResult implements ResultInterface, ResultTarget {
     /**
      * Construct a local result object.
      *
-     * @param session the session
-     * @param expressions the expression array
+     * @param session            the session
+     * @param expressions        the expression array
      * @param visibleColumnCount the number of visible columns
      */
     public LocalResult(Session session, Expression[] expressions,
-            int visibleColumnCount) {
+                       int visibleColumnCount) {
         this.session = session;
         if (session == null) {
             this.maxMemoryRows = Integer.MAX_VALUE;
@@ -71,16 +71,12 @@ public class LocalResult implements ResultInterface, ResultTarget {
         this.expressions = expressions;
     }
 
-    public void setMaxMemoryRows(int maxValue) {
-        this.maxMemoryRows = maxValue;
-    }
-
     /**
      * Construct a local result set by reading all data from a regular result
      * set.
      *
      * @param session the session
-     * @param rs the result set
+     * @param rs      the result set
      * @param maxrows the maximum number of rows to read (0 for no limit)
      * @return the local result set
      */
@@ -102,6 +98,10 @@ public class LocalResult implements ResultInterface, ResultTarget {
         }
         result.done();
         return result;
+    }
+
+    public void setMaxMemoryRows(int maxValue) {
+        this.maxMemoryRows = maxValue;
     }
 
     /**
@@ -249,7 +249,7 @@ public class LocalResult implements ResultInterface, ResultTarget {
     public int getRowId() {
         return rowId;
     }
-    
+
     /**
      * Add a row to this object.
      *

@@ -13,10 +13,10 @@ import com.suning.snfddal.value.Value;
  */
 public class SimpleRowValue implements SearchRow {
 
+    private final int virtualColumnCount;
     private long key;
     private int version;
     private int index;
-    private final int virtualColumnCount;
     private Value data;
 
     public SimpleRowValue(int columnCount) {

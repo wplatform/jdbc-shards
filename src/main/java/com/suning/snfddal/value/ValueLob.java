@@ -5,42 +5,30 @@
  */
 package com.suning.snfddal.value;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.util.DataUtils;
-import com.suning.snfddal.util.FileUtils;
-import com.suning.snfddal.util.IOUtils;
-import com.suning.snfddal.util.MathUtils;
-import com.suning.snfddal.util.SmallLRUCache;
-import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.util.Utils;
+import com.suning.snfddal.util.*;
+
+import java.io.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the BLOB and CLOB data types. Small objects are kept in
  * memory and stored in the record.
- *
+ * <p>
  * Large objects are stored in their own files. When large objects are set in a
  * prepared statement, they are first stored as 'temporary' files. Later, when
  * they are used in a record, and when the record is stored, the lob files are
  * linked: the file is renamed using the file format (tableId).(objectId). There
  * is one exception: large variables are stored in the file (-1).(objectId).
- *
+ * <p>
  * When lobs are deleted, they are first renamed to a temp file, and if the
  * delete operation is committed the file is deleted.
- *
+ * <p>
  * Data compression is supported.
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class ValueLob extends Value {
@@ -62,7 +50,7 @@ public class ValueLob extends Value {
     private int hash;
 
     private ValueLob(int type, String fileName,
-            int tableId, int objectId, boolean linked, long precision) {
+                     int tableId, int objectId, boolean linked, long precision) {
         this.type = type;
         this.fileName = fileName;
         this.tableId = tableId;
@@ -93,7 +81,7 @@ public class ValueLob extends Value {
     /**
      * Create a small lob using the given byte array.
      *
-     * @param type the type (Value.BLOB or CLOB)
+     * @param type  the type (Value.BLOB or CLOB)
      * @param small the byte array
      * @return the lob value
      */
@@ -102,7 +90,7 @@ public class ValueLob extends Value {
     }
 
     private static String getFileName(int tableId,
-            int objectId) {
+                                      int objectId) {
         if (SysProperties.CHECK && tableId == 0 && objectId == 0) {
             DbException.throwInternalError("0 LOB");
         }
@@ -110,25 +98,25 @@ public class ValueLob extends Value {
         return getFileNamePrefix(getDatabasePath(), objectId) +
                 table + Constants.SUFFIX_LOB_FILE;
     }
-    
+
     private static String getDatabasePath() {
         return new File(Utils.getProperty("java.io.tmpdir", "."),
-                SysProperties.PREFIX_TEMP_FILE).getAbsolutePath(); 
+                SysProperties.PREFIX_TEMP_FILE).getAbsolutePath();
     }
 
     /**
      * Create a LOB value with the given parameters.
      *
-     * @param type the data type
-     * @param handler the file handler
-     * @param tableId the table object id
-     * @param objectId the object id
-     * @param precision the precision (length in elements)
+     * @param type        the data type
+     * @param handler     the file handler
+     * @param tableId     the table object id
+     * @param objectId    the object id
+     * @param precision   the precision (length in elements)
      * @param compression if compression is used
      * @return the value object
      */
     public static ValueLob openLinked(int type,
-            int tableId, int objectId, long precision) {
+                                      int tableId, int objectId, long precision) {
         String fileName = getFileName(tableId, objectId);
         return new ValueLob(type, fileName, tableId, objectId,
                 true/* linked */, precision);
@@ -137,18 +125,18 @@ public class ValueLob extends Value {
     /**
      * Create a LOB value with the given parameters.
      *
-     * @param type the data type
-     * @param handler the file handler
-     * @param tableId the table object id
-     * @param objectId the object id
-     * @param precision the precision (length in elements)
+     * @param type        the data type
+     * @param handler     the file handler
+     * @param tableId     the table object id
+     * @param objectId    the object id
+     * @param precision   the precision (length in elements)
      * @param compression if compression is used
-     * @param fileName the file name
+     * @param fileName    the file name
      * @return the value object
      */
     public static ValueLob openUnlinked(int type,
-            int tableId, int objectId, long precision,
-            String fileName) {
+                                        int tableId, int objectId, long precision,
+                                        String fileName) {
         return new ValueLob(type, fileName, tableId, objectId,
                 false/* linked */, precision);
     }
@@ -156,8 +144,8 @@ public class ValueLob extends Value {
     /**
      * Create a CLOB value from a stream.
      *
-     * @param in the reader
-     * @param length the number of characters to read, or -1 for no limit
+     * @param in      the reader
+     * @param length  the number of characters to read, or -1 for no limit
      * @param handler the data handler
      * @return the lob value
      */
@@ -210,32 +198,9 @@ public class ValueLob extends Value {
         }
         return (int) m;
     }
-    
+
     private static int getMaxLengthInplaceLob() {
         return SysProperties.LOB_CLIENT_MAX_SIZE_MEMORY;
-    }
-
-    private void createFromReader(char[] buff, int len, Reader in,
-            long remaining) throws IOException {
-        FileOutputStream out = initLarge();
-        try {
-            while (true) {
-                precision += len;
-                byte[] b = new String(buff, 0, len).getBytes(Constants.UTF8);
-                out.write(b, 0, b.length);
-                remaining -= len;
-                if (remaining <= 0) {
-                    break;
-                }
-                len = getBufferSize(remaining);
-                len = IOUtils.readFully(in, buff, len);
-                if (len == 0) {
-                    break;
-                }
-            }
-        } finally {
-            out.close();
-        }
     }
 
     private static String getFileNamePrefix(String path, int objectId) {
@@ -343,8 +308,8 @@ public class ValueLob extends Value {
     /**
      * Create a BLOB value from a stream.
      *
-     * @param in the input stream
-     * @param length the number of characters to read, or -1 for no limit
+     * @param in      the input stream
+     * @param length  the number of characters to read, or -1 for no limit
      * @param handler the data handler
      * @return the lob value
      */
@@ -376,6 +341,48 @@ public class ValueLob extends Value {
         }
     }
 
+    private static synchronized void deleteFile(
+            String fileName) {
+        FileUtils.delete(fileName);
+    }
+
+    private static synchronized void renameFile(
+            String oldName, String newName) {
+        FileUtils.move(oldName, newName);
+    }
+
+    private static void copyFileTo(String sourceFileName,
+                                   String targetFileName) {
+        try {
+            IOUtils.copyFiles(sourceFileName, targetFileName);
+        } catch (IOException e) {
+            throw DbException.convertIOException(e, null);
+        }
+    }
+
+    private void createFromReader(char[] buff, int len, Reader in,
+                                  long remaining) throws IOException {
+        FileOutputStream out = initLarge();
+        try {
+            while (true) {
+                precision += len;
+                byte[] b = new String(buff, 0, len).getBytes(Constants.UTF8);
+                out.write(b, 0, b.length);
+                remaining -= len;
+                if (remaining <= 0) {
+                    break;
+                }
+                len = getBufferSize(remaining);
+                len = IOUtils.readFully(in, buff, len);
+                if (len == 0) {
+                    break;
+                }
+            }
+        } finally {
+            out.close();
+        }
+    }
+
     private FileOutputStream initLarge() {
         this.tableId = 0;
         this.linked = false;
@@ -395,7 +402,7 @@ public class ValueLob extends Value {
     }
 
     private void createFromStream(byte[] buff, int len, InputStream in,
-            long remaining) throws IOException {
+                                  long remaining) throws IOException {
         FileOutputStream out = initLarge();
         try {
             while (true) {
@@ -470,7 +477,7 @@ public class ValueLob extends Value {
             renameFile(fileName, temp);
             fileName = temp;
             linked = false;
-        
+
         }
     }
 
@@ -499,6 +506,7 @@ public class ValueLob extends Value {
         }
         return this;
     }
+
     /**
      * Get the current table id of this lob.
      *
@@ -714,26 +722,6 @@ public class ValueLob extends Value {
                     DbException.throwInternalError();
                 }
             }
-        } catch (IOException e) {
-            throw DbException.convertIOException(e, null);
-        }
-    }
-
-
-    private static synchronized void deleteFile(
-            String fileName) {
-        FileUtils.delete(fileName);
-    }
-
-    private static synchronized void renameFile(
-            String oldName, String newName) {
-        FileUtils.move(oldName, newName);
-    }
-
-    private static void copyFileTo(String sourceFileName,
-            String targetFileName) {
-        try {
-            IOUtils.copyFiles(sourceFileName, targetFileName);
         } catch (IOException e) {
             throw DbException.convertIOException(e, null);
         }

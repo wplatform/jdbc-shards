@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.sql.ResultSet;
-
 import com.suning.snfddal.command.CommandInterface;
 import com.suning.snfddal.command.Prepared;
 import com.suning.snfddal.command.expression.Expression;
@@ -16,6 +14,8 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.result.LocalResult;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.value.Value;
+
+import java.sql.ResultSet;
 
 /**
  * This class represents the statement
@@ -59,7 +59,7 @@ public class Call extends Prepared {
             return LocalResult.read(session, rs, maxrows);
         }
         LocalResult result = new LocalResult(session, expressions, 1);
-        Value[] row = { v };
+        Value[] row = {v};
         result.addRow(row);
         result.done();
         return result;
@@ -68,7 +68,7 @@ public class Call extends Prepared {
     @Override
     public void prepare() {
         expression = expression.optimize(session);
-        expressions = new Expression[] { expression };
+        expressions = new Expression[]{expression};
         isResultSet = expression.getType() == Value.RESULT_SET;
         if (isResultSet) {
             prepareAlways = true;

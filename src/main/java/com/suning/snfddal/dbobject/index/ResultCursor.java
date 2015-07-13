@@ -48,5 +48,5 @@ public class ResultCursor implements Cursor {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
 }

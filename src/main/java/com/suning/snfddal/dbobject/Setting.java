@@ -22,20 +22,20 @@ public class Setting extends DbObjectBase {
         initDbObjectBase(database, id, settingName, Trace.SETTING);
     }
 
-    public void setIntValue(int value) {
-        intValue = value;
-    }
-
     public int getIntValue() {
         return intValue;
     }
 
-    public void setStringValue(String value) {
-        stringValue = value;
+    public void setIntValue(int value) {
+        intValue = value;
     }
 
     public String getStringValue() {
         return stringValue;
+    }
+
+    public void setStringValue(String value) {
+        stringValue = value;
     }
 
     @Override

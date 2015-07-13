@@ -46,7 +46,7 @@ public class Delete extends Prepared {
     public void setCondition(Expression condition) {
         this.condition = condition;
     }
-    
+
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -82,14 +82,14 @@ public class Delete extends Prepared {
                 }
             }
             int rowScanCount = 0;
-            for (rows.reset(); rows.hasNext();) {
+            for (rows.reset(); rows.hasNext(); ) {
                 if ((++rowScanCount & 127) == 0) {
                     checkCanceled();
                 }
                 Row row = rows.next();
                 //table.removeRow(session, row);
             }
-            
+
             return count;
         } finally {
             rows.close();

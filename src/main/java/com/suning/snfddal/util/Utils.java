@@ -41,9 +41,8 @@ public class Utils {
 
     private static final int GC_DELAY = 50;
     private static final int MAX_GC = 8;
-    private static long lastGC;
-
     private static final HashMap<String, byte[]> RESOURCES = New.hashMap();
+    private static long lastGC;
 
     private Utils() {
         // utility class
@@ -61,8 +60,8 @@ public class Utils {
      * significant byte is written first.
      *
      * @param buff the byte array
-     * @param pos the position
-     * @param x the value to write
+     * @param pos  the position
+     * @param x    the value to write
      */
     public static void writeLong(byte[] buff, int pos, long x) {
         writeInt(buff, pos, (int) (x >> 32));
@@ -81,7 +80,7 @@ public class Utils {
      * significant byte is read first.
      *
      * @param buff the byte array
-     * @param pos the position
+     * @param pos  the position
      * @return the value
      */
     public static long readLong(byte[] buff, int pos) {
@@ -95,9 +94,9 @@ public class Utils {
      * pattern has not been found, and the start position if the pattern is
      * empty.
      *
-     * @param bytes the byte array
+     * @param bytes   the byte array
      * @param pattern the pattern
-     * @param start the start index from where to search
+     * @param start   the start index from where to search
      * @return the index
      */
     public static int indexOf(byte[] bytes, byte[] pattern, int start) {
@@ -360,13 +359,13 @@ public class Utils {
      * Find the top limit values using given comparator and place them as in a
      * full array sort, in descending order.
      *
-     * @param array the array.
+     * @param array  the array.
      * @param offset the offset.
-     * @param limit the limit.
-     * @param comp the comparator.
+     * @param limit  the limit.
+     * @param comp   the comparator.
      */
     public static <X> void sortTopN(X[] array, int offset, int limit,
-            Comparator<? super X> comp) {
+                                    Comparator<? super X> comp) {
         partitionTopN(array, offset, limit, comp);
         Arrays.sort(array, offset,
                 (int) Math.min((long) offset + limit, array.length), comp);
@@ -376,19 +375,19 @@ public class Utils {
      * Find the top limit values using given comparator and place them as in a
      * full array sort. This method does not sort the top elements themselves.
      *
-     * @param array the array
+     * @param array  the array
      * @param offset the offset
-     * @param limit the limit
-     * @param comp the comparator
+     * @param limit  the limit
+     * @param comp   the comparator
      */
     private static <X> void partitionTopN(X[] array, int offset, int limit,
-            Comparator<? super X> comp) {
+                                          Comparator<? super X> comp) {
         partialQuickSort(array, 0, array.length - 1, comp, offset, offset +
                 limit - 1);
     }
 
     private static <X> void partialQuickSort(X[] array, int low, int high,
-            Comparator<? super X> comp, int start, int end) {
+                                             Comparator<? super X> comp, int start, int end) {
         if (low > end || high < start || (low > start && high < end)) {
             return;
         }
@@ -505,7 +504,7 @@ public class Utils {
         }
         return null;
     }
-    
+
     public static InputStream getResourceAsStream(String resource) {
         if (resource == null) {
             return null;
@@ -515,14 +514,14 @@ public class Utils {
         InputStream source = Utils.class.getResourceAsStream(path);
         return source;
     }
-    
+
     public static Class<?> loadClass(String className) {
         Class<?> clazz = null;
 
         if (className == null) {
             return null;
         }
-        
+
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
@@ -547,12 +546,12 @@ public class Utils {
      * than the one in the Java specification, but works well for most cases).
      *
      * @param classAndMethod a string with the entire class and method name, eg.
-     *            "java.lang.System.gc"
-     * @param params the method parameters
+     *                       "java.lang.System.gc"
+     * @param params         the method parameters
      * @return the return value from this call
      */
     public static Object callStaticMethod(String classAndMethod,
-            Object... params) throws Exception {
+                                          Object... params) throws Exception {
         int lastDot = classAndMethod.lastIndexOf('.');
         String className = classAndMethod.substring(0, lastDot);
         String methodName = classAndMethod.substring(lastDot + 1);
@@ -564,9 +563,9 @@ public class Utils {
      * where the most parameter classes match exactly (this algorithm is simpler
      * than the one in the Java specification, but works well for most cases).
      *
-     * @param instance the instance on which the call is done
+     * @param instance   the instance on which the call is done
      * @param methodName a string with the method name
-     * @param params the method parameters
+     * @param params     the method parameters
      * @return the return value from this call
      */
     public static Object callMethod(
@@ -605,7 +604,7 @@ public class Utils {
      * one in the Java specification, but works well for most cases).
      *
      * @param className a string with the entire class, eg. "java.lang.Integer"
-     * @param params the constructor parameters
+     * @param params    the constructor parameters
      * @return the newly created object
      */
     public static Object newInstance(String className, Object... params)
@@ -662,7 +661,7 @@ public class Utils {
     /**
      * Returns a static field.
      *
-     * @param instance the instance on which the call is done
+     * @param instance  the instance on which the call is done
      * @param fieldName the field name
      * @return the field value
      */
@@ -675,7 +674,7 @@ public class Utils {
      * Returns true if the class is present in the current class loader.
      *
      * @param fullyQualifiedClassName a string with the entire class name, eg.
-     *        "java.lang.System"
+     *                                "java.lang.System"
      * @return true if the class is present
      */
     public static boolean isClassPresent(String fullyQualifiedClassName) {
@@ -722,7 +721,7 @@ public class Utils {
      * Get the system property. If the system property is not set, or if a
      * security exception occurs, the default value is returned.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the value
      */
@@ -738,7 +737,7 @@ public class Utils {
      * Get the system property. If the system property is not set, or if a
      * security exception occurs, the default value is returned.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the value
      */
@@ -758,7 +757,7 @@ public class Utils {
      * Get the system property. If the system property is not set, or if a
      * security exception occurs, the default value is returned.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the value
      */
@@ -805,12 +804,12 @@ public class Utils {
         }
         return value;
     }
-    
+
     public static long murmurhash2_64(String text) {
         final byte[] bytes = text.getBytes();
         return murmurhash2_64(bytes, bytes.length, 0xe17a1465);
     }
-    
+
     /**
      * murmur hash 2.0, The murmur hash is a relatively fast hash function from http://murmurhash.googlepages.com/ for
      * platforms with efficient multiplication.
@@ -855,7 +854,6 @@ public class Utils {
                 h ^= (long) (data[length & ~7] & 0xff);
                 h *= m;
         }
-        ;
         h ^= h >>> r;
         h *= m;
         h ^= h >>> r;
@@ -874,7 +872,7 @@ public class Utils {
          *
          * @param name the binary name of the class
          * @return true if this factory can return a valid class for the
-         *         provided class name
+         * provided class name
          */
         boolean match(String name);
 
@@ -884,7 +882,7 @@ public class Utils {
          * @param name the binary name of the class
          * @return the class object
          * @throws ClassNotFoundException If the class is not handle by this
-         *             factory
+         *                                factory
          */
         Class<?> loadClass(String name)
                 throws ClassNotFoundException;

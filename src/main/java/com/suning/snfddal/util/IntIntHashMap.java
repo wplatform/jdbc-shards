@@ -35,7 +35,7 @@ public class IntIntHashMap extends HashBase {
     /**
      * Store the given key-value pair. The value is overwritten or added.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value (-1 is not supported)
      */
     public void put(int key, int value) {

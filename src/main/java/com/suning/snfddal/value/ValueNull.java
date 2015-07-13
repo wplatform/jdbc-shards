@@ -5,16 +5,12 @@
  */
 package com.suning.snfddal.value;
 
+import com.suning.snfddal.message.DbException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-
-import com.suning.snfddal.message.DbException;
+import java.sql.*;
 
 /**
  * Implementation of NULL. NULL is not a regular data type.

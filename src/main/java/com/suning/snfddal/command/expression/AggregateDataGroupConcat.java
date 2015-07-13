@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Database;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.ValueHashMap;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * Data stored while calculating a GROUP_CONCAT aggregate.

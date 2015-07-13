@@ -5,24 +5,11 @@
  */
 package com.suning.snfddal.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
+
+import java.io.*;
 
 /**
  * This utility class contains input/output functions.
@@ -52,11 +39,11 @@ public class IOUtils {
     /**
      * Skip a number of bytes in an input stream.
      *
-     * @param in the input stream
+     * @param in   the input stream
      * @param skip the number of bytes to skip
      * @throws EOFException if the end of file has been reached before all bytes
-     *             could be skipped
-     * @throws IOException if an IO exception occurred while skipping
+     *                      could be skipped
+     * @throws IOException  if an IO exception occurred while skipping
      */
     public static void skipFully(InputStream in, long skip) throws IOException {
         try {
@@ -76,10 +63,10 @@ public class IOUtils {
      * Skip a number of characters in a reader.
      *
      * @param reader the reader
-     * @param skip the number of characters to skip
+     * @param skip   the number of characters to skip
      * @throws EOFException if the end of file has been reached before all
-     *             characters could be skipped
-     * @throws IOException if an IO exception occurred while skipping
+     *                      characters could be skipped
+     * @throws IOException  if an IO exception occurred while skipping
      */
     public static void skipFully(Reader reader, long skip) throws IOException {
         try {
@@ -99,7 +86,7 @@ public class IOUtils {
      * Copy all data from the input stream to the output stream and close both
      * streams. Exceptions while closing are ignored.
      *
-     * @param in the input stream
+     * @param in  the input stream
      * @param out the output stream
      * @return the number of bytes copied
      */
@@ -120,7 +107,7 @@ public class IOUtils {
      * Copy all data from the input stream to the output stream and close the
      * input stream. Exceptions while closing are ignored.
      *
-     * @param in the input stream
+     * @param in  the input stream
      * @param out the output stream (null if writing is not required)
      * @return the number of bytes copied
      */
@@ -139,7 +126,7 @@ public class IOUtils {
      * Copy all data from the input stream to the output stream. Both streams
      * are kept open.
      *
-     * @param in the input stream
+     * @param in  the input stream
      * @param out the output stream (null if writing is not required)
      * @return the number of bytes copied
      */
@@ -152,8 +139,8 @@ public class IOUtils {
      * Copy all data from the input stream to the output stream. Both streams
      * are kept open.
      *
-     * @param in the input stream
-     * @param out the output stream (null if writing is not required)
+     * @param in     the input stream
+     * @param out    the output stream (null if writing is not required)
      * @param length the maximum number of bytes to copy
      * @return the number of bytes copied
      */
@@ -185,8 +172,8 @@ public class IOUtils {
      * Copy all data from the reader to the writer and close the reader.
      * Exceptions while closing are ignored.
      *
-     * @param in the reader
-     * @param out the writer (null if writing is not required)
+     * @param in     the reader
+     * @param out    the writer (null if writing is not required)
      * @param length the maximum number of bytes to copy
      * @return the number of characters copied
      */
@@ -266,9 +253,9 @@ public class IOUtils {
     /**
      * Read a number of bytes from an input stream and close the stream.
      *
-     * @param in the input stream
+     * @param in     the input stream
      * @param length the maximum number of bytes to read, or -1 to read until
-     *            the end of file
+     *               the end of file
      * @return the bytes read
      */
     public static byte[] readBytesAndClose(InputStream in, int length)
@@ -291,9 +278,9 @@ public class IOUtils {
     /**
      * Read a number of characters from a reader and close it.
      *
-     * @param in the reader
+     * @param in     the reader
      * @param length the maximum number of characters to read, or -1 to read
-     *            until the end of file
+     *               until the end of file
      * @return the string read
      */
     public static String readStringAndClose(Reader in, int length)
@@ -316,9 +303,9 @@ public class IOUtils {
      * until the maximum number of bytes have been read or until the end of
      * file.
      *
-     * @param in the input stream
+     * @param in     the input stream
      * @param buffer the output buffer
-     * @param max the number of bytes to read at most
+     * @param max    the number of bytes to read at most
      * @return the number of bytes read, 0 meaning EOF
      */
     public static int readFully(InputStream in, byte[] buffer, int max)
@@ -344,9 +331,9 @@ public class IOUtils {
      * reads until the maximum number of characters have been read or until the
      * end of file.
      *
-     * @param in the reader
+     * @param in     the reader
      * @param buffer the output buffer
-     * @param max the number of characters to read at most
+     * @param max    the number of characters to read at most
      * @return the number of characters read, 0 meaning EOF
      */
     public static int readFully(Reader in, char[] buffer, int max)
@@ -427,9 +414,9 @@ public class IOUtils {
     /**
      * Trace input or output operations if enabled.
      *
-     * @param method the method from where this method was called
+     * @param method   the method from where this method was called
      * @param fileName the file name
-     * @param o the object to append to the message
+     * @param o        the object to append to the message
      */
     public static void trace(String method, String fileName, Object o) {
         if (SysProperties.TRACE_IO) {
@@ -456,7 +443,7 @@ public class IOUtils {
      * Copy a file from one directory to another, or to another file.
      *
      * @param original the original file name
-     * @param copy the file name of the copy
+     * @param copy     the file name of the copy
      */
     public static void copyFiles(String original, String copy) throws IOException {
         InputStream in = FileUtils.newInputStream(original);

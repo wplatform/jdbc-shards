@@ -44,15 +44,15 @@ public class IndexMate extends SchemaObjectBase implements Index {
     /**
      * Initialize the base index.
      *
-     * @param newTable the table
-     * @param id the object id
-     * @param name the index name
+     * @param newTable        the table
+     * @param id              the object id
+     * @param name            the index name
      * @param newIndexColumns the columns that are indexed or null if this is
-     *            not yet known
-     * @param newIndexType the index type
+     *                        not yet known
+     * @param newIndexType    the index type
      */
     public IndexMate(Table newTable, int id, String name,
-            IndexColumn[] newIndexColumns, IndexType newIndexType) {
+                     IndexColumn[] newIndexColumns, IndexType newIndexType) {
         initSchemaObjectBase(newTable.getSchema(), id, name, Trace.INDEX);
         this.indexType = newIndexType;
         this.table = newTable;
@@ -95,14 +95,14 @@ public class IndexMate extends SchemaObjectBase implements Index {
      * b-tree range index. This is the estimated cost required to search one
      * row, and then iterate over the given number of rows.
      *
-     * @param masks the search mask
-     * @param rowCount the number of rows in the index
-     * @param filter the table filter
+     * @param masks     the search mask
+     * @param rowCount  the number of rows in the index
+     * @param filter    the table filter
      * @param sortOrder the sort order
      * @return the estimated cost
      */
     protected long getCostRangeIndex(int[] masks, long rowCount,
-            TableFilter filter, SortOrder sortOrder) {
+                                     TableFilter filter, SortOrder sortOrder) {
         rowCount += Constants.COST_ROW_OFFSET;
         long cost = rowCount;
         long rows = rowCount;
@@ -223,7 +223,7 @@ public class IndexMate extends SchemaObjectBase implements Index {
 
     @Override
     public double getCost(Session session, int[] masks, TableFilter filter,
-            SortOrder sortOrder) {
+                          SortOrder sortOrder) {
         return 100 + getCostRangeIndex(masks, table.getRowCountApproximation()
                 + Constants.COST_ROW_OFFSET, filter, sortOrder);
     }

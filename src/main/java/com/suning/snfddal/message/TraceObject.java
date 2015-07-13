@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.message;
 
+import com.suning.snfddal.util.StringUtils;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Map;
-
-import com.suning.snfddal.util.StringUtils;
 
 /**
  * The base class for objects that can print trace information about themselves.
@@ -93,9 +93,9 @@ public class TraceObject {
 
     private static final int LAST = ARRAY + 1;
     private static final int[] ID = new int[LAST];
-    private static final String[] PREFIX = { "call", "conn", "dbMeta", "prep",
+    private static final String[] PREFIX = {"call", "conn", "dbMeta", "prep",
             "rs", "rsMeta", "sp", "ex", "stat", "blob", "clob", "pMeta", "ds",
-            "xads", "xares", "xid", "ar" };
+            "xads", "xares", "xid", "ar"};
 
     /**
      * The trace module used by this object.
@@ -106,33 +106,6 @@ public class TraceObject {
     private int id;
 
     /**
-     * Set the options to use when writing trace message.
-     *
-     * @param trace the trace object
-     * @param type the trace object type
-     * @param id the trace object id
-     */
-    protected void setTrace(Trace trace, int type, int id) {
-        this.trace = trace;
-        this.traceType = type;
-        this.id = id;
-    }
-
-    /**
-     * INTERNAL
-     */
-    public int getTraceId() {
-        return id;
-    }
-
-    /**
-     * INTERNAL
-     */
-    public String getTraceObjectName() {
-        return PREFIX[traceType] + id;
-    }
-
-    /**
      * Get the next trace object id for this object type.
      *
      * @param type the object type
@@ -140,94 +113,6 @@ public class TraceObject {
      */
     protected static int getNextId(int type) {
         return ID[type]++;
-    }
-
-    /**
-     * Check if the debug trace level is enabled.
-     *
-     * @return true if it is
-     */
-    protected boolean isDebugEnabled() {
-        return trace.isDebugEnabled();
-    }
-
-    /**
-     * Check if info trace level is enabled.
-     *
-     * @return true if it is
-     */
-    protected boolean isInfoEnabled() {
-        return trace.isInfoEnabled();
-    }
-
-    /**
-     * Write trace information as an assignment in the form
-     * className prefixId = objectName.value.
-     *
-     * @param className the class name of the result
-     * @param newType the prefix type
-     * @param newId the trace object id of the created object
-     * @param value the value to assign this new object to
-     */
-    protected void debugCodeAssign(String className, int newType, int newId,
-            String value) {
-        if (trace.isDebugEnabled()) {
-            trace.debugCode(className + " " + PREFIX[newType] +
-                    newId + " = " + getTraceObjectName() + "." + value + ";");
-        }
-    }
-
-    /**
-     * Write trace information as a method call in the form
-     * objectName.methodName().
-     *
-     * @param methodName the method name
-     */
-    protected void debugCodeCall(String methodName) {
-        if (trace.isDebugEnabled()) {
-            trace.debugCode(getTraceObjectName() + "." + methodName + "();");
-        }
-    }
-
-    /**
-     * Write trace information as a method call in the form
-     * objectName.methodName(param) where the parameter is formatted as a long
-     * value.
-     *
-     * @param methodName the method name
-     * @param param one single long parameter
-     */
-    protected void debugCodeCall(String methodName, long param) {
-        if (trace.isDebugEnabled()) {
-            trace.debugCode(getTraceObjectName() + "." +
-                    methodName + "(" + param + ");");
-        }
-    }
-
-    /**
-     * Write trace information as a method call in the form
-     * objectName.methodName(param) where the parameter is formatted as a Java
-     * string.
-     *
-     * @param methodName the method name
-     * @param param one single string parameter
-     */
-    protected void debugCodeCall(String methodName, String param) {
-        if (trace.isDebugEnabled()) {
-            trace.debugCode(getTraceObjectName() + "." +
-                    methodName + "(" + quote(param) + ");");
-        }
-    }
-
-    /**
-     * Write trace information in the form objectName.text.
-     *
-     * @param text the trace text
-     */
-    protected void debugCode(String text) {
-        if (trace.isDebugEnabled()) {
-            trace.debugCode(getTraceObjectName() + "." + text);
-        }
     }
 
     /**
@@ -341,6 +226,121 @@ public class TraceObject {
             return "new Map()";
         }
         return "new Map() /* " + map.toString() + " */";
+    }
+
+    /**
+     * Set the options to use when writing trace message.
+     *
+     * @param trace the trace object
+     * @param type  the trace object type
+     * @param id    the trace object id
+     */
+    protected void setTrace(Trace trace, int type, int id) {
+        this.trace = trace;
+        this.traceType = type;
+        this.id = id;
+    }
+
+    /**
+     * INTERNAL
+     */
+    public int getTraceId() {
+        return id;
+    }
+
+    /**
+     * INTERNAL
+     */
+    public String getTraceObjectName() {
+        return PREFIX[traceType] + id;
+    }
+
+    /**
+     * Check if the debug trace level is enabled.
+     *
+     * @return true if it is
+     */
+    protected boolean isDebugEnabled() {
+        return trace.isDebugEnabled();
+    }
+
+    /**
+     * Check if info trace level is enabled.
+     *
+     * @return true if it is
+     */
+    protected boolean isInfoEnabled() {
+        return trace.isInfoEnabled();
+    }
+
+    /**
+     * Write trace information as an assignment in the form
+     * className prefixId = objectName.value.
+     *
+     * @param className the class name of the result
+     * @param newType   the prefix type
+     * @param newId     the trace object id of the created object
+     * @param value     the value to assign this new object to
+     */
+    protected void debugCodeAssign(String className, int newType, int newId,
+                                   String value) {
+        if (trace.isDebugEnabled()) {
+            trace.debugCode(className + " " + PREFIX[newType] +
+                    newId + " = " + getTraceObjectName() + "." + value + ";");
+        }
+    }
+
+    /**
+     * Write trace information as a method call in the form
+     * objectName.methodName().
+     *
+     * @param methodName the method name
+     */
+    protected void debugCodeCall(String methodName) {
+        if (trace.isDebugEnabled()) {
+            trace.debugCode(getTraceObjectName() + "." + methodName + "();");
+        }
+    }
+
+    /**
+     * Write trace information as a method call in the form
+     * objectName.methodName(param) where the parameter is formatted as a long
+     * value.
+     *
+     * @param methodName the method name
+     * @param param      one single long parameter
+     */
+    protected void debugCodeCall(String methodName, long param) {
+        if (trace.isDebugEnabled()) {
+            trace.debugCode(getTraceObjectName() + "." +
+                    methodName + "(" + param + ");");
+        }
+    }
+
+    /**
+     * Write trace information as a method call in the form
+     * objectName.methodName(param) where the parameter is formatted as a Java
+     * string.
+     *
+     * @param methodName the method name
+     * @param param      one single string parameter
+     */
+    protected void debugCodeCall(String methodName, String param) {
+        if (trace.isDebugEnabled()) {
+            trace.debugCode(getTraceObjectName() + "." +
+                    methodName + "(" + quote(param) + ");");
+        }
+    }
+
+    /**
+     * Write trace information in the form objectName.text.
+     *
+     * @param text the trace text
+     */
+    protected void debugCode(String text) {
+        if (trace.isDebugEnabled()) {
+            trace.debugCode(getTraceObjectName() + "." + text);
+        }
     }
 
     /**

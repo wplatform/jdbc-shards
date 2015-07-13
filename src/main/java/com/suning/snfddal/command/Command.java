@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.Database;
@@ -16,6 +13,9 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.result.ResultInterface;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Represents a SQL statement. This object is only used on the server side.
@@ -26,24 +26,19 @@ public abstract class Command implements CommandInterface {
      * The session.
      */
     protected final Session session;
-
-    /**
-     * The last start time.
-     */
-    protected long startTime;
-
     /**
      * The trace module.
      */
     private final Trace trace;
-
+    private final String sql;
+    /**
+     * The last start time.
+     */
+    protected long startTime;
     /**
      * If this query was canceled.
      */
     private volatile boolean cancel;
-
-    private final String sql;
-
     private boolean canReuse;
 
     Command(Parser parser, String sql) {
@@ -158,7 +153,7 @@ public abstract class Command implements CommandInterface {
      * Execute a query and return the result.
      * This method prepares everything and calls {@link #query(int)} finally.
      *
-     * @param maxrows the maximum number of rows to return
+     * @param maxrows    the maximum number of rows to return
      * @param scrollable if the result set must be scrollable (ignored)
      * @return the result set
      */

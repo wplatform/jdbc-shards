@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.HashMap;
-import java.util.List;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.dml.Select;
 import com.suning.snfddal.command.dml.SelectListColumnResolver;
@@ -24,6 +21,9 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A expression that represents a column of a table or view.
@@ -48,7 +48,7 @@ public class ExpressionColumn extends Expression {
     }
 
     public ExpressionColumn(Database database, String schemaName,
-            String tableAlias, String columnName) {
+                            String tableAlias, String columnName) {
         this.database = database;
         this.schemaName = schemaName;
         this.tableAlias = tableAlias;
@@ -266,40 +266,40 @@ public class ExpressionColumn extends Expression {
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
         switch (visitor.getType()) {
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-            return false;
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-            return true;
-        case ExpressionVisitor.INDEPENDENT:
-            return this.queryLevel < visitor.getQueryLevel();
-        case ExpressionVisitor.EVALUATABLE:
-            // if the current value is known (evaluatable set)
-            // or if this columns belongs to a 'higher level' query and is
-            // therefore just a parameter
-            if (database.getSettings().nestedJoins) {
-                if (visitor.getQueryLevel() < this.queryLevel) {
-                    return true;
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+                return false;
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+                return true;
+            case ExpressionVisitor.INDEPENDENT:
+                return this.queryLevel < visitor.getQueryLevel();
+            case ExpressionVisitor.EVALUATABLE:
+                // if the current value is known (evaluatable set)
+                // or if this columns belongs to a 'higher level' query and is
+                // therefore just a parameter
+                if (database.getSettings().nestedJoins) {
+                    if (visitor.getQueryLevel() < this.queryLevel) {
+                        return true;
+                    }
+                    if (getTableFilter() == null) {
+                        return false;
+                    }
+                    return getTableFilter().isEvaluatable();
                 }
-                if (getTableFilter() == null) {
-                    return false;
+                return evaluatable || visitor.getQueryLevel() < this.queryLevel;
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+                return columnResolver != visitor.getResolver();
+            case ExpressionVisitor.GET_DEPENDENCIES:
+                if (column != null) {
+                    visitor.addDependency(column.getTable());
                 }
-                return getTableFilter().isEvaluatable();
-            }
-            return evaluatable || visitor.getQueryLevel() < this.queryLevel;
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-            return columnResolver != visitor.getResolver();
-        case ExpressionVisitor.GET_DEPENDENCIES:
-            if (column != null) {
-                visitor.addDependency(column.getTable());
-            }
-            return true;
-        case ExpressionVisitor.GET_COLUMNS:
-            visitor.addColumn(column);
-            return true;
-        default:
-            throw DbException.throwInternalError("type=" + visitor.getType());
+                return true;
+            case ExpressionVisitor.GET_COLUMNS:
+                visitor.addColumn(column);
+                return true;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 
@@ -324,9 +324,9 @@ public class ExpressionColumn extends Expression {
         return new Comparison(session, Comparison.EQUAL, this,
                 ValueExpression.get(ValueBoolean.get(false)));
     }
-    
+
     @Override
-    public String exportParameters(TableFilter filter,List<Value> container) {
+    public String exportParameters(TableFilter filter, List<Value> container) {
         if (getTableFilter() == filter) {
             return getSQL();
         }

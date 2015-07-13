@@ -5,11 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
-
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -20,6 +15,11 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeSet;
+
 /**
  * Used for optimised IN(...) queries where the contents of the IN list are all
  * constant and of the same type.
@@ -29,20 +29,20 @@ import com.suning.snfddal.value.ValueNull;
  */
 public class ConditionInConstantSet extends Condition {
 
-    private Expression left;
-    private int queryLevel;
     private final ArrayList<Expression> valueList;
     private final TreeSet<Value> valueSet;
+    private Expression left;
+    private int queryLevel;
 
     /**
      * Create a new IN(..) condition.
      *
-     * @param session the session
-     * @param left the expression before IN
+     * @param session   the session
+     * @param left      the expression before IN
      * @param valueList the value list (at least two elements)
      */
     public ConditionInConstantSet(final Session session, Expression left,
-            ArrayList<Expression> valueList) {
+                                  ArrayList<Expression> valueList) {
         this.left = left;
         this.valueList = valueList;
         this.valueSet = new TreeSet<Value>(new Comparator<Value>() {
@@ -127,19 +127,19 @@ public class ConditionInConstantSet extends Condition {
             return false;
         }
         switch (visitor.getType()) {
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.INDEPENDENT:
-        case ExpressionVisitor.EVALUATABLE:
-        case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.GET_DEPENDENCIES:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        default:
-            throw DbException.throwInternalError("type=" + visitor.getType());
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.INDEPENDENT:
+            case ExpressionVisitor.EVALUATABLE:
+            case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.GET_DEPENDENCIES:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 
@@ -154,7 +154,7 @@ public class ConditionInConstantSet extends Condition {
      * A IN(1, 2) OR A=3, the constant 3 is added: A IN(1, 2, 3).
      *
      * @param session the session
-     * @param other the second condition
+     * @param other   the second condition
      * @return null if the condition was not added, or the new condition
      */
     Expression getAdditional(Session session, Comparison other) {
@@ -172,10 +172,10 @@ public class ConditionInConstantSet extends Condition {
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         StatementBuilder buff = new StatementBuilder("(");
-        buff.append(left.exportParameters(filter,container)).append(" IN(");
+        buff.append(left.exportParameters(filter, container)).append(" IN(");
         for (Expression e : valueList) {
             buff.appendExceptFirst(", ");
-            buff.append(e.exportParameters(filter,container));
+            buff.append(e.exportParameters(filter, container));
         }
         return buff.append("))").toString();
     }

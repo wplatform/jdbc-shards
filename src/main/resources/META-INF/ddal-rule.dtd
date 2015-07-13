@@ -26,6 +26,8 @@
 <!ELEMENT tableRule (#PCDATA)>
 
 <!ELEMENT table (#PCDATA)>
-<!ATTLIST table shard CDATA #REQUIRED>
-<!ATTLIST table suffix CDATA #IMPLIED>
-
+<!ATTLIST table
+shard CDATA #REQUIRED
+name CDATA #IMPLIED
+suffix CDATA #IMPLIED
+>

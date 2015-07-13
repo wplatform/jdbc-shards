@@ -37,7 +37,7 @@ public interface SearchRow {
      * Set the value for given column
      *
      * @param index the column number (starting with 0)
-     * @param v the new value
+     * @param v     the new value
      */
     void setValue(int index, Value v);
 
@@ -56,18 +56,18 @@ public interface SearchRow {
     int getVersion();
 
     /**
-     * Set the unique key of the row.
-     *
-     * @param key the key
-     */
-    void setKey(long key);
-
-    /**
      * Get the unique key of the row.
      *
      * @return the key
      */
     long getKey();
+
+    /**
+     * Set the unique key of the row.
+     *
+     * @param key the key
+     */
+    void setKey(long key);
 
     /**
      * Get the estimated memory used for this row, in bytes.

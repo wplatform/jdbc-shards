@@ -27,6 +27,7 @@ import com.suning.snfddal.result.SortOrder;
 
 /**
  * An index. Indexes are used to speed up searching data.
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface Index extends SchemaObject {
@@ -35,16 +36,16 @@ public interface Index extends SchemaObject {
      * There is one element per column in the search mask.
      * For possible search masks, see IndexCondition.
      *
-     * @param session the session
-     * @param masks per-column comparison bit masks, null means 'always false',
-     *              see constants in IndexCondition
-     * @param filter the table filter
+     * @param session   the session
+     * @param masks     per-column comparison bit masks, null means 'always false',
+     *                  see constants in IndexCondition
+     * @param filter    the table filter
      * @param sortOrder the sort order
      * @return the estimated cost
      */
     double getCost(Session session, int[] masks, TableFilter filter,
-            SortOrder sortOrder);
-    
+                   SortOrder sortOrder);
+
     /**
      * Get the index of a column in the list of index columns
      *

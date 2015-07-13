@@ -22,24 +22,24 @@ public class PlanItem {
     private PlanItem joinPlan;
     private PlanItem nestedJoinPlan;
 
-    void setIndex(Index index) {
-        this.index = index;
-    }
-
     public Index getIndex() {
         return index;
+    }
+
+    void setIndex(Index index) {
+        this.index = index;
     }
 
     PlanItem getJoinPlan() {
         return joinPlan;
     }
 
-    PlanItem getNestedJoinPlan() {
-        return nestedJoinPlan;
-    }
-
     void setJoinPlan(PlanItem joinPlan) {
         this.joinPlan = joinPlan;
+    }
+
+    PlanItem getNestedJoinPlan() {
+        return nestedJoinPlan;
     }
 
     void setNestedJoinPlan(PlanItem nestedJoinPlan) {

@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.MathUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the BYTE data type.
@@ -34,18 +34,28 @@ public class ValueByte extends Value {
         this.value = value;
     }
 
-    @Override
-    public Value add(Value v) {
-        ValueByte other = (ValueByte) v;
-        return checkRange(value + other.value);
-    }
-
     private static ValueByte checkRange(int x) {
         if (x < Byte.MIN_VALUE || x > Byte.MAX_VALUE) {
             throw DbException.get(ErrorCode.NUMERIC_VALUE_OUT_OF_RANGE_1,
                     Integer.toString(x));
         }
         return ValueByte.get((byte) x);
+    }
+
+    /**
+     * Get or create byte value for the given byte.
+     *
+     * @param i the byte
+     * @return the value
+     */
+    public static ValueByte get(byte i) {
+        return (ValueByte) Value.cache(new ValueByte(i));
+    }
+
+    @Override
+    public Value add(Value v) {
+        ValueByte other = (ValueByte) v;
+        return checkRange(value + other.value);
     }
 
     @Override
@@ -133,16 +143,6 @@ public class ValueByte extends Value {
     public void set(PreparedStatement prep, int parameterIndex)
             throws SQLException {
         prep.setByte(parameterIndex, value);
-    }
-
-    /**
-     * Get or create byte value for the given byte.
-     *
-     * @param i the byte
-     * @return the value
-     */
-    public static ValueByte get(byte i) {
-        return (ValueByte) Value.cache(new ValueByte(i));
     }
 
     @Override

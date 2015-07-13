@@ -1,17 +1,5 @@
 package com.suning.snfddal.shards;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.sql.DataSource;
-
 import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.DataSourceException;
@@ -31,6 +19,17 @@ import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.util.Utils;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
@@ -46,14 +45,14 @@ public class DataSourceRepository implements DataSourceDispatcher {
     private final HashMap<String, SmartDataSource> idMapping = New.hashMap();
 
     private final DataSourceProvider dataSourceProvider;
-    private boolean monitorExecution;
-    private String validationQuery;
-    private int validationQueryTimeout = -1;
-    private ExceptionSorter recognizer;
     private final AtomicLong errorCount = new AtomicLong();
     private final Trace trace;
     protected ScheduledExecutorService abnormalScheduler;
     protected ScheduledExecutorService monitorScheduler;
+    private boolean monitorExecution;
+    private String validationQuery;
+    private int validationQueryTimeout = -1;
+    private ExceptionSorter recognizer;
 
     public DataSourceRepository(Database database) {
         Configuration configuration = database.getConfiguration();
@@ -63,7 +62,7 @@ public class DataSourceRepository implements DataSourceDispatcher {
         this.validationQueryTimeout = configuration.getIntProperty(
                 SetTypes.VALIDATION_QUERY_TIMEOUT, -1);
         String recognizerName = configuration.getProperty(SetTypes.EXCEPTION_SORTER_CLASS, null);
-        
+
         if (!StringUtils.isNullOrEmpty(recognizerName)) {
             setExceptionSorter(recognizerName);
         } else {
@@ -274,8 +273,8 @@ public class DataSourceRepository implements DataSourceDispatcher {
 
     }
 
-   private class DataSourceMonitor extends Thread {
-       private DataSourceMonitor(Database db) {
+    private class DataSourceMonitor extends Thread {
+        private DataSourceMonitor(Database db) {
             super("datasource-monitor-thread");
         }
 

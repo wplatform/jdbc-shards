@@ -18,12 +18,12 @@
 
 package com.suning.snfddal.dispatch.rule;
 
-import java.util.List;
-import java.util.Map;
-
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.value.Value;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -31,7 +31,7 @@ import com.suning.snfddal.value.Value;
 public class OgnlRuleEvaluator implements RuleEvaluator {
 
     @Override
-    public Object evaluate(RuleExpression expression,Map<String, Value> parameters) throws RuleEvaluateException{
+    public Object evaluate(RuleExpression expression, Map<String, Value> parameters) throws RuleEvaluateException {
         Map<String, Object> evaluateContext = New.hashMap();
         String ognlExpr = expression.getExpression();
         try {
@@ -55,13 +55,13 @@ public class OgnlRuleEvaluator implements RuleEvaluator {
                         + " return a null value.");
             }
             return result;
-        }catch(RuleEvaluateException e) {
+        } catch (RuleEvaluateException e) {
             throw e;
-        }catch(Exception e) {
-            throw new RuleEvaluateException("Evaluate rule " + ognlExpr + "error, parameter is " + evaluateContext,e);
+        } catch (Exception e) {
+            throw new RuleEvaluateException("Evaluate rule " + ognlExpr + "error, parameter is " + evaluateContext, e);
         }
-        
-        
+
+
     }
 
 }

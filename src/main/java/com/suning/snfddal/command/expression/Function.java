@@ -4,20 +4,6 @@
  * Initial Developer: H2 Group
  */
 package com.suning.snfddal.command.expression;
-import static com.suning.snfddal.util.ToChar.toChar;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.regex.PatternSyntaxException;
 
 import com.suning.snfddal.command.Command;
 import com.suning.snfddal.command.Parser;
@@ -33,28 +19,18 @@ import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.result.Csv;
-import com.suning.snfddal.util.DateTimeUtils;
-import com.suning.snfddal.util.JdbcUtils;
-import com.suning.snfddal.util.MathUtils;
-import com.suning.snfddal.util.New;
-import com.suning.snfddal.util.StatementBuilder;
-import com.suning.snfddal.util.StringUtils;
-import com.suning.snfddal.util.Utils;
-import com.suning.snfddal.value.DataType;
-import com.suning.snfddal.value.Value;
-import com.suning.snfddal.value.ValueArray;
-import com.suning.snfddal.value.ValueBoolean;
-import com.suning.snfddal.value.ValueBytes;
-import com.suning.snfddal.value.ValueDate;
-import com.suning.snfddal.value.ValueDouble;
-import com.suning.snfddal.value.ValueInt;
-import com.suning.snfddal.value.ValueLong;
-import com.suning.snfddal.value.ValueNull;
-import com.suning.snfddal.value.ValueResultSet;
-import com.suning.snfddal.value.ValueString;
-import com.suning.snfddal.value.ValueTime;
-import com.suning.snfddal.value.ValueTimestamp;
-import com.suning.snfddal.value.ValueUuid;
+import com.suning.snfddal.util.*;
+import com.suning.snfddal.value.*;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.PatternSyntaxException;
+
+import static com.suning.snfddal.util.ToChar.toChar;
 
 /**
  * This class implements most built-in functions of this database.
@@ -123,15 +99,6 @@ public class Function extends Expression implements FunctionCall {
     private static final HashMap<String, FunctionInfo> FUNCTIONS = New.hashMap();
     private static final HashMap<String, Integer> DATE_PART = New.hashMap();
     private static final char[] SOUNDEX_INDEX = new char[128];
-
-    protected Expression[] args;
-
-    private final FunctionInfo info;
-    private ArrayList<Expression> varArgs;
-    private int dataType, scale;
-    private long precision = PRECISION_UNKNOWN;
-    private int displaySize;
-    private final Database database;
 
     static {
         // DATE_PART
@@ -457,6 +424,14 @@ public class Function extends Expression implements FunctionCall {
         addFunction("VALUES", VALUES, 1, Value.NULL, false, true, false);
     }
 
+    private final FunctionInfo info;
+    private final Database database;
+    protected Expression[] args;
+    private ArrayList<Expression> varArgs;
+    private int dataType, scale;
+    private long precision = PRECISION_UNKNOWN;
+    private int displaySize;
+
     protected Function(Database database, FunctionInfo info) {
         this.database = database;
         this.info = info;
@@ -468,8 +443,8 @@ public class Function extends Expression implements FunctionCall {
     }
 
     private static void addFunction(String name, int type, int parameterCount,
-            int dataType, boolean nullIfParameterIsNull, boolean deterministic,
-            boolean bufferResultSetToLocalTemp) {
+                                    int dataType, boolean nullIfParameterIsNull, boolean deterministic,
+                                    boolean bufferResultSetToLocalTemp) {
         FunctionInfo info = new FunctionInfo();
         info.name = name;
         info.type = type;
@@ -482,17 +457,17 @@ public class Function extends Expression implements FunctionCall {
     }
 
     private static void addFunctionNotDeterministic(String name, int type,
-            int parameterCount, int dataType) {
+                                                    int parameterCount, int dataType) {
         addFunction(name, type, parameterCount, dataType, true, false, true);
     }
 
     private static void addFunction(String name, int type, int parameterCount,
-            int dataType) {
+                                    int dataType) {
         addFunction(name, type, parameterCount, dataType, true, true, true);
     }
 
     private static void addFunctionWithNull(String name, int type,
-            int parameterCount, int dataType) {
+                                            int parameterCount, int dataType) {
         addFunction(name, type, parameterCount, dataType, false, true, true);
     }
 
@@ -512,7 +487,7 @@ public class Function extends Expression implements FunctionCall {
      * If no function with this name is found, null is returned.
      *
      * @param database the database
-     * @param name the function name
+     * @param name     the function name
      * @return the function object or null
      */
     public static Function getFunction(Database database, String name) {
@@ -524,561 +499,17 @@ public class Function extends Expression implements FunctionCall {
         if (info == null) {
             return null;
         }
-        switch(info.type) {
-        case TABLE:
-        case TABLE_DISTINCT:
-            return new TableFunction(database, info, Long.MAX_VALUE);
-        default:
-            return new Function(database, info);
-        }
-    }
-
-    /**
-     * Set the parameter expression at the given index.
-     *
-     * @param index the index (0, 1,...)
-     * @param param the expression
-     */
-    public void setParameter(int index, Expression param) {
-        if (varArgs != null) {
-            varArgs.add(param);
-        } else {
-            if (index >= args.length) {
-                throw DbException.get(ErrorCode.INVALID_PARAMETER_COUNT_2,
-                        info.name, "" + args.length);
-            }
-            args[index] = param;
+        switch (info.type) {
+            case TABLE:
+            case TABLE_DISTINCT:
+                return new TableFunction(database, info, Long.MAX_VALUE);
+            default:
+                return new Function(database, info);
         }
     }
 
     private static strictfp double log10(double value) {
         return roundMagic(StrictMath.log(value) / StrictMath.log(10));
-    }
-
-    @Override
-    public Value getValue(Session session) {
-        return getValueWithArgs(session, args);
-    }
-
-    private Value getSimpleValue(Session session, Value v0, Expression[] args,
-            Value[] values) {
-        Value result;
-        switch (info.type) {
-        case ABS:
-            result = v0.getSignum() > 0 ? v0 : v0.negate();
-            break;
-        case ACOS:
-            result = ValueDouble.get(Math.acos(v0.getDouble()));
-            break;
-        case ASIN:
-            result = ValueDouble.get(Math.asin(v0.getDouble()));
-            break;
-        case ATAN:
-            result = ValueDouble.get(Math.atan(v0.getDouble()));
-            break;
-        case CEILING:
-            result = ValueDouble.get(Math.ceil(v0.getDouble()));
-            break;
-        case COS:
-            result = ValueDouble.get(Math.cos(v0.getDouble()));
-            break;
-        case COSH:
-            result = ValueDouble.get(Math.cosh(v0.getDouble()));
-            break;
-        case COT: {
-            double d = Math.tan(v0.getDouble());
-            if (d == 0.0) {
-                throw DbException.get(ErrorCode.DIVISION_BY_ZERO_1, getSQL());
-            }
-            result = ValueDouble.get(1. / d);
-            break;
-        }
-        case DEGREES:
-            result = ValueDouble.get(Math.toDegrees(v0.getDouble()));
-            break;
-        case EXP:
-            result = ValueDouble.get(Math.exp(v0.getDouble()));
-            break;
-        case FLOOR:
-            result = ValueDouble.get(Math.floor(v0.getDouble()));
-            break;
-        case LN:
-            result = ValueDouble.get(Math.log(v0.getDouble()));
-            break;
-        case LOG:
-            if (database.getMode().logIsLogBase10) {
-                result = ValueDouble.get(Math.log10(v0.getDouble()));
-            } else {
-                result = ValueDouble.get(Math.log(v0.getDouble()));
-            }
-            break;
-        case LOG10:
-            result = ValueDouble.get(log10(v0.getDouble()));
-            break;
-        case PI:
-            result = ValueDouble.get(Math.PI);
-            break;
-        case RADIANS:
-            result = ValueDouble.get(Math.toRadians(v0.getDouble()));
-            break;
-        case RAND: {
-            if (v0 != null) {
-                session.getRandom().setSeed(v0.getInt());
-            }
-            result = ValueDouble.get(session.getRandom().nextDouble());
-            break;
-        }
-        case ROUNDMAGIC:
-            result = ValueDouble.get(roundMagic(v0.getDouble()));
-            break;
-        case SIGN:
-            result = ValueInt.get(v0.getSignum());
-            break;
-        case SIN:
-            result = ValueDouble.get(Math.sin(v0.getDouble()));
-            break;
-        case SINH:
-            result = ValueDouble.get(Math.sinh(v0.getDouble()));
-            break;
-        case SQRT:
-            result = ValueDouble.get(Math.sqrt(v0.getDouble()));
-            break;
-        case TAN:
-            result = ValueDouble.get(Math.tan(v0.getDouble()));
-            break;
-        case TANH:
-            result = ValueDouble.get(Math.tanh(v0.getDouble()));
-            break;
-        case SECURE_RAND:
-            result = ValueBytes.getNoCopy(
-                    MathUtils.secureRandomBytes(v0.getInt()));
-            break;
-        case ZERO:
-            result = ValueInt.get(0);
-            break;
-        case RANDOM_UUID:
-            result = ValueUuid.getNewRandom();
-            break;
-            // string
-        case ASCII: {
-            String s = v0.getString();
-            if (s.length() == 0) {
-                result = ValueNull.INSTANCE;
-            } else {
-                result = ValueInt.get(s.charAt(0));
-            }
-            break;
-        }
-        case BIT_LENGTH:
-            result = ValueLong.get(16 * length(v0));
-            break;
-        case CHAR:
-            result = ValueString.get(String.valueOf((char) v0.getInt()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case CHAR_LENGTH:
-        case LENGTH:
-            result = ValueLong.get(length(v0));
-            break;
-        case OCTET_LENGTH:
-            result = ValueLong.get(2 * length(v0));
-            break;
-        case CONCAT_WS:
-        case CONCAT: {
-            result = ValueNull.INSTANCE;
-            int start = 0;
-            String separator = "";
-            if (info.type == CONCAT_WS) {
-                start = 1;
-                separator = getNullOrValue(session, args, values, 0).getString();
-            }
-            for (int i = start; i < args.length; i++) {
-                Value v = getNullOrValue(session, args, values, i);
-                if (v == ValueNull.INSTANCE) {
-                    continue;
-                }
-                if (result == ValueNull.INSTANCE) {
-                    result = v;
-                } else {
-                    String tmp = v.getString();
-                    if (!StringUtils.isNullOrEmpty(separator)
-                            && !StringUtils.isNullOrEmpty(tmp)) {
-                        tmp = separator.concat(tmp);
-                    }
-                    result = ValueString.get(result.getString().concat(tmp),
-                            database.getMode().treatEmptyStringsAsNull);
-                }
-            }
-            if (info.type == CONCAT_WS) {
-                if (separator != null && result == ValueNull.INSTANCE) {
-                    result = ValueString.get("",
-                            database.getMode().treatEmptyStringsAsNull);
-                }
-            }
-            break;
-        }
-        case HEXTORAW:
-            result = ValueString.get(hexToRaw(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case LOWER:
-        case LCASE:
-            // TODO this is locale specific, need to document or provide a way
-            // to set the locale
-            result = ValueString.get(v0.getString().toLowerCase(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case RAWTOHEX:
-            result = ValueString.get(rawToHex(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case SOUNDEX:
-            result = ValueString.get(getSoundex(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case SPACE: {
-            int len = Math.max(0, v0.getInt());
-            char[] chars = new char[len];
-            for (int i = len - 1; i >= 0; i--) {
-                chars[i] = ' ';
-            }
-            result = ValueString.get(new String(chars),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case UPPER:
-        case UCASE:
-            // TODO this is locale specific, need to document or provide a way
-            // to set the locale
-            result = ValueString.get(v0.getString().toUpperCase(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case STRINGENCODE:
-            result = ValueString.get(StringUtils.javaEncode(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case STRINGDECODE:
-            result = ValueString.get(StringUtils.javaDecode(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case STRINGTOUTF8:
-            result = ValueBytes.getNoCopy(v0.getString().
-                    getBytes(Constants.UTF8));
-            break;
-        case UTF8TOSTRING:
-            result = ValueString.get(new String(v0.getBytesNoCopy(),
-                    Constants.UTF8),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case XMLCOMMENT:
-            result = ValueString.get(StringUtils.xmlComment(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case XMLCDATA:
-            result = ValueString.get(StringUtils.xmlCData(v0.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case XMLSTARTDOC:
-            result = ValueString.get(StringUtils.xmlStartDoc(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case DAY_NAME: {
-            SimpleDateFormat dayName = new SimpleDateFormat(
-                    "EEEE", Locale.ENGLISH);
-            result = ValueString.get(dayName.format(v0.getDate()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case DAY_OF_MONTH:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.DAY_OF_MONTH));
-            break;
-        case DAY_OF_WEEK:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.DAY_OF_WEEK));
-            break;
-        case DAY_OF_YEAR:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.DAY_OF_YEAR));
-            break;
-        case HOUR:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
-                    Calendar.HOUR_OF_DAY));
-            break;
-        case MINUTE:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
-                    Calendar.MINUTE));
-            break;
-        case MONTH:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.MONTH));
-            break;
-        case MONTH_NAME: {
-            SimpleDateFormat monthName = new SimpleDateFormat("MMMM",
-                    Locale.ENGLISH);
-            result = ValueString.get(monthName.format(v0.getDate()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case QUARTER:
-            result = ValueInt.get((DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.MONTH) - 1) / 3 + 1);
-            break;
-        case SECOND:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
-                    Calendar.SECOND));
-            break;
-        case WEEK:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.WEEK_OF_YEAR));
-            break;
-        case YEAR:
-            result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
-                    Calendar.YEAR));
-            break;
-        case ISO_YEAR:
-            result = ValueInt.get(DateTimeUtils.getIsoYear(v0.getDate()));
-            break;
-        case ISO_WEEK:
-            result = ValueInt.get(DateTimeUtils.getIsoWeek(v0.getDate()));
-            break;
-        case ISO_DAY_OF_WEEK:
-            result = ValueInt.get(DateTimeUtils.getIsoDayOfWeek(v0.getDate()));
-            break;
-        case CURDATE:
-        case CURRENT_DATE: {
-            long now = session.getTransactionStart();
-            // need to normalize
-            result = ValueDate.fromMillis(now);
-            break;
-        }
-        case CURTIME:
-        case CURRENT_TIME: {
-            long now = session.getTransactionStart();
-            // need to normalize
-            result = ValueTime.fromMillis(now);
-            break;
-        }
-        case NOW:
-        case CURRENT_TIMESTAMP: {
-            long now = session.getTransactionStart();
-            ValueTimestamp vt = ValueTimestamp.fromMillis(now);
-            if (v0 != null) {
-                Mode mode = database.getMode();
-                vt = (ValueTimestamp) vt.convertScale(
-                        mode.convertOnlyToSmallerScale, v0.getInt());
-            }
-            result = vt;
-            break;
-        }
-        case USER:
-        case CURRENT_USER:
-            result = ValueString.get(session.getUser().getName(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case IDENTITY:
-            result = session.getLastIdentity();
-            break;
-        case SCOPE_IDENTITY:
-            result = session.getLastScopeIdentity();
-            break;
-        case AUTOCOMMIT:
-            result = ValueBoolean.get(session.getAutoCommit());
-            break;
-        case LOCK_TIMEOUT:
-            result = ValueInt.get(session.getLockTimeout());
-            break;
-        case CAST:
-        case CONVERT: {
-            v0 = v0.convertTo(dataType);
-            Mode mode = database.getMode();
-            v0 = v0.convertScale(mode.convertOnlyToSmallerScale, scale);
-            v0 = v0.convertPrecision(getPrecision(), false);
-            result = v0;
-            break;
-        }
-        case MEMORY_FREE:
-            session.getUser().checkAdmin();
-            result = ValueInt.get(Utils.getMemoryFree());
-            break;
-        case MEMORY_USED:
-            session.getUser().checkAdmin();
-            result = ValueInt.get(Utils.getMemoryUsed());
-            break;
-        case SCHEMA:
-            result = ValueString.get(session.getCurrentSchemaName(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case SESSION_ID:
-            result = ValueInt.get(session.getId());
-            break;
-        case IFNULL: {
-            result = v0;
-            if (v0 == ValueNull.INSTANCE) {
-                result = getNullOrValue(session, args, values, 1);
-            }
-            break;
-        }
-        case CASEWHEN: {
-            Value v;
-            if (v0 == ValueNull.INSTANCE ||
-                    !v0.getBoolean().booleanValue()) {
-                v = getNullOrValue(session, args, values, 2);
-            } else {
-                v = getNullOrValue(session, args, values, 1);
-            }
-            result = v.convertTo(dataType);
-            break;
-        }
-        case DECODE: {
-            int index = -1;
-            for (int i = 1, len = args.length - 1; i < len; i += 2) {
-                if (database.areEqual(v0,
-                        getNullOrValue(session, args, values, i))) {
-                    index = i + 1;
-                    break;
-                }
-            }
-            if (index < 0 && args.length % 2 == 0) {
-                index = args.length - 1;
-            }
-            Value v = index < 0 ? ValueNull.INSTANCE :
-                    getNullOrValue(session, args, values, index);
-            result = v.convertTo(dataType);
-            break;
-        }
-        case NVL2: {
-            Value v;
-            if (v0 == ValueNull.INSTANCE) {
-                v = getNullOrValue(session, args, values, 2);
-            } else {
-                v = getNullOrValue(session, args, values, 1);
-            }
-            result = v.convertTo(dataType);
-            break;
-        }
-        case COALESCE: {
-            result = v0;
-            for (int i = 0; i < args.length; i++) {
-                Value v = getNullOrValue(session, args, values, i);
-                if (!(v == ValueNull.INSTANCE)) {
-                    result = v.convertTo(dataType);
-                    break;
-                }
-            }
-            break;
-        }
-        case GREATEST:
-        case LEAST: {
-            result = ValueNull.INSTANCE;
-            for (int i = 0; i < args.length; i++) {
-                Value v = getNullOrValue(session, args, values, i);
-                if (!(v == ValueNull.INSTANCE)) {
-                    v = v.convertTo(dataType);
-                    if (result == ValueNull.INSTANCE) {
-                        result = v;
-                    } else {
-                        int comp = database.compareTypeSave(result, v);
-                        if (info.type == GREATEST && comp < 0) {
-                            result = v;
-                        } else if (info.type == LEAST && comp > 0) {
-                            result = v;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case CASE: {
-            Expression then = null;
-            if (v0 == null) {
-                // Searched CASE expression
-                // (null, when, then)
-                // (null, when, then, else)
-                // (null, when, then, when, then)
-                // (null, when, then, when, then, else)
-                for (int i = 1, len = args.length - 1; i < len; i += 2) {
-                    Value when = args[i].getValue(session);
-                    if (!(when == ValueNull.INSTANCE) &&
-                            when.getBoolean().booleanValue()) {
-                        then = args[i + 1];
-                        break;
-                    }
-                }
-            } else {
-                // Simple CASE expression
-                // (expr, when, then)
-                // (expr, when, then, else)
-                // (expr, when, then, when, then)
-                // (expr, when, then, when, then, else)
-                if (!(v0 == ValueNull.INSTANCE)) {
-                    for (int i = 1, len = args.length - 1; i < len; i += 2) {
-                        Value when = args[i].getValue(session);
-                        if (database.areEqual(v0, when)) {
-                            then = args[i + 1];
-                            break;
-                        }
-                    }
-                }
-            }
-            if (then == null && args.length % 2 == 0) {
-                // then = elsePart
-                then = args[args.length - 1];
-            }
-            Value v = then == null ? ValueNull.INSTANCE : then.getValue(session);
-            result = v.convertTo(dataType);
-            break;
-        }
-        case ARRAY_GET: {
-            if (v0.getType() == Value.ARRAY) {
-                Value v1 = getNullOrValue(session, args, values, 1);
-                int element = v1.getInt();
-                Value[] list = ((ValueArray) v0).getList();
-                if (element < 1 || element > list.length) {
-                    result = ValueNull.INSTANCE;
-                } else {
-                    result = list[element - 1];
-                }
-            } else {
-                result = ValueNull.INSTANCE;
-            }
-            break;
-        }
-        case ARRAY_LENGTH: {
-            if (v0.getType() == Value.ARRAY) {
-                Value[] list = ((ValueArray) v0).getList();
-                result = ValueInt.get(list.length);
-            } else {
-                result = ValueNull.INSTANCE;
-            }
-            break;
-        }
-        case ARRAY_CONTAINS: {
-            result = ValueBoolean.get(false);
-            if (v0.getType() == Value.ARRAY) {
-                Value v1 = getNullOrValue(session, args, values, 1);
-                Value[] list = ((ValueArray) v0).getList();
-                for (Value v : list) {
-                    if (v.equals(v1)) {
-                        result = ValueBoolean.get(true);
-                        break;
-                    }
-                }
-            }
-            break;
-        }
-        case CANCEL_SESSION: {
-            result = ValueBoolean.get(cancelStatement(session, v0.getInt()));
-            break;
-        }
-        case TRANSACTION_ID: {
-            result = session.getTransactionId();
-            break;
-        }
-        default:
-            result = null;
-        }
-        return result;
     }
 
     private static boolean cancelStatement(Session session, int targetSessionId) {
@@ -1098,7 +529,7 @@ public class Function extends Expression implements FunctionCall {
     }
 
     private static Value getNullOrValue(Session session, Expression[] args,
-            Value[] values, int i) {
+                                        Value[] values, int i) {
         if (i >= args.length) {
             return null;
         }
@@ -1113,442 +544,15 @@ public class Function extends Expression implements FunctionCall {
         return v;
     }
 
-    private Value getValueWithArgs(Session session, Expression[] args) {
-        Value[] values = new Value[args.length];
-        if (info.nullIfParameterIsNull) {
-            for (int i = 0; i < args.length; i++) {
-                Expression e = args[i];
-                Value v = e.getValue(session);
-                if (v == ValueNull.INSTANCE) {
-                    return ValueNull.INSTANCE;
-                }
-                values[i] = v;
-            }
-        }
-        Value v0 = getNullOrValue(session, args, values, 0);
-        Value resultSimple = getSimpleValue(session, v0, args, values);
-        if (resultSimple != null) {
-            return resultSimple;
-        }
-        Value v1 = getNullOrValue(session, args, values, 1);
-        Value v2 = getNullOrValue(session, args, values, 2);
-        Value v3 = getNullOrValue(session, args, values, 3);
-        Value v4 = getNullOrValue(session, args, values, 4);
-        Value v5 = getNullOrValue(session, args, values, 5);
-        Value result;
-        switch (info.type) {
-        case ATAN2:
-            result = ValueDouble.get(
-                    Math.atan2(v0.getDouble(), v1.getDouble()));
-            break;
-        case BITAND:
-            result = ValueLong.get(v0.getLong() & v1.getLong());
-            break;
-        case BITOR:
-            result = ValueLong.get(v0.getLong() | v1.getLong());
-            break;
-        case BITXOR:
-            result = ValueLong.get(v0.getLong() ^ v1.getLong());
-            break;
-        case MOD: {
-            long x = v1.getLong();
-            if (x == 0) {
-                throw DbException.get(ErrorCode.DIVISION_BY_ZERO_1, getSQL());
-            }
-            result = ValueLong.get(v0.getLong() % x);
-            break;
-        }
-        case POWER:
-            result = ValueDouble.get(Math.pow(
-                    v0.getDouble(), v1.getDouble()));
-            break;
-        case ROUND: {
-            double f = v1 == null ? 1. : Math.pow(10., v1.getDouble());
-            result = ValueDouble.get(Math.round(v0.getDouble() * f) / f);
-            break;
-        }
-        case TRUNCATE: {
-            if (v0.getType() == Value.TIMESTAMP) {
-                java.sql.Timestamp d = v0.getTimestamp();
-                Calendar c = Calendar.getInstance();
-                c.setTime(d);
-                c.set(Calendar.HOUR_OF_DAY, 0);
-                c.set(Calendar.MINUTE, 0);
-                c.set(Calendar.SECOND, 0);
-                c.set(Calendar.MILLISECOND, 0);
-                result = ValueTimestamp.fromMillis(c.getTimeInMillis());
-            } else {
-                double d = v0.getDouble();
-                int p = v1 == null ? 0 : v1.getInt();
-                double f = Math.pow(10., p);
-                double g = d * f;
-                result = ValueDouble.get(((d < 0) ? Math.ceil(g) : Math.floor(g)) / f);
-            }
-            break;
-        }
-        case DIFFERENCE:
-            result = ValueInt.get(getDifference(
-                    v0.getString(), v1.getString()));
-            break;
-        case INSERT: {
-            if (v1 == ValueNull.INSTANCE || v2 == ValueNull.INSTANCE) {
-                result = v1;
-            } else {
-                result = ValueString.get(insert(v0.getString(),
-                        v1.getInt(), v2.getInt(), v3.getString()),
-                        database.getMode().treatEmptyStringsAsNull);
-            }
-            break;
-        }
-        case LEFT:
-            result = ValueString.get(left(v0.getString(), v1.getInt()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case LOCATE: {
-            int start = v2 == null ? 0 : v2.getInt();
-            result = ValueInt.get(locate(v0.getString(), v1.getString(), start));
-            break;
-        }
-        case INSTR: {
-            int start = v2 == null ? 0 : v2.getInt();
-            result = ValueInt.get(locate(v1.getString(), v0.getString(), start));
-            break;
-        }
-        case REPEAT: {
-            int count = Math.max(0, v1.getInt());
-            result = ValueString.get(repeat(v0.getString(), count),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case REPLACE: {
-            String s0 = v0.getString();
-            String s1 = v1.getString();
-            String s2 = (v2 == null) ? "" : v2.getString();
-            result = ValueString.get(replace(s0, s1, s2),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case RIGHT:
-            result = ValueString.get(right(v0.getString(), v1.getInt()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case LTRIM:
-            result = ValueString.get(StringUtils.trim(v0.getString(),
-                    true, false, v1 == null ? " " : v1.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case TRIM:
-            result = ValueString.get(StringUtils.trim(v0.getString(),
-                    true, true, v1 == null ? " " : v1.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case RTRIM:
-            result = ValueString.get(StringUtils.trim(v0.getString(),
-                    false, true, v1 == null ? " " : v1.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case SUBSTR:
-        case SUBSTRING: {
-            String s = v0.getString();
-            int offset = v1.getInt();
-            if (offset < 0) {
-                offset = s.length() + offset + 1;
-            }
-            int length = v2 == null ? s.length() : v2.getInt();
-            result = ValueString.get(substring(s, offset, length),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case POSITION:
-            result = ValueInt.get(locate(v0.getString(), v1.getString(), 0));
-            break;
-        case XMLATTR:
-            result = ValueString.get(
-                    StringUtils.xmlAttr(v0.getString(), v1.getString()),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case XMLNODE: {
-            String attr = v1 == null ?
-                    null : v1 == ValueNull.INSTANCE ? null : v1.getString();
-            String content = v2 == null ?
-                    null : v2 == ValueNull.INSTANCE ? null : v2.getString();
-            boolean indent = v3 == null ?
-                    true : v3.getBoolean();
-            result = ValueString.get(StringUtils.xmlNode(
-                    v0.getString(), attr, content, indent),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case REGEXP_REPLACE: {
-            String regexp = v1.getString();
-            String replacement = v2.getString();
-            try {
-                result = ValueString.get(
-                        v0.getString().replaceAll(regexp, replacement),
-                        database.getMode().treatEmptyStringsAsNull);
-            } catch (StringIndexOutOfBoundsException e) {
-                throw DbException.get(
-                        ErrorCode.LIKE_ESCAPE_ERROR_1, e, replacement);
-            } catch (PatternSyntaxException e) {
-                throw DbException.get(
-                        ErrorCode.LIKE_ESCAPE_ERROR_1, e, regexp);
-            }
-            break;
-        }
-        case RPAD:
-            result = ValueString.get(StringUtils.pad(v0.getString(),
-                    v1.getInt(), v2 == null ? null : v2.getString(), true),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case LPAD:
-            result = ValueString.get(StringUtils.pad(v0.getString(),
-                    v1.getInt(), v2 == null ? null : v2.getString(), false),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case TO_CHAR:
-            switch(v0.getType()){
-            case Value.TIME:
-            case Value.DATE:
-            case Value.TIMESTAMP:
-                result = ValueString.get(toChar(v0.getTimestamp(),
-                        v1 == null ? null : v1.getString(),
-                        v2 == null ? null : v2.getString()),
-                        database.getMode().treatEmptyStringsAsNull);
-                break;
-            case Value.SHORT:
-            case Value.INT:
-            case Value.LONG:
-            case Value.DECIMAL:
-            case Value.DOUBLE:
-            case Value.FLOAT:
-                result = ValueString.get(toChar(v0.getBigDecimal(),
-                        v1 == null ? null : v1.getString(),
-                        v2 == null ? null : v2.getString()),
-                        database.getMode().treatEmptyStringsAsNull);
-                break;
-            default:
-                result = ValueString.get(v0.getString(),
-                        database.getMode().treatEmptyStringsAsNull);
-            }
-            break;
-        case TRANSLATE: {
-            String matching = v1.getString();
-            String replacement = v2.getString();
-            result = ValueString.get(
-                    translate(v0.getString(), matching, replacement),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        }
-        case H2VERSION:
-            result = ValueString.get(Constants.getVersion(),
-                    database.getMode().treatEmptyStringsAsNull);
-            break;
-        case DATE_ADD:
-            result = ValueTimestamp.get(dateadd(
-                    v0.getString(), v1.getInt(), v2.getTimestamp()));
-            break;
-        case DATE_DIFF:
-            result = ValueLong.get(datediff(
-                    v0.getString(), v1.getTimestamp(), v2.getTimestamp()));
-            break;
-        case EXTRACT: {
-            int field = getDatePart(v0.getString());
-            result = ValueInt.get(DateTimeUtils.getDatePart(
-                    v1.getTimestamp(), field));
-            break;
-        }
-        case FORMATDATETIME: {
-            if (v0 == ValueNull.INSTANCE || v1 == ValueNull.INSTANCE) {
-                result = ValueNull.INSTANCE;
-            } else {
-                String locale = v2 == null ?
-                        null : v2 == ValueNull.INSTANCE ? null : v2.getString();
-                String tz = v3 == null ?
-                        null : v3 == ValueNull.INSTANCE ? null : v3.getString();
-                result = ValueString.get(DateTimeUtils.formatDateTime(
-                        v0.getTimestamp(), v1.getString(), locale, tz),
-                        database.getMode().treatEmptyStringsAsNull);
-            }
-            break;
-        }
-        case PARSEDATETIME: {
-            if (v0 == ValueNull.INSTANCE || v1 == ValueNull.INSTANCE) {
-                result = ValueNull.INSTANCE;
-            } else {
-                String locale = v2 == null ?
-                        null : v2 == ValueNull.INSTANCE ? null : v2.getString();
-                String tz = v3 == null ?
-                        null : v3 == ValueNull.INSTANCE ? null : v3.getString();
-                java.util.Date d = DateTimeUtils.parseDateTime(
-                        v0.getString(), v1.getString(), locale, tz);
-                result = ValueTimestamp.fromMillis(d.getTime());
-            }
-            break;
-        }
-        case NULLIF:
-            result = database.areEqual(v0, v1) ? ValueNull.INSTANCE : v0;
-            break;
-            // system
-        case NEXTVAL: {
-            Sequence sequence = getSequence(session, v0, v1);
-            SequenceValue value = new SequenceValue(sequence);
-            result = value.getValue(session);
-            break;
-        }
-        case CURRVAL: {
-            Sequence sequence = getSequence(session, v0, v1);
-            result = ValueLong.get(sequence.getCurrentValue());
-            break;
-        }
-        case CSVREAD: {
-            String fileName = v0.getString();
-            String columnList = v1 == null ? null : v1.getString();
-            Csv csv = new Csv();
-            String options = v2 == null ? null : v2.getString();
-            String charset = null;
-            if (options != null && options.indexOf('=') >= 0) {
-                charset = csv.setOptions(options);
-            } else {
-                charset = options;
-                String fieldSeparatorRead = v3 == null ? null : v3.getString();
-                String fieldDelimiter = v4 == null ? null : v4.getString();
-                String escapeCharacter = v5 == null ? null : v5.getString();
-                Value v6 = getNullOrValue(session, args, values, 6);
-                String nullString = v6 == null ? null : v6.getString();
-                setCsvDelimiterEscape(csv, fieldSeparatorRead, fieldDelimiter,
-                        escapeCharacter);
-                csv.setNullString(nullString);
-            }
-            char fieldSeparator = csv.getFieldSeparatorRead();
-            String[] columns = StringUtils.arraySplit(columnList,
-                    fieldSeparator, true);
-            try {
-                ValueResultSet vr = ValueResultSet.get(csv.read(fileName,
-                        columns, charset));
-                result = vr;
-            } catch (SQLException e) {
-                throw DbException.convert(e);
-            }
-            break;
-        }
-        case CSVWRITE: {
-            session.getUser().checkAdmin();
-            Connection conn = session.createConnection(false);
-            Csv csv = new Csv();
-            String options = v2 == null ? null : v2.getString();
-            String charset = null;
-            if (options != null && options.indexOf('=') >= 0) {
-                charset = csv.setOptions(options);
-            } else {
-                charset = options;
-                String fieldSeparatorWrite = v3 == null ? null : v3.getString();
-                String fieldDelimiter = v4 == null ? null : v4.getString();
-                String escapeCharacter = v5 == null ? null : v5.getString();
-                Value v6 = getNullOrValue(session, args, values, 6);
-                String nullString = v6 == null ? null : v6.getString();
-                Value v7 = getNullOrValue(session, args, values, 7);
-                String lineSeparator = v7 == null ? null : v7.getString();
-                setCsvDelimiterEscape(csv, fieldSeparatorWrite, fieldDelimiter,
-                        escapeCharacter);
-                csv.setNullString(nullString);
-                if (lineSeparator != null) {
-                    csv.setLineSeparator(lineSeparator);
-                }
-            }
-            try {
-                int rows = csv.write(conn, v0.getString(), v1.getString(),
-                        charset);
-                result = ValueInt.get(rows);
-            } catch (SQLException e) {
-                throw DbException.convert(e);
-            }
-            break;
-        }
-        case SET: {
-            Variable var = (Variable) args[0];
-            session.setVariable(var.getName(), v1);
-            result = v1;
-            break;
-        }
-        case TRUNCATE_VALUE: {
-            result = v0.convertPrecision(v1.getLong(), v2.getBoolean());
-            break;
-        }
-        case XMLTEXT:
-            if (v1 == null) {
-                result = ValueString.get(StringUtils.xmlText(
-                        v0.getString()),
-                        database.getMode().treatEmptyStringsAsNull);
-            } else {
-                result = ValueString.get(StringUtils.xmlText(
-                        v0.getString(), v1.getBoolean()),
-                        database.getMode().treatEmptyStringsAsNull);
-            }
-            break;
-        case VALUES:
-            result = session.getVariable(args[0].getSchemaName() + "." +
-                    args[0].getTableName() + "." + args[0].getColumnName());
-            break;
-        case EXPAND:
-        case DATABASE:
-        case DATABASE_PATH:
-        case HASH:
-        case ENCRYPT:
-        case DECRYPT:
-        case COMPRESS: 
-        case FILE_READ:
-        case LINK_SCHEMA:
-            throw DbException.throwInternalError("function unimplemented. tyle=" + info.type);
-        default:
-            throw DbException.throwInternalError("type=" + info.type);
-        }
-        return result;
-    }
-
-    private Sequence getSequence(Session session, Value v0, Value v1) {
-        String schemaName, sequenceName;
-        if (v1 == null) {
-            Parser p = new Parser(session);
-            String sql = v0.getString();
-            Expression expr = p.parseExpression(sql);
-            if (expr instanceof ExpressionColumn) {
-                ExpressionColumn seq = (ExpressionColumn) expr;
-                schemaName = seq.getOriginalTableAliasName();
-                if (schemaName == null) {
-                    schemaName = session.getCurrentSchemaName();
-                    sequenceName = sql;
-                } else {
-                    sequenceName = seq.getColumnName();
-                }
-            } else {
-                throw DbException.getSyntaxError(sql, 1);
-            }
-        } else {
-            schemaName = v0.getString();
-            sequenceName = v1.getString();
-        }
-        Schema s = database.findSchema(schemaName);
-        if (s == null) {
-            schemaName = StringUtils.toUpperEnglish(schemaName);
-            s = database.getSchema(schemaName);
-        }
-        Sequence seq = s.findSequence(sequenceName);
-        if (seq == null) {
-            sequenceName = StringUtils.toUpperEnglish(sequenceName);
-            seq = s.getSequence(sequenceName);
-        }
-        return seq;
-    }
-
     private static long length(Value v) {
         switch (v.getType()) {
-        case Value.BLOB:
-        case Value.CLOB:
-        case Value.BYTES:
-        case Value.JAVA_OBJECT:
-            return v.getPrecision();
-        default:
-            return v.getString().length();
+            case Value.BLOB:
+            case Value.CLOB:
+            case Value.BYTES:
+            case Value.JAVA_OBJECT:
+                return v.getPrecision();
+            default:
+                return v.getString().length();
         }
     }
 
@@ -1591,8 +595,8 @@ public class Function extends Expression implements FunctionCall {
      * </pre>
      *
      * @param part the part
-     * @param d1 the first date
-     * @param d2 the second date
+     * @param d1   the first date
+     * @param d2   the second date
      * @return the number of crossed boundaries
      */
     private static long datediff(String part, Timestamp d1, Timestamp d2) {
@@ -1615,31 +619,31 @@ public class Function extends Expression implements FunctionCall {
                 calendar.get(Calendar.DAY_OF_WEEK),
                 calendar.get(Calendar.MILLISECOND));
         switch (field) {
-        case Calendar.MILLISECOND:
-            return t2 - t1;
-        case Calendar.SECOND:
-        case Calendar.MINUTE:
-        case Calendar.HOUR_OF_DAY: {
-            // first 'normalize' the numbers so both are not negative
-            long hour = 60 * 60 * 1000;
-            long add = Math.min(t1 / hour * hour, t2 / hour * hour);
-            t1 -= add;
-            t2 -= add;
-            switch (field) {
+            case Calendar.MILLISECOND:
+                return t2 - t1;
             case Calendar.SECOND:
-                return t2 / 1000 - t1 / 1000;
             case Calendar.MINUTE:
-                return t2 / (60 * 1000) - t1 / (60 * 1000);
-            case Calendar.HOUR_OF_DAY:
-                return t2 / hour - t1 / hour;
-            default:
-                throw DbException.throwInternalError("field:" + field);
+            case Calendar.HOUR_OF_DAY: {
+                // first 'normalize' the numbers so both are not negative
+                long hour = 60 * 60 * 1000;
+                long add = Math.min(t1 / hour * hour, t2 / hour * hour);
+                t1 -= add;
+                t2 -= add;
+                switch (field) {
+                    case Calendar.SECOND:
+                        return t2 / 1000 - t1 / 1000;
+                    case Calendar.MINUTE:
+                        return t2 / (60 * 1000) - t1 / (60 * 1000);
+                    case Calendar.HOUR_OF_DAY:
+                        return t2 / hour - t1 / hour;
+                    default:
+                        throw DbException.throwInternalError("field:" + field);
+                }
             }
-        }
-        case Calendar.DATE:
-            return t2 / (24 * 60 * 60 * 1000) - t1 / (24 * 60 * 60 * 1000);
-        default:
-            break;
+            case Calendar.DATE:
+                return t2 / (24 * 60 * 60 * 1000) - t1 / (24 * 60 * 60 * 1000);
+            default:
+                break;
         }
         calendar.setTimeInMillis(t1);
         int year1 = calendar.get(Calendar.YEAR);
@@ -1792,7 +796,7 @@ public class Function extends Expression implements FunctionCall {
     }
 
     private static String translate(String original, String findChars,
-            String replaceChars) {
+                                    String replaceChars) {
         if (StringUtils.isNullOrEmpty(original) ||
                 StringUtils.isNullOrEmpty(findChars)) {
             return original;
@@ -1860,7 +864,7 @@ public class Function extends Expression implements FunctionCall {
 
     private static String getSoundex(String s) {
         int len = s.length();
-        char[] chars = { '0', '0', '0', '0' };
+        char[] chars = {'0', '0', '0', '0'};
         char lastDigit = '0';
         for (int i = 0, j = 0; i < len && j < 4; i++) {
             char c = s.charAt(i);
@@ -1881,6 +885,998 @@ public class Function extends Expression implements FunctionCall {
             }
         }
         return new String(chars);
+    }
+
+    private static void setCsvDelimiterEscape(Csv csv, String fieldSeparator,
+                                              String fieldDelimiter, String escapeCharacter) {
+        if (fieldSeparator != null) {
+            csv.setFieldSeparatorWrite(fieldSeparator);
+            if (fieldSeparator.length() > 0) {
+                char fs = fieldSeparator.charAt(0);
+                csv.setFieldSeparatorRead(fs);
+            }
+        }
+        if (fieldDelimiter != null) {
+            char fd = fieldDelimiter.length() == 0 ?
+                    0 : fieldDelimiter.charAt(0);
+            csv.setFieldDelimiter(fd);
+        }
+        if (escapeCharacter != null) {
+            char ec = escapeCharacter.length() == 0 ?
+                    0 : escapeCharacter.charAt(0);
+            csv.setEscapeCharacter(ec);
+        }
+    }
+
+    /**
+     * Set the parameter expression at the given index.
+     *
+     * @param index the index (0, 1,...)
+     * @param param the expression
+     */
+    public void setParameter(int index, Expression param) {
+        if (varArgs != null) {
+            varArgs.add(param);
+        } else {
+            if (index >= args.length) {
+                throw DbException.get(ErrorCode.INVALID_PARAMETER_COUNT_2,
+                        info.name, "" + args.length);
+            }
+            args[index] = param;
+        }
+    }
+
+    @Override
+    public Value getValue(Session session) {
+        return getValueWithArgs(session, args);
+    }
+
+    private Value getSimpleValue(Session session, Value v0, Expression[] args,
+                                 Value[] values) {
+        Value result;
+        switch (info.type) {
+            case ABS:
+                result = v0.getSignum() > 0 ? v0 : v0.negate();
+                break;
+            case ACOS:
+                result = ValueDouble.get(Math.acos(v0.getDouble()));
+                break;
+            case ASIN:
+                result = ValueDouble.get(Math.asin(v0.getDouble()));
+                break;
+            case ATAN:
+                result = ValueDouble.get(Math.atan(v0.getDouble()));
+                break;
+            case CEILING:
+                result = ValueDouble.get(Math.ceil(v0.getDouble()));
+                break;
+            case COS:
+                result = ValueDouble.get(Math.cos(v0.getDouble()));
+                break;
+            case COSH:
+                result = ValueDouble.get(Math.cosh(v0.getDouble()));
+                break;
+            case COT: {
+                double d = Math.tan(v0.getDouble());
+                if (d == 0.0) {
+                    throw DbException.get(ErrorCode.DIVISION_BY_ZERO_1, getSQL());
+                }
+                result = ValueDouble.get(1. / d);
+                break;
+            }
+            case DEGREES:
+                result = ValueDouble.get(Math.toDegrees(v0.getDouble()));
+                break;
+            case EXP:
+                result = ValueDouble.get(Math.exp(v0.getDouble()));
+                break;
+            case FLOOR:
+                result = ValueDouble.get(Math.floor(v0.getDouble()));
+                break;
+            case LN:
+                result = ValueDouble.get(Math.log(v0.getDouble()));
+                break;
+            case LOG:
+                if (database.getMode().logIsLogBase10) {
+                    result = ValueDouble.get(Math.log10(v0.getDouble()));
+                } else {
+                    result = ValueDouble.get(Math.log(v0.getDouble()));
+                }
+                break;
+            case LOG10:
+                result = ValueDouble.get(log10(v0.getDouble()));
+                break;
+            case PI:
+                result = ValueDouble.get(Math.PI);
+                break;
+            case RADIANS:
+                result = ValueDouble.get(Math.toRadians(v0.getDouble()));
+                break;
+            case RAND: {
+                if (v0 != null) {
+                    session.getRandom().setSeed(v0.getInt());
+                }
+                result = ValueDouble.get(session.getRandom().nextDouble());
+                break;
+            }
+            case ROUNDMAGIC:
+                result = ValueDouble.get(roundMagic(v0.getDouble()));
+                break;
+            case SIGN:
+                result = ValueInt.get(v0.getSignum());
+                break;
+            case SIN:
+                result = ValueDouble.get(Math.sin(v0.getDouble()));
+                break;
+            case SINH:
+                result = ValueDouble.get(Math.sinh(v0.getDouble()));
+                break;
+            case SQRT:
+                result = ValueDouble.get(Math.sqrt(v0.getDouble()));
+                break;
+            case TAN:
+                result = ValueDouble.get(Math.tan(v0.getDouble()));
+                break;
+            case TANH:
+                result = ValueDouble.get(Math.tanh(v0.getDouble()));
+                break;
+            case SECURE_RAND:
+                result = ValueBytes.getNoCopy(
+                        MathUtils.secureRandomBytes(v0.getInt()));
+                break;
+            case ZERO:
+                result = ValueInt.get(0);
+                break;
+            case RANDOM_UUID:
+                result = ValueUuid.getNewRandom();
+                break;
+            // string
+            case ASCII: {
+                String s = v0.getString();
+                if (s.length() == 0) {
+                    result = ValueNull.INSTANCE;
+                } else {
+                    result = ValueInt.get(s.charAt(0));
+                }
+                break;
+            }
+            case BIT_LENGTH:
+                result = ValueLong.get(16 * length(v0));
+                break;
+            case CHAR:
+                result = ValueString.get(String.valueOf((char) v0.getInt()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case CHAR_LENGTH:
+            case LENGTH:
+                result = ValueLong.get(length(v0));
+                break;
+            case OCTET_LENGTH:
+                result = ValueLong.get(2 * length(v0));
+                break;
+            case CONCAT_WS:
+            case CONCAT: {
+                result = ValueNull.INSTANCE;
+                int start = 0;
+                String separator = "";
+                if (info.type == CONCAT_WS) {
+                    start = 1;
+                    separator = getNullOrValue(session, args, values, 0).getString();
+                }
+                for (int i = start; i < args.length; i++) {
+                    Value v = getNullOrValue(session, args, values, i);
+                    if (v == ValueNull.INSTANCE) {
+                        continue;
+                    }
+                    if (result == ValueNull.INSTANCE) {
+                        result = v;
+                    } else {
+                        String tmp = v.getString();
+                        if (!StringUtils.isNullOrEmpty(separator)
+                                && !StringUtils.isNullOrEmpty(tmp)) {
+                            tmp = separator.concat(tmp);
+                        }
+                        result = ValueString.get(result.getString().concat(tmp),
+                                database.getMode().treatEmptyStringsAsNull);
+                    }
+                }
+                if (info.type == CONCAT_WS) {
+                    if (separator != null && result == ValueNull.INSTANCE) {
+                        result = ValueString.get("",
+                                database.getMode().treatEmptyStringsAsNull);
+                    }
+                }
+                break;
+            }
+            case HEXTORAW:
+                result = ValueString.get(hexToRaw(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case LOWER:
+            case LCASE:
+                // TODO this is locale specific, need to document or provide a way
+                // to set the locale
+                result = ValueString.get(v0.getString().toLowerCase(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case RAWTOHEX:
+                result = ValueString.get(rawToHex(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case SOUNDEX:
+                result = ValueString.get(getSoundex(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case SPACE: {
+                int len = Math.max(0, v0.getInt());
+                char[] chars = new char[len];
+                for (int i = len - 1; i >= 0; i--) {
+                    chars[i] = ' ';
+                }
+                result = ValueString.get(new String(chars),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case UPPER:
+            case UCASE:
+                // TODO this is locale specific, need to document or provide a way
+                // to set the locale
+                result = ValueString.get(v0.getString().toUpperCase(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case STRINGENCODE:
+                result = ValueString.get(StringUtils.javaEncode(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case STRINGDECODE:
+                result = ValueString.get(StringUtils.javaDecode(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case STRINGTOUTF8:
+                result = ValueBytes.getNoCopy(v0.getString().
+                        getBytes(Constants.UTF8));
+                break;
+            case UTF8TOSTRING:
+                result = ValueString.get(new String(v0.getBytesNoCopy(),
+                                Constants.UTF8),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case XMLCOMMENT:
+                result = ValueString.get(StringUtils.xmlComment(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case XMLCDATA:
+                result = ValueString.get(StringUtils.xmlCData(v0.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case XMLSTARTDOC:
+                result = ValueString.get(StringUtils.xmlStartDoc(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case DAY_NAME: {
+                SimpleDateFormat dayName = new SimpleDateFormat(
+                        "EEEE", Locale.ENGLISH);
+                result = ValueString.get(dayName.format(v0.getDate()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case DAY_OF_MONTH:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.DAY_OF_MONTH));
+                break;
+            case DAY_OF_WEEK:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.DAY_OF_WEEK));
+                break;
+            case DAY_OF_YEAR:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.DAY_OF_YEAR));
+                break;
+            case HOUR:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
+                        Calendar.HOUR_OF_DAY));
+                break;
+            case MINUTE:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
+                        Calendar.MINUTE));
+                break;
+            case MONTH:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.MONTH));
+                break;
+            case MONTH_NAME: {
+                SimpleDateFormat monthName = new SimpleDateFormat("MMMM",
+                        Locale.ENGLISH);
+                result = ValueString.get(monthName.format(v0.getDate()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case QUARTER:
+                result = ValueInt.get((DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.MONTH) - 1) / 3 + 1);
+                break;
+            case SECOND:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getTimestamp(),
+                        Calendar.SECOND));
+                break;
+            case WEEK:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.WEEK_OF_YEAR));
+                break;
+            case YEAR:
+                result = ValueInt.get(DateTimeUtils.getDatePart(v0.getDate(),
+                        Calendar.YEAR));
+                break;
+            case ISO_YEAR:
+                result = ValueInt.get(DateTimeUtils.getIsoYear(v0.getDate()));
+                break;
+            case ISO_WEEK:
+                result = ValueInt.get(DateTimeUtils.getIsoWeek(v0.getDate()));
+                break;
+            case ISO_DAY_OF_WEEK:
+                result = ValueInt.get(DateTimeUtils.getIsoDayOfWeek(v0.getDate()));
+                break;
+            case CURDATE:
+            case CURRENT_DATE: {
+                long now = session.getTransactionStart();
+                // need to normalize
+                result = ValueDate.fromMillis(now);
+                break;
+            }
+            case CURTIME:
+            case CURRENT_TIME: {
+                long now = session.getTransactionStart();
+                // need to normalize
+                result = ValueTime.fromMillis(now);
+                break;
+            }
+            case NOW:
+            case CURRENT_TIMESTAMP: {
+                long now = session.getTransactionStart();
+                ValueTimestamp vt = ValueTimestamp.fromMillis(now);
+                if (v0 != null) {
+                    Mode mode = database.getMode();
+                    vt = (ValueTimestamp) vt.convertScale(
+                            mode.convertOnlyToSmallerScale, v0.getInt());
+                }
+                result = vt;
+                break;
+            }
+            case USER:
+            case CURRENT_USER:
+                result = ValueString.get(session.getUser().getName(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case IDENTITY:
+                result = session.getLastIdentity();
+                break;
+            case SCOPE_IDENTITY:
+                result = session.getLastScopeIdentity();
+                break;
+            case AUTOCOMMIT:
+                result = ValueBoolean.get(session.getAutoCommit());
+                break;
+            case LOCK_TIMEOUT:
+                result = ValueInt.get(session.getLockTimeout());
+                break;
+            case CAST:
+            case CONVERT: {
+                v0 = v0.convertTo(dataType);
+                Mode mode = database.getMode();
+                v0 = v0.convertScale(mode.convertOnlyToSmallerScale, scale);
+                v0 = v0.convertPrecision(getPrecision(), false);
+                result = v0;
+                break;
+            }
+            case MEMORY_FREE:
+                session.getUser().checkAdmin();
+                result = ValueInt.get(Utils.getMemoryFree());
+                break;
+            case MEMORY_USED:
+                session.getUser().checkAdmin();
+                result = ValueInt.get(Utils.getMemoryUsed());
+                break;
+            case SCHEMA:
+                result = ValueString.get(session.getCurrentSchemaName(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case SESSION_ID:
+                result = ValueInt.get(session.getId());
+                break;
+            case IFNULL: {
+                result = v0;
+                if (v0 == ValueNull.INSTANCE) {
+                    result = getNullOrValue(session, args, values, 1);
+                }
+                break;
+            }
+            case CASEWHEN: {
+                Value v;
+                if (v0 == ValueNull.INSTANCE ||
+                        !v0.getBoolean().booleanValue()) {
+                    v = getNullOrValue(session, args, values, 2);
+                } else {
+                    v = getNullOrValue(session, args, values, 1);
+                }
+                result = v.convertTo(dataType);
+                break;
+            }
+            case DECODE: {
+                int index = -1;
+                for (int i = 1, len = args.length - 1; i < len; i += 2) {
+                    if (database.areEqual(v0,
+                            getNullOrValue(session, args, values, i))) {
+                        index = i + 1;
+                        break;
+                    }
+                }
+                if (index < 0 && args.length % 2 == 0) {
+                    index = args.length - 1;
+                }
+                Value v = index < 0 ? ValueNull.INSTANCE :
+                        getNullOrValue(session, args, values, index);
+                result = v.convertTo(dataType);
+                break;
+            }
+            case NVL2: {
+                Value v;
+                if (v0 == ValueNull.INSTANCE) {
+                    v = getNullOrValue(session, args, values, 2);
+                } else {
+                    v = getNullOrValue(session, args, values, 1);
+                }
+                result = v.convertTo(dataType);
+                break;
+            }
+            case COALESCE: {
+                result = v0;
+                for (int i = 0; i < args.length; i++) {
+                    Value v = getNullOrValue(session, args, values, i);
+                    if (!(v == ValueNull.INSTANCE)) {
+                        result = v.convertTo(dataType);
+                        break;
+                    }
+                }
+                break;
+            }
+            case GREATEST:
+            case LEAST: {
+                result = ValueNull.INSTANCE;
+                for (int i = 0; i < args.length; i++) {
+                    Value v = getNullOrValue(session, args, values, i);
+                    if (!(v == ValueNull.INSTANCE)) {
+                        v = v.convertTo(dataType);
+                        if (result == ValueNull.INSTANCE) {
+                            result = v;
+                        } else {
+                            int comp = database.compareTypeSave(result, v);
+                            if (info.type == GREATEST && comp < 0) {
+                                result = v;
+                            } else if (info.type == LEAST && comp > 0) {
+                                result = v;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+            case CASE: {
+                Expression then = null;
+                if (v0 == null) {
+                    // Searched CASE expression
+                    // (null, when, then)
+                    // (null, when, then, else)
+                    // (null, when, then, when, then)
+                    // (null, when, then, when, then, else)
+                    for (int i = 1, len = args.length - 1; i < len; i += 2) {
+                        Value when = args[i].getValue(session);
+                        if (!(when == ValueNull.INSTANCE) &&
+                                when.getBoolean().booleanValue()) {
+                            then = args[i + 1];
+                            break;
+                        }
+                    }
+                } else {
+                    // Simple CASE expression
+                    // (expr, when, then)
+                    // (expr, when, then, else)
+                    // (expr, when, then, when, then)
+                    // (expr, when, then, when, then, else)
+                    if (!(v0 == ValueNull.INSTANCE)) {
+                        for (int i = 1, len = args.length - 1; i < len; i += 2) {
+                            Value when = args[i].getValue(session);
+                            if (database.areEqual(v0, when)) {
+                                then = args[i + 1];
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (then == null && args.length % 2 == 0) {
+                    // then = elsePart
+                    then = args[args.length - 1];
+                }
+                Value v = then == null ? ValueNull.INSTANCE : then.getValue(session);
+                result = v.convertTo(dataType);
+                break;
+            }
+            case ARRAY_GET: {
+                if (v0.getType() == Value.ARRAY) {
+                    Value v1 = getNullOrValue(session, args, values, 1);
+                    int element = v1.getInt();
+                    Value[] list = ((ValueArray) v0).getList();
+                    if (element < 1 || element > list.length) {
+                        result = ValueNull.INSTANCE;
+                    } else {
+                        result = list[element - 1];
+                    }
+                } else {
+                    result = ValueNull.INSTANCE;
+                }
+                break;
+            }
+            case ARRAY_LENGTH: {
+                if (v0.getType() == Value.ARRAY) {
+                    Value[] list = ((ValueArray) v0).getList();
+                    result = ValueInt.get(list.length);
+                } else {
+                    result = ValueNull.INSTANCE;
+                }
+                break;
+            }
+            case ARRAY_CONTAINS: {
+                result = ValueBoolean.get(false);
+                if (v0.getType() == Value.ARRAY) {
+                    Value v1 = getNullOrValue(session, args, values, 1);
+                    Value[] list = ((ValueArray) v0).getList();
+                    for (Value v : list) {
+                        if (v.equals(v1)) {
+                            result = ValueBoolean.get(true);
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+            case CANCEL_SESSION: {
+                result = ValueBoolean.get(cancelStatement(session, v0.getInt()));
+                break;
+            }
+            case TRANSACTION_ID: {
+                result = session.getTransactionId();
+                break;
+            }
+            default:
+                result = null;
+        }
+        return result;
+    }
+
+    private Value getValueWithArgs(Session session, Expression[] args) {
+        Value[] values = new Value[args.length];
+        if (info.nullIfParameterIsNull) {
+            for (int i = 0; i < args.length; i++) {
+                Expression e = args[i];
+                Value v = e.getValue(session);
+                if (v == ValueNull.INSTANCE) {
+                    return ValueNull.INSTANCE;
+                }
+                values[i] = v;
+            }
+        }
+        Value v0 = getNullOrValue(session, args, values, 0);
+        Value resultSimple = getSimpleValue(session, v0, args, values);
+        if (resultSimple != null) {
+            return resultSimple;
+        }
+        Value v1 = getNullOrValue(session, args, values, 1);
+        Value v2 = getNullOrValue(session, args, values, 2);
+        Value v3 = getNullOrValue(session, args, values, 3);
+        Value v4 = getNullOrValue(session, args, values, 4);
+        Value v5 = getNullOrValue(session, args, values, 5);
+        Value result;
+        switch (info.type) {
+            case ATAN2:
+                result = ValueDouble.get(
+                        Math.atan2(v0.getDouble(), v1.getDouble()));
+                break;
+            case BITAND:
+                result = ValueLong.get(v0.getLong() & v1.getLong());
+                break;
+            case BITOR:
+                result = ValueLong.get(v0.getLong() | v1.getLong());
+                break;
+            case BITXOR:
+                result = ValueLong.get(v0.getLong() ^ v1.getLong());
+                break;
+            case MOD: {
+                long x = v1.getLong();
+                if (x == 0) {
+                    throw DbException.get(ErrorCode.DIVISION_BY_ZERO_1, getSQL());
+                }
+                result = ValueLong.get(v0.getLong() % x);
+                break;
+            }
+            case POWER:
+                result = ValueDouble.get(Math.pow(
+                        v0.getDouble(), v1.getDouble()));
+                break;
+            case ROUND: {
+                double f = v1 == null ? 1. : Math.pow(10., v1.getDouble());
+                result = ValueDouble.get(Math.round(v0.getDouble() * f) / f);
+                break;
+            }
+            case TRUNCATE: {
+                if (v0.getType() == Value.TIMESTAMP) {
+                    java.sql.Timestamp d = v0.getTimestamp();
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(d);
+                    c.set(Calendar.HOUR_OF_DAY, 0);
+                    c.set(Calendar.MINUTE, 0);
+                    c.set(Calendar.SECOND, 0);
+                    c.set(Calendar.MILLISECOND, 0);
+                    result = ValueTimestamp.fromMillis(c.getTimeInMillis());
+                } else {
+                    double d = v0.getDouble();
+                    int p = v1 == null ? 0 : v1.getInt();
+                    double f = Math.pow(10., p);
+                    double g = d * f;
+                    result = ValueDouble.get(((d < 0) ? Math.ceil(g) : Math.floor(g)) / f);
+                }
+                break;
+            }
+            case DIFFERENCE:
+                result = ValueInt.get(getDifference(
+                        v0.getString(), v1.getString()));
+                break;
+            case INSERT: {
+                if (v1 == ValueNull.INSTANCE || v2 == ValueNull.INSTANCE) {
+                    result = v1;
+                } else {
+                    result = ValueString.get(insert(v0.getString(),
+                                    v1.getInt(), v2.getInt(), v3.getString()),
+                            database.getMode().treatEmptyStringsAsNull);
+                }
+                break;
+            }
+            case LEFT:
+                result = ValueString.get(left(v0.getString(), v1.getInt()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case LOCATE: {
+                int start = v2 == null ? 0 : v2.getInt();
+                result = ValueInt.get(locate(v0.getString(), v1.getString(), start));
+                break;
+            }
+            case INSTR: {
+                int start = v2 == null ? 0 : v2.getInt();
+                result = ValueInt.get(locate(v1.getString(), v0.getString(), start));
+                break;
+            }
+            case REPEAT: {
+                int count = Math.max(0, v1.getInt());
+                result = ValueString.get(repeat(v0.getString(), count),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case REPLACE: {
+                String s0 = v0.getString();
+                String s1 = v1.getString();
+                String s2 = (v2 == null) ? "" : v2.getString();
+                result = ValueString.get(replace(s0, s1, s2),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case RIGHT:
+                result = ValueString.get(right(v0.getString(), v1.getInt()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case LTRIM:
+                result = ValueString.get(StringUtils.trim(v0.getString(),
+                                true, false, v1 == null ? " " : v1.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case TRIM:
+                result = ValueString.get(StringUtils.trim(v0.getString(),
+                                true, true, v1 == null ? " " : v1.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case RTRIM:
+                result = ValueString.get(StringUtils.trim(v0.getString(),
+                                false, true, v1 == null ? " " : v1.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case SUBSTR:
+            case SUBSTRING: {
+                String s = v0.getString();
+                int offset = v1.getInt();
+                if (offset < 0) {
+                    offset = s.length() + offset + 1;
+                }
+                int length = v2 == null ? s.length() : v2.getInt();
+                result = ValueString.get(substring(s, offset, length),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case POSITION:
+                result = ValueInt.get(locate(v0.getString(), v1.getString(), 0));
+                break;
+            case XMLATTR:
+                result = ValueString.get(
+                        StringUtils.xmlAttr(v0.getString(), v1.getString()),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case XMLNODE: {
+                String attr = v1 == null ?
+                        null : v1 == ValueNull.INSTANCE ? null : v1.getString();
+                String content = v2 == null ?
+                        null : v2 == ValueNull.INSTANCE ? null : v2.getString();
+                boolean indent = v3 == null ?
+                        true : v3.getBoolean();
+                result = ValueString.get(StringUtils.xmlNode(
+                                v0.getString(), attr, content, indent),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case REGEXP_REPLACE: {
+                String regexp = v1.getString();
+                String replacement = v2.getString();
+                try {
+                    result = ValueString.get(
+                            v0.getString().replaceAll(regexp, replacement),
+                            database.getMode().treatEmptyStringsAsNull);
+                } catch (StringIndexOutOfBoundsException e) {
+                    throw DbException.get(
+                            ErrorCode.LIKE_ESCAPE_ERROR_1, e, replacement);
+                } catch (PatternSyntaxException e) {
+                    throw DbException.get(
+                            ErrorCode.LIKE_ESCAPE_ERROR_1, e, regexp);
+                }
+                break;
+            }
+            case RPAD:
+                result = ValueString.get(StringUtils.pad(v0.getString(),
+                                v1.getInt(), v2 == null ? null : v2.getString(), true),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case LPAD:
+                result = ValueString.get(StringUtils.pad(v0.getString(),
+                                v1.getInt(), v2 == null ? null : v2.getString(), false),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case TO_CHAR:
+                switch (v0.getType()) {
+                    case Value.TIME:
+                    case Value.DATE:
+                    case Value.TIMESTAMP:
+                        result = ValueString.get(toChar(v0.getTimestamp(),
+                                        v1 == null ? null : v1.getString(),
+                                        v2 == null ? null : v2.getString()),
+                                database.getMode().treatEmptyStringsAsNull);
+                        break;
+                    case Value.SHORT:
+                    case Value.INT:
+                    case Value.LONG:
+                    case Value.DECIMAL:
+                    case Value.DOUBLE:
+                    case Value.FLOAT:
+                        result = ValueString.get(toChar(v0.getBigDecimal(),
+                                        v1 == null ? null : v1.getString(),
+                                        v2 == null ? null : v2.getString()),
+                                database.getMode().treatEmptyStringsAsNull);
+                        break;
+                    default:
+                        result = ValueString.get(v0.getString(),
+                                database.getMode().treatEmptyStringsAsNull);
+                }
+                break;
+            case TRANSLATE: {
+                String matching = v1.getString();
+                String replacement = v2.getString();
+                result = ValueString.get(
+                        translate(v0.getString(), matching, replacement),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            }
+            case H2VERSION:
+                result = ValueString.get(Constants.getVersion(),
+                        database.getMode().treatEmptyStringsAsNull);
+                break;
+            case DATE_ADD:
+                result = ValueTimestamp.get(dateadd(
+                        v0.getString(), v1.getInt(), v2.getTimestamp()));
+                break;
+            case DATE_DIFF:
+                result = ValueLong.get(datediff(
+                        v0.getString(), v1.getTimestamp(), v2.getTimestamp()));
+                break;
+            case EXTRACT: {
+                int field = getDatePart(v0.getString());
+                result = ValueInt.get(DateTimeUtils.getDatePart(
+                        v1.getTimestamp(), field));
+                break;
+            }
+            case FORMATDATETIME: {
+                if (v0 == ValueNull.INSTANCE || v1 == ValueNull.INSTANCE) {
+                    result = ValueNull.INSTANCE;
+                } else {
+                    String locale = v2 == null ?
+                            null : v2 == ValueNull.INSTANCE ? null : v2.getString();
+                    String tz = v3 == null ?
+                            null : v3 == ValueNull.INSTANCE ? null : v3.getString();
+                    result = ValueString.get(DateTimeUtils.formatDateTime(
+                                    v0.getTimestamp(), v1.getString(), locale, tz),
+                            database.getMode().treatEmptyStringsAsNull);
+                }
+                break;
+            }
+            case PARSEDATETIME: {
+                if (v0 == ValueNull.INSTANCE || v1 == ValueNull.INSTANCE) {
+                    result = ValueNull.INSTANCE;
+                } else {
+                    String locale = v2 == null ?
+                            null : v2 == ValueNull.INSTANCE ? null : v2.getString();
+                    String tz = v3 == null ?
+                            null : v3 == ValueNull.INSTANCE ? null : v3.getString();
+                    java.util.Date d = DateTimeUtils.parseDateTime(
+                            v0.getString(), v1.getString(), locale, tz);
+                    result = ValueTimestamp.fromMillis(d.getTime());
+                }
+                break;
+            }
+            case NULLIF:
+                result = database.areEqual(v0, v1) ? ValueNull.INSTANCE : v0;
+                break;
+            // system
+            case NEXTVAL: {
+                Sequence sequence = getSequence(session, v0, v1);
+                SequenceValue value = new SequenceValue(sequence);
+                result = value.getValue(session);
+                break;
+            }
+            case CURRVAL: {
+                Sequence sequence = getSequence(session, v0, v1);
+                result = ValueLong.get(sequence.getCurrentValue());
+                break;
+            }
+            case CSVREAD: {
+                String fileName = v0.getString();
+                String columnList = v1 == null ? null : v1.getString();
+                Csv csv = new Csv();
+                String options = v2 == null ? null : v2.getString();
+                String charset = null;
+                if (options != null && options.indexOf('=') >= 0) {
+                    charset = csv.setOptions(options);
+                } else {
+                    charset = options;
+                    String fieldSeparatorRead = v3 == null ? null : v3.getString();
+                    String fieldDelimiter = v4 == null ? null : v4.getString();
+                    String escapeCharacter = v5 == null ? null : v5.getString();
+                    Value v6 = getNullOrValue(session, args, values, 6);
+                    String nullString = v6 == null ? null : v6.getString();
+                    setCsvDelimiterEscape(csv, fieldSeparatorRead, fieldDelimiter,
+                            escapeCharacter);
+                    csv.setNullString(nullString);
+                }
+                char fieldSeparator = csv.getFieldSeparatorRead();
+                String[] columns = StringUtils.arraySplit(columnList,
+                        fieldSeparator, true);
+                try {
+                    ValueResultSet vr = ValueResultSet.get(csv.read(fileName,
+                            columns, charset));
+                    result = vr;
+                } catch (SQLException e) {
+                    throw DbException.convert(e);
+                }
+                break;
+            }
+            case CSVWRITE: {
+                session.getUser().checkAdmin();
+                Connection conn = session.createConnection(false);
+                Csv csv = new Csv();
+                String options = v2 == null ? null : v2.getString();
+                String charset = null;
+                if (options != null && options.indexOf('=') >= 0) {
+                    charset = csv.setOptions(options);
+                } else {
+                    charset = options;
+                    String fieldSeparatorWrite = v3 == null ? null : v3.getString();
+                    String fieldDelimiter = v4 == null ? null : v4.getString();
+                    String escapeCharacter = v5 == null ? null : v5.getString();
+                    Value v6 = getNullOrValue(session, args, values, 6);
+                    String nullString = v6 == null ? null : v6.getString();
+                    Value v7 = getNullOrValue(session, args, values, 7);
+                    String lineSeparator = v7 == null ? null : v7.getString();
+                    setCsvDelimiterEscape(csv, fieldSeparatorWrite, fieldDelimiter,
+                            escapeCharacter);
+                    csv.setNullString(nullString);
+                    if (lineSeparator != null) {
+                        csv.setLineSeparator(lineSeparator);
+                    }
+                }
+                try {
+                    int rows = csv.write(conn, v0.getString(), v1.getString(),
+                            charset);
+                    result = ValueInt.get(rows);
+                } catch (SQLException e) {
+                    throw DbException.convert(e);
+                }
+                break;
+            }
+            case SET: {
+                Variable var = (Variable) args[0];
+                session.setVariable(var.getName(), v1);
+                result = v1;
+                break;
+            }
+            case TRUNCATE_VALUE: {
+                result = v0.convertPrecision(v1.getLong(), v2.getBoolean());
+                break;
+            }
+            case XMLTEXT:
+                if (v1 == null) {
+                    result = ValueString.get(StringUtils.xmlText(
+                                    v0.getString()),
+                            database.getMode().treatEmptyStringsAsNull);
+                } else {
+                    result = ValueString.get(StringUtils.xmlText(
+                                    v0.getString(), v1.getBoolean()),
+                            database.getMode().treatEmptyStringsAsNull);
+                }
+                break;
+            case VALUES:
+                result = session.getVariable(args[0].getSchemaName() + "." +
+                        args[0].getTableName() + "." + args[0].getColumnName());
+                break;
+            case EXPAND:
+            case DATABASE:
+            case DATABASE_PATH:
+            case HASH:
+            case ENCRYPT:
+            case DECRYPT:
+            case COMPRESS:
+            case FILE_READ:
+            case LINK_SCHEMA:
+                throw DbException.throwInternalError("function unimplemented. tyle=" + info.type);
+            default:
+                throw DbException.throwInternalError("type=" + info.type);
+        }
+        return result;
+    }
+
+    private Sequence getSequence(Session session, Value v0, Value v1) {
+        String schemaName, sequenceName;
+        if (v1 == null) {
+            Parser p = new Parser(session);
+            String sql = v0.getString();
+            Expression expr = p.parseExpression(sql);
+            if (expr instanceof ExpressionColumn) {
+                ExpressionColumn seq = (ExpressionColumn) expr;
+                schemaName = seq.getOriginalTableAliasName();
+                if (schemaName == null) {
+                    schemaName = session.getCurrentSchemaName();
+                    sequenceName = sql;
+                } else {
+                    sequenceName = seq.getColumnName();
+                }
+            } else {
+                throw DbException.getSyntaxError(sql, 1);
+            }
+        } else {
+            schemaName = v0.getString();
+            sequenceName = v1.getString();
+        }
+        Schema s = database.findSchema(schemaName);
+        if (s == null) {
+            schemaName = StringUtils.toUpperEnglish(schemaName);
+            s = database.getSchema(schemaName);
+        }
+        Sequence seq = s.findSequence(sequenceName);
+        if (seq == null) {
+            sequenceName = StringUtils.toUpperEnglish(sequenceName);
+            seq = s.getSequence(sequenceName);
+        }
+        return seq;
     }
 
     @Override
@@ -1906,67 +1902,67 @@ public class Function extends Expression implements FunctionCall {
     protected void checkParameterCount(int len) {
         int min = 0, max = Integer.MAX_VALUE;
         switch (info.type) {
-        case COALESCE:
-        case CSVREAD:
-        case LEAST:
-        case GREATEST:
-            min = 1;
-            break;
-        case NOW:
-        case CURRENT_TIMESTAMP:
-        case RAND:
-            max = 1;
-            break;
-        case COMPRESS:
-        case LTRIM:
-        case RTRIM:
-        case TRIM:
-        case FILE_READ:
-        case ROUND:
-        case XMLTEXT:
-        case TRUNCATE:
-            min = 1;
-            max = 2;
-            break;
-        case TO_CHAR:
-            min = 1;
-            max = 3;
-            break;
-        case REPLACE:
-        case LOCATE:
-        case INSTR:
-        case SUBSTR:
-        case SUBSTRING:
-        case LPAD:
-        case RPAD:
-            min = 2;
-            max = 3;
-            break;
-        case CONCAT:
-        case CONCAT_WS:
-        case CSVWRITE:
-            min = 2;
-            break;
-        case XMLNODE:
-            min = 1;
-            max = 4;
-            break;
-        case FORMATDATETIME:
-        case PARSEDATETIME:
-            min = 2;
-            max = 4;
-            break;
-        case CURRVAL:
-        case NEXTVAL:
-            min = 1;
-            max = 2;
-            break;
-        case DECODE:
-        case CASE:
-            min = 3;
-            break;
-        default:
-            DbException.throwInternalError("type=" + info.type);
+            case COALESCE:
+            case CSVREAD:
+            case LEAST:
+            case GREATEST:
+                min = 1;
+                break;
+            case NOW:
+            case CURRENT_TIMESTAMP:
+            case RAND:
+                max = 1;
+                break;
+            case COMPRESS:
+            case LTRIM:
+            case RTRIM:
+            case TRIM:
+            case FILE_READ:
+            case ROUND:
+            case XMLTEXT:
+            case TRUNCATE:
+                min = 1;
+                max = 2;
+                break;
+            case TO_CHAR:
+                min = 1;
+                max = 3;
+                break;
+            case REPLACE:
+            case LOCATE:
+            case INSTR:
+            case SUBSTR:
+            case SUBSTRING:
+            case LPAD:
+            case RPAD:
+                min = 2;
+                max = 3;
+                break;
+            case CONCAT:
+            case CONCAT_WS:
+            case CSVWRITE:
+                min = 2;
+                break;
+            case XMLNODE:
+                min = 1;
+                max = 4;
+                break;
+            case FORMATDATETIME:
+            case PARSEDATETIME:
+                min = 2;
+                max = 4;
+                break;
+            case CURRVAL:
+            case NEXTVAL:
+                min = 1;
+                max = 2;
+                break;
+            case DECODE:
+            case CASE:
+                min = 3;
+                break;
+            default:
+                DbException.throwInternalError("type=" + info.type);
         }
         boolean ok = (len >= min) && (len <= max);
         if (!ok) {
@@ -2024,185 +2020,185 @@ public class Function extends Expression implements FunctionCall {
         long p;
         Expression p0 = args.length < 1 ? null : args[0];
         switch (info.type) {
-        case IFNULL:
-        case NULLIF:
-        case COALESCE:
-        case LEAST:
-        case GREATEST: {
-            t = Value.UNKNOWN;
-            s = 0;
-            p = 0;
-            d = 0;
-            for (Expression e : args) {
-                if (e != ValueExpression.getNull()) {
-                    int type = e.getType();
-                    if (type != Value.UNKNOWN && type != Value.NULL) {
-                        t = Value.getHigherOrder(t, type);
-                        s = Math.max(s, e.getScale());
-                        p = Math.max(p, e.getPrecision());
-                        d = Math.max(d, e.getDisplaySize());
-                    }
-                }
-            }
-            if (t == Value.UNKNOWN) {
-                t = Value.STRING;
+            case IFNULL:
+            case NULLIF:
+            case COALESCE:
+            case LEAST:
+            case GREATEST: {
+                t = Value.UNKNOWN;
                 s = 0;
-                p = Integer.MAX_VALUE;
-                d = Integer.MAX_VALUE;
-            }
-            break;
-        }
-        case CASE:
-        case DECODE: {
-            t = Value.UNKNOWN;
-            s = 0;
-            p = 0;
-            d = 0;
-            // (expr, when, then)
-            // (expr, when, then, else)
-            // (expr, when, then, when, then)
-            // (expr, when, then, when, then, else)
-            for (int i = 2, len = args.length; i < len; i += 2) {
-                Expression then = args[i];
-                if (then != ValueExpression.getNull()) {
-                    int type = then.getType();
-                    if (type != Value.UNKNOWN && type != Value.NULL) {
-                        t = Value.getHigherOrder(t, type);
-                        s = Math.max(s, then.getScale());
-                        p = Math.max(p, then.getPrecision());
-                        d = Math.max(d, then.getDisplaySize());
+                p = 0;
+                d = 0;
+                for (Expression e : args) {
+                    if (e != ValueExpression.getNull()) {
+                        int type = e.getType();
+                        if (type != Value.UNKNOWN && type != Value.NULL) {
+                            t = Value.getHigherOrder(t, type);
+                            s = Math.max(s, e.getScale());
+                            p = Math.max(p, e.getPrecision());
+                            d = Math.max(d, e.getDisplaySize());
+                        }
                     }
                 }
-            }
-            if (args.length % 2 == 0) {
-                Expression elsePart = args[args.length - 1];
-                if (elsePart != ValueExpression.getNull()) {
-                    int type = elsePart.getType();
-                    if (type != Value.UNKNOWN && type != Value.NULL) {
-                        t = Value.getHigherOrder(t, type);
-                        s = Math.max(s, elsePart.getScale());
-                        p = Math.max(p, elsePart.getPrecision());
-                        d = Math.max(d, elsePart.getDisplaySize());
-                    }
+                if (t == Value.UNKNOWN) {
+                    t = Value.STRING;
+                    s = 0;
+                    p = Integer.MAX_VALUE;
+                    d = Integer.MAX_VALUE;
                 }
-            }
-            if (t == Value.UNKNOWN) {
-                t = Value.STRING;
-                s = 0;
-                p = Integer.MAX_VALUE;
-                d = Integer.MAX_VALUE;
-            }
-            break;
-        }
-        case CASEWHEN:
-            t = Value.getHigherOrder(args[1].getType(), args[2].getType());
-            p = Math.max(args[1].getPrecision(), args[2].getPrecision());
-            d = Math.max(args[1].getDisplaySize(), args[2].getDisplaySize());
-            s = Math.max(args[1].getScale(), args[2].getScale());
-            break;
-        case NVL2:
-            switch (args[1].getType()) {
-            case Value.STRING:
-            case Value.CLOB:
-            case Value.STRING_FIXED:
-            case Value.STRING_IGNORECASE:
-                t = args[1].getType();
                 break;
-            default:
+            }
+            case CASE:
+            case DECODE: {
+                t = Value.UNKNOWN;
+                s = 0;
+                p = 0;
+                d = 0;
+                // (expr, when, then)
+                // (expr, when, then, else)
+                // (expr, when, then, when, then)
+                // (expr, when, then, when, then, else)
+                for (int i = 2, len = args.length; i < len; i += 2) {
+                    Expression then = args[i];
+                    if (then != ValueExpression.getNull()) {
+                        int type = then.getType();
+                        if (type != Value.UNKNOWN && type != Value.NULL) {
+                            t = Value.getHigherOrder(t, type);
+                            s = Math.max(s, then.getScale());
+                            p = Math.max(p, then.getPrecision());
+                            d = Math.max(d, then.getDisplaySize());
+                        }
+                    }
+                }
+                if (args.length % 2 == 0) {
+                    Expression elsePart = args[args.length - 1];
+                    if (elsePart != ValueExpression.getNull()) {
+                        int type = elsePart.getType();
+                        if (type != Value.UNKNOWN && type != Value.NULL) {
+                            t = Value.getHigherOrder(t, type);
+                            s = Math.max(s, elsePart.getScale());
+                            p = Math.max(p, elsePart.getPrecision());
+                            d = Math.max(d, elsePart.getDisplaySize());
+                        }
+                    }
+                }
+                if (t == Value.UNKNOWN) {
+                    t = Value.STRING;
+                    s = 0;
+                    p = Integer.MAX_VALUE;
+                    d = Integer.MAX_VALUE;
+                }
+                break;
+            }
+            case CASEWHEN:
                 t = Value.getHigherOrder(args[1].getType(), args[2].getType());
+                p = Math.max(args[1].getPrecision(), args[2].getPrecision());
+                d = Math.max(args[1].getDisplaySize(), args[2].getDisplaySize());
+                s = Math.max(args[1].getScale(), args[2].getScale());
+                break;
+            case NVL2:
+                switch (args[1].getType()) {
+                    case Value.STRING:
+                    case Value.CLOB:
+                    case Value.STRING_FIXED:
+                    case Value.STRING_IGNORECASE:
+                        t = args[1].getType();
+                        break;
+                    default:
+                        t = Value.getHigherOrder(args[1].getType(), args[2].getType());
+                        break;
+                }
+                p = Math.max(args[1].getPrecision(), args[2].getPrecision());
+                d = Math.max(args[1].getDisplaySize(), args[2].getDisplaySize());
+                s = Math.max(args[1].getScale(), args[2].getScale());
+                break;
+            case CAST:
+            case CONVERT:
+            case TRUNCATE_VALUE:
+                // data type, precision and scale is already set
+                t = dataType;
+                p = precision;
+                s = scale;
+                d = displaySize;
+                break;
+            case TRUNCATE:
+                t = p0.getType();
+                s = p0.getScale();
+                p = p0.getPrecision();
+                d = p0.getDisplaySize();
+                if (t == Value.NULL) {
+                    t = Value.INT;
+                    p = ValueInt.PRECISION;
+                    d = ValueInt.DISPLAY_SIZE;
+                    s = 0;
+                } else if (t == Value.TIMESTAMP) {
+                    t = Value.DATE;
+                    p = ValueDate.PRECISION;
+                    s = 0;
+                    d = ValueDate.DISPLAY_SIZE;
+                }
+                break;
+            case ABS:
+            case FLOOR:
+            case ROUND:
+                t = p0.getType();
+                s = p0.getScale();
+                p = p0.getPrecision();
+                d = p0.getDisplaySize();
+                if (t == Value.NULL) {
+                    t = Value.INT;
+                    p = ValueInt.PRECISION;
+                    d = ValueInt.DISPLAY_SIZE;
+                    s = 0;
+                }
+                break;
+            case SET: {
+                Expression p1 = args[1];
+                t = p1.getType();
+                p = p1.getPrecision();
+                s = p1.getScale();
+                d = p1.getDisplaySize();
+                if (!(p0 instanceof Variable)) {
+                    throw DbException.get(
+                            ErrorCode.CAN_ONLY_ASSIGN_TO_VARIABLE_1, p0.getSQL());
+                }
                 break;
             }
-            p = Math.max(args[1].getPrecision(), args[2].getPrecision());
-            d = Math.max(args[1].getDisplaySize(), args[2].getDisplaySize());
-            s = Math.max(args[1].getScale(), args[2].getScale());
-            break;
-        case CAST:
-        case CONVERT:
-        case TRUNCATE_VALUE:
-            // data type, precision and scale is already set
-            t = dataType;
-            p = precision;
-            s = scale;
-            d = displaySize;
-            break;
-        case TRUNCATE:
-            t = p0.getType();
-            s = p0.getScale();
-            p = p0.getPrecision();
-            d = p0.getDisplaySize();
-            if (t == Value.NULL) {
-                t = Value.INT;
-                p = ValueInt.PRECISION;
-                d = ValueInt.DISPLAY_SIZE;
+            case FILE_READ: {
+                if (args.length == 1) {
+                    t = Value.BLOB;
+                } else {
+                    t = Value.CLOB;
+                }
+                p = Integer.MAX_VALUE;
                 s = 0;
-            } else if (t == Value.TIMESTAMP) {
-                t = Value.DATE;
-                p = ValueDate.PRECISION;
+                d = Integer.MAX_VALUE;
+                break;
+            }
+            case SUBSTRING:
+            case SUBSTR: {
+                t = info.dataType;
+                p = args[0].getPrecision();
                 s = 0;
-                d = ValueDate.DISPLAY_SIZE;
+                if (args[1].isConstant()) {
+                    // if only two arguments are used,
+                    // subtract offset from first argument length
+                    p -= args[1].getValue(session).getLong() - 1;
+                }
+                if (args.length == 3 && args[2].isConstant()) {
+                    // if the third argument is constant it is at most this value
+                    p = Math.min(p, args[2].getValue(session).getLong());
+                }
+                p = Math.max(0, p);
+                d = MathUtils.convertLongToInt(p);
+                break;
             }
-            break;
-        case ABS:
-        case FLOOR:
-        case ROUND:
-            t = p0.getType();
-            s = p0.getScale();
-            p = p0.getPrecision();
-            d = p0.getDisplaySize();
-            if (t == Value.NULL) {
-                t = Value.INT;
-                p = ValueInt.PRECISION;
-                d = ValueInt.DISPLAY_SIZE;
-                s = 0;
-            }
-            break;
-        case SET: {
-            Expression p1 = args[1];
-            t = p1.getType();
-            p = p1.getPrecision();
-            s = p1.getScale();
-            d = p1.getDisplaySize();
-            if (!(p0 instanceof Variable)) {
-                throw DbException.get(
-                        ErrorCode.CAN_ONLY_ASSIGN_TO_VARIABLE_1, p0.getSQL());
-            }
-            break;
-        }
-        case FILE_READ: {
-            if (args.length == 1) {
-                t = Value.BLOB;
-            } else {
-                t = Value.CLOB;
-            }
-            p = Integer.MAX_VALUE;
-            s = 0;
-            d = Integer.MAX_VALUE;
-            break;
-        }
-        case SUBSTRING:
-        case SUBSTR: {
-            t = info.dataType;
-            p = args[0].getPrecision();
-            s = 0;
-            if (args[1].isConstant()) {
-                // if only two arguments are used,
-                // subtract offset from first argument length
-                p -= args[1].getValue(session).getLong() - 1;
-            }
-            if (args.length == 3 && args[2].isConstant()) {
-                // if the third argument is constant it is at most this value
-                p = Math.min(p, args[2].getValue(session).getLong());
-            }
-            p = Math.max(0, p);
-            d = MathUtils.convertLongToInt(p);
-            break;
-        }
-        default:
-            t = info.dataType;
-            DataType type = DataType.getDataType(t);
-            p = PRECISION_UNKNOWN;
-            d = 0;
-            s = type.defaultScale;
+            default:
+                t = info.dataType;
+                DataType type = DataType.getDataType(t);
+                p = PRECISION_UNKNOWN;
+                d = 0;
+                s = type.defaultScale;
         }
         dataType = t;
         precision = p;
@@ -2252,67 +2248,67 @@ public class Function extends Expression implements FunctionCall {
 
     private void calculatePrecisionAndDisplaySize() {
         switch (info.type) {
-        case ENCRYPT:
-        case DECRYPT:
-            precision = args[2].getPrecision();
-            displaySize = args[2].getDisplaySize();
-            break;
-        case COMPRESS:
-            precision = args[0].getPrecision();
-            displaySize = args[0].getDisplaySize();
-            break;
-        case CHAR:
-            precision = 1;
-            displaySize = 1;
-            break;
-        case CONCAT:
-            precision = 0;
-            displaySize = 0;
-            for (Expression e : args) {
-                precision += e.getPrecision();
-                displaySize = MathUtils.convertLongToInt(
-                        (long) displaySize + e.getDisplaySize());
-                if (precision < 0) {
-                    precision = Long.MAX_VALUE;
+            case ENCRYPT:
+            case DECRYPT:
+                precision = args[2].getPrecision();
+                displaySize = args[2].getDisplaySize();
+                break;
+            case COMPRESS:
+                precision = args[0].getPrecision();
+                displaySize = args[0].getDisplaySize();
+                break;
+            case CHAR:
+                precision = 1;
+                displaySize = 1;
+                break;
+            case CONCAT:
+                precision = 0;
+                displaySize = 0;
+                for (Expression e : args) {
+                    precision += e.getPrecision();
+                    displaySize = MathUtils.convertLongToInt(
+                            (long) displaySize + e.getDisplaySize());
+                    if (precision < 0) {
+                        precision = Long.MAX_VALUE;
+                    }
                 }
-            }
-            break;
-        case HEXTORAW:
-            precision = (args[0].getPrecision() + 3) / 4;
-            displaySize = MathUtils.convertLongToInt(precision);
-            break;
-        case LCASE:
-        case LTRIM:
-        case RIGHT:
-        case RTRIM:
-        case UCASE:
-        case LOWER:
-        case UPPER:
-        case TRIM:
-        case STRINGDECODE:
-        case UTF8TOSTRING:
-        case TRUNCATE:
-            precision = args[0].getPrecision();
-            displaySize = args[0].getDisplaySize();
-            break;
-        case RAWTOHEX:
-            precision = args[0].getPrecision() * 4;
-            displaySize = MathUtils.convertLongToInt(precision);
-            break;
-        case SOUNDEX:
-            precision = 4;
-            displaySize = (int) precision;
-            break;
-        case DAY_NAME:
-        case MONTH_NAME:
-            // day and month names may be long in some languages
-            precision = 20;
-            displaySize = (int) precision;
-            break;
-        default:
-            DataType type = DataType.getDataType(dataType);
-            precision = type.defaultPrecision;
-            displaySize = type.defaultDisplaySize;
+                break;
+            case HEXTORAW:
+                precision = (args[0].getPrecision() + 3) / 4;
+                displaySize = MathUtils.convertLongToInt(precision);
+                break;
+            case LCASE:
+            case LTRIM:
+            case RIGHT:
+            case RTRIM:
+            case UCASE:
+            case LOWER:
+            case UPPER:
+            case TRIM:
+            case STRINGDECODE:
+            case UTF8TOSTRING:
+            case TRUNCATE:
+                precision = args[0].getPrecision();
+                displaySize = args[0].getDisplaySize();
+                break;
+            case RAWTOHEX:
+                precision = args[0].getPrecision() * 4;
+                displaySize = MathUtils.convertLongToInt(precision);
+                break;
+            case SOUNDEX:
+                precision = 4;
+                displaySize = (int) precision;
+                break;
+            case DAY_NAME:
+            case MONTH_NAME:
+                // day and month names may be long in some languages
+                precision = 20;
+                displaySize = (int) precision;
+                break;
+            default:
+                DataType type = DataType.getDataType(dataType);
+                precision = type.defaultPrecision;
+                displaySize = type.defaultDisplaySize;
         }
     }
 
@@ -2334,29 +2330,29 @@ public class Function extends Expression implements FunctionCall {
         }
         buff.append('(');
         switch (info.type) {
-        case CAST: {
-            buff.append(args[0].getSQL()).append(" AS ").
-                append(new Column(null, dataType, precision,
-                        scale, displaySize).getCreateSQL());
-            break;
-        }
-        case CONVERT: {
-            buff.append(args[0].getSQL()).append(',').
-                append(new Column(null, dataType, precision,
-                        scale, displaySize).getCreateSQL());
-            break;
-        }
-        case EXTRACT: {
-            ValueString v = (ValueString) ((ValueExpression) args[0]).getValue(null);
-            buff.append(v.getString()).append(" FROM ").append(args[1].getSQL());
-            break;
-        }
-        default: {
-            for (Expression e : args) {
-                buff.appendExceptFirst(", ");
-                buff.append(e.getSQL());
+            case CAST: {
+                buff.append(args[0].getSQL()).append(" AS ").
+                        append(new Column(null, dataType, precision,
+                                scale, displaySize).getCreateSQL());
+                break;
             }
-        }
+            case CONVERT: {
+                buff.append(args[0].getSQL()).append(',').
+                        append(new Column(null, dataType, precision,
+                                scale, displaySize).getCreateSQL());
+                break;
+            }
+            case EXTRACT: {
+                ValueString v = (ValueString) args[0].getValue(null);
+                buff.append(v.getString()).append(" FROM ").append(args[1].getSQL());
+                break;
+            }
+            default: {
+                for (Expression e : args) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(e.getSQL());
+                }
+            }
         }
         return buff.append(')').toString();
     }
@@ -2381,72 +2377,51 @@ public class Function extends Expression implements FunctionCall {
 
     @Override
     public ValueResultSet getValueForColumnList(Session session,
-            Expression[] argList) {
+                                                Expression[] argList) {
         switch (info.type) {
-        case CSVREAD: {
-            String fileName = argList[0].getValue(session).getString();
-            if (fileName == null) {
-                throw DbException.get(ErrorCode.PARAMETER_NOT_SET_1, "fileName");
+            case CSVREAD: {
+                String fileName = argList[0].getValue(session).getString();
+                if (fileName == null) {
+                    throw DbException.get(ErrorCode.PARAMETER_NOT_SET_1, "fileName");
+                }
+                String columnList = argList.length < 2 ?
+                        null : argList[1].getValue(session).getString();
+                Csv csv = new Csv();
+                String options = argList.length < 3 ?
+                        null : argList[2].getValue(session).getString();
+                String charset = null;
+                if (options != null && options.indexOf('=') >= 0) {
+                    charset = csv.setOptions(options);
+                } else {
+                    charset = options;
+                    String fieldSeparatorRead = argList.length < 4 ?
+                            null : argList[3].getValue(session).getString();
+                    String fieldDelimiter = argList.length < 5 ?
+                            null : argList[4].getValue(session).getString();
+                    String escapeCharacter = argList.length < 6 ?
+                            null : argList[5].getValue(session).getString();
+                    setCsvDelimiterEscape(csv, fieldSeparatorRead, fieldDelimiter,
+                            escapeCharacter);
+                }
+                char fieldSeparator = csv.getFieldSeparatorRead();
+                String[] columns = StringUtils.arraySplit(columnList, fieldSeparator, true);
+                ResultSet rs = null;
+                ValueResultSet x;
+                try {
+                    rs = csv.read(fileName, columns, charset);
+                    x = ValueResultSet.getCopy(rs, 0);
+                } catch (SQLException e) {
+                    throw DbException.convert(e);
+                } finally {
+                    csv.close();
+                    JdbcUtils.closeSilently(rs);
+                }
+                return x;
             }
-            String columnList = argList.length < 2 ?
-                    null : argList[1].getValue(session).getString();
-            Csv csv = new Csv();
-            String options = argList.length < 3 ?
-                    null : argList[2].getValue(session).getString();
-            String charset = null;
-            if (options != null && options.indexOf('=') >= 0) {
-                charset = csv.setOptions(options);
-            } else {
-                charset = options;
-                String fieldSeparatorRead = argList.length < 4 ?
-                        null : argList[3].getValue(session).getString();
-                String fieldDelimiter = argList.length < 5 ?
-                        null : argList[4].getValue(session).getString();
-                String escapeCharacter = argList.length < 6 ?
-                        null : argList[5].getValue(session).getString();
-                setCsvDelimiterEscape(csv, fieldSeparatorRead, fieldDelimiter,
-                        escapeCharacter);
-            }
-            char fieldSeparator = csv.getFieldSeparatorRead();
-            String[] columns = StringUtils.arraySplit(columnList, fieldSeparator, true);
-            ResultSet rs = null;
-            ValueResultSet x;
-            try {
-                rs = csv.read(fileName, columns, charset);
-                x = ValueResultSet.getCopy(rs, 0);
-            } catch (SQLException e) {
-                throw DbException.convert(e);
-            } finally {
-                csv.close();
-                JdbcUtils.closeSilently(rs);
-            }
-            return x;
-        }
-        default:
-            break;
+            default:
+                break;
         }
         return (ValueResultSet) getValueWithArgs(session, argList);
-    }
-
-    private static void setCsvDelimiterEscape(Csv csv, String fieldSeparator,
-            String fieldDelimiter, String escapeCharacter) {
-        if (fieldSeparator != null) {
-            csv.setFieldSeparatorWrite(fieldSeparator);
-            if (fieldSeparator.length() > 0) {
-                char fs = fieldSeparator.charAt(0);
-                csv.setFieldSeparatorRead(fs);
-            }
-        }
-        if (fieldDelimiter != null) {
-            char fd = fieldDelimiter.length() == 0 ?
-                    0 : fieldDelimiter.charAt(0);
-            csv.setFieldDelimiter(fd);
-        }
-        if (escapeCharacter != null) {
-            char ec = escapeCharacter.length() == 0 ?
-                    0 : escapeCharacter.charAt(0);
-            csv.setEscapeCharacter(ec);
-        }
     }
 
     @Override
@@ -2462,20 +2437,20 @@ public class Function extends Expression implements FunctionCall {
             }
         }
         switch (visitor.getType()) {
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-        case ExpressionVisitor.READONLY:
-            return info.deterministic;
-        case ExpressionVisitor.EVALUATABLE:
-        case ExpressionVisitor.GET_DEPENDENCIES:
-        case ExpressionVisitor.INDEPENDENT:
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        default:
-            throw DbException.throwInternalError("type=" + visitor.getType());
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+            case ExpressionVisitor.READONLY:
+                return info.deterministic;
+            case ExpressionVisitor.EVALUATABLE:
+            case ExpressionVisitor.GET_DEPENDENCIES:
+            case ExpressionVisitor.INDEPENDENT:
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 
@@ -2500,48 +2475,48 @@ public class Function extends Expression implements FunctionCall {
         return info.bufferResultSetToLocalTemp;
     }
 
-    
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         StatementBuilder buff = new StatementBuilder(info.name);
         if (info.type == CASE) {
             if (args[0] != null) {
-                buff.append(" ").append(args[0].exportParameters(filter,container));
+                buff.append(" ").append(args[0].exportParameters(filter, container));
             }
             for (int i = 1, len = args.length - 1; i < len; i += 2) {
-                buff.append(" WHEN ").append(args[i].exportParameters(filter,container));
-                buff.append(" THEN ").append(args[i + 1].exportParameters(filter,container));
+                buff.append(" WHEN ").append(args[i].exportParameters(filter, container));
+                buff.append(" THEN ").append(args[i + 1].exportParameters(filter, container));
             }
             if (args.length % 2 == 0) {
-                buff.append(" ELSE ").append(args[args.length - 1].exportParameters(filter,container));
+                buff.append(" ELSE ").append(args[args.length - 1].exportParameters(filter, container));
             }
             return buff.append(" END").toString();
         }
         buff.append('(');
         switch (info.type) {
-        case CAST: {
-            buff.append(args[0].exportParameters(filter,container)).append(" AS ").
-                append(new Column(null, dataType, precision,
-                        scale, displaySize).getCreateSQL());
-            break;
-        }
-        case CONVERT: {
-            buff.append(args[0].exportParameters(filter,container)).append(',').
-                append(new Column(null, dataType, precision,
-                        scale, displaySize).getCreateSQL());
-            break;
-        }
-        case EXTRACT: {
-            ValueString v = (ValueString) ((ValueExpression) args[0]).getValue(null);
-            buff.append(v.getString()).append(" FROM ").append(args[1].exportParameters(filter,container));
-            break;
-        }
-        default: {
-            for (Expression e : args) {
-                buff.appendExceptFirst(", ");
-                buff.append(e.exportParameters(filter,container));
+            case CAST: {
+                buff.append(args[0].exportParameters(filter, container)).append(" AS ").
+                        append(new Column(null, dataType, precision,
+                                scale, displaySize).getCreateSQL());
+                break;
             }
-        }
+            case CONVERT: {
+                buff.append(args[0].exportParameters(filter, container)).append(',').
+                        append(new Column(null, dataType, precision,
+                                scale, displaySize).getCreateSQL());
+                break;
+            }
+            case EXTRACT: {
+                ValueString v = (ValueString) args[0].getValue(null);
+                buff.append(v.getString()).append(" FROM ").append(args[1].exportParameters(filter, container));
+                break;
+            }
+            default: {
+                for (Expression e : args) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(e.exportParameters(filter, container));
+                }
+            }
         }
         return buff.append(')').toString();
     }

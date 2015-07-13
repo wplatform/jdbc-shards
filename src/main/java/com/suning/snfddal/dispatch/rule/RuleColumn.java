@@ -134,6 +134,5 @@ public class RuleColumn implements Serializable {
         return "${" + name + "}";
     }
 
-    
 
 }

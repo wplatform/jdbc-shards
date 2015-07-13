@@ -25,14 +25,11 @@ import java.util.List;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class RuleExpression implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-
-    private List<RuleColumn> ruleColumns;
-
-    private String expression;
-    
     private final TableRouter tableRouter;
+    private List<RuleColumn> ruleColumns;
+    private String expression;
 
     /**
      * @param tableRouter
@@ -76,8 +73,6 @@ public class RuleExpression implements Serializable {
     public TableRouter getTableRouter() {
         return tableRouter;
     }
-    
-    
-    
-    
+
+
 }

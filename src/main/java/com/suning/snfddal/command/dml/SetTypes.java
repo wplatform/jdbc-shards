@@ -5,9 +5,9 @@
  */
 package com.suning.snfddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * The list of setting for a SET statement.
@@ -227,10 +227,6 @@ public class SetTypes {
 
     private static final ArrayList<String> TYPES = New.arrayList();
 
-    private SetTypes() {
-        // utility class
-    }
-
     static {
         ArrayList<String> list = TYPES;
         list.add(null);
@@ -275,13 +271,17 @@ public class SetTypes {
         list.add(JAVA_OBJECT_SERIALIZER, "JAVA_OBJECT_SERIALIZER");
         list.add(RETENTION_TIME, "RETENTION_TIME");
         list.add(QUERY_STATISTICS, "QUERY_STATISTICS");
-        
+
         list.add(MONITOR_EXECUTION, "MONITOR_EXECUTION");
         list.add(VALIDATION_QUERY, "VALIDATION_QUERY");
         list.add(VALIDATION_QUERY_TIMEOUT, "VALIDATION_QUERY_TIMEOUT");
         list.add(EXCEPTION_SORTER_CLASS, "EXCEPTION_SORTER_CLASS");
         list.add(TRACE_FILE_NAME, "TRACE_FILE_NAME");
-        
+
+    }
+
+    private SetTypes() {
+        // utility class
     }
 
     /**

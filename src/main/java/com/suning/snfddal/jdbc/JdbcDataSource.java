@@ -15,14 +15,6 @@
  */
 package com.suning.snfddal.jdbc;
 
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
 import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.config.Configuration;
 import com.suning.snfddal.config.DataSourceProvider;
@@ -34,6 +26,13 @@ import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.TraceSystem;
 import com.suning.snfddal.util.StringUtils;
 import com.suning.snfddal.util.Utils;
+
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -129,7 +128,7 @@ public class JdbcDataSource implements DataSource {
      * Open a new connection using the current URL and the specified user name
      * and password.
      *
-     * @param user the user name
+     * @param user     the user name
      * @param password the password
      * @return the connection
      */
@@ -214,21 +213,21 @@ public class JdbcDataSource implements DataSource {
     }
 
     /**
-     * Set the current password.
-     *
-     * @param password the new password.
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
      * Get the current password.
      *
      * @return the password
      */
     public String getPassword() {
         return this.password;
+    }
+
+    /**
+     * Set the current password.
+     *
+     * @param password the new password.
+     */
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     /**
@@ -475,7 +474,7 @@ public class JdbcDataSource implements DataSource {
             configuration.setProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
                     TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
         }
-        
+
         if ("TRACE".equalsIgnoreCase(this.fileLevel) || "DEBUG".equalsIgnoreCase(this.fileLevel)) {
             configuration.setProperty(SetTypes.TRACE_LEVEL_FILE, TraceSystem.DEBUG);
         } else if ("INFO".equalsIgnoreCase(this.fileLevel)
@@ -491,10 +490,10 @@ public class JdbcDataSource implements DataSource {
                     TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
         }
         configuration.setProperty(SetTypes.EXCEPTION_SORTER_CLASS, this.exceptionSorterClass);
-        if(this.dataSourceProvider != null) {
+        if (this.dataSourceProvider != null) {
             configuration.setDataSourceProvider(this.dataSourceProvider);
         }
-        
+
         this.database = new Database(configuration);
         inited = true;
     }

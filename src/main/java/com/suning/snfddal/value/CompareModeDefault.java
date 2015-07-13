@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.value;
 
-import java.text.CollationKey;
-import java.text.Collator;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.SmallLRUCache;
+
+import java.text.CollationKey;
+import java.text.Collator;
 
 /**
  * The default implementation of CompareMode. It uses java.text.Collator.
@@ -21,7 +21,7 @@ public class CompareModeDefault extends CompareMode {
     private final SmallLRUCache<String, CollationKey> collationKeys;
 
     protected CompareModeDefault(String name, int strength,
-            boolean binaryUnsigned) {
+                                 boolean binaryUnsigned) {
         super(name, strength, binaryUnsigned);
         collator = CompareMode.getCollator(name);
         if (collator == null) {
@@ -56,7 +56,7 @@ public class CompareModeDefault extends CompareMode {
 
     @Override
     public boolean equalsChars(String a, int ai, String b, int bi,
-            boolean ignoreCase) {
+                               boolean ignoreCase) {
         return compareString(a.substring(ai, ai + 1), b.substring(bi, bi + 1),
                 ignoreCase) == 0;
     }

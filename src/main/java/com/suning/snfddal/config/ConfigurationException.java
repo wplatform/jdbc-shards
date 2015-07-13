@@ -27,8 +27,9 @@ import com.suning.snfddal.config.parser.ParsingException;
 public class ConfigurationException extends ParsingException {
 
     private static final long serialVersionUID = 1L;
+
     /**
-     * 
+     *
      */
     public ConfigurationException() {
         super();
@@ -56,6 +57,6 @@ public class ConfigurationException extends ParsingException {
         super(cause);
         // TODO Auto-generated constructor stub
     }
-    
-    
+
+
 }

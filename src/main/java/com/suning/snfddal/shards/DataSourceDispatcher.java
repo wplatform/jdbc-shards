@@ -25,6 +25,6 @@ import java.sql.SQLException;
  */
 public interface DataSourceDispatcher {
 
-    public DataSourceMarker doDispatch(Optional optional) throws SQLException;
-        
+    DataSourceMarker doDispatch(Optional optional) throws SQLException;
+
 }

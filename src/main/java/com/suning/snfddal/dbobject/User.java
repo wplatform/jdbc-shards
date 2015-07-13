@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.dbobject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.suning.snfddal.dbobject.schema.Schema;
 import com.suning.snfddal.dbobject.table.Table;
 import com.suning.snfddal.engine.Database;
@@ -17,6 +14,9 @@ import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents a user object.
@@ -31,12 +31,12 @@ public class User extends RightOwner {
         super(database, id, userName, Trace.USER);
     }
 
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
-
     public boolean isAdmin() {
         return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     /**
@@ -65,7 +65,7 @@ public class User extends RightOwner {
     /**
      * Checks that this user has the given rights for this database object.
      *
-     * @param table the database object
+     * @param table     the database object
      * @param rightMask the rights required
      * @throws DbException if this user does not have the required rights
      */
@@ -78,7 +78,7 @@ public class User extends RightOwner {
     /**
      * See if this user has the given rights for this database object.
      *
-     * @param table the database object, or null for schema-only check
+     * @param table     the database object, or null for schema-only check
      * @param rightMask the rights required
      * @return true if the user has the rights
      */
@@ -90,7 +90,7 @@ public class User extends RightOwner {
      * Get the CREATE SQL statement for this object.
      *
      * @param password true if the password (actually the salt and hash) should
-     *            be returned
+     *                 be returned
      * @return the SQL statement
      */
     public String getCreateSQL(boolean password) {
@@ -101,10 +101,10 @@ public class User extends RightOwner {
         }
         if (password) {
             buff.append(" SALT '").
-                append(StringUtils.convertBytesToHex(salt)).
-                append("' HASH '").
-                append(StringUtils.convertBytesToHex(passwordHash)).
-                append('\'');
+                    append(StringUtils.convertBytesToHex(salt)).
+                    append("' HASH '").
+                    append(StringUtils.convertBytesToHex(passwordHash)).
+                    append('\'');
         } else {
             buff.append(" PASSWORD ''");
         }

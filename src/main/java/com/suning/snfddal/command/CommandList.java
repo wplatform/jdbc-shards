@@ -5,10 +5,10 @@
  */
 package com.suning.snfddal.command;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.command.expression.ParameterInterface;
 import com.suning.snfddal.result.ResultInterface;
+
+import java.util.ArrayList;
 
 /**
  * Represents a list of SQL statements.

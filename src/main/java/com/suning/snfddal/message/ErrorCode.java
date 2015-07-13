@@ -1048,7 +1048,6 @@ public class ErrorCode {
      * a directory or file could not be created. This can occur when
      * trying to create a directory if a file with the same name already
      * exists, or vice versa.
-     *
      */
     public static final int FILE_CREATION_FAILED_1 = 90062;
 
@@ -1646,7 +1645,7 @@ public class ErrorCode {
      * DROP TABLE INFORMATION_SCHEMA.SETTINGS;
      * </pre>
      */
-    public static final int CANNOT_DROP_TABLE_1  = 90118;
+    public static final int CANNOT_DROP_TABLE_1 = 90118;
 
     /**
      * The error with code <code>90119</code> is thrown when
@@ -1853,12 +1852,12 @@ public class ErrorCode {
 
     /**
      * The error with code <code>90138</code> is thrown when
-     *
+     * <p>
      * trying to open a persistent database using an incorrect database name.
      * The name of a persistent database contains the path and file name prefix
      * where the data is stored. The file name part of a database name must be
      * at least two characters.
-     *
+     * <p>
      * Example of wrong usage:
      * <pre>
      * DriverManager.getConnection("jdbc:h2:~/t");
@@ -1913,22 +1912,22 @@ public class ErrorCode {
     public static boolean isCommon(int errorCode) {
         // this list is sorted alphabetically
         switch (errorCode) {
-        case DATA_CONVERSION_ERROR_1:
-        case DUPLICATE_KEY_1:
-        case FUNCTION_ALIAS_ALREADY_EXISTS_1:
-        case LOCK_TIMEOUT_1:
-        case NULL_NOT_ALLOWED:
-        case NO_DATA_AVAILABLE:
-        case NUMERIC_VALUE_OUT_OF_RANGE_1:
-        case OBJECT_CLOSED:
-        case REFERENTIAL_INTEGRITY_VIOLATED_CHILD_EXISTS_1:
-        case REFERENTIAL_INTEGRITY_VIOLATED_PARENT_MISSING_1:
-        case SYNTAX_ERROR_1:
-        case SYNTAX_ERROR_2:
-        case TABLE_OR_VIEW_ALREADY_EXISTS_1:
-        case TABLE_OR_VIEW_NOT_FOUND_1:
-        case VALUE_TOO_LONG_2:
-            return true;
+            case DATA_CONVERSION_ERROR_1:
+            case DUPLICATE_KEY_1:
+            case FUNCTION_ALIAS_ALREADY_EXISTS_1:
+            case LOCK_TIMEOUT_1:
+            case NULL_NOT_ALLOWED:
+            case NO_DATA_AVAILABLE:
+            case NUMERIC_VALUE_OUT_OF_RANGE_1:
+            case OBJECT_CLOSED:
+            case REFERENTIAL_INTEGRITY_VIOLATED_CHILD_EXISTS_1:
+            case REFERENTIAL_INTEGRITY_VIOLATED_PARENT_MISSING_1:
+            case SYNTAX_ERROR_1:
+            case SYNTAX_ERROR_2:
+            case TABLE_OR_VIEW_ALREADY_EXISTS_1:
+            case TABLE_OR_VIEW_NOT_FOUND_1:
+            case VALUE_TOO_LONG_2:
+                return true;
         }
         return false;
     }
@@ -1942,38 +1941,52 @@ public class ErrorCode {
 
         switch (errorCode) {
 
-        // 02: no data
-        case NO_DATA_AVAILABLE: return "02000";
+            // 02: no data
+            case NO_DATA_AVAILABLE:
+                return "02000";
 
-        // 07: dynamic SQL error
-        case INVALID_PARAMETER_COUNT_2: return "07001";
+            // 07: dynamic SQL error
+            case INVALID_PARAMETER_COUNT_2:
+                return "07001";
 
-        // 08: connection exception
-        case ERROR_OPENING_DATABASE_1: return "08000";
+            // 08: connection exception
+            case ERROR_OPENING_DATABASE_1:
+                return "08000";
 
-        // 21: cardinality violation
-        case COLUMN_COUNT_DOES_NOT_MATCH: return "21S02";
+            // 21: cardinality violation
+            case COLUMN_COUNT_DOES_NOT_MATCH:
+                return "21S02";
 
-        // 42: syntax error or access rule violation
-        case TABLE_OR_VIEW_ALREADY_EXISTS_1: return "42S01";
-        case TABLE_OR_VIEW_NOT_FOUND_1: return "42S02";
-        case INDEX_ALREADY_EXISTS_1: return "42S11";
-        case INDEX_NOT_FOUND_1: return "42S12";
-        case DUPLICATE_COLUMN_NAME_1: return "42S21";
-        case COLUMN_NOT_FOUND_1: return "42S22";
+            // 42: syntax error or access rule violation
+            case TABLE_OR_VIEW_ALREADY_EXISTS_1:
+                return "42S01";
+            case TABLE_OR_VIEW_NOT_FOUND_1:
+                return "42S02";
+            case INDEX_ALREADY_EXISTS_1:
+                return "42S11";
+            case INDEX_NOT_FOUND_1:
+                return "42S12";
+            case DUPLICATE_COLUMN_NAME_1:
+                return "42S21";
+            case COLUMN_NOT_FOUND_1:
+                return "42S22";
 
-        // 0A: feature not supported
+            // 0A: feature not supported
 
-        // HZ: remote database access
+            // HZ: remote database access
 
-        // HY
-        case GENERAL_ERROR_1: return "HY000";
-        case UNKNOWN_DATA_TYPE_1: return "HY004";
+            // HY
+            case GENERAL_ERROR_1:
+                return "HY000";
+            case UNKNOWN_DATA_TYPE_1:
+                return "HY004";
 
-        case FEATURE_NOT_SUPPORTED_1: return "HYC00";
-        case LOCK_TIMEOUT_1: return "HYT00";
-        default:
-            return "" + errorCode;
+            case FEATURE_NOT_SUPPORTED_1:
+                return "HYC00";
+            case LOCK_TIMEOUT_1:
+                return "HYT00";
+            default:
+                return "" + errorCode;
         }
     }
 

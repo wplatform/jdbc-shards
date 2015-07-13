@@ -5,27 +5,6 @@
  */
 package com.suning.snfddal.result;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
@@ -34,6 +13,10 @@ import com.suning.snfddal.util.IOUtils;
 import com.suning.snfddal.util.JdbcUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
+
+import java.io.*;
+import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * A facility to read from and write to CSV (comma separated values) files. When
@@ -67,6 +50,35 @@ public class Csv implements SimpleRowSource {
     private Writer output;
     private boolean endOfLine, endOfFile;
 
+    private static boolean isSimpleColumnName(String columnName) {
+        for (int i = 0, length = columnName.length(); i < length; i++) {
+            char ch = columnName.charAt(i);
+            if (i == 0) {
+                if (ch != '_' && !Character.isLetter(ch)) {
+                    return false;
+                }
+            } else {
+                if (ch != '_' && !Character.isLetterOrDigit(ch)) {
+                    return false;
+                }
+            }
+        }
+        return columnName.length() != 0;
+    }
+
+    private static SQLException convertException(String message, Exception e) {
+        return DbException.get(ErrorCode.IO_EXCEPTION_1, e, message).getSQLException();
+    }
+
+    private static boolean isParam(String key, String... values) {
+        for (String v : values) {
+            if (key.equalsIgnoreCase(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private int writeResultSet(ResultSet rs) throws SQLException {
         try {
             int rows = 0;
@@ -85,17 +97,17 @@ public class Csv implements SimpleRowSource {
                 for (int i = 0; i < columnCount; i++) {
                     Object o;
                     switch (sqlTypes[i]) {
-                    case Types.DATE:
-                        o = rs.getDate(i + 1);
-                        break;
-                    case Types.TIME:
-                        o = rs.getTime(i + 1);
-                        break;
-                    case Types.TIMESTAMP:
-                        o = rs.getTimestamp(i + 1);
-                        break;
-                    default:
-                        o = rs.getString(i + 1);
+                        case Types.DATE:
+                            o = rs.getDate(i + 1);
+                            break;
+                        case Types.TIME:
+                            o = rs.getTime(i + 1);
+                            break;
+                        case Types.TIMESTAMP:
+                            o = rs.getTimestamp(i + 1);
+                            break;
+                        default:
+                            o = rs.getString(i + 1);
                     }
                     row[i] = o == null ? null : o.toString();
                 }
@@ -116,7 +128,7 @@ public class Csv implements SimpleRowSource {
      * Writes the result set to a file in the CSV format.
      *
      * @param writer the writer
-     * @param rs the result set
+     * @param rs     the result set
      * @return the number of rows written
      */
     public int write(Writer writer, ResultSet rs) throws SQLException {
@@ -127,7 +139,7 @@ public class Csv implements SimpleRowSource {
     /**
      * Writes the result set to a file in the CSV format. The result set is read
      * using the following loop:
-     *
+     * <p>
      * <pre>
      * while (rs.next()) {
      *     writeRow(row);
@@ -135,10 +147,10 @@ public class Csv implements SimpleRowSource {
      * </pre>
      *
      * @param outputFileName the name of the csv file
-     * @param rs the result set - the result set must be positioned before the
-     *          first row.
-     * @param charset the charset or null to use the system default charset
-     *          (see system property file.encoding)
+     * @param rs             the result set - the result set must be positioned before the
+     *                       first row.
+     * @param charset        the charset or null to use the system default charset
+     *                       (see system property file.encoding)
      * @return the number of rows written
      */
     public int write(String outputFileName, ResultSet rs, String charset)
@@ -155,15 +167,15 @@ public class Csv implements SimpleRowSource {
     /**
      * Writes the result set of a query to a file in the CSV format.
      *
-     * @param conn the connection
+     * @param conn           the connection
      * @param outputFileName the file name
-     * @param sql the query
-     * @param charset the charset or null to use the system default charset
-     *          (see system property file.encoding)
+     * @param sql            the query
+     * @param charset        the charset or null to use the system default charset
+     *                       (see system property file.encoding)
      * @return the number of rows written
      */
     public int write(Connection conn, String outputFileName, String sql,
-            String charset) throws SQLException {
+                     String charset) throws SQLException {
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(sql);
         int rows = write(outputFileName, rs, charset);
@@ -183,14 +195,14 @@ public class Csv implements SimpleRowSource {
      * case sensitive (that means they need to be quoted when accessed).
      *
      * @param inputFileName the file name
-     * @param colNames or null if the column names should be read from the CSV
-     *          file
-     * @param charset the charset or null to use the system default charset
-     *          (see system property file.encoding)
+     * @param colNames      or null if the column names should be read from the CSV
+     *                      file
+     * @param charset       the charset or null to use the system default charset
+     *                      (see system property file.encoding)
      * @return the result set
      */
     public ResultSet read(String inputFileName, String[] colNames,
-            String charset) throws SQLException {
+                          String charset) throws SQLException {
         init(inputFileName, charset);
         try {
             return readResultSet(colNames);
@@ -204,9 +216,9 @@ public class Csv implements SimpleRowSource {
      * result set are created on demand, that means the reader is kept open
      * until all rows are read or the result set is closed.
      *
-     * @param reader the reader
+     * @param reader   the reader
      * @param colNames or null if the column names should be read from the CSV
-     *            file
+     *                 file
      * @return the result set
      */
     public ResultSet read(Reader reader, String[] colNames) throws IOException {
@@ -365,25 +377,6 @@ public class Csv implements SimpleRowSource {
         }
         columnNames = new String[list.size()];
         list.toArray(columnNames);
-    }
-
-    private static boolean isSimpleColumnName(String columnName) {
-        for (int i = 0, length = columnName.length(); i < length; i++) {
-            char ch = columnName.charAt(i);
-            if (i == 0) {
-                if (ch != '_' && !Character.isLetter(ch)) {
-                    return false;
-                }
-            } else {
-                if (ch != '_' && !Character.isLetterOrDigit(ch)) {
-                    return false;
-                }
-            }
-        }
-        if (columnName.length() == 0) {
-            return false;
-        }
-        return true;
     }
 
     private void pushBack() {
@@ -595,10 +588,6 @@ public class Csv implements SimpleRowSource {
         return row;
     }
 
-    private static SQLException convertException(String message, Exception e) {
-        return DbException.get(ErrorCode.IO_EXCEPTION_1, e, message).getSQLException();
-    }
-
     /**
      * INTERNAL
      */
@@ -619,6 +608,15 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
+     * Get the current field separator for writing.
+     *
+     * @return the field separator
+     */
+    public String getFieldSeparatorWrite() {
+        return fieldSeparatorWrite;
+    }
+
+    /**
      * Override the field separator for writing. The default is ",".
      *
      * @param fieldSeparatorWrite the field separator
@@ -628,12 +626,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current field separator for writing.
+     * Get the current case sensitive column names setting.
      *
-     * @return the field separator
+     * @return whether column names are case sensitive
      */
-    public String getFieldSeparatorWrite() {
-        return fieldSeparatorWrite;
+    public boolean getCaseSensitiveColumnNames() {
+        return caseSensitiveColumnNames;
     }
 
     /**
@@ -647,12 +645,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current case sensitive column names setting.
+     * Get the current field separator for reading.
      *
-     * @return whether column names are case sensitive
+     * @return the field separator
      */
-    public boolean getCaseSensitiveColumnNames() {
-        return caseSensitiveColumnNames;
+    public char getFieldSeparatorRead() {
+        return fieldSeparatorRead;
     }
 
     /**
@@ -665,12 +663,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current field separator for reading.
+     * Get the line comment character.
      *
-     * @return the field separator
+     * @return the line comment character, or 0 if disabled
      */
-    public char getFieldSeparatorRead() {
-        return fieldSeparatorRead;
+    public char getLineCommentCharacter() {
+        return lineComment;
     }
 
     /**
@@ -684,12 +682,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the line comment character.
+     * Get the current field delimiter.
      *
-     * @return the line comment character, or 0 if disabled
+     * @return the field delimiter
      */
-    public char getLineCommentCharacter() {
-        return lineComment;
+    public char getFieldDelimiter() {
+        return fieldDelimiter;
     }
 
     /**
@@ -703,12 +701,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current field delimiter.
+     * Get the current escape character.
      *
-     * @return the field delimiter
+     * @return the escape character
      */
-    public char getFieldDelimiter() {
-        return fieldDelimiter;
+    public char getEscapeCharacter() {
+        return escapeCharacter;
     }
 
     /**
@@ -742,12 +740,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current escape character.
+     * Get the line separator used for writing.
      *
-     * @return the escape character
+     * @return the line separator
      */
-    public char getEscapeCharacter() {
-        return escapeCharacter;
+    public String getLineSeparator() {
+        return lineSeparator;
     }
 
     /**
@@ -763,12 +761,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the line separator used for writing.
+     * Get the current null string.
      *
-     * @return the line separator
+     * @return the null string.
      */
-    public String getLineSeparator() {
-        return lineSeparator;
+    public String getNullString() {
+        return nullString;
     }
 
     /**
@@ -782,12 +780,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Get the current null string.
+     * Whether whitespace in unquoted text is preserved.
      *
-     * @return the null string.
+     * @return the current value for the setting
      */
-    public String getNullString() {
-        return nullString;
+    public boolean getPreserveWhitespace() {
+        return preserveWhitespace;
     }
 
     /**
@@ -800,12 +798,12 @@ public class Csv implements SimpleRowSource {
     }
 
     /**
-     * Whether whitespace in unquoted text is preserved.
+     * Whether the column header is written.
      *
      * @return the current value for the setting
      */
-    public boolean getPreserveWhitespace() {
-        return preserveWhitespace;
+    public boolean getWriteColumnHeader() {
+        return writeColumnHeader;
     }
 
     /**
@@ -815,15 +813,6 @@ public class Csv implements SimpleRowSource {
      */
     public void setWriteColumnHeader(boolean value) {
         this.writeColumnHeader = value;
-    }
-
-    /**
-     * Whether the column header is written.
-     *
-     * @return the current value for the setting
-     */
-    public boolean getWriteColumnHeader() {
-        return writeColumnHeader;
     }
 
     /**
@@ -870,15 +859,6 @@ public class Csv implements SimpleRowSource {
             }
         }
         return charset;
-    }
-
-    private static boolean isParam(String key, String... values) {
-        for (String v : values) {
-            if (key.equalsIgnoreCase(v)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

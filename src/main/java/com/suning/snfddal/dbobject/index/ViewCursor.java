@@ -48,5 +48,5 @@ public class ViewCursor implements Cursor {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
 }

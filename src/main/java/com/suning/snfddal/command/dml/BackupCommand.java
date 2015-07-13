@@ -24,20 +24,6 @@ public class BackupCommand extends Prepared {
         super(session);
     }
 
-    public void setFileName(Expression fileName) {
-        this.fileNameExpr = fileName;
-    }
-
-    @Override
-    public int update() {
-        throw DbException.getUnsupportedException("TODO");
-    }
-
-    @Override
-    public boolean isTransactional() {
-        return true;
-    }
-
     /**
      * Fix the file name, replacing backslash with slash.
      *
@@ -50,6 +36,20 @@ public class BackupCommand extends Prepared {
             f = f.substring(1);
         }
         return f;
+    }
+
+    public void setFileName(Expression fileName) {
+        this.fileNameExpr = fileName;
+    }
+
+    @Override
+    public int update() {
+        throw DbException.getUnsupportedException("TODO");
+    }
+
+    @Override
+    public boolean isTransactional() {
+        return true;
     }
 
     @Override

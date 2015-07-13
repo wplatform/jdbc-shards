@@ -5,11 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.List;
-
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -21,12 +16,66 @@ import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * An expression is a operation, a value, or a function in a query.
  */
 public abstract class Expression {
 
     private boolean addedToFilter;
+
+    /**
+     * Extracts expression columns from ValueArray
+     *
+     * @param session the current session
+     * @param value   the value to extract columns from
+     * @return array of expression columns
+     */
+    static Expression[] getExpressionColumns(Session session, ValueArray value) {
+        Value[] list = value.getList();
+        ExpressionColumn[] expr = new ExpressionColumn[list.length];
+        for (int i = 0, len = list.length; i < len; i++) {
+            Value v = list[i];
+            Column col = new Column("C" + (i + 1), v.getType(),
+                    v.getPrecision(), v.getScale(),
+                    v.getDisplaySize());
+            expr[i] = new ExpressionColumn(session.getDatabase(), col);
+        }
+        return expr;
+    }
+
+    /**
+     * Extracts expression columns from the given result set.
+     *
+     * @param session the session
+     * @param rs      the result set
+     * @return an array of expression columns
+     */
+    public static Expression[] getExpressionColumns(Session session, ResultSet rs) {
+        try {
+            ResultSetMetaData meta = rs.getMetaData();
+            int columnCount = meta.getColumnCount();
+            Expression[] expressions = new Expression[columnCount];
+            Database db = session == null ? null : session.getDatabase();
+            for (int i = 0; i < columnCount; i++) {
+                String name = meta.getColumnLabel(i + 1);
+                int type = DataType.getValueTypeFromResultSet(meta, i + 1);
+                int precision = meta.getPrecision(i + 1);
+                int scale = meta.getScale(i + 1);
+                int displaySize = meta.getColumnDisplaySize(i + 1);
+                Column col = new Column(name, type, precision, scale, displaySize);
+                Expression expr = new ExpressionColumn(db, col);
+                expressions[i] = expr;
+            }
+            return expressions;
+        } catch (SQLException e) {
+            throw DbException.convert(e);
+        }
+    }
 
     /**
      * Return the resulting value for the current row.
@@ -48,7 +97,7 @@ public abstract class Expression {
      * Map the columns of the resolver to expression columns.
      *
      * @param resolver the column resolver
-     * @param level the subquery nesting level
+     * @param level    the subquery nesting level
      */
     public abstract void mapColumns(ColumnResolver resolver, int level);
 
@@ -65,7 +114,7 @@ public abstract class Expression {
      * now. This is used when optimizing the query.
      *
      * @param tableFilter the table filter
-     * @param value true if the table filter can return value
+     * @param value       true if the table filter can return value
      */
     public abstract void setEvaluatable(TableFilter tableFilter, boolean value);
 
@@ -184,7 +233,7 @@ public abstract class Expression {
      * Create index conditions if possible and attach them to the table filter.
      *
      * @param session the session
-     * @param filter the table filter
+     * @param filter  the table filter
      */
     public void createIndexConditions(Session session, TableFilter filter) {
         // default is do nothing
@@ -267,7 +316,7 @@ public abstract class Expression {
     /**
      * Add conditions to a table filter if they can be evaluated.
      *
-     * @param filter the table filter
+     * @param filter    the table filter
      * @param outerJoin if the expression is part of an outer join
      */
     public void addFilterConditions(TableFilter filter, boolean outerJoin) {
@@ -297,7 +346,7 @@ public abstract class Expression {
     public Expression[] getExpressionColumns(Session session) {
         return null;
     }
-    
+
     /**
      * Exporting parameters If this expression contains parameters
      *
@@ -306,54 +355,5 @@ public abstract class Expression {
      */
     public String exportParameters(TableFilter filter, List<Value> container) {
         return getSQL();
-    }
-
-    /**
-     * Extracts expression columns from ValueArray
-     *
-     * @param session the current session
-     * @param value the value to extract columns from
-     * @return array of expression columns
-     */
-    static Expression[] getExpressionColumns(Session session, ValueArray value) {
-        Value[] list = value.getList();
-        ExpressionColumn[] expr = new ExpressionColumn[list.length];
-        for (int i = 0, len = list.length; i < len; i++) {
-            Value v = list[i];
-            Column col = new Column("C" + (i + 1), v.getType(),
-                    v.getPrecision(), v.getScale(),
-                    v.getDisplaySize());
-            expr[i] = new ExpressionColumn(session.getDatabase(), col);
-        }
-        return expr;
-    }
-
-    /**
-     * Extracts expression columns from the given result set.
-     *
-     * @param session the session
-     * @param rs the result set
-     * @return an array of expression columns
-     */
-    public static Expression[] getExpressionColumns(Session session, ResultSet rs) {
-        try {
-            ResultSetMetaData meta = rs.getMetaData();
-            int columnCount = meta.getColumnCount();
-            Expression[] expressions = new Expression[columnCount];
-            Database db = session == null ? null : session.getDatabase();
-            for (int i = 0; i < columnCount; i++) {
-                String name = meta.getColumnLabel(i + 1);
-                int type = DataType.getValueTypeFromResultSet(meta, i + 1);
-                int precision = meta.getPrecision(i + 1);
-                int scale = meta.getScale(i + 1);
-                int displaySize = meta.getColumnDisplaySize(i + 1);
-                Column col = new Column(name, type, precision, scale, displaySize);
-                Expression expr = new ExpressionColumn(db, col);
-                expressions[i] = expr;
-            }
-            return expressions;
-        } catch (SQLException e) {
-            throw DbException.convert(e);
-        }
     }
 }

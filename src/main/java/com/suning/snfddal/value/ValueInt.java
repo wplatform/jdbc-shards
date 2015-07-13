@@ -5,12 +5,12 @@
  */
 package com.suning.snfddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.MathUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the INT data type.
@@ -34,13 +34,13 @@ public class ValueInt extends Value {
     private static final ValueInt[] STATIC_CACHE = new ValueInt[STATIC_SIZE];
     private static final ValueInt[] DYNAMIC_CACHE = new ValueInt[DYNAMIC_SIZE];
 
-    private final int value;
-
     static {
         for (int i = 0; i < STATIC_SIZE; i++) {
             STATIC_CACHE[i] = new ValueInt(i);
         }
     }
+
+    private final int value;
 
     private ValueInt(int value) {
         this.value = value;
@@ -64,17 +64,17 @@ public class ValueInt extends Value {
         return v;
     }
 
-    @Override
-    public Value add(Value v) {
-        ValueInt other = (ValueInt) v;
-        return checkRange((long) value + (long) other.value);
-    }
-
     private static ValueInt checkRange(long x) {
         if (x < Integer.MIN_VALUE || x > Integer.MAX_VALUE) {
             throw DbException.get(ErrorCode.NUMERIC_VALUE_OUT_OF_RANGE_1, Long.toString(x));
         }
         return ValueInt.get((int) x);
+    }
+
+    @Override
+    public Value add(Value v) {
+        ValueInt other = (ValueInt) v;
+        return checkRange((long) value + (long) other.value);
     }
 
     @Override

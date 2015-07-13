@@ -25,7 +25,7 @@ public class DropView extends SchemaCommand {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
                 Constants.RESTRICT :
-                    Constants.CASCADE;
+                Constants.CASCADE;
     }
 
     public void setIfExists(boolean b) {

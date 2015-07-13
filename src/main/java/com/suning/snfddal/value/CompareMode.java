@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.value;
 
-import java.text.Collator;
-import java.util.Locale;
-
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.util.StringUtils;
+
+import java.text.Collator;
+import java.util.Locale;
 
 /**
  * Instances of this class can compare strings. Case sensitive and case
@@ -46,10 +46,8 @@ public class CompareMode {
      * were unsigned.
      */
     public static final String UNSIGNED = "UNSIGNED";
-
-    private static CompareMode lastUsed;
-
     private static final boolean CAN_USE_ICU4J;
+    private static CompareMode lastUsed;
 
     static {
         boolean b = false;
@@ -82,12 +80,12 @@ public class CompareMode {
      * returned. A cache is used to speed up comparison when using a collator;
      * CollationKey objects are cached.
      *
-     * @param name the collation name or null
+     * @param name     the collation name or null
      * @param strength the collation strength
      * @return the compare mode
      */
     public static synchronized CompareMode getInstance(String name,
-            int strength) {
+                                                       int strength) {
         return getInstance(name, strength, SysProperties.SORT_BINARY_UNSIGNED);
     }
 
@@ -97,13 +95,13 @@ public class CompareMode {
      * returned. A cache is used to speed up comparison when using a collator;
      * CollationKey objects are cached.
      *
-     * @param name the collation name or null
-     * @param strength the collation strength
+     * @param name           the collation name or null
+     * @param strength       the collation strength
      * @param binaryUnsigned whether to compare binaries as unsigned
      * @return the compare mode
      */
     public static synchronized CompareMode getInstance(String name,
-            int strength, boolean binaryUnsigned) {
+                                                       int strength, boolean binaryUnsigned) {
         if (lastUsed != null) {
             if (StringUtils.equals(lastUsed.name, name) &&
                     lastUsed.strength == strength &&
@@ -134,43 +132,6 @@ public class CompareMode {
     }
 
     /**
-     * Compare two characters in a string.
-     *
-     * @param a the first string
-     * @param ai the character index in the first string
-     * @param b the second string
-     * @param bi the character index in the second string
-     * @param ignoreCase true if a case-insensitive comparison should be made
-     * @return true if the characters are equals
-     */
-    public boolean equalsChars(String a, int ai, String b, int bi,
-            boolean ignoreCase) {
-        char ca = a.charAt(ai);
-        char cb = b.charAt(bi);
-        if (ignoreCase) {
-            ca = Character.toUpperCase(ca);
-            cb = Character.toUpperCase(cb);
-        }
-        return ca == cb;
-    }
-
-    /**
-     * Compare two strings.
-     *
-     * @param a the first string
-     * @param b the second string
-     * @param ignoreCase true if a case-insensitive comparison should be made
-     * @return -1 if the first string is 'smaller', 1 if the second string is
-     *         smaller, and 0 if they are equal
-     */
-    public int compareString(String a, String b, boolean ignoreCase) {
-        if (ignoreCase) {
-            return a.compareToIgnoreCase(b);
-        }
-        return a.compareTo(b);
-    }
-
-    /**
      * Get the collation name.
      *
      * @param l the locale
@@ -189,7 +150,7 @@ public class CompareMode {
      * is ignored.
      *
      * @param locale the locale
-     * @param name the name
+     * @param name   the name
      * @return true if they match
      */
     static boolean compareLocaleNames(Locale locale, String name) {
@@ -239,6 +200,43 @@ public class CompareMode {
         return result;
     }
 
+    /**
+     * Compare two characters in a string.
+     *
+     * @param a          the first string
+     * @param ai         the character index in the first string
+     * @param b          the second string
+     * @param bi         the character index in the second string
+     * @param ignoreCase true if a case-insensitive comparison should be made
+     * @return true if the characters are equals
+     */
+    public boolean equalsChars(String a, int ai, String b, int bi,
+                               boolean ignoreCase) {
+        char ca = a.charAt(ai);
+        char cb = b.charAt(bi);
+        if (ignoreCase) {
+            ca = Character.toUpperCase(ca);
+            cb = Character.toUpperCase(cb);
+        }
+        return ca == cb;
+    }
+
+    /**
+     * Compare two strings.
+     *
+     * @param a          the first string
+     * @param b          the second string
+     * @param ignoreCase true if a case-insensitive comparison should be made
+     * @return -1 if the first string is 'smaller', 1 if the second string is
+     * smaller, and 0 if they are equal
+     */
+    public int compareString(String a, String b, boolean ignoreCase) {
+        if (ignoreCase) {
+            return a.compareToIgnoreCase(b);
+        }
+        return a.compareTo(b);
+    }
+
     public String getName() {
         return name == null ? OFF : name;
     }
@@ -265,10 +263,7 @@ public class CompareMode {
         if (strength != o.strength) {
             return false;
         }
-        if (binaryUnsigned != o.binaryUnsigned) {
-            return false;
-        }
-        return true;
+        return binaryUnsigned == o.binaryUnsigned;
     }
 
     @Override

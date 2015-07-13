@@ -23,10 +23,10 @@ package com.suning.snfddal.tx;
  */
 public interface TransactionManager {
 
-    public void begin() throws TransactionException;
-    
-    public void commit () throws TransactionException;
-    
-    public void rollback() throws TransactionException;
+    void begin() throws TransactionException;
+
+    void commit() throws TransactionException;
+
+    void rollback() throws TransactionException;
 
 }

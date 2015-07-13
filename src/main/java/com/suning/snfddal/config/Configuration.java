@@ -18,33 +18,28 @@
 
 package com.suning.snfddal.config;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import com.suning.snfddal.command.dml.SetTypes;
 import com.suning.snfddal.dispatch.rule.TableRouter;
 import com.suning.snfddal.engine.SysProperties;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.util.New;
 
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class Configuration {
-    
-    private Properties prop = new Properties();
-
-    private SchemaConfig schemaConfig = new SchemaConfig();
 
     private final Map<String, ShardConfig> cluster = New.hashMap();
-    
     private final Map<String, Object> ruleAlgorithms = New.hashMap();
-    
     private final Map<String, TableRouter> temporary = New.hashMap();
-    
+    private Properties prop = new Properties();
+    private SchemaConfig schemaConfig = new SchemaConfig();
     private DataSourceProvider dataSourceProvider;
-    
+
     public Set<String> getShardNames() {
         return cluster.keySet();
     }
@@ -69,6 +64,7 @@ public class Configuration {
     public Properties getSettings() {
         return this.prop;
     }
+
     /**
      * Get the property keys.
      *
@@ -97,7 +93,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param key the property key
+     * @param key          the property key
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -109,7 +105,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param key the property key
+     * @param key          the property key
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -121,7 +117,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting the setting id
+     * @param setting      the setting id
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -134,7 +130,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting the setting id
+     * @param setting      the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -147,11 +143,11 @@ public class Configuration {
             return defaultValue;
         }
     }
-    
+
     /**
      * Get the value of the given property.
      *
-     * @param setting the setting id
+     * @param setting      the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -164,10 +160,11 @@ public class Configuration {
             return defaultValue;
         }
     }
+
     /**
      * Remove a boolean property if it is set and return the value.
      *
-     * @param key the property name
+     * @param key          the property name
      * @param defaultValue the default value
      * @return the value
      */
@@ -175,48 +172,48 @@ public class Configuration {
         String x = removeProperty(key, null);
         return x == null ? defaultValue : Boolean.parseBoolean(x);
     }
-    
+
     /**
      * Overwrite a property.
      *
-     * @param key the property name
+     * @param key   the property name
      * @param value the value
      */
     public void setProperty(int setting, String value) {
         String key = SetTypes.getTypeName(setting);
         if (SysProperties.CHECK && key == null) {
             DbException.throwInternalError(key);
-        }    
+        }
         // value is null if the value is an object
         if (value != null) {
             prop.setProperty(key, value);
         }
     }
-    
+
     /**
      * Overwrite a property.
      *
-     * @param key the property name
+     * @param key   the property name
      * @param value the value
      */
     public void setProperty(int setting, int value) {
         setProperty(setting, String.valueOf(value));
     }
-    
+
     /**
      * Overwrite a property.
      *
-     * @param key the property name
+     * @param key   the property name
      * @param value the value
      */
     public void setProperty(int setting, boolean value) {
         setProperty(setting, String.valueOf(value));
     }
-    
+
     /**
      * Overwrite a property.
      *
-     * @param key the property name
+     * @param key   the property name
      * @param value the value
      */
     public void setProperty(String key, String value) {
@@ -225,11 +222,11 @@ public class Configuration {
             prop.setProperty(key, value);
         }
     }
-    
+
     /**
      * Remove a String property if it is set and return the value.
      *
-     * @param key the property name
+     * @param key          the property name
      * @param defaultValue the default value
      * @return the value
      */
@@ -254,13 +251,14 @@ public class Configuration {
         }
         cluster.put(name, shard);
     }
-    
+
     public void addTemporaryTableRouter(String id, TableRouter tableRouter) {
         if (temporary.containsKey(id)) {
             throw new ConfigurationException("Duplicate table router id " + id);
         }
         temporary.put(id, tableRouter);
     }
+
     /**
      * @return the tableRules
      */
@@ -295,5 +293,5 @@ public class Configuration {
     public void setDataSourceProvider(DataSourceProvider dataSourceProvider) {
         this.dataSourceProvider = dataSourceProvider;
     }
-    
+
 }

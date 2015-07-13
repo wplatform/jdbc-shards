@@ -5,7 +5,8 @@
  */
 package com.suning.snfddal.util;
 
-import static java.lang.Math.abs;
+import com.suning.snfddal.message.DbException;
+import com.suning.snfddal.message.ErrorCode;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -13,14 +14,9 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Currency;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
-import com.suning.snfddal.message.DbException;
-import com.suning.snfddal.message.ErrorCode;
+import static java.lang.Math.abs;
 
 /**
  * Emulates Oracle's TO_CHAR function.
@@ -47,7 +43,7 @@ public class ToChar {
 
     /**
      * Emulates Oracle's TO_CHAR(number) function.
-     *
+     * <p>
      * <p><table border="1">
      * <th><td>Input</td>
      * <td>Output</td>
@@ -118,13 +114,13 @@ public class ToChar {
      * See also TO_CHAR(number) and number format models
      * in the Oracle documentation.
      *
-     * @param number the number to format
-     * @param format the format pattern to use (if any)
+     * @param number   the number to format
+     * @param format   the format pattern to use (if any)
      * @param nlsParam the NLS parameter (if any)
      * @return the formatted number
      */
     public static String toChar(BigDecimal number, String format,
-            String nlsParam) {
+                                String nlsParam) {
 
         // short-circuit logic for formats that don't follow common logic below
         String formatUp = format != null ? format.toUpperCase() : null;
@@ -331,8 +327,8 @@ public class ToChar {
     }
 
     private static void addSign(StringBuilder output, int signum,
-            boolean leadingSign, boolean trailingSign, boolean trailingMinus,
-            boolean angleBrackets, boolean fillMode) {
+                                boolean leadingSign, boolean trailingSign, boolean trailingMinus,
+                                boolean angleBrackets, boolean fillMode) {
         if (angleBrackets) {
             if (signum < 0) {
                 output.insert(0, '<');
@@ -390,10 +386,10 @@ public class ToChar {
     }
 
     private static String toRomanNumeral(int number) {
-        int[] values = new int[] { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9,
-                5, 4, 1 };
-        String[] numerals = new String[] { "M", "CM", "D", "CD", "C", "XC",
-                "L", "XL", "X", "IX", "V", "IV", "I" };
+        int[] values = new int[]{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9,
+                5, 4, 1};
+        String[] numerals = new String[]{"M", "CM", "D", "CD", "C", "XC",
+                "L", "XL", "X", "IX", "V", "IV", "I"};
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < values.length; i++) {
             int value = values[i];
@@ -440,7 +436,7 @@ public class ToChar {
 
     /**
      * Emulates Oracle's TO_CHAR(datetime) function.
-     *
+     * <p>
      * <p><table border="1">
      * <th><td>Input</td>
      * <td>Output</td>
@@ -570,8 +566,8 @@ public class ToChar {
      * See also TO_CHAR(datetime) and datetime format models
      * in the Oracle documentation.
      *
-     * @param ts the timestamp to format
-     * @param format the format pattern to use (if any)
+     * @param ts       the timestamp to format
+     * @param format   the format pattern to use (if any)
      * @param nlsParam the NLS parameter (if any)
      * @return the formatted timestamp
      */
@@ -586,11 +582,11 @@ public class ToChar {
         StringBuilder output = new StringBuilder();
         boolean fillMode = true;
 
-        for (int i = 0; i < format.length();) {
+        for (int i = 0; i < format.length(); ) {
 
             Capitalization cap;
 
-                // AD / BC
+            // AD / BC
 
             if ((cap = containsAt(format, i, "A.D.", "B.C.")) != null) {
                 String era = cal.get(Calendar.ERA) == GregorianCalendar.AD ? "A.D." : "B.C.";
@@ -828,15 +824,15 @@ public class ToChar {
      * the specified substrings are found, this method returns <code>null</code>
      * .
      *
-     * @param s the string to check
-     * @param index the index to check at
+     * @param s          the string to check
+     * @param index      the index to check at
      * @param substrings the substrings to check for within the string
      * @return a capitalization strategy if the specified string contains any of
-     *         the specified substrings at the specified index,
-     *         <code>null</code> otherwise
+     * the specified substrings at the specified index,
+     * <code>null</code> otherwise
      */
     private static Capitalization containsAt(String s, int index,
-            String... substrings) {
+                                             String... substrings) {
         for (String substring : substrings) {
             if (index + substring.length() <= s.length()) {
                 boolean found = true;
@@ -864,7 +860,9 @@ public class ToChar {
         return null;
     }
 
-    /** Represents a capitalization / casing strategy. */
+    /**
+     * Represents a capitalization / casing strategy.
+     */
     private enum Capitalization {
 
         /**
@@ -890,7 +888,7 @@ public class ToChar {
          * @param up1 whether or not the first letter is uppercased
          * @param up2 whether or not the second letter is uppercased
          * @return the capitalization / casing strategy which should be used
-         *         when the first and second letters have the specified casing
+         * when the first and second letters have the specified casing
          */
         public static Capitalization toCapitalization(Boolean up1, Boolean up2) {
             if (up1 == null) {
@@ -915,16 +913,16 @@ public class ToChar {
                 return s;
             }
             switch (this) {
-            case UPPERCASE:
-                return s.toUpperCase();
-            case LOWERCASE:
-                return s.toLowerCase();
-            case CAPITALIZE:
-                return Character.toUpperCase(s.charAt(0)) +
-                        (s.length() > 1 ? s.toLowerCase().substring(1) : "");
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown capitalization strategy: " + this);
+                case UPPERCASE:
+                    return s.toUpperCase();
+                case LOWERCASE:
+                    return s.toLowerCase();
+                case CAPITALIZE:
+                    return Character.toUpperCase(s.charAt(0)) +
+                            (s.length() > 1 ? s.toLowerCase().substring(1) : "");
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown capitalization strategy: " + this);
             }
         }
     }

@@ -5,14 +5,6 @@
  */
 package com.suning.snfddal.dbobject;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.command.expression.Expression;
 import com.suning.snfddal.dbobject.schema.Schema;
@@ -31,6 +23,14 @@ import com.suning.snfddal.value.DataType;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueArray;
 import com.suning.snfddal.value.ValueNull;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents a user-defined function, or alias.
@@ -54,11 +54,11 @@ public class FunctionAlias extends SchemaObjectBase {
     /**
      * Create a new alias based on a method name.
      *
-     * @param schema the schema
-     * @param id the id
-     * @param name the name
-     * @param javaClassMethod the class and method name
-     * @param force create the object even if the class or method does not exist
+     * @param schema                     the schema
+     * @param id                         the id
+     * @param name                       the name
+     * @param javaClassMethod            the class and method name
+     * @param force                      create the object even if the class or method does not exist
      * @param bufferResultSetToLocalTemp whether the result should be buffered
      * @return the database object
      */
@@ -82,11 +82,11 @@ public class FunctionAlias extends SchemaObjectBase {
     /**
      * Create a new alias based on source code.
      *
-     * @param schema the schema
-     * @param id the id
-     * @param name the name
-     * @param source the source code
-     * @param force create the object even if the class or method does not exist
+     * @param schema                     the schema
+     * @param id                         the id
+     * @param name                       the name
+     * @param source                     the source code
+     * @param force                      create the object even if the class or method does not exist
      * @param bufferResultSetToLocalTemp whether the result should be buffered
      * @return the database object
      */
@@ -98,6 +98,45 @@ public class FunctionAlias extends SchemaObjectBase {
         alias.bufferResultSetToLocalTemp = bufferResultSetToLocalTemp;
         alias.init(force);
         return alias;
+    }
+
+    private static String getMethodSignature(Method m) {
+        StatementBuilder buff = new StatementBuilder(m.getName());
+        buff.append('(');
+        for (Class<?> p : m.getParameterTypes()) {
+            // do not use a space here, because spaces are removed
+            // in CreateFunctionAlias.setJavaClassMethod()
+            buff.appendExceptFirst(",");
+            if (p.isArray()) {
+                buff.append(p.getComponentType().getName()).append("[]");
+            } else {
+                buff.append(p.getName());
+            }
+        }
+        return buff.append(')').toString();
+    }
+
+    /**
+     * Checks if the given method takes a variable number of arguments. For Java
+     * 1.4 and older, false is returned. Example:
+     * <pre>
+     * public static double mean(double... values)
+     * </pre>
+     *
+     * @param m the method to test
+     * @return true if the method takes a variable number of arguments.
+     */
+    static boolean isVarArgs(Method m) {
+        if ("1.5".compareTo(SysProperties.JAVA_SPECIFICATION_VERSION) > 0) {
+            return false;
+        }
+        try {
+            Method isVarArgs = m.getClass().getMethod("isVarArgs");
+            Boolean result = (Boolean) isVarArgs.invoke(m);
+            return result.booleanValue();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void init(boolean force) {
@@ -131,7 +170,7 @@ public class FunctionAlias extends SchemaObjectBase {
             try {
                 Method m = compiler.getMethod(fullClassName);
                 JavaMethod method = new JavaMethod(m, 0);
-                javaMethods = new JavaMethod[] {
+                javaMethods = new JavaMethod[]{
                         method
                 };
             } catch (DbException e) {
@@ -157,7 +196,7 @@ public class FunctionAlias extends SchemaObjectBase {
                 for (JavaMethod old : list) {
                     if (old.getParameterCount() == javaMethod.getParameterCount()) {
                         throw DbException.get(ErrorCode.
-                                METHODS_MUST_HAVE_DIFFERENT_PARAMETER_COUNTS_2,
+                                        METHODS_MUST_HAVE_DIFFERENT_PARAMETER_COUNTS_2,
                                 old.toString(), javaMethod.toString());
                     }
                 }
@@ -176,22 +215,6 @@ public class FunctionAlias extends SchemaObjectBase {
         // with a variable number. The one without parameters needs to be used
         // if no parameters are given.
         Arrays.sort(javaMethods);
-    }
-
-    private static String getMethodSignature(Method m) {
-        StatementBuilder buff = new StatementBuilder(m.getName());
-        buff.append('(');
-        for (Class<?> p : m.getParameterTypes()) {
-            // do not use a space here, because spaces are removed
-            // in CreateFunctionAlias.setJavaClassMethod()
-            buff.appendExceptFirst(",");
-            if (p.isArray()) {
-                buff.append(p.getComponentType().getName()).append("[]");
-            } else {
-                buff.append(p.getName());
-            }
-        }
-        return buff.append(')').toString();
     }
 
     @Override
@@ -261,39 +284,16 @@ public class FunctionAlias extends SchemaObjectBase {
         return javaMethods;
     }
 
-    public void setDeterministic(boolean deterministic) {
-        this.deterministic = deterministic;
-    }
-
     public boolean isDeterministic() {
         return deterministic;
     }
 
-    public String getSource() {
-        return source;
+    public void setDeterministic(boolean deterministic) {
+        this.deterministic = deterministic;
     }
 
-    /**
-     * Checks if the given method takes a variable number of arguments. For Java
-     * 1.4 and older, false is returned. Example:
-     * <pre>
-     * public static double mean(double... values)
-     * </pre>
-     *
-     * @param m the method to test
-     * @return true if the method takes a variable number of arguments.
-     */
-    static boolean isVarArgs(Method m) {
-        if ("1.5".compareTo(SysProperties.JAVA_SPECIFICATION_VERSION) > 0) {
-            return false;
-        }
-        try {
-            Method isVarArgs = m.getClass().getMethod("isVarArgs");
-            Boolean result = (Boolean) isVarArgs.invoke(m);
-            return result.booleanValue();
-        } catch (Exception e) {
-            return false;
-        }
+    public String getSource() {
+        return source;
     }
 
     /**
@@ -359,14 +359,14 @@ public class FunctionAlias extends SchemaObjectBase {
         /**
          * Call the user-defined function and return the value.
          *
-         * @param session the session
-         * @param args the argument list
+         * @param session    the session
+         * @param args       the argument list
          * @param columnList true if the function should only return the column
-         *            list
+         *                   list
          * @return the value
          */
         public Value getValue(Session session, Expression[] args,
-                boolean columnList) {
+                              boolean columnList) {
             Class<?>[] paramClasses = method.getParameterTypes();
             Object[] params = new Object[paramClasses.length];
             int p = 0;

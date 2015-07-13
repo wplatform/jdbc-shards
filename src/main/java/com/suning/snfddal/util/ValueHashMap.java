@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.util;
 
-import java.util.ArrayList;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * This hash map supports keys of type Value.
@@ -61,7 +61,7 @@ public class ValueHashMap<V> extends HashBase {
     /**
      * Add or update a key value pair.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the new value
      */
     public void put(Value key, V value) {

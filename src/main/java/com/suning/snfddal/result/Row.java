@@ -17,9 +17,8 @@ public class Row implements SearchRow {
 
     public static final int MEMORY_CALCULATE = -1;
     public static final Row[] EMPTY_ARRAY = {};
-
-    private long key;
     private final Value[] data;
+    private long key;
     private int memory;
     private int version;
     private boolean deleted;
@@ -134,16 +133,12 @@ public class Row implements SearchRow {
         return buff.append(')').toString();
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public int getSessionId() {
+        return sessionId;
     }
 
     public void setSessionId(int sessionId) {
         this.sessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return sessionId;
     }
 
     /**
@@ -155,6 +150,10 @@ public class Row implements SearchRow {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Value[] getValueList() {

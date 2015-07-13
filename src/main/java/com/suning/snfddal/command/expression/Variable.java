@@ -63,24 +63,24 @@ public class Variable extends Expression {
 
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
-        switch(visitor.getType()) {
-        case ExpressionVisitor.EVALUATABLE:
-            // the value will be evaluated at execute time
-        case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
-            // it is checked independently if the value is the same as the last
-            // time
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.INDEPENDENT:
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-        case ExpressionVisitor.GET_DEPENDENCIES:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        case ExpressionVisitor.DETERMINISTIC:
-            return false;
-        default:
-            throw DbException.throwInternalError("type="+visitor.getType());
+        switch (visitor.getType()) {
+            case ExpressionVisitor.EVALUATABLE:
+                // the value will be evaluated at execute time
+            case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
+                // it is checked independently if the value is the same as the last
+                // time
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.INDEPENDENT:
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+            case ExpressionVisitor.GET_DEPENDENCIES:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            case ExpressionVisitor.DETERMINISTIC:
+                return false;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 

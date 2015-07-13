@@ -5,8 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.dbobject.table.Column;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -17,14 +15,16 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.List;
+
 /**
  * A parameter of a prepared statement.
  */
 public class Parameter extends Expression implements ParameterInterface {
 
+    private final int index;
     private Value value;
     private Column column;
-    private final int index;
 
     public Parameter(int index) {
         this.index = index;
@@ -143,24 +143,24 @@ public class Parameter extends Expression implements ParameterInterface {
 
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
-        switch(visitor.getType()) {
-        case ExpressionVisitor.EVALUATABLE:
-            // the parameter _will_be_ evaluatable at execute time
-        case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
-            // it is checked independently if the value is the same as the last
-            // time
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-        case ExpressionVisitor.GET_DEPENDENCIES:
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        case ExpressionVisitor.INDEPENDENT:
-            return value != null;
-        default:
-            throw DbException.throwInternalError("type="+visitor.getType());
+        switch (visitor.getType()) {
+            case ExpressionVisitor.EVALUATABLE:
+                // the parameter _will_be_ evaluatable at execute time
+            case ExpressionVisitor.SET_MAX_DATA_MODIFICATION_ID:
+                // it is checked independently if the value is the same as the last
+                // time
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+            case ExpressionVisitor.GET_DEPENDENCIES:
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            case ExpressionVisitor.INDEPENDENT:
+                return value != null;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 
@@ -182,6 +182,7 @@ public class Parameter extends Expression implements ParameterInterface {
     public int getIndex() {
         return index;
     }
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         container.add(value);

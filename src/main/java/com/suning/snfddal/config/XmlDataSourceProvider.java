@@ -18,12 +18,11 @@
 
 package com.suning.snfddal.config;
 
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -25,7 +25,7 @@ package com.suning.snfddal.util;
  *     buff.appendExceptFirst(&quot;, &quot;);
  *     buff.append(a);
  * }
- *</pre>
+ * </pre>
  */
 public class StatementBuilder {
 

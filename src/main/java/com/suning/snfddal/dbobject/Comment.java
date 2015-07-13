@@ -20,40 +20,51 @@ public class Comment extends DbObjectBase {
     private String commentText;
 
     public Comment(Database database, int id, DbObject obj) {
-        initDbObjectBase(database, id,  getKey(obj), Trace.DATABASE);
+        initDbObjectBase(database, id, getKey(obj), Trace.DATABASE);
         this.objectType = obj.getType();
         this.objectName = obj.getSQL();
     }
 
     private static String getTypeName(int type) {
-        switch(type) {
-        case DbObject.CONSTANT:
-            return "CONSTANT";
-        case DbObject.CONSTRAINT:
-            return "CONSTRAINT";
-        case DbObject.FUNCTION_ALIAS:
-            return "ALIAS";
-        case DbObject.INDEX:
-            return "INDEX";
-        case DbObject.ROLE:
-            return "ROLE";
-        case DbObject.SCHEMA:
-            return "SCHEMA";
-        case DbObject.SEQUENCE:
-            return "SEQUENCE";
-        case DbObject.TABLE_OR_VIEW:
-            return "TABLE";
-        case DbObject.TRIGGER:
-            return "TRIGGER";
-        case DbObject.USER:
-            return "USER";
-        case DbObject.USER_DATATYPE:
-            return "DOMAIN";
-        default:
-            // not supported by parser, but required when trying to find a
-            // comment
-            return "type" + type;
+        switch (type) {
+            case DbObject.CONSTANT:
+                return "CONSTANT";
+            case DbObject.CONSTRAINT:
+                return "CONSTRAINT";
+            case DbObject.FUNCTION_ALIAS:
+                return "ALIAS";
+            case DbObject.INDEX:
+                return "INDEX";
+            case DbObject.ROLE:
+                return "ROLE";
+            case DbObject.SCHEMA:
+                return "SCHEMA";
+            case DbObject.SEQUENCE:
+                return "SEQUENCE";
+            case DbObject.TABLE_OR_VIEW:
+                return "TABLE";
+            case DbObject.TRIGGER:
+                return "TRIGGER";
+            case DbObject.USER:
+                return "USER";
+            case DbObject.USER_DATATYPE:
+                return "DOMAIN";
+            default:
+                // not supported by parser, but required when trying to find a
+                // comment
+                return "type" + type;
         }
+    }
+
+    /**
+     * Get the comment key name for the given database object. This key name is
+     * used internally to associate the comment to the object.
+     *
+     * @param obj the object
+     * @return the key name
+     */
+    public static String getKey(DbObject obj) {
+        return getTypeName(obj.getType()) + " " + obj.getSQL();
     }
 
     @Override
@@ -69,17 +80,6 @@ public class Comment extends DbObjectBase {
     @Override
     public void checkRename() {
         DbException.throwInternalError();
-    }
-
-    /**
-     * Get the comment key name for the given database object. This key name is
-     * used internally to associate the comment to the object.
-     *
-     * @param obj the object
-     * @return the key name
-     */
-    public static String getKey(DbObject obj) {
-        return getTypeName(obj.getType()) + " " + obj.getSQL();
     }
 
     /**

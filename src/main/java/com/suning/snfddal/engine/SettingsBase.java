@@ -5,11 +5,11 @@
  */
 package com.suning.snfddal.engine;
 
-import java.util.HashMap;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.Utils;
+
+import java.util.HashMap;
 
 /**
  * The base class for settings.
@@ -25,7 +25,7 @@ public class SettingsBase {
     /**
      * Get the setting for the given key.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the setting
      */
@@ -42,7 +42,7 @@ public class SettingsBase {
     /**
      * Get the setting for the given key.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the setting
      */
@@ -59,7 +59,7 @@ public class SettingsBase {
     /**
      * Get the setting for the given key.
      *
-     * @param key the key
+     * @param key          the key
      * @param defaultValue the default value
      * @return the setting
      */

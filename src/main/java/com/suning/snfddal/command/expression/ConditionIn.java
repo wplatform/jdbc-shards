@@ -5,9 +5,6 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.suning.snfddal.dbobject.index.IndexCondition;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
@@ -18,25 +15,28 @@ import com.suning.snfddal.value.Value;
 import com.suning.snfddal.value.ValueBoolean;
 import com.suning.snfddal.value.ValueNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An 'in' condition with a list of values, as in WHERE NAME IN(...)
  */
 public class ConditionIn extends Condition {
 
     private final Database database;
-    private Expression left;
     private final ArrayList<Expression> valueList;
+    private Expression left;
     private int queryLevel;
 
     /**
      * Create a new IN(..) condition.
      *
      * @param database the database
-     * @param left the expression before IN
-     * @param values the value list (at least one element)
+     * @param left     the expression before IN
+     * @param values   the value list (at least one element)
      */
     public ConditionIn(Database database, Expression left,
-            ArrayList<Expression> values) {
+                       ArrayList<Expression> values) {
         this.database = database;
         this.left = left;
         this.valueList = values;
@@ -208,15 +208,15 @@ public class ConditionIn extends Condition {
         }
         return null;
     }
-    
-    
+
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
         StatementBuilder buff = new StatementBuilder("(");
-        buff.append(left.exportParameters(filter,container)).append(" IN(");
+        buff.append(left.exportParameters(filter, container)).append(" IN(");
         for (Expression e : valueList) {
             buff.appendExceptFirst(", ");
-            buff.append(e.exportParameters(filter,container));
+            buff.append(e.exportParameters(filter, container));
         }
         return buff.append("))").toString();
     }

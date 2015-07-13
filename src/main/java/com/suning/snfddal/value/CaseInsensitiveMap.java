@@ -5,9 +5,9 @@
  */
 package com.suning.snfddal.value;
 
-import java.util.HashMap;
-
 import com.suning.snfddal.util.StringUtils;
+
+import java.util.HashMap;
 
 /**
  * A hash map with a case-insensitive string key.
@@ -17,6 +17,10 @@ import com.suning.snfddal.util.StringUtils;
 public class CaseInsensitiveMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = 1L;
+
+    private static String toUpper(Object key) {
+        return key == null ? null : StringUtils.toUpperEnglish(key.toString());
+    }
 
     @Override
     public V get(Object key) {
@@ -36,10 +40,6 @@ public class CaseInsensitiveMap<V> extends HashMap<String, V> {
     @Override
     public V remove(Object key) {
         return super.remove(toUpper(key));
-    }
-
-    private static String toUpper(Object key) {
-        return key == null ? null : StringUtils.toUpperEnglish(key.toString());
     }
 
 }

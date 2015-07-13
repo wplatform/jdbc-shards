@@ -30,10 +30,6 @@ public class AlterUser extends DefineCommand {
         super(session);
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
     public void setNewName(String newName) {
         this.newName = newName;
     }
@@ -66,6 +62,10 @@ public class AlterUser extends DefineCommand {
     @Override
     public int getType() {
         return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
 }

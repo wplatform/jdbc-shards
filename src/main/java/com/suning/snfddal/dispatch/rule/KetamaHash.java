@@ -37,13 +37,6 @@ public class KetamaHash {
     private static final int NUM24 = 24;
     private static final int NUM_0XFF = 0xFF;
 
-
-    public long calculate(Object paramObj) {
-        String paramValue = paramObj == null ? "null" : paramObj.toString();
-        long hashCode = HashAlgorithm.KETAMA_HASH.hash(computeMd5(paramValue), 0);
-        return hashCode;
-    }
-
     private static byte[] computeMd5(String k) {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
@@ -57,7 +50,13 @@ public class KetamaHash {
         }
     }
 
-    private static enum HashAlgorithm {
+    public long calculate(Object paramObj) {
+        String paramValue = paramObj == null ? "null" : paramObj.toString();
+        long hashCode = HashAlgorithm.KETAMA_HASH.hash(computeMd5(paramValue), 0);
+        return hashCode;
+    }
+
+    private enum HashAlgorithm {
         /**
          * MD5-based hash algorithm used by ketama.
          */

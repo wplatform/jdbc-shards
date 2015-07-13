@@ -5,18 +5,6 @@
  */
 package com.suning.snfddal.jdbc;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.sql.Blob;
-import java.sql.SQLException;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
@@ -25,13 +13,17 @@ import com.suning.snfddal.util.IOUtils;
 import com.suning.snfddal.util.Task;
 import com.suning.snfddal.value.Value;
 
+import java.io.*;
+import java.sql.Blob;
+import java.sql.SQLException;
+
 /**
  * Represents a BLOB value.
  */
 public class JdbcBlob extends TraceObject implements Blob {
 
-    Value value;
     private final JdbcConnection conn;
+    Value value;
 
     /**
      * INTERNAL
@@ -77,7 +69,7 @@ public class JdbcBlob extends TraceObject implements Blob {
     /**
      * Returns some bytes of the object.
      *
-     * @param pos the index, the first byte is at position 1
+     * @param pos    the index, the first byte is at position 1
      * @param length the number of bytes
      * @return the bytes, at most length bytes
      */
@@ -85,7 +77,7 @@ public class JdbcBlob extends TraceObject implements Blob {
     public byte[] getBytes(long pos, int length) throws SQLException {
         try {
             if (isDebugEnabled()) {
-                debugCode("getBytes("+pos+", "+length+");");
+                debugCode("getBytes(" + pos + ", " + length + ");");
             }
             checkClosed();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -107,7 +99,7 @@ public class JdbcBlob extends TraceObject implements Blob {
      * were created with Connection.createBlob(). The position
      * must be 1, meaning the whole Blob data is set.
      *
-     * @param pos where to start writing (the first byte is at position 1)
+     * @param pos   where to start writing (the first byte is at position 1)
      * @param bytes the bytes to set
      * @return the length of the added data
      */
@@ -115,7 +107,7 @@ public class JdbcBlob extends TraceObject implements Blob {
     public int setBytes(long pos, byte[] bytes) throws SQLException {
         try {
             if (isDebugEnabled()) {
-                debugCode("setBytes("+pos+", "+quoteBytes(bytes)+");");
+                debugCode("setBytes(" + pos + ", " + quoteBytes(bytes) + ");");
             }
             checkClosed();
             if (pos != 1) {
@@ -131,10 +123,10 @@ public class JdbcBlob extends TraceObject implements Blob {
     /**
      * [Not supported] Sets some bytes of the object.
      *
-     * @param pos the write position
-     * @param bytes the bytes to set
+     * @param pos    the write position
+     * @param bytes  the bytes to set
      * @param offset the bytes offset
-     * @param len the number of bytes to write
+     * @param len    the number of bytes to write
      * @return how many bytes have been written
      */
     @Override
@@ -173,7 +165,7 @@ public class JdbcBlob extends TraceObject implements Blob {
     public OutputStream setBinaryStream(long pos) throws SQLException {
         try {
             if (isDebugEnabled()) {
-                debugCode("setBinaryStream("+pos+");");
+                debugCode("setBinaryStream(" + pos + ");");
             }
             checkClosed();
             if (pos != 1) {
@@ -212,13 +204,13 @@ public class JdbcBlob extends TraceObject implements Blob {
      * [Not supported] Searches a pattern and return the position.
      *
      * @param pattern the pattern to search
-     * @param start the index, the first byte is at position 1
+     * @param start   the index, the first byte is at position 1
      * @return the position (first byte is at position 1), or -1 for not found
      */
     @Override
     public long position(byte[] pattern, long start) throws SQLException {
         if (isDebugEnabled()) {
-            debugCode("position("+quoteBytes(pattern)+", "+start+");");
+            debugCode("position(" + quoteBytes(pattern) + ", " + start + ");");
         }
         if (Constants.BLOB_SEARCH) {
             try {
@@ -267,13 +259,13 @@ public class JdbcBlob extends TraceObject implements Blob {
      * [Not supported] Searches a pattern and return the position.
      *
      * @param blobPattern the pattern to search
-     * @param start the index, the first byte is at position 1
+     * @param start       the index, the first byte is at position 1
      * @return the position (first byte is at position 1), or -1 for not found
      */
     @Override
     public long position(Blob blobPattern, long start) throws SQLException {
         if (isDebugEnabled()) {
-            debugCode("position(blobPattern, "+start+");");
+            debugCode("position(blobPattern, " + start + ");");
         }
         if (Constants.BLOB_SEARCH) {
             try {
@@ -310,7 +302,7 @@ public class JdbcBlob extends TraceObject implements Blob {
     /**
      * [Not supported] Returns the input stream, starting from an offset.
      *
-     * @param pos where to start reading
+     * @param pos    where to start reading
      * @param length the number of bytes that will be read
      * @return the input stream to read
      */

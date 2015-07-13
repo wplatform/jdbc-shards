@@ -27,8 +27,8 @@ public class SmallLRUCache<K, V> extends LinkedHashMap<K, V> {
     /**
      * Create a new object with all elements of the given collection.
      *
-     * @param <K> the key type
-     * @param <V> the value type
+     * @param <K>  the key type
+     * @param <V>  the value type
      * @param size the number of elements
      * @return the object
      */

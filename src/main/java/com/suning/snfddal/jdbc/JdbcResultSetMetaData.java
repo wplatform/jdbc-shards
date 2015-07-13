@@ -5,15 +5,15 @@
  */
 package com.suning.snfddal.jdbc;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.Trace;
 import com.suning.snfddal.message.TraceObject;
 import com.suning.snfddal.result.ResultInterface;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.value.DataType;
+
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * Represents the meta data for a ResultSet.
@@ -28,7 +28,7 @@ public class JdbcResultSetMetaData extends TraceObject implements
     private final int columnCount;
 
     JdbcResultSetMetaData(JdbcResultSet rs, JdbcPreparedStatement prep,
-            ResultInterface result, String catalog, Trace trace, int id) {
+                          ResultInterface result, String catalog, Trace trace, int id) {
         setTrace(trace, TraceObject.RESULT_SET_META_DATA, id);
         this.catalog = catalog;
         this.rs = rs;

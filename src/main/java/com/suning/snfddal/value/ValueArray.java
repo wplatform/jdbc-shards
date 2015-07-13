@@ -5,14 +5,14 @@
  */
 package com.suning.snfddal.value;
 
-import java.lang.reflect.Array;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-
 import com.suning.snfddal.engine.Constants;
 import com.suning.snfddal.util.MathUtils;
 import com.suning.snfddal.util.New;
 import com.suning.snfddal.util.StatementBuilder;
+
+import java.lang.reflect.Array;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
 
 /**
  * Implementation of the ARRAY data type.
@@ -48,7 +48,7 @@ public class ValueArray extends Value {
      * Do not clone the data.
      *
      * @param componentType the array class (null for Object[])
-     * @param list the value array
+     * @param list          the value array
      * @return the value
      */
     public static ValueArray get(Class<?> componentType, Value[] list) {

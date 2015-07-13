@@ -24,7 +24,6 @@ import com.suning.snfddal.result.ResultInterface;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public interface PreparedExecutor<T extends Prepared> {
     /**
@@ -34,12 +33,13 @@ public interface PreparedExecutor<T extends Prepared> {
      * @return the result set
      * @throws DbException if it is not a query
      */
-    public ResultInterface executeQuery(int maxrows);
+    ResultInterface executeQuery(int maxrows);
+
     /**
      * Execute the statement.
      *
      * @return the update count
      * @throws DbException if it is a query
      */
-    public int executeUpdate();
+    int executeUpdate();
 }

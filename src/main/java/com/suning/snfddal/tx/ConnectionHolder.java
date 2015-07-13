@@ -18,18 +18,18 @@
 
 package com.suning.snfddal.tx;
 
+import com.suning.snfddal.util.New;
+
 import java.sql.Connection;
 import java.util.Map;
-
-import com.suning.snfddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class ConnectionHolder {
-    
+
     public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
-    
+
 
     private Map<String, Connection> resources = New.hashMap();
 

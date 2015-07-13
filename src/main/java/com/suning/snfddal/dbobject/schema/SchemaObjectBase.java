@@ -1,7 +1,7 @@
 /*
- * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0,
- * and the EPL 1.0 (http://h2database.com/html/license.html).
- * Initial Developer: H2 Group
+ * Copyright 2004-2014 H2 Group. Multiple-Licensed under the MPL 2.0, and the
+ * EPL 1.0 (http://h2database.com/html/license.html). Initial Developer: H2
+ * Group
  */
 package com.suning.snfddal.dbobject.schema;
 
@@ -10,21 +10,19 @@ import com.suning.snfddal.dbobject.DbObjectBase;
 /**
  * The base class for classes implementing SchemaObject.
  */
-public abstract class SchemaObjectBase extends DbObjectBase implements
-        SchemaObject {
+public abstract class SchemaObjectBase extends DbObjectBase implements SchemaObject {
 
     private Schema schema;
 
     /**
      * Initialize some attributes of this object.
      *
-     * @param newSchema the schema
-     * @param id the object id
-     * @param name the name
+     * @param newSchema   the schema
+     * @param id          the object id
+     * @param name        the name
      * @param traceModule the trace module name
      */
-    protected void initSchemaObjectBase(Schema newSchema, int id, String name,
-            String traceModule) {
+    protected void initSchemaObjectBase(Schema newSchema, int id, String name, String traceModule) {
         initDbObjectBase(newSchema.getDatabase(), id, name, traceModule);
         this.schema = newSchema;
     }

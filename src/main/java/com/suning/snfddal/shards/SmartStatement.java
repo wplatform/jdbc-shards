@@ -23,6 +23,18 @@ public final class SmartStatement extends SmartSupport implements InvocationHand
         this.statement = stmt;
     }
 
+    /**
+     * Creates a logging version of a Statement
+     *
+     * @param stmt - the statement
+     * @return - the proxy
+     */
+    public static Statement newInstance(SmartSupport parent, Statement stmt) {
+        InvocationHandler handler = new SmartStatement(parent, stmt);
+        ClassLoader cl = Statement.class.getClassLoader();
+        return (Statement) Proxy.newProxyInstance(cl, new Class[]{Statement.class}, handler);
+    }
+
     public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
         try {
             if (EXECUTE_METHODS.contains(method.getName())) {
@@ -59,18 +71,6 @@ public final class SmartStatement extends SmartSupport implements InvocationHand
             handleException(t);
             throw t;
         }
-    }
-
-    /**
-     * Creates a logging version of a Statement
-     *
-     * @param stmt - the statement
-     * @return - the proxy
-     */
-    public static Statement newInstance(SmartSupport parent, Statement stmt) {
-        InvocationHandler handler = new SmartStatement(parent, stmt);
-        ClassLoader cl = Statement.class.getClassLoader();
-        return (Statement) Proxy.newProxyInstance(cl, new Class[] { Statement.class }, handler);
     }
 
     /**

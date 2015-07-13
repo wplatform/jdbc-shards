@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.command.expression;
 
-import java.util.List;
-
 import com.suning.snfddal.command.Parser;
 import com.suning.snfddal.dbobject.table.ColumnResolver;
 import com.suning.snfddal.dbobject.table.TableFilter;
 import com.suning.snfddal.engine.Session;
 import com.suning.snfddal.value.Value;
+
+import java.util.List;
 
 /**
  * A column alias as in SELECT 'Hello' AS NAME ...
@@ -19,8 +19,8 @@ import com.suning.snfddal.value.Value;
 public class Alias extends Expression {
 
     private final String alias;
-    private Expression expr;
     private final boolean aliasColumnName;
+    private Expression expr;
 
     public Alias(Expression expression, String alias, boolean aliasColumnName) {
         this.expr = expression;
@@ -125,10 +125,10 @@ public class Alias extends Expression {
         return expr.getColumnName();
     }
 
-    
+
     @Override
     public String exportParameters(TableFilter filter, List<Value> container) {
-        return expr.exportParameters(filter,container) + " AS " + Parser.quoteIdentifier(alias);
+        return expr.exportParameters(filter, container) + " AS " + Parser.quoteIdentifier(alias);
     }
 
 }

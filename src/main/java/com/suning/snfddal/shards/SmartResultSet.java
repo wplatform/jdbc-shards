@@ -16,10 +16,6 @@ import java.util.Set;
 public final class SmartResultSet extends SmartSupport implements InvocationHandler {
 
     private static Set<Integer> BLOB_TYPES = new HashSet<Integer>();
-    private boolean first = true;
-    private int rows = 0;
-    private ResultSet rs;
-    private Set<Integer> blobColumns = new HashSet<Integer>();
 
     static {
         BLOB_TYPES.add(Types.BINARY);
@@ -32,6 +28,11 @@ public final class SmartResultSet extends SmartSupport implements InvocationHand
         BLOB_TYPES.add(Types.VARBINARY);
     }
 
+    private boolean first = true;
+    private int rows = 0;
+    private ResultSet rs;
+    private Set<Integer> blobColumns = new HashSet<Integer>();
+
     /**
      * @param database
      * @param dataSource
@@ -40,6 +41,15 @@ public final class SmartResultSet extends SmartSupport implements InvocationHand
     protected SmartResultSet(SmartSupport parent, ResultSet rs) {
         super(parent.database, parent.dataSource);
         this.rs = rs;
+    }
+
+    /* Creates a logging version of a ResultSet
+     * @param rs - the ResultSet to proxy
+     * @return - the ResultSet with logging */
+    public static ResultSet newInstance(SmartSupport parent, ResultSet rs) {
+        InvocationHandler handler = new SmartResultSet(parent, rs);
+        ClassLoader cl = ResultSet.class.getClassLoader();
+        return (ResultSet) Proxy.newProxyInstance(cl, new Class[]{ResultSet.class}, handler);
     }
 
     public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
@@ -105,15 +115,6 @@ public final class SmartResultSet extends SmartSupport implements InvocationHand
                 row.append(", ");
         }
         debug(row.toString());
-    }
-
-    /* Creates a logging version of a ResultSet
-     * @param rs - the ResultSet to proxy
-     * @return - the ResultSet with logging */
-    public static ResultSet newInstance(SmartSupport parent, ResultSet rs) {
-        InvocationHandler handler = new SmartResultSet(parent, rs);
-        ClassLoader cl = ResultSet.class.getClassLoader();
-        return (ResultSet) Proxy.newProxyInstance(cl, new Class[] { ResultSet.class }, handler);
     }
 
     /* Get the wrapped result set

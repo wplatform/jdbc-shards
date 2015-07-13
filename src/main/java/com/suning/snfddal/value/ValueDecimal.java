@@ -5,13 +5,13 @@
  */
 package com.suning.snfddal.value;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.suning.snfddal.message.DbException;
 import com.suning.snfddal.message.ErrorCode;
 import com.suning.snfddal.util.MathUtils;
+
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the DECIMAL data type.
@@ -62,6 +62,35 @@ public class ValueDecimal extends Value {
                     BigDecimal.class.getName(), value.getClass().getName());
         }
         this.value = value;
+    }
+
+    /**
+     * Get or create big decimal value for the given big decimal.
+     *
+     * @param dec the bit decimal
+     * @return the value
+     */
+    public static ValueDecimal get(BigDecimal dec) {
+        if (BigDecimal.ZERO.equals(dec)) {
+            return (ValueDecimal) ZERO;
+        } else if (BigDecimal.ONE.equals(dec)) {
+            return (ValueDecimal) ONE;
+        }
+        return (ValueDecimal) Value.cache(new ValueDecimal(dec));
+    }
+
+    /**
+     * Set the scale of a BigDecimal value.
+     *
+     * @param bd    the BigDecimal value
+     * @param scale the new scale
+     * @return the scaled value
+     */
+    public static BigDecimal setScale(BigDecimal bd, int scale) {
+        if (scale > BIG_DECIMAL_SCALE_MAX || scale < -BIG_DECIMAL_SCALE_MAX) {
+            throw DbException.getInvalidValueException("scale", scale);
+        }
+        return bd.setScale(scale, BigDecimal.ROUND_HALF_UP);
     }
 
     @Override
@@ -219,21 +248,6 @@ public class ValueDecimal extends Value {
                 Long.toString(precision));
     }
 
-    /**
-     * Get or create big decimal value for the given big decimal.
-     *
-     * @param dec the bit decimal
-     * @return the value
-     */
-    public static ValueDecimal get(BigDecimal dec) {
-        if (BigDecimal.ZERO.equals(dec)) {
-            return (ValueDecimal) ZERO;
-        } else if (BigDecimal.ONE.equals(dec)) {
-            return (ValueDecimal) ONE;
-        }
-        return (ValueDecimal) Value.cache(new ValueDecimal(dec));
-    }
-
     @Override
     public int getDisplaySize() {
         // add 2 characters for '-' and '.'
@@ -253,20 +267,6 @@ public class ValueDecimal extends Value {
     @Override
     public int getMemory() {
         return value.precision() + 120;
-    }
-
-    /**
-     * Set the scale of a BigDecimal value.
-     *
-     * @param bd the BigDecimal value
-     * @param scale the new scale
-     * @return the scaled value
-     */
-    public static BigDecimal setScale(BigDecimal bd, int scale) {
-        if (scale > BIG_DECIMAL_SCALE_MAX || scale < -BIG_DECIMAL_SCALE_MAX) {
-            throw DbException.getInvalidValueException("scale", scale);
-        }
-        return bd.setScale(scale, BigDecimal.ROUND_HALF_UP);
     }
 
 }
