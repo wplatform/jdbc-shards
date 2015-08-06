@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ddal-config PUBLIC "-//suning.com//DTD ddal-config//EN" "http://suning.com/dtd/ddal-config.dtd">
+<!DOCTYPE ddal-config PUBLIC "-//wplatform.com//DTD ddal-config//EN" "http://wplatform.com/dtd/ddal-config.dtd">
 <ddal-config>
 
-	<schema name="PUBLIC" metadata="shard2">
+	<schema name="PUBLIC" shard="shard2">
 	
 		<tableGroup router="customer_group" validation="false">
-			<table name="customers" metadata="shard1.customers_001"/>
-			<table name="address" metadata="shard1.address_001"/>
+			<table name="customers"/>
+			<table name="address"/>
 		</tableGroup>	
 
 		<tableGroup router="order_group" validation="false">
-			<table name="orders" metadata="shard1.orders_01"/>
-			<table name="order_items"  metadata="shard1.order_items_01"/>
-			<table name="order_status" metadata="shard1.order_status_01"/>
+			<table name="orders"/>
+			<table name="order_items"/>
+			<table name="order_status"/>
 		</tableGroup>
 		
 		<table name="product" validation="false"/>

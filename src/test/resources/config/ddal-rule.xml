@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ddal-rule PUBLIC "-//suning.com//DTD ddal-rule//EN" "http://suning.com/dtd/ddal-rule.dtd">
+<!DOCTYPE ddal-rule PUBLIC "-//wplatform.com//DTD ddal-rule//EN" "http://wplatform.com/dtd/ddal-rule.dtd">
 <ddal-rule>
 
 	<tableRouter id="order_group">
