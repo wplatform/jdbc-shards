@@ -388,6 +388,7 @@ public class Database {
                 }
             }
         }
+        dsRepository.close();
         trace.info("Database {0} closed", databaseName);
         traceSystem.close();
     }

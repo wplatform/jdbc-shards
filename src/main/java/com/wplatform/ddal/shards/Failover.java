@@ -23,8 +23,8 @@ package com.wplatform.ddal.shards;
  */
 public interface Failover {
 
-    void doHandleAbnormal(SmartDataSource source);
+    void doHandleAbnormal(DataSourceMarker source);
 
-    void doHandleWakeup(SmartDataSource source);
+    void doHandleWakeup(DataSourceMarker source);
 
 }

@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.wplatform.ddal.value.CaseInsensitiveMap;
 
@@ -248,6 +250,43 @@ public class New {
      */
     public static <T> CopyOnWriteArraySet<T> copyOnWriteArraySet() {
         return new CopyOnWriteArraySet<T>();
+    }
+    
+    
+    /**
+     * Create a new CopyOnWriteArraySet.
+     *
+     * @param <T> the type
+     * @return the object
+     */
+    public static ThreadFactory customThreadFactory(String namePrefix) {
+        return new CustomThreadFactory(namePrefix);
+    }
+    
+    
+    
+    private static final class CustomThreadFactory implements ThreadFactory {
+        private final String namePrefix;
+        private final ThreadGroup group;
+        private final AtomicInteger index = new AtomicInteger(1);
+
+        private CustomThreadFactory(String namePrefix) {
+            SecurityManager sm = System.getSecurityManager();
+            group = (sm != null) ? sm.getThreadGroup()
+                    : Thread.currentThread().getThreadGroup();
+            this.namePrefix = namePrefix;
+        }
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r, namePrefix + "-"
+                    + index.getAndIncrement());
+            t.setDaemon(true);
+            if (t.getPriority() != Thread.NORM_PRIORITY) {
+                t.setPriority(Thread.NORM_PRIORITY);
+            }
+            return t;
+        }
     }
 
 }

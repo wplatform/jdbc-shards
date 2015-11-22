@@ -191,7 +191,7 @@ public class TableMate extends Table {
         }
     }
     
-    public boolean canAccess() {
+    public boolean isMock() {
         return initException != null;
     }
 

@@ -29,7 +29,7 @@ validation (true|false) #IMPLIED
 
 
 <!ELEMENT cluster (shard+)>
-<!ELEMENT shard (standalone|(master*,slave*)+)>
+<!ELEMENT shard (member+)>
 <!ATTLIST shard
 name CDATA #REQUIRED
 >
@@ -79,20 +79,10 @@ name CDATA #REQUIRED
 value CDATA #REQUIRED
 >
 
-<!ELEMENT standalone (#PCDATA)>
-<!ATTLIST standalone
-ref CDATA #REQUIRED
->
 
-<!ELEMENT master (#PCDATA)>
-<!ATTLIST master
+<!ELEMENT member (#PCDATA)>
+<!ATTLIST member
 ref CDATA #REQUIRED
 wWeight CDATA #IMPLIED
-rWeight CDATA #IMPLIED
->
-
-<!ELEMENT slave (#PCDATA)>
-<!ATTLIST slave
-ref CDATA #REQUIRED
 rWeight CDATA #IMPLIED
 >

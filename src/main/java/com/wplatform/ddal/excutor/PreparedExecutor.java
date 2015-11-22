@@ -18,14 +18,13 @@
 
 package com.wplatform.ddal.excutor;
 
-import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.ResultInterface;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public interface PreparedExecutor<T extends Prepared> {
+public interface PreparedExecutor {
     /**
      * Execute the query.
      *

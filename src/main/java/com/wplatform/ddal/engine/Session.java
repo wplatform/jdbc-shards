@@ -17,7 +17,14 @@ package com.wplatform.ddal.engine;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.sql.DataSource;
 
 import com.wplatform.ddal.command.Command;
 import com.wplatform.ddal.command.CommandInterface;
@@ -35,8 +42,7 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.message.TraceSystem;
 import com.wplatform.ddal.result.LocalResult;
-import com.wplatform.ddal.shards.DataSourceDispatcher;
-import com.wplatform.ddal.shards.DataSourceMarker;
+import com.wplatform.ddal.shards.DataSourceRepository;
 import com.wplatform.ddal.shards.Optional;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.New;
@@ -110,7 +116,7 @@ public class Session implements SessionInterface {
     private ArrayList<Value> temporaryLobs;
     private boolean readOnly;
     private int transactionIsolation;
-    private volatile DataSourceDispatcher dsDispatcher;
+    private final DataSourceRepository dsRepository;
 
     public Session(Database database, User user, int id) {
         this.database = database;
@@ -123,7 +129,7 @@ public class Session implements SessionInterface {
         this.lockTimeout = setting == null ?
                 Constants.INITIAL_LOCK_TIMEOUT : setting.getIntValue();
         this.currentSchemaName = Constants.SCHEMA_MAIN;
-        this.dsDispatcher = database.getDataSourceRepository();
+        this.dsRepository = database.getDataSourceRepository();
     }
 
     public boolean setCommitOrRollbackDisabled(boolean x) {
@@ -1052,14 +1058,13 @@ public class Session implements SessionInterface {
 
 
     public Connection applyConnection(String shardName) throws SQLException {
-        Optional optional = Optional.create();
+        Optional optional = Optional.build();
         optional.shardName = shardName;
         optional.readOnly = false;
-
         Connection result = connectionHolder.get(shardName);
         if (result == null) {
-            DataSourceMarker dsMarker = dsDispatcher.doDispatch(optional);
-            result = dsMarker.doGetConnection();
+            DataSource ds = dsRepository.getDataSourceByShardName(shardName);
+            result = ds.getConnection();
             if (result.getAutoCommit() != getAutoCommit()) {
                 result.setAutoCommit(getAutoCommit());
             }
@@ -1068,18 +1073,6 @@ public class Session implements SessionInterface {
         return result;
     }
 
-    public Connection applyConnection(Optional optional) throws SQLException {
-        Connection result = connectionHolder.get(optional.shardName);
-        if (result == null) {
-            DataSourceMarker dsMarker = dsDispatcher.doDispatch(optional);
-            result = dsMarker.doGetConnection();
-            if (result.getAutoCommit() != getAutoCommit()) {
-                result.setAutoCommit(getAutoCommit());
-            }
-            connectionHolder.put(optional.shardName, result);
-        }
-        return result;
-    }
 
     /**
      * Represents a savepoint (a position in a transaction to where one can roll

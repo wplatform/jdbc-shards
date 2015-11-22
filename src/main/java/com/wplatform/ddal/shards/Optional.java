@@ -22,7 +22,7 @@ package com.wplatform.ddal.shards;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class Optional {
-
+    
     public static final int DEFAULT_TRYTIMES = 3;
 
     public int retry = DEFAULT_TRYTIMES;
@@ -31,9 +31,48 @@ public class Optional {
     public boolean readOnly;
 
 
-    public static Optional create() {
+    public static Optional build() {
         Optional optional = new Optional();
         return optional;
     }
+
+
+    /**
+     * @param dbid the dbid to set
+     */
+    public Optional dbid(String dbid) {
+        this.dbid = dbid;
+        return this;
+    }
+
+
+    /**
+     * @param shardName the shardName to set
+     */
+    public Optional shardName(String shardName) {
+        this.shardName = shardName;
+        return this;
+    }
+
+
+    /**
+     * @param readOnly the readOnly to set
+     */
+    public Optional readOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        return this;
+    }
+
+    /**
+     * @param retry the retry to set
+     */
+    public Optional retry(int retry) {
+        this.retry = retry;
+        return this;
+    }
+    
+    
+    
+    
 
 }

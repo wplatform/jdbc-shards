@@ -17,14 +17,17 @@ package com.wplatform.ddal.shards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 import com.wplatform.ddal.message.Trace;
+import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class SmartSupport {
+public class RoutingSupport {
 
     protected static final Set<String> SET_METHODS = new HashSet<String>();
     protected static final Set<String> EXECUTE_METHODS = new HashSet<String>();
@@ -59,7 +62,7 @@ public class SmartSupport {
     }
 
     protected final DataSourceRepository database;
-    protected final SmartDataSource dataSource;
+    protected final RoutingDataSource dataSource;
     protected final Trace trace;
     private Map<Object, Object> columnMap = new HashMap<Object, Object>();
     private List<Object> columnNames = new ArrayList<Object>();
@@ -70,8 +73,9 @@ public class SmartSupport {
      * @param dataSource
      * @param connection
      * @param trace
+     * @throws SQLException
      */
-    protected SmartSupport(DataSourceRepository database, SmartDataSource dataSource) {
+    protected RoutingSupport(DataSourceRepository database, RoutingDataSource dataSource) {
         this.database = database;
         this.dataSource = dataSource;
         this.trace = database.getTrace();
@@ -120,7 +124,6 @@ public class SmartSupport {
     }
 
     protected void handleException(Throwable t) throws Throwable {
-        database.handleException(dataSource, t);
     }
 
     protected String removeBreakingWhitespace(String original) {
@@ -141,6 +144,28 @@ public class SmartSupport {
         if (trace.isDebugEnabled()) {
             trace.debug(dataSource.toString() + text);
         }
+    }
+    
+    
+    protected Connection applyConnection(boolean readOnly) throws SQLException {
+        return applyConnection(readOnly, null, null);
+    }
+    
+    protected Connection applyConnection(boolean readOnly,String username, String password) throws SQLException {
+        Optional optional = Optional.build().readOnly(readOnly);
+        List<DataSourceMarker> tryList = New.arrayList();
+        DataSourceMarker selected = dataSource.doRoute(optional);
+        while(selected != null) {
+            try {
+                tryList.add(selected);
+                return (username != null) ? database.getConnection(selected, username, password)
+                        : database.getConnection(selected); 
+            }catch(SQLException e) {
+                selected = dataSource.doRoute(optional, tryList);
+            }
+        }
+        throw new SQLException("No avaliable datasource in shard " + dataSource);
+
     }
 
 }

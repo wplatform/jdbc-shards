@@ -19,14 +19,15 @@
 package com.wplatform.ddal.excutor;
 
 import java.sql.SQLException;
-import java.util.concurrent.ExecutorService;
+import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
+import com.wplatform.ddal.dbobject.schema.Schema;
+import com.wplatform.ddal.dbobject.table.Table;
+import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.RoutingHandler;
-import com.wplatform.ddal.dispatch.rule.GroupTableNode;
-import com.wplatform.ddal.dispatch.rule.RoutingResult;
-import com.wplatform.ddal.dispatch.rule.TableNode;
+import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
@@ -35,12 +36,16 @@ import com.wplatform.ddal.result.ResultInterface;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public abstract class CommonPreparedExecutor<T extends Prepared> implements PreparedExecutor<T> {
+public abstract class CommonPreparedExecutor<T extends Prepared> implements PreparedExecutor {
 
     protected T prepared;
     protected Session session;
-    protected ExecutorService executorService;
+    protected Database database;
+    protected ThreadPoolExecutor sqlExecutor;
     protected RoutingHandler routingHandler;
+    
+    private Map<String, JdbcOperations> jdbcOperationMapping;
+
 
     /**
      * @param session
@@ -50,13 +55,15 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         super();
         this.prepared = prepared;
         this.session = session;
+        this.database = session.getDatabase();
+        database.getDataSourceRepository()
     }
 
     /**
      * Wrap a SQL exception that occurred while accessing a linked table.
      *
      * @param sql the SQL statement
-     * @param ex  the exception from the remote database
+     * @param ex the exception from the remote database
      * @return the wrapped exception
      */
     protected static DbException wrapException(String sql, Exception ex) {
@@ -64,57 +71,63 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
     }
 
+    /**
+     * Execute the query.
+     *
+     * @param maxrows the maximum number of rows to return
+     * @return the result set
+     * @throws DbException if it is not a query
+     */
     @Override
     public ResultInterface executeQuery(int maxrows) {
-        switch (prepared.getType()) {
-            case CommandInterface.SELECT:
-            case CommandInterface.CALL:
-                RoutingResult rr = doRoute();
-                TableNode[] tableNodes = rr.group();
-                for (TableNode tableNode : tableNodes) {
-                    if (tableNode instanceof GroupTableNode) {
-                        doTranslate((GroupTableNode) tableNode);
-                    } else {
-                        doTranslate(tableNode);
-                    }
-                }
-
-                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-            default:
-                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-        }
-
+        throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
     }
 
+    /**
+     * Execute the statement.
+     *
+     * @return the update count
+     * @throws DbException if it is a query
+     */
     @Override
     public int executeUpdate() {
-        switch (prepared.getType()) {
-            case CommandInterface.SELECT:
-            case CommandInterface.CALL:
-                throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-            default:
-                RoutingResult rr = doRoute();
-                TableNode[] tableNodes = rr.group();
-                for (TableNode tableNode : tableNodes) {
-                    if (tableNode instanceof GroupTableNode) {
-                        doTranslate((GroupTableNode) tableNode);
-                    } else {
-                        doTranslate(tableNode);
-                    }
-                }
-                return 0;
-        }
+        throw DbException.get(ErrorCode.METHOD_NOT_ALLOWED_FOR_QUERY);
     }
 
+    /**
+     * Check if this object is a query.
+     *
+     * @return true if it is
+     */
+    public boolean isQuery() {
+        return false;
+    }
+    
     protected T getPrepared() {
         return this.prepared;
     }
 
-    protected abstract RoutingResult doRoute();
-
-    protected abstract String doTranslate(TableNode tableNode);
-
-    protected abstract String doTranslate(GroupTableNode tableNode);
-
+    /**
+     * @param tableName
+     */
+    public TableMate getTableMate(String tableName) {
+        Table table = database.getSchema(session.getCurrentSchemaName()).findTableOrView(session, tableName);
+        if (table == null) {
+            String[] schemaNames = session.getSchemaSearchPath();
+            if (schemaNames != null) {
+                for (String name : schemaNames) {
+                    Schema s = database.getSchema(name);
+                    table = s.findTableOrView(session, tableName);
+                    if (table != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if(table != null && table instanceof TableMate) {
+            return (TableMate)table;
+        }
+        throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
+    }
 
 }

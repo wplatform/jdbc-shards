@@ -105,24 +105,21 @@ public class XmlConfigParser {
                         "Error parsing ddal-config XML . Cause: group's name required.");
             }
             shardConfig.setName(name);
-            List<XNode> children = xNode.evalNodes("standalone|master|slave");
+            List<XNode> children = xNode.evalNodes("member");
             List<ShardItem> shardItems = New.arrayList(children.size());
             for (XNode child : children) {
                 ShardItem shardItem = new ShardItem();
-                String nodename = child.getName();
-                if ("standalone".equals(nodename) || "master".equals(nodename)) {
-                    shardItem.setReadOnly(false);
-                } else if ("slave".equals(nodename)) {
-                    shardItem.setReadOnly(true);
-                }
                 String ref = child.getStringAttribute("ref");
                 int wWeight = child.getIntAttribute("wWeight", 1);
                 int rWeight = child.getIntAttribute("rWeight", 1);
                 if (StringUtils.isNullOrEmpty(ref)) {
-                    throw new ParsingException(nodename + "'s ref is required.");
+                    throw new ParsingException("member 's ref is required.");
                 }
-                if (wWeight < 0 || rWeight < 0) {
-                    throw new ParsingException(nodename + "'s weight not be less than zero.");
+                if (wWeight <= 0 && rWeight <= 0) {
+                    throw new ParsingException("member 's weight not be less than zero.");
+                }
+                if(wWeight <= 0) {
+                    shardItem.setReadOnly(true);
                 }
                 shardItem.setRef(ref);
                 shardItem.setwWeight(wWeight);

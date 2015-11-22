@@ -51,7 +51,6 @@ public class JdbcDataSource implements DataSource {
     private boolean monitorExecution = true;
     private String validationQuery;
     private int validationQueryTimeout = -1;
-    private String exceptionSorterClass;
 
     private int maxMemoryRows = -1;
     private int maxOperationMemory = -1;
@@ -325,20 +324,6 @@ public class JdbcDataSource implements DataSource {
     }
 
     /**
-     * @return the exceptionSorterClass
-     */
-    public String getExceptionSorterClass() {
-        return exceptionSorterClass;
-    }
-
-    /**
-     * @param exceptionSorterClass the exceptionSorterClass to set
-     */
-    public void setExceptionSorterClass(String exceptionSorterClass) {
-        this.exceptionSorterClass = exceptionSorterClass;
-    }
-
-    /**
      * @return the stdoutLevel
      */
     public String getStdoutLevel() {
@@ -490,7 +475,6 @@ public class JdbcDataSource implements DataSource {
             configuration.setProperty(SetTypes.TRACE_LEVEL_FILE,
                     TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
         }
-        configuration.setProperty(SetTypes.EXCEPTION_SORTER_CLASS, this.exceptionSorterClass);
         if (this.dataSourceProvider != null) {
             configuration.setDataSourceProvider(this.dataSourceProvider);
         }

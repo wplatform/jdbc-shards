@@ -48,30 +48,4 @@ public abstract class SchemaCommand extends DefineCommand {
     protected Schema getSchema() {
         return schema;
     }
-
-
-    /**
-     * @param tableName
-     */
-    public TableMate finalTableMate(String tableName) {
-        Table tableOrView = getSchema().findTableOrView(session, tableName);
-        TableMate tableMate = null;
-        if (tableOrView != null && tableOrView instanceof TableMate) {
-            tableMate = (TableMate) tableOrView;
-        }
-        return tableMate;
-    }
-
-
-    /**
-     * @param tableOrView
-     */
-    public TableMate getTableMate(String tableName) {
-        Table tableOrView = getSchema().getTableOrView(session, tableName);
-        if (tableOrView != null && tableOrView instanceof TableMate) {
-            return (TableMate) tableOrView;
-        }
-        throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
-    }
-
 }
