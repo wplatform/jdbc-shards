@@ -15,10 +15,10 @@
  */
 package com.wplatform.ddal.excutor;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.List;
 
-import com.wplatform.ddal.command.expression.Parameter;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -26,14 +26,14 @@ import com.wplatform.ddal.command.expression.Parameter;
  */
 public interface JdbcOperations {
     
-    public int executeUpdate(Connection conn, String sql);
-    public int executeUpdate(Connection conn, String sql, Parameter param);
+    public int executeUpdate(String sql);
+    public int executeUpdate(String sql, List<Value> params);
     
-    public ResultSet executeQuery(Connection conn, String sql);
-    public ResultSet executeQuery(Connection conn, String sql, Parameter param);
+    public ResultSet executeQuery(String sql);
+    public ResultSet executeQuery(String sql, List<Value> params);
     
-    public int[] batchUpdate(Connection conn, String[] sql);
-    public int[] batchUpdate(Connection conn, String sql, Parameter[] params);
+    public int[] batchUpdate(String[] sql);
+    public int[] batchUpdate(String sql, List<Value>[] array);
     
     
 }

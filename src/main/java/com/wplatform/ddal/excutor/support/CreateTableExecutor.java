@@ -57,14 +57,11 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
         super(session, prepared);
     }
 
-
-
-
     @Override
     public int executeUpdate() {
         String tableName = prepared.getTableName();
         TableMate tableMate = getTableMate(tableName);
-        if(tableMate == null) {
+        if (tableMate == null) {
             throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
         }
         if (!tableMate.isMock()) {
@@ -82,11 +79,12 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 throw DbException.get(ErrorCode.COLUMN_COUNT_DOES_NOT_MATCH);
             }
         }
-        
+
         ArrayList<Sequence> sequences = New.arrayList();
         for (Column c : tableMate.getColumns()) {
             if (c.isAutoIncrement()) {
-                c.convertAutoIncrementToSequence(session, database.getSchema(session.getCurrentSchemaName()), tableMate.getId(), prepared.isTemporary());
+                c.convertAutoIncrementToSequence(session, database.getSchema(session.getCurrentSchemaName()),
+                        tableMate.getId(), prepared.isTemporary());
             }
             Sequence seq = c.getSequence();
             if (seq != null) {
@@ -115,13 +113,12 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 insert.update();
             }
         } catch (DbException e) {
-            //db.removeSchemaObject(session, table);
+            // db.removeSchemaObject(session, table);
             throw e;
         }
-        tableMate.loadMataData(session);    
+        tableMate.loadMataData(session);
     }
-    
-    
+
     private void generateColumnsFromQuery() {
         int columnCount = prepared.getQuery().getColumnCount();
         ArrayList<Expression> expressions = prepared.getQuery().getExpressions();
@@ -132,14 +129,13 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
             long precision = expr.getPrecision();
             int displaySize = expr.getDisplaySize();
             DataType dt = DataType.getDataType(type);
-            if (precision > 0
-                    && (dt.defaultPrecision == 0 || (dt.defaultPrecision > precision && dt.defaultPrecision < Byte.MAX_VALUE))) {
+            if (precision > 0 && (dt.defaultPrecision == 0
+                    || (dt.defaultPrecision > precision && dt.defaultPrecision < Byte.MAX_VALUE))) {
                 // dont' set precision to MAX_VALUE if this is the default
                 precision = dt.defaultPrecision;
             }
             int scale = expr.getScale();
-            if (scale > 0
-                    && (dt.defaultScale == 0 || (dt.defaultScale > scale && dt.defaultScale < precision))) {
+            if (scale > 0 && (dt.defaultScale == 0 || (dt.defaultScale > scale && dt.defaultScale < precision))) {
                 scale = dt.defaultScale;
             }
             if (scale > precision) {
@@ -149,7 +145,6 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
             prepared.addColumn(col);
         }
     }
-
 
     private String doTranslate(TableNode tableNode) {
         StatementBuilder buff = new StatementBuilder("CREATE ");
@@ -173,7 +168,7 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
         if (prepared.getTableEngine() != null) {
             buff.append("\nENGINE ");
             buff.append(StringUtils.quoteIdentifier(prepared.getTableEngine()));
-        
+
         }
         if (!prepared.getTableEngineParams().isEmpty()) {
             buff.append("\nWITH ");
@@ -184,8 +179,7 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
             }
         }
         return buff.toString();
-    
-    }
 
+    }
 
 }

@@ -16,7 +16,7 @@
 // Created on 2015年4月13日
 // $Id$
 
-package com.wplatform.ddal.shards;
+package com.wplatform.ddal.excutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

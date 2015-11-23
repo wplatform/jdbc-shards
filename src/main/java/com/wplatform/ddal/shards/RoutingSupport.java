@@ -152,16 +152,15 @@ public class RoutingSupport {
     }
     
     protected Connection applyConnection(boolean readOnly,String username, String password) throws SQLException {
-        Optional optional = Optional.build().readOnly(readOnly);
         List<DataSourceMarker> tryList = New.arrayList();
-        DataSourceMarker selected = dataSource.doRoute(optional);
+        DataSourceMarker selected = dataSource.doRoute(readOnly);
         while(selected != null) {
             try {
                 tryList.add(selected);
                 return (username != null) ? database.getConnection(selected, username, password)
                         : database.getConnection(selected); 
             }catch(SQLException e) {
-                selected = dataSource.doRoute(optional, tryList);
+                selected = dataSource.doRoute(readOnly, tryList);
             }
         }
         throw new SQLException("No avaliable datasource in shard " + dataSource);

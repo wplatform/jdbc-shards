@@ -198,12 +198,12 @@ public class JdbcUtils {
     /**
      * Close a statement without throwing an exception.
      *
-     * @param stat the statement or null
+     * @param stmt the statement or null
      */
-    public static void closeSilently(Statement stat) {
-        if (stat != null) {
+    public static void closeSilently(Statement stmt) {
+        if (stmt != null) {
             try {
-                stat.close();
+                stmt.close();
             } catch (SQLException e) {
                 // ignore
             }

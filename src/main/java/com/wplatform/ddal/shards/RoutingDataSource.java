@@ -100,8 +100,7 @@ public class RoutingDataSource implements DataSource, Failover {
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        this.setLoginTimeout(seconds);
-
+    	this.seconds = seconds;
     }
 
     @Override
@@ -150,9 +149,9 @@ public class RoutingDataSource implements DataSource, Failover {
         return RoutingConnection.newInstance(database, this, username, password);
     }
     
-    public DataSourceMarker doRoute(Optional option) {
+    public DataSourceMarker doRoute(boolean readOnly) {
         DataSourceMarker next;
-        if (!option.readOnly) {
+        if (!readOnly) {
             next = writableLoadBalance.next();
         } else {
             next = readableLoadBalance.next();
@@ -160,12 +159,12 @@ public class RoutingDataSource implements DataSource, Failover {
         return next;
     }
 
-    public DataSourceMarker doRoute(Optional option, List<DataSourceMarker> exclusive) {
+    public DataSourceMarker doRoute(boolean readOnly, List<DataSourceMarker> exclusive) {
         for (DataSourceMarker marker : menbers) {
             if (exclusive.contains(marker)) {
                 continue;
             }
-            if (!option.readOnly && marker.isReadOnly()) {
+            if (!readOnly && marker.isReadOnly()) {
                 continue;
             }
             return marker;
