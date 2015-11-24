@@ -18,8 +18,9 @@
 
 package com.wplatform.ddal.excutor;
 
-import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.wplatform.ddal.command.Prepared;
@@ -29,9 +30,11 @@ import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.RoutingHandler;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.excutor.support.GeneralJdbcOperations;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.ResultInterface;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -43,9 +46,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected Database database;
     protected ThreadPoolExecutor sqlExecutor;
     protected RoutingHandler routingHandler;
-    
-    private Map<String, JdbcOperations> jdbcOperationMapping;
-
+    protected int maxrows;
 
     /**
      * @param session
@@ -56,19 +57,11 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         this.prepared = prepared;
         this.session = session;
         this.database = session.getDatabase();
-        database.getDataSourceRepository()
     }
 
-    /**
-     * Wrap a SQL exception that occurred while accessing a linked table.
-     *
-     * @param sql the SQL statement
-     * @param ex the exception from the remote database
-     * @return the wrapped exception
-     */
-    protected static DbException wrapException(String sql, Exception ex) {
-        SQLException e = DbException.toSQLException(ex);
-        return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
+    public JdbcOperations getJdbcOperations(String shardName) {
+        ConcurrentMap<String, JdbcOperations> map = session.getJdbcOperationsMap();
+        return map.putIfAbsent(shardName, new GeneralJdbcOperations(shardName, session));
     }
 
     /**
@@ -102,9 +95,17 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     public boolean isQuery() {
         return false;
     }
-    
+
     protected T getPrepared() {
         return this.prepared;
+    }
+
+    public int getMaxrows() {
+        return maxrows;
+    }
+
+    public void setMaxrows(int maxrows) {
+        this.maxrows = maxrows;
     }
 
     /**
@@ -124,10 +125,71 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
                 }
             }
         }
-        if(table != null && table instanceof TableMate) {
-            return (TableMate)table;
+        if (table != null && table instanceof TableMate) {
+            return (TableMate) table;
         }
         throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
+    }    
+    
+    protected Worker<UpdateResult> createUpdateWorker(String shardName, String sql, List<Value> params) {
+        return new UpdateWorker(shardName, sql, params);
+    }
+    
+    protected Worker<QueryResult> createQueryWorker(String shardName, String sql, List<Value> params) {
+        return new QueryWorker(shardName, sql, params);
+    }
+    
+    protected Worker<UpdateResult> createBatchUpdateWorker(String shardName, String sql, List<Value>[] array) {
+        return new BatchUpdateWorker(shardName, sql, array);
+    }
+    
+    protected static abstract class Worker<T> implements Callable<T> {
+        protected final String shardName;
+        protected final String sql;
+        protected final List<Value> params;
+        public Worker(String shardName, String sql, List<Value> params) {
+            super();
+            this.shardName = shardName;
+            this.sql = sql;
+            this.params = params;
+        }
+        public abstract T doWork();
+        public T call() throws Exception {
+            return doWork();
+        }
+    }
+
+    protected class UpdateWorker extends Worker<UpdateResult> {
+        public UpdateWorker(String shardName, String sql, List<Value> params) {
+            super(shardName, sql, params);
+        }
+        @Override
+        public UpdateResult doWork() {
+            return getJdbcOperations(shardName).executeUpdate(sql, params);
+        }
+    }
+
+    protected class QueryWorker extends Worker<QueryResult> {
+        public QueryWorker(String shardName, String sql, List<Value> params) {
+            super(shardName, sql, params);
+        }
+        @Override
+        public QueryResult doWork() {
+            int maxRows = maxrows > 0 ? maxrows:database.getMaxMemoryRows();
+            return getJdbcOperations(shardName).executeQuery(sql, params, maxRows);
+        }
+    }
+    
+    protected class BatchUpdateWorker extends Worker<UpdateResult> {
+        protected final List<Value>[] array;
+        public BatchUpdateWorker(String shardName, String sql, List<Value>[] array) {
+            super(shardName, sql, null);
+            this.array = array;
+        }
+        @Override
+        public UpdateResult doWork() {
+            return getJdbcOperations(shardName).batchUpdate(sql, array);
+        }
     }
 
 }

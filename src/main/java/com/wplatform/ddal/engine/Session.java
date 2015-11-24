@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.sql.DataSource;
 
@@ -36,6 +37,7 @@ import com.wplatform.ddal.dbobject.User;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
+import com.wplatform.ddal.excutor.JdbcOperations;
 import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.DbException;
@@ -116,7 +118,8 @@ public class Session implements SessionInterface {
     private ArrayList<Value> temporaryLobs;
     private boolean readOnly;
     private int transactionIsolation;
-    private final DataSourceRepository dsRepository;
+    private final ConcurrentMap<String, JdbcOperations> jdbcOperationsMap;
+
 
     public Session(Database database, User user, int id) {
         this.database = database;
@@ -124,12 +127,11 @@ public class Session implements SessionInterface {
         this.queryCacheSize = database.getSettings().queryCacheSize;
         this.user = user;
         this.id = id;
-        Setting setting = database.findSetting(
-                SetTypes.getTypeName(SetTypes.DEFAULT_LOCK_TIMEOUT));
-        this.lockTimeout = setting == null ?
-                Constants.INITIAL_LOCK_TIMEOUT : setting.getIntValue();
+        Setting setting = database.findSetting(SetTypes.getTypeName(SetTypes.DEFAULT_LOCK_TIMEOUT));
+        this.lockTimeout = setting == null ? Constants.INITIAL_LOCK_TIMEOUT : setting.getIntValue();
         this.currentSchemaName = Constants.SCHEMA_MAIN;
-        this.dsRepository = database.getDataSourceRepository();
+        int initialCapacity = getDataSourceRepository().shardCount();
+        this.jdbcOperationsMap = New.concurrentHashMap(initialCapacity, .75f);
     }
 
     public boolean setCommitOrRollbackDisabled(boolean x) {
@@ -147,7 +149,7 @@ public class Session implements SessionInterface {
     /**
      * Set the value of the given variable for this session.
      *
-     * @param name  the name of the variable (may not be null)
+     * @param name the name of the variable (may not be null)
      * @param value the new value (may not be null)
      */
     public void setVariable(String name, Value value) {
@@ -225,8 +227,7 @@ public class Session implements SessionInterface {
             localTempTables = database.newStringMap();
         }
         if (localTempTables.get(table.getName()) != null) {
-            throw DbException.get(ErrorCode.TABLE_OR_VIEW_ALREADY_EXISTS_1,
-                    table.getSQL());
+            throw DbException.get(ErrorCode.TABLE_OR_VIEW_ALREADY_EXISTS_1, table.getSQL());
         }
         modificationId++;
         localTempTables.put(table.getName(), table);
@@ -277,8 +278,7 @@ public class Session implements SessionInterface {
             localTempTableIndexes = database.newStringMap();
         }
         if (localTempTableIndexes.get(index.getName()) != null) {
-            throw DbException.get(ErrorCode.INDEX_ALREADY_EXISTS_1,
-                    index.getSQL());
+            throw DbException.get(ErrorCode.INDEX_ALREADY_EXISTS_1, index.getSQL());
         }
         localTempTableIndexes.put(index.getName(), index);
     }
@@ -320,8 +320,7 @@ public class Session implements SessionInterface {
     }
 
     @Override
-    public synchronized CommandInterface prepareCommand(String sql,
-                                                        int fetchSize) {
+    public synchronized CommandInterface prepareCommand(String sql, int fetchSize) {
         return prepareLocal(sql);
     }
 
@@ -339,7 +338,7 @@ public class Session implements SessionInterface {
     /**
      * Parse and prepare the given SQL statement.
      *
-     * @param sql           the SQL statement
+     * @param sql the SQL statement
      * @param rightsChecked true if the rights have already been checked
      * @return the prepared statement
      */
@@ -350,29 +349,29 @@ public class Session implements SessionInterface {
     }
 
     /**
-     * Parse and prepare the given SQL statement.
-     * This method also checks if the connection has been closed.
+     * Parse and prepare the given SQL statement. This method also checks if the
+     * connection has been closed.
      *
      * @param sql the SQL statement
      * @return the prepared statement
      */
     public Command prepareLocal(String sql) {
         if (closed) {
-            throw DbException.get(ErrorCode.CONNECTION_BROKEN_1,
-                    "session closed");
+            throw DbException.get(ErrorCode.CONNECTION_BROKEN_1, "session closed");
         }
         Command command;
         if (queryCacheSize > 0) {
             if (queryCache == null) {
                 queryCache = SmallLRUCache.newInstance(queryCacheSize);
-                //modificationMetaID = database.getModificationMetaId();
+                // modificationMetaID = database.getModificationMetaId();
             } else {
-                //ignore table structure modification
-                /*long newModificationMetaID = database.getModificationMetaId();
-                if (newModificationMetaID != modificationMetaID) {
-                    queryCache.clear();
-                    modificationMetaID = newModificationMetaID;
-                }*/
+                // ignore table structure modification
+                /*
+                 * long newModificationMetaID =
+                 * database.getModificationMetaId(); if (newModificationMetaID
+                 * != modificationMetaID) { queryCache.clear();
+                 * modificationMetaID = newModificationMetaID; }
+                 */
                 command = queryCache.get(sql);
                 if (command != null && command.canReuse()) {
                     command.reuse();
@@ -453,13 +452,12 @@ public class Session implements SessionInterface {
         if (commitExceptions.isEmpty()) {
             trace.debug("commit multiple group transaction succeed. commit track list:{0}", buf);
         } else {
-            trace.error(commitExceptions.get(0), "fail to commit multiple group transaction. commit track list:{0}", buf);
+            trace.error(commitExceptions.get(0), "fail to commit multiple group transaction. commit track list:{0}",
+                    buf);
             DbException.convert(commitExceptions.get(0));
         }
 
-
     }
-
 
     private void endTransaction() {
         if (unlinkLobMap != null && unlinkLobMap.size() > 0) {
@@ -498,7 +496,7 @@ public class Session implements SessionInterface {
     /**
      * Partially roll back the current transaction.
      *
-     * @param savepoint  the savepoint to which should be rolled back
+     * @param savepoint the savepoint to which should be rolled back
      * @param trimToSize if the list should be trimmed
      */
     public void rollbackTo(Savepoint savepoint, boolean trimToSize) {
@@ -555,7 +553,6 @@ public class Session implements SessionInterface {
             }
         }
     }
-
 
     private void cleanTempTables(boolean closeSession) {
         if (localTempTables != null && localTempTables.size() > 0) {
@@ -617,7 +614,7 @@ public class Session implements SessionInterface {
      * committed.
      *
      * @param logId the transaction log id
-     * @param pos   the position of the log entry in the transaction log
+     * @param pos the position of the log entry in the transaction log
      */
     public void addLogPos(int logId, int pos) {
         if (firstUncommittedLog == Session.LOG_WRITTEN) {
@@ -690,11 +687,10 @@ public class Session implements SessionInterface {
      * Commit or roll back the given transaction.
      *
      * @param transactionName the name of the transaction
-     * @param commit          true for commit, false for rollback
+     * @param commit true for commit, false for rollback
      */
     public void setPreparedTransaction(String transactionName, boolean commit) {
-        if (currentTransactionName != null &&
-                currentTransactionName.equals(transactionName)) {
+        if (currentTransactionName != null && currentTransactionName.equals(transactionName)) {
             if (commit) {
                 commit(false);
             } else {
@@ -862,8 +858,7 @@ public class Session implements SessionInterface {
     }
 
     /**
-     * Get the procedure with the given name, or null
-     * if none exists.
+     * Get the procedure with the given name, or null if none exists.
      *
      * @param name the procedure name
      * @return the procedure or null
@@ -912,7 +907,6 @@ public class Session implements SessionInterface {
         }
         return transactionStart;
     }
-
 
     /**
      * Remember the result set and close it as soon as the transaction is
@@ -963,7 +957,7 @@ public class Session implements SessionInterface {
      * Set the table this session is waiting for, and the thread that is
      * waiting.
      *
-     * @param waitForLock       the table
+     * @param waitForLock the table
      * @param waitForLockThread the current thread (the one that is waiting)
      */
     public void setWaitForLock(Table waitForLock, Thread waitForLockThread) {
@@ -995,10 +989,8 @@ public class Session implements SessionInterface {
         return newSession;
     }
 
-
     public Value getTransactionId() {
-        return ValueString.get(firstUncommittedLog + "-" + firstUncommittedPos +
-                "-" + id);
+        return ValueString.get(firstUncommittedLog + "-" + firstUncommittedPos + "-" + id);
     }
 
     /**
@@ -1034,14 +1026,14 @@ public class Session implements SessionInterface {
     @Override
     public void setTransactionIsolation(int level) {
         switch (level) {
-            case Connection.TRANSACTION_NONE:
-            case Connection.TRANSACTION_READ_UNCOMMITTED:
-            case Connection.TRANSACTION_READ_COMMITTED:
-            case Connection.TRANSACTION_REPEATABLE_READ:
-            case Connection.TRANSACTION_SERIALIZABLE:
-                break;
-            default:
-                throw DbException.getInvalidValueException("transaction isolation", level);
+        case Connection.TRANSACTION_NONE:
+        case Connection.TRANSACTION_READ_UNCOMMITTED:
+        case Connection.TRANSACTION_READ_COMMITTED:
+        case Connection.TRANSACTION_REPEATABLE_READ:
+        case Connection.TRANSACTION_SERIALIZABLE:
+            break;
+        default:
+            throw DbException.getInvalidValueException("transaction isolation", level);
         }
         transactionIsolation = level;
     }
@@ -1056,24 +1048,28 @@ public class Session implements SessionInterface {
         this.readOnly = readOnly;
     }
 
-
-    public Connection applyConnection(String shardName) throws SQLException {
-        Optional optional = Optional.build();
-        optional.shardName = shardName;
-        optional.readOnly = false;
-        Connection result = connectionHolder.get(shardName);
-        if (result == null) {
-            DataSource ds = dsRepository.getDataSourceByShardName(shardName);
-            result = ds.getConnection();
-            if (result.getAutoCommit() != getAutoCommit()) {
-                result.setAutoCommit(getAutoCommit());
-            }
-            connectionHolder.put(shardName, result);
+    public Connection applyConnection(DataSource ds, Optional optional) throws SQLException {
+        Connection conn = ds.getConnection();
+        if (conn.getAutoCommit() != getAutoCommit()) {
+            conn.setAutoCommit(getAutoCommit());
         }
-        return result;
+        if (conn.getTransactionIsolation() != getTransactionIsolation()) {
+            conn.setTransactionIsolation(getTransactionIsolation());
+        }
+        if (conn.isReadOnly() != isReadOnly()) {
+            conn.setReadOnly(isReadOnly());
+        }
+        return conn;
     }
 
+    public DataSourceRepository getDataSourceRepository() {
+        return database.getDataSourceRepository();
+    }
 
+    public ConcurrentMap<String, JdbcOperations> getJdbcOperationsMap() {
+        return jdbcOperationsMap;
+    }
+    
     /**
      * Represents a savepoint (a position in a transaction to where one can roll
      * back to).

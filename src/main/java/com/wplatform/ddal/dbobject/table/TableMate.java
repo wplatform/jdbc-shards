@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import com.wplatform.ddal.command.ddl.CreateTableData;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
@@ -37,8 +39,10 @@ import com.wplatform.ddal.dispatch.rule.RuleColumn;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
 import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.shards.DataSourceRepository;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.New;
@@ -296,7 +300,10 @@ public class TableMate extends Table {
                 String shardName = matadataNode.getShardName();
                 try {
                     trace.debug("Try to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);
-                    conn = session.applyConnection(shardName);
+                    DataSourceRepository dsRepository = session.getDataSourceRepository();
+                    DataSource dataSource = dsRepository.getDataSourceByShardName(shardName);
+                    Optional optional = Optional.build().shardName(shardName).readOnly(false);
+                    conn = session.applyConnection(dataSource, optional);
                     tryReadMetaData(conn, tableName);
                     trace.debug("Load the {0} metadata success.", getName());
                 } catch (Exception e) {

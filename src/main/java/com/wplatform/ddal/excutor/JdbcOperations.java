@@ -15,25 +15,18 @@
  */
 package com.wplatform.ddal.excutor;
 
-import java.sql.ResultSet;
 import java.util.List;
 
 import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public interface JdbcOperations {
+
+    public UpdateResult executeUpdate(String sql, List<Value> params);
+
+    public UpdateResult batchUpdate(String sql, List<Value>[] array);
     
-    public int executeUpdate(String sql);
-    public int executeUpdate(String sql, List<Value> params);
-    
-    public ResultSet executeQuery(String sql);
-    public ResultSet executeQuery(String sql, List<Value> params);
-    
-    public int[] batchUpdate(String[] sql);
-    public int[] batchUpdate(String sql, List<Value>[] array);
-    
-    
+    public QueryResult executeQuery(String sql, List<Value> params, int maxRows);
 }

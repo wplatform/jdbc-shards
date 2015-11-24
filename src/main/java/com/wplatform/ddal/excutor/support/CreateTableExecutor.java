@@ -19,30 +19,29 @@
 package com.wplatform.ddal.excutor.support;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Future;
 
 import com.wplatform.ddal.command.ddl.CreateTable;
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.dml.Insert;
 import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.command.expression.Expression;
-import com.wplatform.ddal.dbobject.DbObject;
+import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.dbobject.schema.Sequence;
 import com.wplatform.ddal.dbobject.table.Column;
-import com.wplatform.ddal.dbobject.table.IndexColumn;
-import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.dispatch.rule.RoutingResult;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.DbSettings;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
+import com.wplatform.ddal.excutor.UpdateResult;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.DataType;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -103,6 +102,26 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 command.setTransactional(prepared.isTransactional());
                 command.update();
             }
+            TableNode[] nodes = tableMate.getPartitionNode();
+            List<Worker<UpdateResult>> workers = New.arrayList(nodes.length);
+            for (TableNode node : nodes) {
+                String sql = doTranslate(node);
+                List<Parameter> items = getPrepared().getParameters();
+                List<Value> params = New.arrayList(items.size());
+                for (Parameter parameter : items) {
+                    params.add(parameter.getParamValue());
+                }
+                workers.add(createUpdateWorker(node.getShardName(), sql, params));
+            }
+            try {
+                List<Future<UpdateResult>> futures = sqlExecutor.invokeAll(workers);
+                for (Future<UpdateResult> future : futures) {
+                    
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
             if (query != null) {
                 Insert insert = new Insert(session);
                 insert.setSortedInsertMode(prepared.isSortedInsertMode());
@@ -113,10 +132,10 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 insert.update();
             }
         } catch (DbException e) {
-            // db.removeSchemaObject(session, table);
             throw e;
         }
         tableMate.loadMataData(session);
+        return 0;
     }
 
     private void generateColumnsFromQuery() {

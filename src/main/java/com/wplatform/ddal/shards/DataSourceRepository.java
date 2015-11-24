@@ -162,6 +162,11 @@ public class DataSourceRepository {
         return trace;
     }
     
+    public int shardCount() {
+        return this.shardMaping.size();
+    }
+
+    
     public void close() {
         try {
             this.scheduledExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);

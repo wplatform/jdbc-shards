@@ -3,8 +3,8 @@ package com.wplatform.ddal.excutor;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-import com.mysql.jdbc.Statement;
 import com.wplatform.ddal.util.JdbcUtils;
 
 public class UpdateResult {
@@ -32,5 +32,6 @@ public class UpdateResult {
         JdbcUtils.closeSilently(stmt);
         JdbcUtils.closeSilently(conn);
     }
+
 
 }
