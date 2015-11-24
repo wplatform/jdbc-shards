@@ -266,22 +266,28 @@ public class New {
     
     
     private static final class CustomThreadFactory implements ThreadFactory {
-        private final String namePrefix;
+        private final String prefix;
+        private final boolean daemon;
         private final ThreadGroup group;
         private final AtomicInteger index = new AtomicInteger(1);
 
-        private CustomThreadFactory(String namePrefix) {
+        public CustomThreadFactory(String prefix) {
+            this(prefix, false);
+        }
+        
+        private CustomThreadFactory(String prefix, boolean daemon) {
             SecurityManager sm = System.getSecurityManager();
             group = (sm != null) ? sm.getThreadGroup()
                     : Thread.currentThread().getThreadGroup();
-            this.namePrefix = namePrefix;
+            this.prefix = prefix;
+            this.daemon = daemon;
         }
 
         @Override
         public Thread newThread(Runnable r) {
-            Thread t = new Thread(group, r, namePrefix + "-"
-                    + index.getAndIncrement());
-            t.setDaemon(true);
+            String name = prefix + index.getAndIncrement();
+            Thread t = new Thread(group, r, name);
+            t.setDaemon(daemon);
             if (t.getPriority() != Thread.NORM_PRIORITY) {
                 t.setPriority(Thread.NORM_PRIORITY);
             }

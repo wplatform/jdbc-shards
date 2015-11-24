@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.sql.DataSource;
 
@@ -37,7 +36,6 @@ import com.wplatform.ddal.dbobject.User;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
-import com.wplatform.ddal.excutor.JdbcOperations;
 import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.DbException;
@@ -118,8 +116,6 @@ public class Session implements SessionInterface {
     private ArrayList<Value> temporaryLobs;
     private boolean readOnly;
     private int transactionIsolation;
-    private final ConcurrentMap<String, JdbcOperations> jdbcOperationsMap;
-
 
     public Session(Database database, User user, int id) {
         this.database = database;
@@ -130,8 +126,6 @@ public class Session implements SessionInterface {
         Setting setting = database.findSetting(SetTypes.getTypeName(SetTypes.DEFAULT_LOCK_TIMEOUT));
         this.lockTimeout = setting == null ? Constants.INITIAL_LOCK_TIMEOUT : setting.getIntValue();
         this.currentSchemaName = Constants.SCHEMA_MAIN;
-        int initialCapacity = getDataSourceRepository().shardCount();
-        this.jdbcOperationsMap = New.concurrentHashMap(initialCapacity, .75f);
     }
 
     public boolean setCommitOrRollbackDisabled(boolean x) {
@@ -1064,10 +1058,6 @@ public class Session implements SessionInterface {
 
     public DataSourceRepository getDataSourceRepository() {
         return database.getDataSourceRepository();
-    }
-
-    public ConcurrentMap<String, JdbcOperations> getJdbcOperationsMap() {
-        return jdbcOperationsMap;
     }
     
     /**

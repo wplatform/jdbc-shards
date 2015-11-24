@@ -21,6 +21,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
 
 import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.config.Configuration;
@@ -86,6 +91,8 @@ public class Database {
     private int maxOperationMemory = Constants.DEFAULT_MAX_OPERATION_MEMORY;
     private SourceCompiler compiler;
     private RoutingHandler routingHandler;
+    private ThreadPoolExecutor jdbcExecutor;
+
 
     public Database(Configuration configuration) {
         this.configuration = configuration;
@@ -387,6 +394,11 @@ public class Database {
                     trace.error(e, "disconnecting session #{0}", s.getId());
                 }
             }
+        }
+        try {
+            jdbcExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            trace.error(e, "jdbcExecutor awaitTermination");
         }
         dsRepository.close();
         trace.info("Database {0} closed", databaseName);
@@ -755,6 +767,30 @@ public class Database {
     public DataSourceRepository getDataSourceRepository() {
         return dsRepository;
     }
+
+    /**
+     * TODO configurable
+     * @return the jdbcExecutor
+     */
+    public ThreadPoolExecutor getJdbcExecutor() {
+        if (jdbcExecutor == null) {
+            int corePoolSize = Runtime.getRuntime().availableProcessors();
+            int maximumPoolSize = 200;//TODO configurable
+            int capacity = maximumPoolSize * 1;
+            int keepAliveTime = dbSettings.maxQueryTimeout;
+            if(keepAliveTime <= 0) {
+                keepAliveTime = 15 * 60000; //15 MINUTES
+            }
+            BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(capacity);
+            jdbcExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
+                    workQueue, New.customThreadFactory("jdbc-worker"), new AbortPolicy());
+            jdbcExecutor.allowCoreThreadTimeOut(true);
+        }
+        return jdbcExecutor;
+    }
+    
+    
+    
 
 
 }

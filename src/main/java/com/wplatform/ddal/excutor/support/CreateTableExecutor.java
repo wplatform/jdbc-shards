@@ -20,7 +20,6 @@ package com.wplatform.ddal.excutor.support;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import com.wplatform.ddal.command.ddl.CreateTable;
 import com.wplatform.ddal.command.ddl.DefineCommand;
@@ -34,7 +33,7 @@ import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
-import com.wplatform.ddal.excutor.UpdateResult;
+import com.wplatform.ddal.excutor.JdbcWorker;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
@@ -103,7 +102,7 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 command.update();
             }
             TableNode[] nodes = tableMate.getPartitionNode();
-            List<Worker<UpdateResult>> workers = New.arrayList(nodes.length);
+            List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
             for (TableNode node : nodes) {
                 String sql = doTranslate(node);
                 List<Parameter> items = getPrepared().getParameters();
@@ -114,12 +113,18 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 workers.add(createUpdateWorker(node.getShardName(), sql, params));
             }
             try {
-                List<Future<UpdateResult>> futures = sqlExecutor.invokeAll(workers);
-                for (Future<UpdateResult> future : futures) {
-                    
+                //DDL statement returns nothing.  
+                if(workers.size() > 1) {
+                    jdbcExecutor.invokeAll(workers);
+                } else if(workers.size() == 1){
+                    workers.get(0).doWork();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+               throw DbException.convert(e);
+            } finally {
+                for (JdbcWorker<Integer> jdbcWorker : workers) {
+                    jdbcWorker.closeResource();
+                }
             }
             
             if (query != null) {
