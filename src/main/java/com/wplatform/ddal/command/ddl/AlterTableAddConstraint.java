@@ -283,6 +283,14 @@ public class AlterTableAddConstraint extends SchemaCommand {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
+    
+    public String getTableName() {
+        return tableName;
+    }
+    
+    public String getRefTableName() {
+        return refTableName;
+    }
 
     public IndexColumn[] getIndexColumns() {
         return indexColumns;
@@ -290,6 +298,13 @@ public class AlterTableAddConstraint extends SchemaCommand {
 
     public void setIndexColumns(IndexColumn[] indexColumns) {
         this.indexColumns = indexColumns;
+    }
+    
+    /**
+     * @return the refSchema
+     */
+    public Schema getRefSchema() {
+        return refSchema;
     }
 
     /**
@@ -325,6 +340,91 @@ public class AlterTableAddConstraint extends SchemaCommand {
 
     public void setPrimaryKeyHash(boolean b) {
         this.primaryKeyHash = b;
+    }
+
+    
+    /**
+     * @return the ifNotExists
+     */
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    /**
+     * @return the constraintName
+     */
+    public String getConstraintName() {
+        return constraintName;
+    }
+
+    /**
+     * @return the deleteAction
+     */
+    public int getDeleteAction() {
+        return deleteAction;
+    }
+
+    /**
+     * @return the updateAction
+     */
+    public int getUpdateAction() {
+        return updateAction;
+    }
+
+    /**
+     * @return the refIndexColumns
+     */
+    public IndexColumn[] getRefIndexColumns() {
+        return refIndexColumns;
+    }
+
+    /**
+     * @return the checkExpression
+     */
+    public Expression getCheckExpression() {
+        return checkExpression;
+    }
+
+    /**
+     * @return the index
+     */
+    public Index getIndex() {
+        return index;
+    }
+
+    /**
+     * @return the refIndex
+     */
+    public Index getRefIndex() {
+        return refIndex;
+    }
+
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
+
+    /**
+     * @return the checkExisting
+     */
+    public boolean isCheckExisting() {
+        return checkExisting;
+    }
+
+    /**
+     * @return the primaryKeyHash
+     */
+    public boolean isPrimaryKeyHash() {
+        return primaryKeyHash;
+    }
+
+    /**
+     * @return the createdIndexes
+     */
+    public ArrayList<Index> getCreatedIndexes() {
+        return createdIndexes;
     }
 
     @Override
