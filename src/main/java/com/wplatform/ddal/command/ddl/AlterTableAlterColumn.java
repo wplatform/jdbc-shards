@@ -102,4 +102,47 @@ public class AlterTableAlterColumn extends SchemaCommand {
     public void setNewColumns(ArrayList<Column> columnsToAdd) {
         this.columnsToAdd = columnsToAdd;
     }
+
+    public ArrayList<Column> getColumnsToAdd() {
+        return columnsToAdd;
+    }
+
+    public void setColumnsToAdd(ArrayList<Column> columnsToAdd) {
+        this.columnsToAdd = columnsToAdd;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Column getOldColumn() {
+        return oldColumn;
+    }
+
+    public Column getNewColumn() {
+        return newColumn;
+    }
+
+    public Expression getDefaultExpression() {
+        return defaultExpression;
+    }
+
+    public Expression getNewSelectivity() {
+        return newSelectivity;
+    }
+
+    public String getAddBefore() {
+        return addBefore;
+    }
+
+    public String getAddAfter() {
+        return addAfter;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+    
+    
+    
 }

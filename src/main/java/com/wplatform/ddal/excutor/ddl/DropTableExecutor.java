@@ -28,6 +28,7 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.util.StatementBuilder;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -51,7 +52,17 @@ public class DropTableExecutor extends CommonPreparedExecutor<DropTable> {
 
     @Override
     protected String doTranslate(TableNode tableNode) {
-        return null;
+        String forTable = tableNode.getCompositeTableName();
+        StringBuilder sql = new StringBuilder();
+        sql.append("DROP TABLE");
+        if(prepared.isIfExists()) {
+            sql.append(" IF EXISTS");
+        }
+        sql.append(" ").append(forTable);
+        if(prepared.getDropAction() == AlterTableAddConstraint.CASCADE) {
+            sql.append(" CASCADE");
+        }
+        return sql.toString();
     }
     
 
@@ -75,15 +86,18 @@ public class DropTableExecutor extends CommonPreparedExecutor<DropTable> {
 
     private void executeDrop(DropTable next) {
         String tableName = next.getTableName();
-        TableMate table = getTableMate(tableName);
-        TableNode[] nodes = table.getPartitionNode();
-        executeOn(nodes);
-        Database db = session.getDatabase();
-        db.removeSchemaObject(session, table);
+        TableMate table = findTableMate(tableName);
+        if (table != null) {
+            TableNode[] nodes = table.getPartitionNode();
+            executeOn(nodes);
+            Database db = session.getDatabase();
+            db.removeSchemaObject(session, table);
+        }
         next = prepared.getNext();
         if (next != null) {
             executeDrop(next);
         }
     }
+    
 
 }
