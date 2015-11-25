@@ -16,7 +16,7 @@
 // Created on 2015年1月28日
 // $Id$
 
-package com.wplatform.ddal.test.insert;
+package com.wplatform.ddal.test.sql.dml;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -30,14 +30,14 @@ import org.junit.Test;
 
 import junit.framework.Assert;
 
-import com.wplatform.ddal.test.BaseSampleCase;
+import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class InsertTestCase extends BaseSampleCase {
+public class InsertTestCase extends BaseTestCase {
 
     
     public void execute(String sql, List<Object> params) {

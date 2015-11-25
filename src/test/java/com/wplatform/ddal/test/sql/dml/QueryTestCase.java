@@ -16,7 +16,7 @@
 // Created on 2014年11月17日
 // $Id$
 
-package com.wplatform.ddal.test.query;
+package com.wplatform.ddal.test.sql.dml;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,14 +28,14 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.wplatform.ddal.test.BaseSampleCase;
+import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class QueryTestCase extends BaseSampleCase{
+public class QueryTestCase extends BaseTestCase{
     
     public void query_Sql(String sql, List<Object> params) {
         Connection conn = null;
@@ -183,6 +183,8 @@ public class QueryTestCase extends BaseSampleCase{
         String sql = "SELECT * FROM (select * from t_student_course where t_score > 80) a, t_student b where a.f_student_id = b.f_student_id";
         this.query_Sql(sql, null);
     }
+
+
     
     
   

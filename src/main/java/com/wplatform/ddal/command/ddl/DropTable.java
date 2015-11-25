@@ -16,14 +16,8 @@
 package com.wplatform.ddal.command.ddl;
 
 import com.wplatform.ddal.command.CommandInterface;
-import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.schema.Schema;
-import com.wplatform.ddal.dbobject.table.Table;
-import com.wplatform.ddal.engine.Constants;
-import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
 
 /**
  * This class represents the statement
@@ -35,15 +29,14 @@ public class DropTable extends SchemaCommand {
 
     private boolean ifExists;
     private String tableName;
-    private Table table;
     private DropTable next;
     private int dropAction;
 
     public DropTable(Session session, Schema schema) {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
-                Constants.RESTRICT :
-                Constants.CASCADE;
+                AlterTableAddConstraint.RESTRICT :
+                    AlterTableAddConstraint.CASCADE;
     }
 
     /**
@@ -72,9 +65,6 @@ public class DropTable extends SchemaCommand {
 
     @Override
     public int update() {
-        session.commit(true);
-        prepareDrop();
-        executeDrop();
         return 0;
     }
 
@@ -90,33 +80,20 @@ public class DropTable extends SchemaCommand {
         return CommandInterface.DROP_TABLE;
     }
 
-
-    private void prepareDrop() {
-        table = finalTableMate(tableName);
-        if (table == null) {
-            if (!ifExists) {
-                throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
-            }
-        }
-        session.getUser().checkRight(table, Right.ALL);
-        if (dropAction == Constants.CASCADE) {
-
-        }
-        if (next != null) {
-            next.prepareDrop();
-        }
+    public boolean isIfExists() {
+        return ifExists;
     }
 
-    private void executeDrop() {
-        table = finalTableMate(tableName);
-        if (table != null) {
-            Database db = session.getDatabase();
-            db.removeSchemaObject(session, table);
-        }
-        if (next != null) {
-            next.executeDrop();
-        }
+    public String getTableName() {
+        return tableName;
     }
 
+    public int getDropAction() {
+        return dropAction;
+    }
+
+    public DropTable getNext() {
+        return next;
+    }
 
 }

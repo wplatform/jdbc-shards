@@ -511,32 +511,6 @@ public class Constants {
      */
     public static final int VIEW_INDEX_CACHE_SIZE = 64;
 
-
-    /**
-     * referential constraint
-     * The action is to restrict the operation.
-     */
-    public static final int RESTRICT = 0;
-
-    /**
-     * referential constraint
-     * The action is to cascade the operation.
-     */
-    public static final int CASCADE = 1;
-
-    /**
-     * referential constraint
-     * The action is to set the value to the default value.
-     */
-    public static final int SET_DEFAULT = 2;
-
-    /**
-     * referential constraint
-     * The action is to set the value to NULL.
-     */
-    public static final int SET_NULL = 3;
-
-
     public static int SCANLEVEL_UNLIMITED = 1;
     public static int SCANLEVEL_FILTER = 2;
     public static int SCANLEVEL_ANYINDEX = 3;

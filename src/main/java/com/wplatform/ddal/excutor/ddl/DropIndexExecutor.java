@@ -13,36 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月6日
+// Created on 2015年4月12日
 // $Id$
 
-package com.wplatform.ddal.test;
+package com.wplatform.ddal.excutor.ddl;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.util.FileUtils;
-import com.wplatform.ddal.util.IOUtils;
-import com.wplatform.ddal.value.ValueLobDb;
+import com.wplatform.ddal.command.ddl.DropTable;
+import com.wplatform.ddal.dispatch.rule.TableNode;
+import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class ValueLob {
-    @Test
-    public void testValueLobDB() throws Exception {
-        FileInputStream blobin = new FileInputStream("e:/33766gg.rar");
-        ValueLobDb lob = ValueLobDb.createTempBlob(blobin, -1);
-    
-        InputStream in = lob.getInputStream();
-        
-        FileOutputStream out = new FileOutputStream("e:/---------.zip");
-        
-        IOUtils.copy(in, out);
+public class DropIndexExecutor extends CommonPreparedExecutor<DropTable> {
+
+    /**
+     * @param session
+     * @param prepared
+     */
+    public DropIndexExecutor(Session session, DropTable prepared) {
+        super(session, prepared);
+    }
+
+    @Override
+    public int executeUpdate() {
+        return 0;
+    }
+
+    @Override
+    protected String doTranslate(TableNode tableNode) {
+        return null;
     }
 
 }

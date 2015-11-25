@@ -34,8 +34,8 @@ public class DropView extends SchemaCommand {
     public DropView(Session session, Schema schema) {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
-                Constants.RESTRICT :
-                Constants.CASCADE;
+                AlterTableAddConstraint.RESTRICT :
+                    AlterTableAddConstraint.CASCADE;
     }
 
     public void setIfExists(boolean b) {

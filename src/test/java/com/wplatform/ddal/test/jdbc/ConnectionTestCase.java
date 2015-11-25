@@ -28,13 +28,13 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.wplatform.ddal.test.BaseSampleCase;
+import com.wplatform.ddal.test.BaseTestCase;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class JdbcConnectionTestCase extends BaseSampleCase {
+public class ConnectionTestCase extends BaseTestCase {
     
     public void testConnection(String sql, List<Object> params) {
         Connection conn = null;

@@ -23,15 +23,18 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.wplatform.ddal.command.Prepared;
+import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.RoutingHandler;
+import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.ResultInterface;
+import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
 
 /**
@@ -115,10 +118,40 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
     }
     
-    
-    
+    /**
+     * execute DDL use default sql translator
+     * @param nodes
+     */
+    public void executeOn(TableNode[] nodes) {
+        List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
+        for (TableNode node : nodes) {
+            String sql = doTranslate(node);
+            List<Parameter> items = getPrepared().getParameters();
+            List<Value> params = New.arrayList(items.size());
+            for (Parameter parameter : items) {
+                params.add(parameter.getParamValue());
+            }
+            workers.add(createUpdateWorker(node.getShardName(), sql, params));
+        }
+        try {
+            //DDL statement returns nothing.  
+            if(workers.size() > 1) {
+                jdbcExecutor.invokeAll(workers);
+            } else if(workers.size() == 1){
+                workers.get(0).doWork();
+            }
+        } catch (InterruptedException e) {
+           throw DbException.convert(e);
+        } finally {
+            for (JdbcWorker<Integer> jdbcWorker : workers) {
+                jdbcWorker.closeResource();
+            }
+        }
+    }
     
 
+    protected abstract String doTranslate(TableNode node);
+    
     protected JdbcWorker<Integer> createUpdateWorker(String shardName, String sql, List<Value> params) {
         return new JdbcUpdateWorker(session, shardName, sql, params);
     }

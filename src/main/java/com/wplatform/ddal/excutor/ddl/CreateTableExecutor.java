@@ -16,31 +16,27 @@
 // Created on 2015年4月12日
 // $Id$
 
-package com.wplatform.ddal.excutor.support;
+package com.wplatform.ddal.excutor.ddl;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.wplatform.ddal.command.ddl.CreateTable;
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.dml.Insert;
 import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.command.expression.Expression;
-import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.dbobject.schema.Sequence;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
-import com.wplatform.ddal.excutor.JdbcWorker;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.DataType;
-import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -101,31 +97,9 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
                 command.setTransactional(prepared.isTransactional());
                 command.update();
             }
+            
             TableNode[] nodes = tableMate.getPartitionNode();
-            List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
-            for (TableNode node : nodes) {
-                String sql = doTranslate(node);
-                List<Parameter> items = getPrepared().getParameters();
-                List<Value> params = New.arrayList(items.size());
-                for (Parameter parameter : items) {
-                    params.add(parameter.getParamValue());
-                }
-                workers.add(createUpdateWorker(node.getShardName(), sql, params));
-            }
-            try {
-                //DDL statement returns nothing.  
-                if(workers.size() > 1) {
-                    jdbcExecutor.invokeAll(workers);
-                } else if(workers.size() == 1){
-                    workers.get(0).doWork();
-                }
-            } catch (InterruptedException e) {
-               throw DbException.convert(e);
-            } finally {
-                for (JdbcWorker<Integer> jdbcWorker : workers) {
-                    jdbcWorker.closeResource();
-                }
-            }
+            executeOn(nodes);
             
             if (query != null) {
                 Insert insert = new Insert(session);
@@ -169,8 +143,9 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
             prepared.addColumn(col);
         }
     }
-
-    private String doTranslate(TableNode tableNode) {
+    
+    @Override
+    protected String doTranslate(TableNode tableNode) {
         StatementBuilder buff = new StatementBuilder("CREATE ");
         if (prepared.isTemporary()) {
             buff.append("TEMPORARY ");
@@ -183,19 +158,19 @@ public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
         if (prepared.getComment() != null) {
             buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(prepared.getComment()));
         }
-        buff.append("(\n    ");
+        buff.append("(");
         for (Column column : prepared.getColumns()) {
-            buff.appendExceptFirst(",\n    ");
+            buff.appendExceptFirst(", ");
             buff.append(column.getCreateSQL());
         }
-        buff.append("\n)");
+        buff.append(")");
         if (prepared.getTableEngine() != null) {
-            buff.append("\nENGINE ");
+            buff.append("ENGINE ");
             buff.append(StringUtils.quoteIdentifier(prepared.getTableEngine()));
 
         }
         if (!prepared.getTableEngineParams().isEmpty()) {
-            buff.append("\nWITH ");
+            buff.append("WITH ");
             buff.resetCount();
             for (String parameter : prepared.getTableEngineParams()) {
                 buff.appendExceptFirst(", ");

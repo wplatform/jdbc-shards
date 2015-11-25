@@ -16,25 +16,25 @@
 // Created on 2015年4月7日
 // $Id$
 
-package com.wplatform.ddal.test.ddl;
+package com.wplatform.ddal.test.tools;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Connection;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
-import com.wplatform.ddal.test.BaseSampleCase;
+import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.ScriptRunner;
 import com.wplatform.ddal.util.Utils;
+
+import junit.framework.Assert;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class ScriptRunnerTestCase extends BaseSampleCase {
+public class ScriptRunnerTestCase extends BaseTestCase {
 
     
     @Test

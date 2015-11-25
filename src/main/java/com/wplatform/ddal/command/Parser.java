@@ -1395,12 +1395,12 @@ public class Parser {
             ifExists = readIfExists(ifExists);
             command.setIfExists(ifExists);
             if (readIf("CASCADE")) {
-                command.setDropAction(Constants.CASCADE);
+                command.setDropAction(AlterTableAddConstraint.CASCADE);
                 readIf("CONSTRAINTS");
             } else if (readIf("RESTRICT")) {
-                command.setDropAction(Constants.RESTRICT);
+                command.setDropAction(AlterTableAddConstraint.RESTRICT);
             } else if (readIf("IGNORE")) {
-                command.setDropAction(Constants.SET_DEFAULT);
+                command.setDropAction(AlterTableAddConstraint.SET_DEFAULT);
             }
             return command;
         } else if (readIf("INDEX")) {
@@ -5226,21 +5226,21 @@ public class Parser {
         }
         if (readIf("NO")) {
             read("ACTION");
-            return Constants.RESTRICT;
+            return AlterTableAddConstraint.RESTRICT;
         }
         read("SET");
         if (readIf("NULL")) {
-            return Constants.SET_NULL;
+            return AlterTableAddConstraint.SET_NULL;
         }
         read("DEFAULT");
-        return Constants.SET_DEFAULT;
+        return AlterTableAddConstraint.SET_DEFAULT;
     }
 
     private Integer parseCascadeOrRestrict() {
         if (readIf("CASCADE")) {
-            return Constants.CASCADE;
+            return AlterTableAddConstraint.CASCADE;
         } else if (readIf("RESTRICT")) {
-            return Constants.RESTRICT;
+            return AlterTableAddConstraint.RESTRICT;
         } else {
             return null;
         }
