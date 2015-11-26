@@ -57,4 +57,18 @@ public class CreateConstant extends SchemaCommand {
         return CommandInterface.CREATE_CONSTANT;
     }
 
+    public String getConstantName() {
+        return constantName;
+    }
+
+    public Expression getExpression() {
+        return expression;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+    
+    
+
 }

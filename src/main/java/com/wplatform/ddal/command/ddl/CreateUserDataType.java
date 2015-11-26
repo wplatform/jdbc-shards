@@ -56,4 +56,18 @@ public class CreateUserDataType extends DefineCommand {
         return CommandInterface.CREATE_DOMAIN;
     }
 
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public Column getColumn() {
+        return column;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+    
+    
+
 }

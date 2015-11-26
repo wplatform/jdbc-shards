@@ -50,4 +50,12 @@ public class DropUserDataType extends DefineCommand {
         return CommandInterface.DROP_DOMAIN;
     }
 
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
 }

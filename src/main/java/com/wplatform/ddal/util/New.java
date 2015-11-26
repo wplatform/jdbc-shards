@@ -285,7 +285,7 @@ public class New {
 
         @Override
         public Thread newThread(Runnable r) {
-            String name = prefix + index.getAndIncrement();
+            String name = prefix + "_" + index.getAndIncrement();
             Thread t = new Thread(group, r, name);
             t.setDaemon(daemon);
             if (t.getPriority() != Thread.NORM_PRIORITY) {

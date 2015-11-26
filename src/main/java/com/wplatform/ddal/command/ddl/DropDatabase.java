@@ -50,4 +50,14 @@ public class DropDatabase extends DefineCommand {
         return CommandInterface.DROP_ALL_OBJECTS;
     }
 
+    public boolean isDropAllObjects() {
+        return dropAllObjects;
+    }
+
+    public boolean isDeleteFiles() {
+        return deleteFiles;
+    }
+    
+    
+
 }

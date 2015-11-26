@@ -19,7 +19,6 @@ import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.util.StringUtils;
 
 /**
  * This class represents the statement
@@ -51,15 +50,6 @@ public class CreateUser extends DefineCommand {
         this.password = password;
     }
 
-    private char[] getCharArray(Expression e) {
-        return e.optimize(session).getValue(session).getString().toCharArray();
-    }
-
-    private byte[] getByteArray(Expression e) {
-        return StringUtils.convertHexToBytes(
-                e.optimize(session).getValue(session).getString());
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -85,5 +75,34 @@ public class CreateUser extends DefineCommand {
     public int getType() {
         return CommandInterface.CREATE_USER;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public Expression getPassword() {
+        return password;
+    }
+
+    public Expression getSalt() {
+        return salt;
+    }
+
+    public Expression getHash() {
+        return hash;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+    
 
 }

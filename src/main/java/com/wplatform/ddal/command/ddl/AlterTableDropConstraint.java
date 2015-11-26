@@ -49,4 +49,14 @@ public class AlterTableDropConstraint extends SchemaCommand {
         return CommandInterface.ALTER_TABLE_DROP_CONSTRAINT;
     }
 
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
+    public String getConstraintName() {
+        return constraintName;
+    }
+    
+    
+
 }

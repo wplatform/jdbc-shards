@@ -49,4 +49,9 @@ public class Analyze extends DefineCommand {
         return CommandInterface.ANALYZE;
     }
 
+    public int getSampleRows() {
+        return sampleRows;
+    }
+    
+
 }

@@ -50,4 +50,14 @@ public class DropAggregate extends DefineCommand {
         return CommandInterface.DROP_AGGREGATE;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+    
+    
+
 }

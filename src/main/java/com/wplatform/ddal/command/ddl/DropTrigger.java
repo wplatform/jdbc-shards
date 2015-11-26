@@ -51,4 +51,13 @@ public class DropTrigger extends SchemaCommand {
         return CommandInterface.DROP_TRIGGER;
     }
 
+    public String getTriggerName() {
+        return triggerName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+    
+
 }

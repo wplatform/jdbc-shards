@@ -50,4 +50,13 @@ public class CreateRole extends DefineCommand {
         return CommandInterface.CREATE_ROLE;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+    
+
 }

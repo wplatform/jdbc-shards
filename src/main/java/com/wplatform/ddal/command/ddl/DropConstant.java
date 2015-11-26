@@ -51,4 +51,12 @@ public class DropConstant extends SchemaCommand {
         return CommandInterface.DROP_CONSTANT;
     }
 
+    public String getConstantName() {
+        return constantName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
 }

@@ -51,4 +51,12 @@ public class DropFunctionAlias extends SchemaCommand {
         return CommandInterface.DROP_ALIAS;
     }
 
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
 }

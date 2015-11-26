@@ -16,11 +16,7 @@
 package com.wplatform.ddal.command.ddl;
 
 import com.wplatform.ddal.dbobject.schema.Schema;
-import com.wplatform.ddal.dbobject.table.Table;
-import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
 
 /**
  * This class represents a non-transaction statement that involves a schema.

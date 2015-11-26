@@ -297,6 +297,19 @@ public class DbSettings extends SettingsBase {
      * The default table engine to use for new tables.
      */
     public String defaultTableEngine = get("DEFAULT_TABLE_ENGINE", null);
+    /**
+     * Database setting <code>DEFAULT_VALIDATION_QUERY</code>
+     * (default: SELECT 1 FROM DUAL).<br />
+     * The default sql to validation jdbc connection.
+     */
+    public String defaultValidationQuery = get("DEFAULT_VALIDATION_QUERY", "SELECT 1 FROM DUAL");
+    /**
+     * Database setting <code>DEFAULT_VALIDATION_QUERYT_IMEOUT</code>
+     * (default: -1).<br />
+     * The default time to execute validation sql.
+     */
+    public int defaultValidationQueryTimeout = get("DEFAULT_VALIDATION_QUERYT_IMEOUT", -1);
+    
 
     private DbSettings(HashMap<String, String> s) {
         super(s);

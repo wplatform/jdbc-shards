@@ -101,4 +101,18 @@ public class Comment extends DbObjectBase {
         this.commentText = comment;
     }
 
+    public int getObjectType() {
+        return objectType;
+    }
+
+    public String getObjectName() {
+        return objectName;
+    }
+
+    public String getCommentText() {
+        return commentText;
+    }
+    
+    
+
 }

@@ -71,4 +71,28 @@ public class SetComment extends DefineCommand {
         return CommandInterface.COMMENT;
     }
 
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public String getObjectName() {
+        return objectName;
+    }
+
+    public boolean isColumn() {
+        return column;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public int getObjectType() {
+        return objectType;
+    }
+
+    public Expression getExpr() {
+        return expr;
+    }
+
 }

@@ -87,4 +87,42 @@ public class CreateSequence extends SchemaCommand {
         return CommandInterface.CREATE_SEQUENCE;
     }
 
+    public String getSequenceName() {
+        return sequenceName;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public boolean isCycle() {
+        return cycle;
+    }
+
+    public Expression getMinValue() {
+        return minValue;
+    }
+
+    public Expression getMaxValue() {
+        return maxValue;
+    }
+
+    public Expression getStart() {
+        return start;
+    }
+
+    public Expression getIncrement() {
+        return increment;
+    }
+
+    public Expression getCacheSize() {
+        return cacheSize;
+    }
+
+    public boolean isBelongsToTable() {
+        return belongsToTable;
+    }
+    
+    
+
 }

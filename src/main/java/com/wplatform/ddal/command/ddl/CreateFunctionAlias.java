@@ -87,4 +87,34 @@ public class CreateFunctionAlias extends SchemaCommand {
         return CommandInterface.CREATE_ALIAS;
     }
 
+    public String getAliasName() {
+        return aliasName;
+    }
+
+    public String getJavaClassMethod() {
+        return javaClassMethod;
+    }
+
+    public boolean isDeterministic() {
+        return deterministic;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public boolean isBufferResultSetToLocalTemp() {
+        return bufferResultSetToLocalTemp;
+    }
+    
+    
+
 }

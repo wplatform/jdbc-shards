@@ -55,4 +55,12 @@ public class DropUser extends DefineCommand {
         return CommandInterface.DROP_USER;
     }
 
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
 }

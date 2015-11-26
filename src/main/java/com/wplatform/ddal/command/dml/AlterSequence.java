@@ -96,4 +96,36 @@ public class AlterSequence extends SchemaCommand {
         return CommandInterface.ALTER_SEQUENCE;
     }
 
+    public Table getTable() {
+        return table;
+    }
+
+    public Sequence getSequence() {
+        return sequence;
+    }
+
+    public Expression getStart() {
+        return start;
+    }
+
+    public Expression getIncrement() {
+        return increment;
+    }
+
+    public Boolean getCycle() {
+        return cycle;
+    }
+
+    public Expression getMinValue() {
+        return minValue;
+    }
+
+    public Expression getMaxValue() {
+        return maxValue;
+    }
+
+    public Expression getCacheSize() {
+        return cacheSize;
+    }
+
 }

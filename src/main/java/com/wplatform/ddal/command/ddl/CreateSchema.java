@@ -55,4 +55,16 @@ public class CreateSchema extends DefineCommand {
         return CommandInterface.CREATE_SCHEMA;
     }
 
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public String getAuthorization() {
+        return authorization;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
 }

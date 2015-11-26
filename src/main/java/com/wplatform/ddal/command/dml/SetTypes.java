@@ -229,10 +229,7 @@ public class SetTypes {
      */
     public static final int QUERY_STATISTICS = 41;
 
-    public static final int MONITOR_EXECUTION = 42;
-    public static final int VALIDATION_QUERY = 43;
-    public static final int VALIDATION_QUERY_TIMEOUT = 44;
-    public static final int TRACE_FILE_NAME = 45;
+    public static final int TRACE_FILE_NAME = 42;
 
     private static final ArrayList<String> TYPES = New.arrayList();
 
@@ -281,9 +278,6 @@ public class SetTypes {
         list.add(RETENTION_TIME, "RETENTION_TIME");
         list.add(QUERY_STATISTICS, "QUERY_STATISTICS");
 
-        list.add(MONITOR_EXECUTION, "MONITOR_EXECUTION");
-        list.add(VALIDATION_QUERY, "VALIDATION_QUERY");
-        list.add(VALIDATION_QUERY_TIMEOUT, "VALIDATION_QUERY_TIMEOUT");
         list.add(TRACE_FILE_NAME, "TRACE_FILE_NAME");
 
     }

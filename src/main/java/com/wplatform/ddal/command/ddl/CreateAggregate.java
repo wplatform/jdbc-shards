@@ -66,4 +66,26 @@ public class CreateAggregate extends DefineCommand {
         return CommandInterface.CREATE_AGGREGATE;
     }
 
+    public Schema getSchema() {
+        return schema;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getJavaClassMethod() {
+        return javaClassMethod;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+    
+    
+
 }

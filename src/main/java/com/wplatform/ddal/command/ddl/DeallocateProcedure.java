@@ -45,4 +45,9 @@ public class DeallocateProcedure extends DefineCommand {
         return CommandInterface.DEALLOCATE;
     }
 
+    public String getProcedureName() {
+        return procedureName;
+    }
+    
+
 }

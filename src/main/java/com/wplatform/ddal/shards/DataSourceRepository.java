@@ -22,13 +22,16 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 import javax.sql.DataSource;
 
-import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.config.DataSourceException;
 import com.wplatform.ddal.config.DataSourceProvider;
@@ -38,37 +41,36 @@ import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class DataSourceRepository {
 
-    private final static String DEFAULT_VALIDATION_QUERY = "SELECT 1 FROM DUAL";
-
+    private final Database database;
     private final List<DataSourceMarker> registered = New.arrayList();
     private final List<DataSourceMarker> abnormalList = New.copyOnWriteArrayList();
     private final List<DataSourceMarker> monitor = New.copyOnWriteArrayList();
 
     private final HashMap<String, DataSource> shardMaping = New.hashMap();
     private final HashMap<String, DataSource> idMapping = New.hashMap();
-
+    private final String defaultShardName;
     private final DataSourceProvider dataSourceProvider;
     private final Trace trace;
     protected ScheduledExecutorService abnormalScheduler;
     protected ScheduledExecutorService monitorScheduler;
-    private boolean monitorExecution;
     private String validationQuery;
-    private int validationQueryTimeout = -1;
+    private int validationQueryTimeout;
+    private ThreadPoolExecutor jdbcExecutor;
     private ScheduledExecutorService scheduledExecutor;
 
     public DataSourceRepository(Database database) {
+        this.database = database;
         Configuration configuration = database.getConfiguration();
-
-        this.monitorExecution = configuration.getBooleanProperty(SetTypes.MONITOR_EXECUTION, true);
-        this.validationQuery = configuration.getProperty(SetTypes.VALIDATION_QUERY, null);
-        this.validationQueryTimeout = configuration.getIntProperty(SetTypes.VALIDATION_QUERY_TIMEOUT, -1);
-
+        this.defaultShardName = configuration.getSchemaConfig().getShard();
+        this.validationQuery = database.getSettings().defaultValidationQuery;
+        this.validationQueryTimeout = database.getSettings().defaultValidationQueryTimeout;
         this.dataSourceProvider = configuration.getDataSourceProvider();
         this.trace = database.getTrace(Trace.DATASOURCE);
         Map<String, ShardConfig> shardMapping = configuration.getCluster();
@@ -147,17 +149,6 @@ public class DataSourceRepository {
         this.validationQueryTimeout = validationQueryTimeout;
     }
 
-    public boolean isTraceExecution() {
-        return monitorExecution;
-    }
-
-    /**
-     * @param traceExecution the traceExecution to set
-     */
-    public void setTraceExecution(boolean traceExecution) {
-        this.monitorExecution = traceExecution;
-    }
-
     public Trace getTrace() {
         return trace;
     }
@@ -165,12 +156,51 @@ public class DataSourceRepository {
     public int shardCount() {
         return this.shardMaping.size();
     }
-
+    
+    public String getDefaultShardName() {
+        return defaultShardName;
+    }
+    
+    public DataSource getDefaultShardDataSource() {
+        if(StringUtils.isNullOrEmpty(defaultShardName)) {
+            return null;
+        }
+        return shardMaping.get(defaultShardName);
+    }
+    
+    /**
+     * TODO configurable
+     * @return the jdbcExecutor
+     */
+    public ThreadPoolExecutor getJdbcExecutor() {
+        if (jdbcExecutor == null) {
+            int corePoolSize = Runtime.getRuntime().availableProcessors();
+            int maximumPoolSize = 200;// TODO configurable
+            int capacity = maximumPoolSize * 1;
+            int keepAliveTime = database.getSettings().maxQueryTimeout;
+            if (keepAliveTime <= 0) {
+                keepAliveTime = 15 * 60000; // 15 MINUTES
+            }
+            BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(capacity);
+            jdbcExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
+                    workQueue, New.customThreadFactory("jdbc-worker"), new AbortPolicy());
+            jdbcExecutor.allowCoreThreadTimeOut(true);
+        }
+        return jdbcExecutor;
+    }
     
     public void close() {
         try {
             this.scheduledExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
+            trace.error(e, "scheduledExecutor awaitTermination");
+        }
+        try {
+            if (jdbcExecutor != null) {
+                jdbcExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            trace.error(e, "jdbcExecutor awaitTermination");
         }
     }
 
@@ -248,7 +278,8 @@ public class DataSourceRepository {
                 monitor.remove(source);
             }
         }
-
+        
+        
         private boolean validateAvailable(DataSource dataSource) throws SQLException {
             Connection conn = null;
             try {
@@ -256,9 +287,6 @@ public class DataSourceRepository {
             } catch (SQLException ex) {
                 // skip
                 return false;
-            }
-            if (validationQuery == null) {
-                validationQuery = DEFAULT_VALIDATION_QUERY;
             }
             Statement stmt = null;
             ResultSet rs = null;

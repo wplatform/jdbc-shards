@@ -442,9 +442,6 @@ public class JdbcDataSource implements DataSource {
         if (this.maxOperationMemory > -1) {
             configuration.setProperty(SetTypes.MAX_OPERATION_MEMORY, this.maxOperationMemory);
         }
-        configuration.setProperty(SetTypes.MONITOR_EXECUTION, this.monitorExecution);
-        configuration.setProperty(SetTypes.VALIDATION_QUERY, this.validationQuery);
-        configuration.setProperty(SetTypes.VALIDATION_QUERY_TIMEOUT, this.validationQueryTimeout);
         configuration.setProperty(SetTypes.TRACE_FILE_NAME, this.logFileName);
 
         if ("TRACE".equalsIgnoreCase(this.stdoutLevel)

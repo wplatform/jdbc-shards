@@ -82,4 +82,38 @@ public class CreateView extends SchemaCommand {
         return CommandInterface.CREATE_VIEW;
     }
 
+    public Query getSelect() {
+        return select;
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public String getSelectSQL() {
+        return selectSQL;
+    }
+
+    public String[] getColumnNames() {
+        return columnNames;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public boolean isOrReplace() {
+        return orReplace;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+    
+    
+
 }

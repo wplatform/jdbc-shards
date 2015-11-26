@@ -56,4 +56,18 @@ public class AlterTableRename extends SchemaCommand {
         this.hidden = hidden;
     }
 
+    public Table getOldTable() {
+        return oldTable;
+    }
+
+    public String getNewTableName() {
+        return newTableName;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+    
+    
+
 }

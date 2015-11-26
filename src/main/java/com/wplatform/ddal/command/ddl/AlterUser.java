@@ -78,4 +78,30 @@ public class AlterUser extends DefineCommand {
         this.type = type;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public String getNewName() {
+        return newName;
+    }
+
+    public Expression getPassword() {
+        return password;
+    }
+
+    public Expression getSalt() {
+        return salt;
+    }
+
+    public Expression getHash() {
+        return hash;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+    
+    
+
 }

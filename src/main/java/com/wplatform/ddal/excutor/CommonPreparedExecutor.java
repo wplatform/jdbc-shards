@@ -55,7 +55,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         this.prepared = prepared;
         this.session = prepared.getSession();
         this.database = session.getDatabase();
-        this.jdbcExecutor = database.getJdbcExecutor();
+        this.jdbcExecutor = session.getDataSourceRepository().getJdbcExecutor();
     }
     /**
      * Execute the query.

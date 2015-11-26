@@ -51,4 +51,12 @@ public class DropSequence extends SchemaCommand {
         return CommandInterface.DROP_SEQUENCE;
     }
 
+    public String getSequenceName() {
+        return sequenceName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
 }

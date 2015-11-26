@@ -65,4 +65,12 @@ public class PrepareProcedure extends DefineCommand {
         return CommandInterface.PREPARE;
     }
 
+    public String getProcedureName() {
+        return procedureName;
+    }
+
+    public Prepared getPrepared() {
+        return prepared;
+    }
+
 }

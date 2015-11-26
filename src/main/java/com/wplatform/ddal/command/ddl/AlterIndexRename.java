@@ -52,4 +52,15 @@ public class AlterIndexRename extends DefineCommand {
         return CommandInterface.ALTER_INDEX_RENAME;
     }
 
+    public Index getOldIndex() {
+        return oldIndex;
+    }
+
+    public String getNewIndexName() {
+        return newIndexName;
+    }
+
+    
+    
+
 }

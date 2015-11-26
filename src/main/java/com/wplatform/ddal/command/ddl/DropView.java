@@ -17,7 +17,6 @@ package com.wplatform.ddal.command.ddl;
 
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.dbobject.schema.Schema;
-import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 
@@ -58,6 +57,18 @@ public class DropView extends SchemaCommand {
     @Override
     public int getType() {
         return CommandInterface.DROP_VIEW;
+    }
+
+    public String getViewName() {
+        return viewName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
+    public int getDropAction() {
+        return dropAction;
     }
 
 }

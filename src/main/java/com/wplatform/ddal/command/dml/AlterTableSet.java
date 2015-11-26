@@ -60,4 +60,16 @@ public class AlterTableSet extends SchemaCommand {
         return type;
     }
 
+    public boolean isValue() {
+        return value;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public boolean isCheckExisting() {
+        return checkExisting;
+    }
+
 }

@@ -37,6 +37,14 @@ public class DropIndex extends SchemaCommand {
         ifExists = b;
     }
 
+    public String getIndexName() {
+        return indexName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
     public void setIndexName(String indexName) {
         this.indexName = indexName;
     }

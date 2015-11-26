@@ -51,4 +51,14 @@ public class AlterSchemaRename extends DefineCommand {
         return CommandInterface.ALTER_SCHEMA_RENAME;
     }
 
+    public Schema getOldSchema() {
+        return oldSchema;
+    }
+
+    public String getNewSchemaName() {
+        return newSchemaName;
+    }
+    
+    
+
 }

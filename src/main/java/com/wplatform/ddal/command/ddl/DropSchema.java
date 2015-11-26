@@ -45,6 +45,14 @@ public class DropSchema extends DefineCommand {
         this.ifExists = ifExists;
     }
 
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
     @Override
     public int getType() {
         return CommandInterface.DROP_SCHEMA;

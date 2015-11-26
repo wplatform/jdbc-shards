@@ -46,4 +46,10 @@ public class AlterView extends DefineCommand {
         return CommandInterface.ALTER_VIEW;
     }
 
+    public TableView getView() {
+        return view;
+    }
+    
+    
+
 }

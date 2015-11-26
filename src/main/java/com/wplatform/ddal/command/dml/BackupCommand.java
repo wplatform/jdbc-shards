@@ -77,4 +77,8 @@ public class BackupCommand extends Prepared {
         return CommandInterface.BACKUP;
     }
 
+    public Expression getFileNameExpr() {
+        return fileNameExpr;
+    }
+
 }

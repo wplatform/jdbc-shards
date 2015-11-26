@@ -50,4 +50,12 @@ public class DropRole extends DefineCommand {
         return CommandInterface.DROP_ROLE;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public boolean isIfExists() {
+        return ifExists;
+    }
+
 }
