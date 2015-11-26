@@ -46,6 +46,8 @@ import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.RoutingHandler;
 import com.wplatform.ddal.dispatch.RoutingHandlerImpl;
+import com.wplatform.ddal.excutor.ExecutorFactory;
+import com.wplatform.ddal.excutor.PreparedExecutorFactory;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
@@ -92,7 +94,7 @@ public class Database {
     private SourceCompiler compiler;
     private RoutingHandler routingHandler;
     private ThreadPoolExecutor jdbcExecutor;
-
+    private PreparedExecutorFactory peFactory;
 
     public Database(Configuration configuration) {
         this.configuration = configuration;
@@ -127,8 +129,7 @@ public class Database {
         systemUser.setUserPasswordHash(new byte[0]);
         users.put(SYSTEM_USER_NAME, systemUser);
 
-        Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser,
-                true);
+        Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser, true);
         schemas.put(schema.getName(), schema);
 
         Role publicRole = new Role(this, 0, Constants.PUBLIC_ROLE_NAME, true);
@@ -152,14 +153,13 @@ public class Database {
                     tableMate.check();
                     tableMate.validationRuleColumn();
                 }
-                
+
                 this.addSchemaObject(tableMate);
             }
             trace.info("opened {0}", databaseName);
         } finally {
             sysSession.close();
         }
-        
 
     }
 
@@ -182,7 +182,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     * 1 otherwise
+     *         1 otherwise
      */
     public int compare(Value a, Value b) {
         return a.compareTo(b, compareMode);
@@ -195,7 +195,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     * 1 otherwise
+     *         1 otherwise
      */
     public int compareTypeSave(Value a, Value b) {
         return a.compareTypeSave(b, compareMode);
@@ -215,26 +215,26 @@ public class Database {
     private HashMap<String, DbObject> getMap(int type) {
         HashMap<String, ? extends DbObject> result;
         switch (type) {
-            case DbObject.USER:
-                result = users;
-                break;
-            case DbObject.SETTING:
-                result = settings;
-                break;
-            case DbObject.ROLE:
-                result = roles;
-                break;
-            case DbObject.RIGHT:
-                result = rights;
-                break;
-            case DbObject.SCHEMA:
-                result = schemas;
-                break;
-            case DbObject.COMMENT:
-                result = comments;
-                break;
-            default:
-                throw DbException.throwInternalError("type=" + type);
+        case DbObject.USER:
+            result = users;
+            break;
+        case DbObject.SETTING:
+            result = settings;
+            break;
+        case DbObject.ROLE:
+            result = roles;
+            break;
+        case DbObject.RIGHT:
+            result = rights;
+            break;
+        case DbObject.SCHEMA:
+            result = schemas;
+            break;
+        case DbObject.COMMENT:
+            result = comments;
+            break;
+        default:
+            throw DbException.throwInternalError("type=" + type);
         }
         return (HashMap<String, DbObject>) result;
     }
@@ -242,7 +242,7 @@ public class Database {
     /**
      * Add a schema object to the database.
      *
-     * @param obj     the object to add
+     * @param obj the object to add
      */
     public synchronized void addSchemaObject(SchemaObject obj) {
         obj.getSchema().add(obj);
@@ -252,7 +252,7 @@ public class Database {
     /**
      * Add an object to the database.
      *
-     * @param obj     the object to add
+     * @param obj the object to add
      */
     public synchronized void addDatabaseObject(DbObject obj) {
         HashMap<String, DbObject> map = getMap(obj.getType());
@@ -391,7 +391,7 @@ public class Database {
             }
         }
         try {
-            if(jdbcExecutor != null) {
+            if (jdbcExecutor != null) {
                 jdbcExecutor.awaitTermination(1, TimeUnit.SECONDS);
             }
         } catch (InterruptedException e) {
@@ -461,6 +461,7 @@ public class Database {
 
     /**
      * Get all tables and views.
+     * 
      * @return all objects of that type
      */
     public ArrayList<Table> getAllTablesAndViews() {
@@ -510,7 +511,7 @@ public class Database {
      * Rename a schema object.
      *
      * @param session the session
-     * @param obj     the object
+     * @param obj the object
      * @param newName the new name
      */
     public synchronized void renameSchemaObject(Session session, SchemaObject obj, String newName) {
@@ -521,7 +522,7 @@ public class Database {
      * Rename a database object.
      *
      * @param session the session
-     * @param obj     the object
+     * @param obj the object
      * @param newName the new name
      */
     public synchronized void renameDatabaseObject(Session session, DbObject obj, String newName) {
@@ -560,7 +561,7 @@ public class Database {
      * Remove the object from the database.
      *
      * @param session the session
-     * @param obj     the object to remove
+     * @param obj the object to remove
      */
     public synchronized void removeDatabaseObject(Session session, DbObject obj) {
         String objName = obj.getName();
@@ -580,20 +581,20 @@ public class Database {
     /**
      * Get the first table that depends on this object.
      *
-     * @param obj    the object to find
+     * @param obj the object to find
      * @param except the table to exclude (or null)
      * @return the first dependent table, or null
      */
     public Table getDependentTable(SchemaObject obj, Table except) {
         switch (obj.getType()) {
-            case DbObject.COMMENT:
-            case DbObject.CONSTRAINT:
-            case DbObject.INDEX:
-            case DbObject.RIGHT:
-            case DbObject.TRIGGER:
-            case DbObject.USER:
-                return null;
-            default:
+        case DbObject.COMMENT:
+        case DbObject.CONSTRAINT:
+        case DbObject.INDEX:
+        case DbObject.RIGHT:
+        case DbObject.TRIGGER:
+        case DbObject.USER:
+            return null;
+        default:
         }
         HashSet<DbObject> set = New.hashSet();
         for (Table t : getAllTablesAndViews()) {
@@ -615,7 +616,7 @@ public class Database {
      * Remove an object from the system table.
      *
      * @param session the session
-     * @param obj     the object to be removed
+     * @param obj the object to be removed
      */
     public synchronized void removeSchemaObject(Session session, SchemaObject obj) {
         int type = obj.getType();
@@ -758,16 +759,17 @@ public class Database {
 
     /**
      * TODO configurable
+     * 
      * @return the jdbcExecutor
      */
     public ThreadPoolExecutor getJdbcExecutor() {
         if (jdbcExecutor == null) {
             int corePoolSize = Runtime.getRuntime().availableProcessors();
-            int maximumPoolSize = 200;//TODO configurable
+            int maximumPoolSize = 200;// TODO configurable
             int capacity = maximumPoolSize * 1;
             int keepAliveTime = dbSettings.maxQueryTimeout;
-            if(keepAliveTime <= 0) {
-                keepAliveTime = 15 * 60000; //15 MINUTES
+            if (keepAliveTime <= 0) {
+                keepAliveTime = 15 * 60000; // 15 MINUTES
             }
             BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(capacity);
             jdbcExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
@@ -776,9 +778,12 @@ public class Database {
         }
         return jdbcExecutor;
     }
-    
-    
-    
 
+    public PreparedExecutorFactory getPreparedExecutorFactory() {
+        if(peFactory == null) {
+            peFactory = new ExecutorFactory();
+        }
+        return peFactory;
+    }
 
 }

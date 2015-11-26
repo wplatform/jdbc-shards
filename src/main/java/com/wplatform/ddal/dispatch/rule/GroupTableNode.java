@@ -37,7 +37,7 @@ public class GroupTableNode extends TableNode {
     }
 
     @Override
-    public String getTableName() {
+    public String getObjectName() {
         throw new UnsupportedOperationException();
     }
 

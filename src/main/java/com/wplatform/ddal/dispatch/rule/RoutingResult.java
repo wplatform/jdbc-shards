@@ -95,7 +95,7 @@ public class RoutingResult implements Serializable {
                 List<String> suffixes = New.arrayList();
                 for (TableNode tableNode : selected) {
                     String nodeName = tableNode.getShardName();
-                    String tableName = tableNode.getTableName();
+                    String tableName = tableNode.getObjectName();
                     String suffix = tableNode.getSuffix();
                     if (shardName.equals(nodeName)) {
                         tables.add(tableName);

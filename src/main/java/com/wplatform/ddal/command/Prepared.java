@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.excutor.PreparedExecutor;
+import com.wplatform.ddal.excutor.PreparedExecutorFactory;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
@@ -211,7 +213,13 @@ public abstract class Prepared {
      * @throws DbException if it is a query
      */
     public int update() {
-        throw DbException.get(ErrorCode.METHOD_NOT_ALLOWED_FOR_QUERY);
+        session.checkCanceled();
+        PreparedExecutorFactory pef = session.getPreparedExecutorFactory();
+        PreparedExecutor executor = pef.newExecutor(this);
+        if(executor == null) {
+            throw DbException.get(ErrorCode.METHOD_NOT_ALLOWED_FOR_QUERY);
+        }
+        return executor.executeUpdate();
     }
 
     /**
@@ -222,7 +230,13 @@ public abstract class Prepared {
      * @throws DbException if it is not a query
      */
     public ResultInterface query(int maxrows) {
-        throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
+        session.checkCanceled();
+        PreparedExecutorFactory pef = session.getPreparedExecutorFactory();
+        PreparedExecutor executor = pef.newExecutor(this);
+        if(executor == null) {
+            throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
+        }
+        return executor.executeQuery(maxrows);
     }
 
     /**

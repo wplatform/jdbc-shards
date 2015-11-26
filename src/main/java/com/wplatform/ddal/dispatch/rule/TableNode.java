@@ -31,21 +31,21 @@ public class TableNode implements Serializable {
 
     private final String shardName;
 
-    private final String tableName;
+    private final String objectName;
 
     private final String suffix;
 
     /**
      * @param shardName
-     * @param tableName
+     * @param objectName
      */
-    public TableNode(String shardName, String tableName) {
-        this(shardName, tableName, null);
+    public TableNode(String shardName, String objectName) {
+        this(shardName, objectName, null);
     }
 
-    public TableNode(String shardName, String tableName, String suffix) {
+    public TableNode(String shardName, String objectName, String suffix) {
         this.shardName = shardName;
-        this.tableName = tableName;
+        this.objectName = objectName;
         this.suffix = suffix;
     }
 
@@ -59,8 +59,8 @@ public class TableNode implements Serializable {
     /**
      * @return the tableName
      */
-    public String getTableName() {
-        return tableName;
+    public String getObjectName() {
+        return objectName;
     }
 
     /**
@@ -71,9 +71,9 @@ public class TableNode implements Serializable {
     }
 
 
-    public String getCompositeTableName() {
+    public String getCompositeObjectName() {
         StringBuilder fullName = new StringBuilder();
-        fullName.append(tableName);
+        fullName.append(objectName);
         if (!StringUtils.isNullOrEmpty(suffix)) {
             fullName.append(suffix);
         }
@@ -93,7 +93,7 @@ public class TableNode implements Serializable {
         int result = 1;
         result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
         result = prime * result + ((suffix == null) ? 0 : suffix.hashCode());
-        result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+        result = prime * result + ((objectName == null) ? 0 : objectName.hashCode());
         return result;
     }
 
@@ -119,17 +119,17 @@ public class TableNode implements Serializable {
                 return false;
         } else if (!suffix.equals(other.suffix))
             return false;
-        if (tableName == null) {
-            if (other.tableName != null)
+        if (objectName == null) {
+            if (other.objectName != null)
                 return false;
-        } else if (!tableName.equals(other.tableName))
+        } else if (!objectName.equals(other.objectName))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return getShardName() + "." + getCompositeTableName();
+        return getShardName() + "." + getCompositeObjectName();
     }
 
     

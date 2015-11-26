@@ -97,11 +97,6 @@ public class AlterTableAddConstraint extends SchemaCommand {
         this.ifNotExists = ifNotExists;
     }
 
-    @Override
-    public int update() {
-        return 0;
-    }
-
     public void setDeleteAction(int action) {
         this.deleteAction = action;
     }

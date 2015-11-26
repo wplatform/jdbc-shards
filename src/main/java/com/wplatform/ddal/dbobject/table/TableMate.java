@@ -296,7 +296,7 @@ public class TableMate extends Table {
         for (int retry = 0; ; retry++) {
             try {
                 Connection conn = null;
-                String tableName = matadataNode.getCompositeTableName();
+                String tableName = matadataNode.getCompositeObjectName();
                 String shardName = matadataNode.getShardName();
                 try {
                     trace.debug("Try to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);

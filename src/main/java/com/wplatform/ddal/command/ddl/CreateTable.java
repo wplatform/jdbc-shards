@@ -16,7 +16,6 @@
 package com.wplatform.ddal.command.ddl;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.dml.Query;
@@ -137,11 +136,6 @@ public class CreateTable extends SchemaCommand {
      */
     public boolean isIfNotExists() {
         return ifNotExists;
-    }
-
-    @Override
-    public int update() {
-        return 0;
     }
 
     /**

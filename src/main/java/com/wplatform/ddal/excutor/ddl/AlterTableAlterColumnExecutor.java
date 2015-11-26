@@ -93,7 +93,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
     @Override
     protected String doTranslate(TableNode node) {
         Column oldColumn = prepared.getOldColumn();
-        String forTable = node.getCompositeTableName();
+        String forTable = node.getCompositeObjectName();
         int type = prepared.getType();
         switch (type) {
             case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {

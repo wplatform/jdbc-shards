@@ -375,7 +375,7 @@ public class XmlConfigParser {
             List<TableNode> inited = New.arrayList(partition.size());
             for (TableNode item : partition) {
                 String shardName = item.getShardName();
-                String name = item.getTableName();
+                String name = item.getObjectName();
                 String suffix = item.getSuffix();
                 if (StringUtils.isNullOrEmpty(name)) {
                     name = tableName;

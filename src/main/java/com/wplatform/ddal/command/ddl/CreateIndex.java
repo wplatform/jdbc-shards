@@ -19,7 +19,6 @@ import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.IndexColumn;
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.message.DbException;
 
 /**
  * This class represents the statement
@@ -54,11 +53,6 @@ public class CreateIndex extends SchemaCommand {
         this.indexColumns = columns;
     }
 
-    @Override
-    public int update() {
-        throw DbException.getUnsupportedException("TODO");
-    }
-
     public void setPrimaryKey(boolean b) {
         this.primaryKey = b;
     }
@@ -79,6 +73,42 @@ public class CreateIndex extends SchemaCommand {
         this.comment = comment;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public String getIndexName() {
+        return indexName;
+    }
+
+    public IndexColumn[] getIndexColumns() {
+        return indexColumns;
+    }
+
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public boolean isHash() {
+        return hash;
+    }
+
+    public boolean isSpatial() {
+        return spatial;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+    
     @Override
     public int getType() {
         return CommandInterface.CREATE_INDEX;

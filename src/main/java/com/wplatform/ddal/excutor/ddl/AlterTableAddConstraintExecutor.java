@@ -21,7 +21,6 @@ package com.wplatform.ddal.excutor.ddl;
 import java.util.Map;
 
 import com.wplatform.ddal.command.CommandInterface;
-import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.ddl.AlterTableAddConstraint;
 import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.IndexColumn;
@@ -29,7 +28,6 @@ import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 
@@ -79,40 +77,11 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         return 0;
     }
 
-    private static Map<TableNode, TableNode> getSymmetryRelation(TableNode[] n1, TableNode[] n2) {
-        if (n1.length != n2.length) {
-            return null;
-        }
-        Map<TableNode, TableNode> tableNode = New.hashMap();
-        for (TableNode tn1 : n1) {
-            String sName = tn1.getShardName();
-            String suffix = tn1.getSuffix();
-            TableNode matched = null;
-            for (TableNode tn2 : n2) {
-                if (!sName.equals(tn2.getShardName())) {
-                    continue;
-                }
-                if (suffix != null && !suffix.equals(tn2.getSuffix())) {
-                    continue;
-                }
-                matched = tn2;
-            }
-            if (matched == null) {
-                return null;
-            }
-            tableNode.put(tn1, matched);
-        }
-        if (tableNode.size() != n1.length) {
-            return null;
-        }
-        return tableNode;
-    }
-
     @Override
     protected String doTranslate(TableNode tableNode) {
         String tableName = prepared.getTableName();
         TableMate table = getTableMate(tableName);
-        String forTable = tableNode.getCompositeTableName();
+        String forTable = tableNode.getCompositeObjectName();
         IndexColumn.mapColumns(prepared.getIndexColumns(), table);
         switch (prepared.getType()) {
         case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
@@ -143,7 +112,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
                 throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
                         "The original table and reference table should be symmetrical.");
             }
-            return doBuildReferences(forTable, relation.getCompositeTableName());
+            return doBuildReferences(forTable, relation.getCompositeObjectName());
         }
         default:
             throw DbException.throwInternalError("type=" + prepared.getType());
@@ -153,7 +122,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildUnique(String forTable, String uniqueType) {
         StatementBuilder buff = new StatementBuilder("ALTER TABLE ");
-        buff.append(forTable).append(" ADD CONSTRAINT ");
+        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         // MySQL constraintName is optional
         if (!StringUtils.isNullOrEmpty(constraintName)) {
@@ -166,7 +135,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         buff.append('(');
         for (IndexColumn c : prepared.getIndexColumns()) {
             buff.appendExceptFirst(", ");
-            buff.append(Parser.quoteIdentifier(c.column.getName()));
+            buff.append(quoteIdentifier(c.column.getName()));
         }
         buff.append(')');
         return buff.toString();
@@ -174,7 +143,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildCheck(String forTable) {
         StringBuilder buff = new StringBuilder("ALTER TABLE ");
-        buff.append(forTable).append(" ADD CONSTRAINT ");
+        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         if (!StringUtils.isNullOrEmpty(constraintName)) {
             buff.append(constraintName);
@@ -186,7 +155,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildReferences(String forTable, String forRefTable) {
         StatementBuilder buff = new StatementBuilder("ALTER TABLE ");
-        buff.append(forTable).append(" ADD CONSTRAINT ");
+        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         if (!StringUtils.isNullOrEmpty(constraintName)) {
             buff.append(constraintName);

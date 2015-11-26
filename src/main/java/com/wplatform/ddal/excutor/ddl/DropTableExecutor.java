@@ -45,13 +45,13 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
 
     @Override
     protected String doTranslate(TableNode tableNode) {
-        String forTable = tableNode.getCompositeTableName();
+        String forTable = tableNode.getCompositeObjectName();
         StringBuilder sql = new StringBuilder();
         sql.append("DROP TABLE");
         if(prepared.isIfExists()) {
             sql.append(" IF EXISTS");
         }
-        sql.append(" ").append(forTable);
+        sql.append(" ").append(quoteIdentifier(forTable));
         if(prepared.getDropAction() == AlterTableAddConstraint.CASCADE) {
             sql.append(" CASCADE");
         }

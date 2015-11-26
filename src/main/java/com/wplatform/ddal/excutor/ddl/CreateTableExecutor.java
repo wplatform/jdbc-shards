@@ -19,7 +19,12 @@
 package com.wplatform.ddal.excutor.ddl;
 
 import java.util.ArrayList;
+import java.util.Map;
 
+import com.wplatform.ddal.command.CommandInterface;
+import com.wplatform.ddal.command.Parser;
+import com.wplatform.ddal.command.ddl.AlterTableAddConstraint;
+import com.wplatform.ddal.command.ddl.CreateIndex;
 import com.wplatform.ddal.command.ddl.CreateTable;
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.dml.Insert;
@@ -27,6 +32,7 @@ import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.schema.Sequence;
 import com.wplatform.ddal.dbobject.table.Column;
+import com.wplatform.ddal.dbobject.table.IndexColumn;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.message.DbException;
@@ -92,13 +98,23 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 tableMate.addSequence(sequence);
             }
             for (DefineCommand command : prepared.getConstraintCommands()) {
-                command.setTransactional(prepared.isTransactional());
-                command.update();
+                if(command.getType() == CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL) {
+                    AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
+                    String refTableName = stmt.getRefTableName();
+                    TableMate refTable = getTableMate(refTableName);
+                    if(refTable != null && refTable.getPartitionNode().length > 1) {
+                        TableNode[] tableNodes = tableMate.getPartitionNode();
+                        TableNode[] refTableNodes = refTable.getPartitionNode();
+                        Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(tableNodes, refTableNodes);
+                        if (symmetryRelation == null) {
+                            throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
+                                    "The original table and the reference table should be symmetrical.");
+                        }
+                    }
+                }
             }
-            
             TableNode[] nodes = tableMate.getPartitionNode();
             executeOn(nodes);
-            
             if (query != null) {
                 Insert insert = new Insert(session);
                 insert.setSortedInsertMode(prepared.isSortedInsertMode());
@@ -152,7 +168,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         if (prepared.isIfNotExists()) {
             buff.append("IF NOT EXISTS ");
         }
-        buff.append(tableNode.getCompositeTableName());
+        buff.append(quoteIdentifier(tableNode.getCompositeObjectName()));
         if (prepared.getComment() != null) {
             buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(prepared.getComment()));
         }
@@ -160,6 +176,103 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         for (Column column : prepared.getColumns()) {
             buff.appendExceptFirst(", ");
             buff.append(column.getCreateSQL());
+        }
+        for (DefineCommand command : prepared.getConstraintCommands()) {
+            buff.appendExceptFirst(", ");
+            int type = command.getType();
+            switch (type) {
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
+                AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
+                buff.append(" CONSTRAINT PRIMARY KEY");
+                if (stmt.isPrimaryKeyHash()) {
+                    buff.append(" USING HASH");
+                }
+                buff.append('(');
+                for (IndexColumn c : stmt.getIndexColumns()) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(Parser.quoteIdentifier(c.column.getName()));
+                }
+                buff.append(')');
+                break;
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
+                AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
+                buff.append(" CONSTRAINT UNIQUE KEY");
+                buff.append('(');
+                for (IndexColumn c : stmt.getIndexColumns()) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(quoteIdentifier(c.column.getName()));
+                }
+                buff.append(')');
+                break;
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
+                AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
+                String enclose = StringUtils.enclose(stmt.getCheckExpression().getSQL());
+                buff.append(" CHECK").append(enclose);                
+                break;
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
+                AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
+                String refTableName = stmt.getRefTableName();
+                TableMate table = getTableMate(stmt.getTableName());
+                TableMate refTable = getTableMate(refTableName);
+                if(refTable != null) {
+                    TableNode[] partitionNode = refTable.getPartitionNode();
+                    if(partitionNode.length > 1) {
+                        TableNode[] tableNodes = table.getPartitionNode();
+                        TableNode[] refTableNodes = partitionNode;
+                        Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(tableNodes, refTableNodes);
+                        TableNode relation = symmetryRelation.get(tableNode);
+                        if (relation == null) {
+                            throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
+                                    "The original table and reference table should be symmetrical.");
+                        }
+                        refTableName = relation.getCompositeObjectName();
+                    } else if(partitionNode.length == 1){
+                        refTableName = partitionNode[1].getCompositeObjectName();
+                    }
+                }
+                
+                IndexColumn[] cols = stmt.getIndexColumns();
+                IndexColumn[] refCols = stmt.getRefIndexColumns();
+                buff.append(" CONSTRAINT FOREIGN KEY(");
+                for (IndexColumn c : cols) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(c.getSQL());
+                }
+                buff.append(')');
+                buff.append(" REFERENCES ");
+                buff.append(quoteIdentifier(refTableName)).append('(');
+                buff.resetCount();
+                for (IndexColumn r : refCols) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(r.getSQL());
+                }
+                
+                break;
+            }
+            case CommandInterface.CREATE_INDEX: {
+                CreateIndex stmt = (CreateIndex)command;
+                if(stmt.isSpatial()) {
+                    buff.append(" SPATIAL INDEX");
+                } else {
+                    buff.append(" INDEX");
+                    if (stmt.isHash()) {
+                        buff.append(" USING HASH");
+                    }
+                }
+                buff.append('(');
+                for (IndexColumn c : stmt.getIndexColumns()) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(quoteIdentifier(c.column.getName()));
+                }
+                buff.append(')');                
+                break;
+            }
+            default:
+                throw DbException.throwInternalError("type=" + type);
+            }
         }
         buff.append(")");
         if (prepared.getTableEngine() != null) {

@@ -16,6 +16,7 @@
 package com.wplatform.ddal.excutor.ddl;
 
 import java.util.List;
+import java.util.Map;
 
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.expression.Parameter;
@@ -67,7 +68,38 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
             }
         }
     }
-
+    
     protected abstract String doTranslate(TableNode node);
+
+    
+    protected static Map<TableNode, TableNode> getSymmetryRelation(TableNode[] n1, TableNode[] n2) {
+        if (n1.length != n2.length) {
+            return null;
+        }
+        Map<TableNode, TableNode> tableNode = New.hashMap();
+        for (TableNode tn1 : n1) {
+            String sName = tn1.getShardName();
+            String suffix = tn1.getSuffix();
+            TableNode matched = null;
+            for (TableNode tn2 : n2) {
+                if (!sName.equals(tn2.getShardName())) {
+                    continue;
+                }
+                if (suffix != null && !suffix.equals(tn2.getSuffix())) {
+                    continue;
+                }
+                matched = tn2;
+            }
+            if (matched == null) {
+                return null;
+            }
+            tableNode.put(tn1, matched);
+        }
+        if (tableNode.size() != n1.length) {
+            return null;
+        }
+        return tableNode;
+    }
+
 
 }

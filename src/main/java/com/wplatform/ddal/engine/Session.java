@@ -37,6 +37,7 @@ import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.excutor.Optional;
+import com.wplatform.ddal.excutor.PreparedExecutorFactory;
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
@@ -1059,6 +1060,11 @@ public class Session implements SessionInterface {
     public DataSourceRepository getDataSourceRepository() {
         return database.getDataSourceRepository();
     }
+    
+    public PreparedExecutorFactory getPreparedExecutorFactory() {
+        return database.getPreparedExecutorFactory();
+    }
+
     
     /**
      * Represents a savepoint (a position in a transaction to where one can roll
