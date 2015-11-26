@@ -24,23 +24,16 @@ import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Database;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.util.StatementBuilder;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class DropTableExecutor extends CommonPreparedExecutor<DropTable> {
+public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
 
-    /**
-     * @param session
-     * @param prepared
-     */
-    public DropTableExecutor(Session session, DropTable prepared) {
-        super(session, prepared);
+    public DropTableExecutor(DropTable prepared) {
+        super(prepared);
     }
 
     @Override
@@ -75,9 +68,6 @@ public class DropTableExecutor extends CommonPreparedExecutor<DropTable> {
             }
         }
         session.getUser().checkRight(table, Right.ALL);
-        if (next.getDropAction() == AlterTableAddConstraint.CASCADE) {
-
-        }
         next = prepared.getNext();
         if (next != null) {
             prepareDrop(next);

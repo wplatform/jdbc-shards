@@ -102,7 +102,7 @@ public class XmlConfigParser {
             String name = xNode.getStringAttribute("name");
             if (StringUtils.isNullOrEmpty(name)) {
                 throw new ParsingException(
-                        "Error parsing ddal-config XML . Cause: group's name required.");
+                        "Error parsing ddal-config XML . Cause: element cluster.shard's name required.");
             }
             shardConfig.setName(name);
             List<XNode> children = xNode.evalNodes("member");
@@ -110,8 +110,13 @@ public class XmlConfigParser {
             for (XNode child : children) {
                 ShardItem shardItem = new ShardItem();
                 String ref = child.getStringAttribute("ref");
-                int wWeight = child.getIntAttribute("wWeight", 1);
-                int rWeight = child.getIntAttribute("rWeight", 1);
+                int wWeight, rWeight;
+                try {
+                    wWeight = child.getIntAttribute("wWeight",1);
+                    rWeight = child.getIntAttribute("rWeight",1);
+                } catch (Exception e) {
+                    throw new ParsingException("incorrect wWeight or rWeight 'value for member");
+                }
                 if (StringUtils.isNullOrEmpty(ref)) {
                     throw new ParsingException("member 's ref is required.");
                 }

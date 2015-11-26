@@ -22,20 +22,16 @@
 
 	<cluster>
 		<shard name="shard1">
-			<master ref="db1m" rWeight="1"/>
-			<slave ref="db1s" rWeight="2"/>
+			<member ref="db1m"/>
 		</shard>
 		<shard name="shard2">
-			<master ref="db2m" rWeight="1"/>
-			<slave ref="db2s" rWeight="2"/>
+			<member ref="db2m"/>
 		</shard>
 		<shard name="shard3">
-			<master ref="db3m" rWeight="1"/>
-			<slave ref="db3s" rWeight="2"/>
+			<member ref="db3m"/>
 		</shard>
 		<shard name="shard4">
-			<master ref="db4m" rWeight="1"/>
-			<slave ref="db4s" rWeight="2"/>
+			<member ref="db4m"/>
 		</shard>
 	</cluster>
 
@@ -43,52 +39,54 @@
 	<dataNodes>
 		<datasource id="db1m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test1" />
-			<property name="username" value="user" />
-			<property name="password" value="abc" />
-		</datasource>
-		<datasource id="db1s" class="org.apache.commons.dbcp.BasicDataSource">
-			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_test1" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db1" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
 		<datasource id="db2m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test2" />
-			<property name="username" value="user" />
-			<property name="password" value="abc" />
-		</datasource>
-		<datasource id="db2s" class="org.apache.commons.dbcp.BasicDataSource">
-			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_test2" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db2" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
 		<datasource id="db3m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test3" />
-			<property name="username" value="user" />
-			<property name="password" value="abc" />
-		</datasource>
-		<datasource id="db3s" class="org.apache.commons.dbcp.BasicDataSource">
-			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_test3" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db3" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
 		<datasource id="db4m" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.74:3306/ddal_test4" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db4" />
+			<property name="username" value="user" />
+			<property name="password" value="abc" />
+		</datasource>
+		<!--
+		<datasource id="db1s" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db1" />
+			<property name="username" value="user" />
+			<property name="password" value="abc" />
+		</datasource>
+		<datasource id="db2s" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_db2" />
+			<property name="username" value="user" />
+			<property name="password" value="abc" />
+		</datasource>
+		<datasource id="db3s" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_db3" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
 		<datasource id="db4s" class="org.apache.commons.dbcp.BasicDataSource">
 			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_test4" />
+			<property name="url" value="jdbc:mysql://10.19.90.77:3306/ddal_db4" />
 			<property name="username" value="user" />
 			<property name="password" value="abc" />
 		</datasource>
+		-->
 	</dataNodes>
 	
 	

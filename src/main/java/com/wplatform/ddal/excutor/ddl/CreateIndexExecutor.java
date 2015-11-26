@@ -20,20 +20,18 @@ package com.wplatform.ddal.excutor.ddl;
 
 import com.wplatform.ddal.command.ddl.DropIndex;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class CreateIndexExecutor extends CommonPreparedExecutor<DropIndex> {
+public class CreateIndexExecutor extends DefineCommandExecutor<DropIndex> {
 
     /**
      * @param session
      * @param prepared
      */
-    public CreateIndexExecutor(Session session, DropIndex prepared) {
-        super(session, prepared);
+    public CreateIndexExecutor(DropIndex prepared) {
+        super(prepared);
     }
 
     @Override

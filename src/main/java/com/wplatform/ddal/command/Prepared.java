@@ -310,6 +310,13 @@ public abstract class Prepared {
     public void setSession(Session currentSession) {
         this.session = currentSession;
     }
+    
+    /**
+     * @return the session
+     */
+    public Session getSession() {
+        return session;
+    }
 
     /**
      * Print information about the statement executed if info trace level is

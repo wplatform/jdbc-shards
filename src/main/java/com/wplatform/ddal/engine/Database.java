@@ -242,7 +242,6 @@ public class Database {
     /**
      * Add a schema object to the database.
      *
-     * @param session the session
      * @param obj     the object to add
      */
     public synchronized void addSchemaObject(SchemaObject obj) {
@@ -253,7 +252,6 @@ public class Database {
     /**
      * Add an object to the database.
      *
-     * @param session the session
      * @param obj     the object to add
      */
     public synchronized void addDatabaseObject(DbObject obj) {
@@ -371,9 +369,6 @@ public class Database {
 
     /**
      * Close the database.
-     *
-     * @param fromShutdownHook true if this method is called from the shutdown
-     *                         hook
      */
     public synchronized void close() {
         if (closing) {
@@ -396,7 +391,9 @@ public class Database {
             }
         }
         try {
-            jdbcExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            if(jdbcExecutor != null) {
+                jdbcExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            }
         } catch (InterruptedException e) {
             trace.error(e, "jdbcExecutor awaitTermination");
         }
@@ -452,8 +449,7 @@ public class Database {
     /**
      * Get all schema objects of the given type.
      *
-     * @param type the object type
-     * @return all objects of that type
+     * @param type the int type
      */
     public ArrayList<SchemaObject> getAllSchemaObjects(int type) {
         ArrayList<SchemaObject> list = New.arrayList();
@@ -465,10 +461,6 @@ public class Database {
 
     /**
      * Get all tables and views.
-     *
-     * @param includeMeta whether to force including the meta data tables (if
-     *                    true, metadata tables are always included; if false, metadata
-     *                    tables are only included if they are already initialized)
      * @return all objects of that type
      */
     public ArrayList<Table> getAllTablesAndViews() {
@@ -501,10 +493,6 @@ public class Database {
 
     /**
      * Get all sessions that are currently connected to the database.
-     *
-     * @param includingSystemSession if the system session should also be
-     *                               included
-     * @return the list of sessions
      */
     public Session[] getSessions() {
         ArrayList<Session> list;

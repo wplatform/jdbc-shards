@@ -18,20 +18,18 @@
 
 package com.wplatform.ddal.excutor.ddl;
 
+import java.util.ArrayList;
+
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.ddl.AlterTableAlterColumn;
 import com.wplatform.ddal.dbobject.Right;
-import com.wplatform.ddal.dbobject.schema.Sequence;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.StatementBuilder;
-import com.wplatform.ddal.util.StringUtils;
 
 /**
  * This executor execute the statements
@@ -46,14 +44,10 @@ import com.wplatform.ddal.util.StringUtils;
  * ALTER TABLE DROP COLUMN
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class AlterTableAlterColumnExecutor extends CommonPreparedExecutor<AlterTableAlterColumn> {
+public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTableAlterColumn> {
 
-    /**
-     * @param session
-     * @param prepared
-     */
-    public AlterTableAlterColumnExecutor(Session session, AlterTableAlterColumn prepared) {
-        super(session, prepared);
+    public AlterTableAlterColumnExecutor(AlterTableAlterColumn prepared) {
+        super(prepared);
     }
 
     @Override
@@ -65,20 +59,32 @@ public class AlterTableAlterColumnExecutor extends CommonPreparedExecutor<AlterT
         TableMate table = (TableMate)parseTable;
         session.getUser().checkRight(table, Right.ALL);
         TableNode[] tableNodes = table.getPartitionNode();
+        Column oldColumn = prepared.getOldColumn();
         int type = prepared.getType();
         switch (type) {
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: 
+        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
+            if (!oldColumn.isNullable()) {
+                break;
+            }
+        }
+        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
+            if (oldColumn.isNullable()) {
+                break;
+            }
+        }
         case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT: 
         case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: 
         case CommandInterface.ALTER_TABLE_ADD_COLUMN: 
-        case CommandInterface.ALTER_TABLE_DROP_COLUMN:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY: {
+        case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
             executeOn(tableNodes);
+            table.loadMataData(session);
             break;
         }
+        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY: {
+            return 0;//not supported.
+        }
         default:
-            DbException.throwInternalError("type=" + type);
+            throw DbException.throwInternalError("type=" + type);
         }
         return 0;
     }
@@ -86,101 +92,68 @@ public class AlterTableAlterColumnExecutor extends CommonPreparedExecutor<AlterT
     
     @Override
     protected String doTranslate(TableNode node) {
-        
-        TableMate table = (TableMate)prepared.getTable();
+        Column oldColumn = prepared.getOldColumn();
         String forTable = node.getCompositeTableName();
         int type = prepared.getType();
         switch (type) {
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
-            StatementBuilder buff = new StatementBuilder("ALTER TABLE");
-            buff.append(forTable).append(" ADD CONSTRAINT ");
-            Column oldColumn = prepared.getOldColumn();
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
-            if (oldColumn.isNullable()) {
-                // no change
-                break;
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
+                StringBuilder buff = new StringBuilder("ALTER TABLE ");
+                buff.append(quoteIdentifier(forTable));
+                buff.append(" CHANGE COLUMN ");
+                buff.append(oldColumn.getSQL()).append(' ');
+                buff.append(oldColumn.getCreateSQL());
+                return buff.toString();
             }
-            checkNullable();
-            oldColumn.setNullable(true);
-            db.updateMeta(session, table);
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT: {
-            StatementBuilder buff = new StatementBuilder("ALTER TABLE");
-            buff.append(" ALTER COLUMN ");
-            buff.append(prepared.getOldColumn().getSQL());
-            buff.append(" SET DEFAULT ");
-            buff.append(prepared.getDefaultExpression().getSQL());
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: {
-            // if the change is only increasing the precision, then we don't
-            // need to copy the table because the length is only a constraint,
-            // and does not affect the storage structure.
-            StatementBuilder buff = new StatementBuilder("ALTER TABLE");
-            buff.append(" ALTER COLUMN ");
-            buff.append(prepared.getOldColumn().getSQL());
-            buff.append(" SET DEFAULT ");
-            buff.append(prepared.getDefaultExpression().getSQL());
-            
-            if (prepared.getOldColumn().isWideningConversion(newColumn)) {
-                convertAutoIncrementColumn(newColumn);
-                oldColumn.copy(newColumn);
-                db.updateMeta(session, table);
-            } else {
-                oldColumn.setSequence(null);
-                oldColumn.setDefaultExpression(session, null);
-                oldColumn.setConvertNullToDefault(false);
-                if (oldColumn.isNullable() && !newColumn.isNullable()) {
-                    checkNoNullValues();
-                } else if (!oldColumn.isNullable() && newColumn.isNullable()) {
-                    checkNullable();
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
+
+                StringBuilder buff = new StringBuilder("ALTER TABLE ");
+                buff.append(quoteIdentifier(forTable));
+                buff.append(" CHANGE COLUMN ");
+                buff.append(oldColumn.getSQL()).append(' ');
+                buff.append(oldColumn.getCreateSQL());
+                return buff.toString();
+            }
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT: {
+                StringBuilder buff = new StringBuilder("ALTER TABLE");
+                buff.append(quoteIdentifier(forTable));
+                buff.append(" ALTER COLUMN ");
+                buff.append(prepared.getOldColumn().getSQL());
+                buff.append(" SET DEFAULT ");
+                buff.append(prepared.getDefaultExpression().getSQL());
+                return buff.toString();
+            }
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: {
+                StringBuilder buff = new StringBuilder("ALTER TABLE");
+                buff.append(quoteIdentifier(forTable));
+                buff.append(" ALTER COLUMN ");
+                buff.append(prepared.getOldColumn().getSQL());
+                buff.append(" SET DEFAULT ");
+                buff.append(prepared.getDefaultExpression().getSQL());
+                return buff.toString();
+            }
+            case CommandInterface.ALTER_TABLE_ADD_COLUMN: {
+                StatementBuilder buff = new StatementBuilder("ALTER TABLE");
+                buff.append(quoteIdentifier(forTable));
+                ArrayList<Column> columnsToAdd = getPrepared().getColumnsToAdd();
+                for (Column column : columnsToAdd) {
+                    buff.appendExceptFirst(", ");
+                    buff.append(" ADD COLUMN ");
+                    buff.append(column.getCreateSQL());
                 }
-                convertAutoIncrementColumn(newColumn);
-                copyData();
+                return buff.toString();
             }
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ADD_COLUMN: {
-            // ifNotExists only supported for single column add
-            if (ifNotExists && columnsToAdd.size() == 1 &&
-                    table.doesColumnExist(columnsToAdd.get(0).getName())) {
-                break;
+            case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
+                StatementBuilder buff = new StatementBuilder("ALTER TABLE");
+                buff.append(quoteIdentifier(forTable));
+                buff.append(" DROP COLUMN ");
+                buff.append(oldColumn.getSQL());
+                return buff.toString();
+
             }
-            for (Column column : columnsToAdd) {
-                if (column.isAutoIncrement()) {
-                    int objId = getObjectId();
-                    column.convertAutoIncrementToSequence(session, getSchema(), objId,
-                            table.isTemporary());
-                }
-            }
-            copyData();
-            break;
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY:
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
-        case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
-            if (table.getColumns().length - columnsToRemove.size() < 1) {
-                throw DbException.get(ErrorCode.CANNOT_DROP_LAST_COLUMN,
-                        columnsToRemove.get(0).getSQL());
-            }
-            table.dropMultipleColumnsConstraintsAndIndexes(session, columnsToRemove);
-            copyData();
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY: {
-            int value = newSelectivity.optimize(session).getValue(session).getInt();
-            oldColumn.setSelectivity(value);
-            db.updateMeta(session, table);
-            break;
-        }
-        default:
-            DbException.throwInternalError("type=" + type);
-        }
-        return 0;
-    
-        
     }
-    
 
 }

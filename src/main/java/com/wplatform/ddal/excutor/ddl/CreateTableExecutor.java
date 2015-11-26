@@ -29,8 +29,6 @@ import com.wplatform.ddal.dbobject.schema.Sequence;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
@@ -41,14 +39,14 @@ import com.wplatform.ddal.value.DataType;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class CreateTableExecutor extends CommonPreparedExecutor<CreateTable> {
+public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
 
     /**
      * @param session
      * @param prepared
      */
-    public CreateTableExecutor(Session session, CreateTable prepared) {
-        super(session, prepared);
+    public CreateTableExecutor(CreateTable prepared) {
+        super(prepared);
     }
 
     @Override

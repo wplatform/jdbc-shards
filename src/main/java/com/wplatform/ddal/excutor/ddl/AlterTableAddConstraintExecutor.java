@@ -27,8 +27,6 @@ import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.IndexColumn;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
@@ -38,14 +36,14 @@ import com.wplatform.ddal.util.StringUtils;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class AlterTableAddConstraintExecutor extends CommonPreparedExecutor<AlterTableAddConstraint> {
+public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<AlterTableAddConstraint> {
 
     /**
      * @param session
      * @param prepared
      */
-    public AlterTableAddConstraintExecutor(Session session, AlterTableAddConstraint prepared) {
-        super(session, prepared);
+    public AlterTableAddConstraintExecutor(AlterTableAddConstraint prepared) {
+        super(prepared);
     }
 
     @Override
