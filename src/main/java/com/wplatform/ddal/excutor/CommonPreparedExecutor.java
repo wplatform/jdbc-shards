@@ -33,6 +33,7 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.ResultInterface;
+import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 
 /**
@@ -131,7 +132,8 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     }
 
 
-    protected static String quoteIdentifier(String forTable) {
-        return Parser.quoteIdentifier(forTable);
+    protected String identifier(String s) {
+        return database.getSettings().databaseToUpper ? StringUtils.toUpperEnglish(s) : s;
+
     }
 }

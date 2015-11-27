@@ -162,8 +162,6 @@ public class TableMate extends Table {
     }
     /**
      * validation the rule columns is in the table columns
-     * @param config
-     * @param columns
      */
     public void validationRuleColumn() {
         if(initException != null) {
@@ -299,7 +297,7 @@ public class TableMate extends Table {
                 String tableName = matadataNode.getCompositeObjectName();
                 String shardName = matadataNode.getShardName();
                 try {
-                    trace.debug("Try to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);
+                    trace.debug("Try to load {0} metadata from table {1}.{2}", getName(), shardName, tableName);
                     DataSourceRepository dsRepository = session.getDataSourceRepository();
                     DataSource dataSource = dsRepository.getDataSourceByShardName(shardName);
                     Optional optional = Optional.build().shardName(shardName).readOnly(false);
@@ -307,7 +305,7 @@ public class TableMate extends Table {
                     tryReadMetaData(conn, tableName);
                     trace.debug("Load the {0} metadata success.", getName());
                 } catch (Exception e) {
-                    trace.debug("Fail to load {0} metadata from table {1}.{2}.", getName(), shardName, tableName);
+                    trace.debug("Fail to load {0} metadata from table {1}.{2}", getName(), shardName, tableName);
                     throw DbException.convert(e);
                 } finally {
                     //JdbcUtils.closeSilently(conn); initSession.close();

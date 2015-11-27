@@ -20,4 +20,53 @@ CREATE TABLE IF NOT EXISTS `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
-ALTER TABLE `orders` FOREIGN KEY `orders_fk`;
+CREATE TABLE `data_types_test` (
+  `col1` INT NOT NULL,
+  `col2` VARCHAR(45) NULL,
+  `col3` DECIMAL(4) NOT NULL,
+  `col4` DATETIME NULL,
+  `col5` BLOB NULL,
+  `col6` DATE NULL,
+  `col7` DOUBLE NULL,
+  `col8` TINYINT(1) NOT NULL DEFAULT 0,
+  `col9` SMALLINT(1) NULL,
+  `col10` CHAR(10) NULL,
+  `col11` NVARCHAR(10) NOT NULL DEFAULT 'test',
+  `col12` YEAR NOT NULL DEFAULT 2001,
+  `col13` BIGINT NULL,
+  `col14` BINARY NULL,
+  `col15` TINYBLOB NULL,
+  `col16` MEDIUMBLOB NULL,
+  `col17` LONGBLOB NULL,
+  `col18` TINYTEXT NULL,
+  `col19` LONGTEXT NULL,
+  `col20` TEXT NULL,
+  PRIMARY KEY (`col1`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE  `constraint_test_parent` (
+  `col1 int not null` int(11) NOT NULL,
+  `col2` int(11) DEFAULT NULL,
+  `col3` varchar(20) DEFAULT NULL,
+  `col4` varchar(200) DEFAULT NULL,
+  `col5` int(1) DEFAULT 0,
+  CONSTRAINT PRIMARY KEY (`col1`),
+  CONSTRAINT UNIQUE KEY (`col2`),
+  KEY USING BTREE (`col3`),
+  CHECK (`col5` IN (1,2,3,4,5))
+
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE  `constraint_test_child` (
+  `col1` int(11) NOT NULL,
+  `col2` int(11) NOT NULL,
+  `col3` varchar(200) DEFAULT NULL,
+  `col4` datetime NOT NULL,
+  `col5` int(1) DEFAULT 0,
+  CONSTRAINT PRIMARY KEY (`col1`),
+  CONSTRAINT UNIQUE KEY (`col2`),
+  CONSTRAINT `orders_fk` FOREIGN KEY (`col3`) REFERENCES `constraint_test_parent` (`col4`)
+  KEY USING BTREE (`col4`),
+  CHECK (`col5` IN (1,2,3,4,5))
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

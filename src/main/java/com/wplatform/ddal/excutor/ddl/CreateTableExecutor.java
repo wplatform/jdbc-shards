@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.wplatform.ddal.command.CommandInterface;
-import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.ddl.AlterTableAddConstraint;
 import com.wplatform.ddal.command.ddl.CreateIndex;
 import com.wplatform.ddal.command.ddl.CreateTable;
@@ -48,7 +47,6 @@ import com.wplatform.ddal.value.DataType;
 public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
 
     /**
-     * @param session
      * @param prepared
      */
     public CreateTableExecutor(CreateTable prepared) {
@@ -168,7 +166,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         if (prepared.isIfNotExists()) {
             buff.append("IF NOT EXISTS ");
         }
-        buff.append(quoteIdentifier(tableNode.getCompositeObjectName()));
+        buff.append(identifier(tableNode.getCompositeObjectName()));
         if (prepared.getComment() != null) {
             buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(prepared.getComment()));
         }
@@ -187,23 +185,23 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 if (stmt.isPrimaryKeyHash()) {
                     buff.append(" USING HASH");
                 }
-                buff.append('(');
+                buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
-                    buff.append(Parser.quoteIdentifier(c.column.getName()));
+                    buff.append(identifier(c.columnName));
                 }
-                buff.append(')');
+                buff.append(")");
                 break;
             }
             case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
                 AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
                 buff.append(" CONSTRAINT UNIQUE KEY");
-                buff.append('(');
+                buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
-                    buff.append(quoteIdentifier(c.column.getName()));
+                    buff.append(identifier(c.column.getName()));
                 }
-                buff.append(')');
+                buff.append(")");
                 break;
             }
             case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
@@ -241,9 +239,9 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                     buff.appendExceptFirst(", ");
                     buff.append(c.getSQL());
                 }
-                buff.append(')');
+                buff.append(")");
                 buff.append(" REFERENCES ");
-                buff.append(quoteIdentifier(refTableName)).append('(');
+                buff.append(identifier(refTableName)).append("(");
                 buff.resetCount();
                 for (IndexColumn r : refCols) {
                     buff.appendExceptFirst(", ");
@@ -262,12 +260,12 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                         buff.append(" USING HASH");
                     }
                 }
-                buff.append('(');
+                buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
-                    buff.append(quoteIdentifier(c.column.getName()));
+                    buff.append(identifier(c.column.getName()));
                 }
-                buff.append(')');                
+                buff.append(")");
                 break;
             }
             default:
@@ -277,13 +275,14 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         buff.append(")");
         if (prepared.getTableEngine() != null) {
             buff.append("ENGINE ");
-            buff.append(StringUtils.quoteIdentifier(prepared.getTableEngine()));
+            buff.append(prepared.getTableEngine());
 
         }
-        if (!prepared.getTableEngineParams().isEmpty()) {
+        ArrayList<String> tableEngineParams = prepared.getTableEngineParams();
+        if (tableEngineParams != null && tableEngineParams.isEmpty()) {
             buff.append("WITH ");
             buff.resetCount();
-            for (String parameter : prepared.getTableEngineParams()) {
+            for (String parameter : tableEngineParams) {
                 buff.appendExceptFirst(", ");
                 buff.append(StringUtils.quoteIdentifier(parameter));
             }

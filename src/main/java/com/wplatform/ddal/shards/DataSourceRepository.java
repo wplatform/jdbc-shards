@@ -72,6 +72,9 @@ public class DataSourceRepository {
         this.validationQuery = database.getSettings().defaultValidationQuery;
         this.validationQueryTimeout = database.getSettings().defaultValidationQueryTimeout;
         this.dataSourceProvider = configuration.getDataSourceProvider();
+        if(dataSourceProvider == null) {
+            throw new IllegalArgumentException();
+        }
         this.trace = database.getTrace(Trace.DATASOURCE);
         Map<String, ShardConfig> shardMapping = configuration.getCluster();
         for (ShardConfig value : shardMapping.values()) {
@@ -108,7 +111,7 @@ public class DataSourceRepository {
     public DataSource getDataSourceByShardName(String shardName) {
         DataSource dataSource = shardMaping.get(shardName);
         if(dataSource == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(shardName + " DataSource not found.");
         }
         return dataSource;
     }

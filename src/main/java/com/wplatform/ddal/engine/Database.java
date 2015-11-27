@@ -24,8 +24,6 @@ import java.util.Set;
 
 import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.config.Configuration;
-import com.wplatform.ddal.config.ConfigurationException;
-import com.wplatform.ddal.config.DataSourceProvider;
 import com.wplatform.ddal.config.SchemaConfig;
 import com.wplatform.ddal.config.TableConfig;
 import com.wplatform.ddal.dbobject.Comment;
@@ -51,6 +49,7 @@ import com.wplatform.ddal.shards.DataSourceRepository;
 import com.wplatform.ddal.util.BitField;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.SourceCompiler;
+import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.CaseInsensitiveMap;
 import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
@@ -112,9 +111,7 @@ public class Database {
         traceSystem.setLevelSystemOut(traceLevelSystemOut);
         trace = traceSystem.getTrace(Trace.DATABASE);
         dsRepository = new DataSourceRepository(this);
-
         openDatabase();
-
     }
 
     private synchronized void openDatabase() {
@@ -129,16 +126,14 @@ public class Database {
         Role publicRole = new Role(this, 0, Constants.PUBLIC_ROLE_NAME, true);
         roles.put(Constants.PUBLIC_ROLE_NAME, publicRole);
 
-        DataSourceProvider dataSourceProvider = configuration.getDataSourceProvider();
-        if (dataSourceProvider == null) {
-            throw new ConfigurationException("No configuration data source.");
-        }
         Session sysSession = createSession(systemUser);
         try {
             SchemaConfig sc = configuration.getSchemaConfig();
             List<TableConfig> ctList = sc.getTables();
             for (TableConfig tableConfig : ctList) {
-                TableMate tableMate = new TableMate(schema, allocateObjectId(), tableConfig.getName());
+                String identifier = tableConfig.getName();
+                identifier = dbSettings.databaseToUpper ? StringUtils.toUpperEnglish(identifier) : identifier;
+                TableMate tableMate = new TableMate(schema, allocateObjectId(), identifier);
                 tableMate.setTableRouter(tableConfig.getTableRouter());
                 tableMate.setShards(tableConfig.getShards());
                 tableMate.setScanLevel(tableConfig.getScanLevel());
@@ -147,7 +142,6 @@ public class Database {
                     tableMate.check();
                     tableMate.validationRuleColumn();
                 }
-
                 this.addSchemaObject(tableMate);
             }
             trace.info("opened {0}", databaseName);

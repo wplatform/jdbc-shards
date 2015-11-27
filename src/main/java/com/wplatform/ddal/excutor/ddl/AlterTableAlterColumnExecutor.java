@@ -98,7 +98,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
         switch (type) {
             case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
                 StringBuilder buff = new StringBuilder("ALTER TABLE ");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 buff.append(" CHANGE COLUMN ");
                 buff.append(oldColumn.getSQL()).append(' ');
                 buff.append(oldColumn.getCreateSQL());
@@ -107,7 +107,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
             case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
 
                 StringBuilder buff = new StringBuilder("ALTER TABLE ");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 buff.append(" CHANGE COLUMN ");
                 buff.append(oldColumn.getSQL()).append(' ');
                 buff.append(oldColumn.getCreateSQL());
@@ -115,7 +115,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
             }
             case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT: {
                 StringBuilder buff = new StringBuilder("ALTER TABLE");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 buff.append(" ALTER COLUMN ");
                 buff.append(prepared.getOldColumn().getSQL());
                 buff.append(" SET DEFAULT ");
@@ -124,7 +124,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
             }
             case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: {
                 StringBuilder buff = new StringBuilder("ALTER TABLE");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 buff.append(" ALTER COLUMN ");
                 buff.append(prepared.getOldColumn().getSQL());
                 buff.append(" SET DEFAULT ");
@@ -133,7 +133,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
             }
             case CommandInterface.ALTER_TABLE_ADD_COLUMN: {
                 StatementBuilder buff = new StatementBuilder("ALTER TABLE");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 ArrayList<Column> columnsToAdd = getPrepared().getColumnsToAdd();
                 for (Column column : columnsToAdd) {
                     buff.appendExceptFirst(", ");
@@ -144,7 +144,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
             }
             case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
                 StatementBuilder buff = new StatementBuilder("ALTER TABLE");
-                buff.append(quoteIdentifier(forTable));
+                buff.append(identifier(forTable));
                 buff.append(" DROP COLUMN ");
                 buff.append(oldColumn.getSQL());
                 return buff.toString();

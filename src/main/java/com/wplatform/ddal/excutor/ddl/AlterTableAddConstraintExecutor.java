@@ -122,7 +122,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildUnique(String forTable, String uniqueType) {
         StatementBuilder buff = new StatementBuilder("ALTER TABLE ");
-        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
+        buff.append(identifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         // MySQL constraintName is optional
         if (!StringUtils.isNullOrEmpty(constraintName)) {
@@ -135,7 +135,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         buff.append('(');
         for (IndexColumn c : prepared.getIndexColumns()) {
             buff.appendExceptFirst(", ");
-            buff.append(quoteIdentifier(c.column.getName()));
+            buff.append(identifier(c.column.getName()));
         }
         buff.append(')');
         return buff.toString();
@@ -143,7 +143,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildCheck(String forTable) {
         StringBuilder buff = new StringBuilder("ALTER TABLE ");
-        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
+        buff.append(identifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         if (!StringUtils.isNullOrEmpty(constraintName)) {
             buff.append(constraintName);
@@ -155,7 +155,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
 
     private String doBuildReferences(String forTable, String forRefTable) {
         StatementBuilder buff = new StatementBuilder("ALTER TABLE ");
-        buff.append(quoteIdentifier(forTable)).append(" ADD CONSTRAINT ");
+        buff.append(identifier(forTable)).append(" ADD CONSTRAINT ");
         String constraintName = prepared.getConstraintName();
         if (!StringUtils.isNullOrEmpty(constraintName)) {
             buff.append(constraintName);

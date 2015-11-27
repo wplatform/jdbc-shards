@@ -63,6 +63,11 @@ public abstract class BaseTestCase {
     public static final String BASE_TEST_DIR = "./data";
 
     /**
+     * The base directory.
+     */
+    public static final String BASE_TEST_CONFIGLOCATION = "/config/ddal-config.xml";
+
+    /**
      * An id used to create unique file names.
      */
     protected static int uniqueId;
@@ -80,9 +85,8 @@ public abstract class BaseTestCase {
     private final LinkedList<byte[]> memory = new LinkedList<byte[]>();
     protected DataSource dataSource;
 
-    public BaseTestCase() {
+    public BaseTestCase(String configLocation) {
         try {
-            String configLocation = "/config/ddal-config.xml";
             JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setConfigLocation(configLocation);
             dataSource.setStdoutLevel("DEBUG");
@@ -96,8 +100,11 @@ public abstract class BaseTestCase {
         }
     }
 
+    public BaseTestCase() {
+        this(BASE_TEST_CONFIGLOCATION);
+    }
     @After
-    public void disorty() {
+    public void destory() {
         try {
             ((JdbcDataSource) dataSource).close();
         } catch (Exception e) {

@@ -20,7 +20,7 @@
 
 <!ELEMENT settings (property*)>
 
-<!ELEMENT schema (tableGroup* , table*)>
+<!ELEMENT schema (tableGroup*, table*)>
 <!ATTLIST schema
 name CDATA #REQUIRED
 shard CDATA #IMPLIED

@@ -51,7 +51,7 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
         if(prepared.isIfExists()) {
             sql.append(" IF EXISTS");
         }
-        sql.append(" ").append(quoteIdentifier(forTable));
+        sql.append(" ").append(identifier(forTable));
         if(prepared.getDropAction() == AlterTableAddConstraint.CASCADE) {
             sql.append(" CASCADE");
         }
