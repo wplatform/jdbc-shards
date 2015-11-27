@@ -274,10 +274,16 @@ public class TableMate extends Table {
             throw new IllegalStateException();
         }
         TableNode matadataNode = nodes[0];
+        String tableName = matadataNode.getCompositeObjectName();
+        String shardName = matadataNode.getShardName();
         try {
+            trace.debug("Try to load {0} metadata from table {1}.{2}", getName(), shardName, tableName);
             readMataData(session, matadataNode);
+            trace.debug("Load the {0} metadata success.", getName());
             initException = null;
         } catch (DbException e) {
+            trace.debug("Fail to load {0} metadata from table {1}.{2}. error: {3}",
+                    getName(), shardName, tableName, e.getCause().getMessage());
             initException = e;
             Column[] cols = { };
             setColumns(cols);
@@ -297,18 +303,15 @@ public class TableMate extends Table {
                 String tableName = matadataNode.getCompositeObjectName();
                 String shardName = matadataNode.getShardName();
                 try {
-                    trace.debug("Try to load {0} metadata from table {1}.{2}", getName(), shardName, tableName);
                     DataSourceRepository dsRepository = session.getDataSourceRepository();
                     DataSource dataSource = dsRepository.getDataSourceByShardName(shardName);
                     Optional optional = Optional.build().shardName(shardName).readOnly(false);
                     conn = session.applyConnection(dataSource, optional);
                     tryReadMetaData(conn, tableName);
-                    trace.debug("Load the {0} metadata success.", getName());
                 } catch (Exception e) {
-                    trace.debug("Fail to load {0} metadata from table {1}.{2}", getName(), shardName, tableName);
                     throw DbException.convert(e);
                 } finally {
-                    //JdbcUtils.closeSilently(conn); initSession.close();
+                    JdbcUtils.closeSilently(conn);
                 }
             } catch (DbException e) {
                 if (retry >= MAX_RETRY) {

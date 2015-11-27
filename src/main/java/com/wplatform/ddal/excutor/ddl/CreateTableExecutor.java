@@ -168,7 +168,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         }
         buff.append(identifier(tableNode.getCompositeObjectName()));
         if (prepared.getComment() != null) {
-            buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(prepared.getComment()));
+            //buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(prepared.getComment()));
         }
         buff.append("(");
         for (Column column : prepared.getColumns()) {
@@ -185,6 +185,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 if (stmt.isPrimaryKeyHash()) {
                     buff.append(" USING HASH");
                 }
+                buff.resetCount();
                 buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
@@ -196,10 +197,11 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
             case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
                 AlterTableAddConstraint stmt = (AlterTableAddConstraint)command;
                 buff.append(" CONSTRAINT UNIQUE KEY");
+                buff.resetCount();
                 buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
-                    buff.append(identifier(c.column.getName()));
+                    buff.append(identifier(c.columnName));
                 }
                 buff.append(")");
                 break;
@@ -228,16 +230,17 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                         }
                         refTableName = relation.getCompositeObjectName();
                     } else if(partitionNode.length == 1){
-                        refTableName = partitionNode[1].getCompositeObjectName();
+                        refTableName = partitionNode[0].getCompositeObjectName();
                     }
                 }
                 
                 IndexColumn[] cols = stmt.getIndexColumns();
                 IndexColumn[] refCols = stmt.getRefIndexColumns();
+                buff.resetCount();
                 buff.append(" CONSTRAINT FOREIGN KEY(");
                 for (IndexColumn c : cols) {
                     buff.appendExceptFirst(", ");
-                    buff.append(c.getSQL());
+                    buff.append(c.columnName);
                 }
                 buff.append(")");
                 buff.append(" REFERENCES ");
@@ -245,9 +248,9 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 buff.resetCount();
                 for (IndexColumn r : refCols) {
                     buff.appendExceptFirst(", ");
-                    buff.append(r.getSQL());
+                    buff.append(r.columnName);
                 }
-                
+                buff.append(")");
                 break;
             }
             case CommandInterface.CREATE_INDEX: {
@@ -260,10 +263,11 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                         buff.append(" USING HASH");
                     }
                 }
+                buff.resetCount();
                 buff.append("(");
                 for (IndexColumn c : stmt.getIndexColumns()) {
                     buff.appendExceptFirst(", ");
-                    buff.append(identifier(c.column.getName()));
+                    buff.append(identifier(c.columnName));
                 }
                 buff.append(")");
                 break;
@@ -274,7 +278,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         }
         buff.append(")");
         if (prepared.getTableEngine() != null) {
-            buff.append("ENGINE ");
+            buff.append(" ENGINE = ");
             buff.append(prepared.getTableEngine());
 
         }
@@ -286,6 +290,10 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 buff.appendExceptFirst(", ");
                 buff.append(StringUtils.quoteIdentifier(parameter));
             }
+        }
+        if(prepared.getCharset() != null) {
+            buff.append(" DEFAULT CHARACTER SET = ");
+            buff.append(prepared.getCharset());
         }
         return buff.toString();
 

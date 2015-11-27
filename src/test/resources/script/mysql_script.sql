@@ -65,8 +65,11 @@ CREATE TABLE  `constraint_test_child` (
   `col4` datetime NOT NULL,
   `col5` int(1) DEFAULT 0,
   CONSTRAINT PRIMARY KEY (`col1`),
-  CONSTRAINT UNIQUE KEY (`col2`),
-  CONSTRAINT `orders_fk` FOREIGN KEY (`col3`) REFERENCES `constraint_test_parent` (`col4`)
-  KEY USING BTREE (`col4`),
+   UNIQUE KEY (`col2`),
+  CONSTRAINT FOREIGN KEY (`col3`) REFERENCES(`col4`),
+  KEY(`col4`),
   CHECK (`col5` IN (1,2,3,4,5))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE  test (   `col1 int not null` int(11) NOT NULL,   `col2` int(11) DEFAULT NULL,   `col3` varchar(20) DEFAULT NULL,   `col4` varchar(200) DEFAULT NULL,   `col5` int(1) DEFAULT 0,   PRIMARY KEY(`col1`),  UNIQUE KEY(`col2`),   KEY USING BTREE (`col3`),   CHECK (`col5` IN (1,2,3,4,5))  ) ENGINE=InnoDB DEFAULT CHARSET=latin1

@@ -63,11 +63,6 @@ public class DropTable extends SchemaCommand {
         this.tableName = tableName;
     }
 
-    @Override
-    public int update() {
-        return 0;
-    }
-
     public void setDropAction(int dropAction) {
         this.dropAction = dropAction;
         if (next != null) {

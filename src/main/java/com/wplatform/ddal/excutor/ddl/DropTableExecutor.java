@@ -80,8 +80,7 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
         if (table != null) {
             TableNode[] nodes = table.getPartitionNode();
             executeOn(nodes);
-            Database db = session.getDatabase();
-            db.removeSchemaObject(session, table);
+            table.loadMataData(session);
         }
         next = prepared.getNext();
         if (next != null) {

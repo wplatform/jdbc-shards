@@ -1048,12 +1048,15 @@ public class Session implements SessionInterface {
         if (conn.getAutoCommit() != getAutoCommit()) {
             conn.setAutoCommit(getAutoCommit());
         }
-        if (conn.getTransactionIsolation() != getTransactionIsolation()) {
-            conn.setTransactionIsolation(getTransactionIsolation());
+        if (getTransactionIsolation() != 0) {
+            if (conn.getTransactionIsolation() != getTransactionIsolation()) {
+                conn.setTransactionIsolation(getTransactionIsolation());
+            }
         }
         if (conn.isReadOnly() != isReadOnly()) {
             conn.setReadOnly(isReadOnly());
         }
+
         return conn;
     }
 

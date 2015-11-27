@@ -49,7 +49,7 @@ public class JdbcUpdateWorker extends JdbcWorker<Integer> {
             conn = session.applyConnection(dataSource, optional);
             attach(conn);
             if (trace.isDebugEnabled()) {
-                trace.debug("{0} Preparing: {};", shardName, sql);
+                trace.debug("{0} Preparing: {1};", shardName, sql);
             }
             stmt = conn.prepareStatement(sql);
             attach(stmt);
