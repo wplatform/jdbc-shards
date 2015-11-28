@@ -396,7 +396,7 @@ public abstract class Query extends Prepared {
      * @param target the target result (null will return the result)
      * @return the result set (if the target is not set).
      */
-    LocalResult query(int limit, ResultTarget target) {
+    public LocalResult query(int limit, ResultTarget target) {
         if (noCache) {
             return queryWithoutCache(limit, target);
         }

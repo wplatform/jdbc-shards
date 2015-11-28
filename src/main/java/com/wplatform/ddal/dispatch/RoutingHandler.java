@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.TableMate;
+import com.wplatform.ddal.dispatch.function.PartitionFunction;
 import com.wplatform.ddal.dispatch.rule.RoutingResult;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.result.SearchRow;
@@ -30,7 +31,9 @@ import com.wplatform.ddal.result.SearchRow;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface RoutingHandler {
-
+    
+    PartitionFunction getPartitionFunction(TableMate table);
+    
     RoutingResult doRoute(TableMate table, SearchRow row);
 
     RoutingResult doRoute(TableMate table, SearchRow stard, SearchRow end);

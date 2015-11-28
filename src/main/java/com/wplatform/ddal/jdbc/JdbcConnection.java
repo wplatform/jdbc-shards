@@ -734,6 +734,7 @@ public class JdbcConnection extends TraceObject implements Connection {
                 debugCode("setReadOnly(" + readOnly + ");");
             }
             checkClosed();
+            session.setReadOnly(readOnly);
         } catch (Exception e) {
             throw logAndConvert(e);
         }

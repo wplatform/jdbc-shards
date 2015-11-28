@@ -212,5 +212,28 @@ public class Update extends Prepared {
     public boolean isCacheable() {
         return true;
     }
+    
+    
+    //getter
+    public ArrayList<Column> getColumns() {
+        return columns;
+    }
+
+    public HashMap<Column, Expression> getExpressionMap() {
+        return expressionMap;
+    }
+
+    public Expression getCondition() {
+        return condition;
+    }
+
+    public TableFilter getTableFilter() {
+        return tableFilter;
+    }
+
+    public Expression getLimitExpr() {
+        return limitExpr;
+    }
+    
 
 }

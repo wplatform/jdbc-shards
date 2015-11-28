@@ -21,6 +21,8 @@ package com.wplatform.ddal.dispatch.rule;
 import java.io.Serializable;
 import java.util.List;
 
+import com.wplatform.ddal.dispatch.function.PartitionFunction;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
@@ -30,6 +32,7 @@ public class RuleExpression implements Serializable {
     private final TableRouter tableRouter;
     private List<RuleColumn> ruleColumns;
     private String expression;
+    private PartitionFunction function;
 
     /**
      * @param tableRouter
@@ -72,6 +75,12 @@ public class RuleExpression implements Serializable {
      */
     public TableRouter getTableRouter() {
         return tableRouter;
+    }
+    /**
+     * @return the function
+     */
+    public PartitionFunction getFunction() {
+        return function;
     }
 
 

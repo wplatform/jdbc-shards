@@ -23,7 +23,6 @@ import com.wplatform.ddal.command.ddl.DropTable;
 import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 
@@ -80,7 +79,7 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
         if (table != null) {
             TableNode[] nodes = table.getPartitionNode();
             executeOn(nodes);
-            table.loadMataData(session);
+            table.markDeleted();
         }
         next = prepared.getNext();
         if (next != null) {

@@ -21,8 +21,6 @@ import com.wplatform.ddal.command.Command;
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.expression.Expression;
-import com.wplatform.ddal.command.expression.Parameter;
-import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.Table;
@@ -30,10 +28,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.ResultInterface;
-import com.wplatform.ddal.result.Row;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
-import com.wplatform.ddal.value.Value;
 
 /**
  * This class represents the MySQL-compatibility REPLACE statement
@@ -84,124 +80,6 @@ public class Replace extends Prepared {
         list.add(expr);
     }
 
-    @Override
-    public int update() {
-        int count;
-        session.getUser().checkRight(table, Right.INSERT);
-        session.getUser().checkRight(table, Right.UPDATE);
-        setCurrentRowNumber(0);
-        if (list.size() > 0) {
-            count = 0;
-            for (int x = 0, size = list.size(); x < size; x++) {
-                setCurrentRowNumber(x + 1);
-                Expression[] expr = list.get(x);
-                Row newRow = table.getTemplateRow();
-                for (int i = 0, len = columns.length; i < len; i++) {
-                    Column c = columns[i];
-                    int index = c.getColumnId();
-                    Expression e = expr[i];
-                    if (e != null) {
-                        // e can be null (DEFAULT)
-                        try {
-                            Value v = c.convert(e.getValue(session));
-                            newRow.setValue(index, v);
-                        } catch (DbException ex) {
-                            throw setRow(ex, count, getSQL(expr));
-                        }
-                    }
-                }
-                replace(newRow);
-                count++;
-            }
-        } else {
-            ResultInterface rows = query.query(0);
-            count = 0;
-            //table.lock(session, true, false);
-            while (rows.next()) {
-                count++;
-                Value[] r = rows.currentRow();
-                Row newRow = table.getTemplateRow();
-                setCurrentRowNumber(count);
-                for (int j = 0; j < columns.length; j++) {
-                    Column c = columns[j];
-                    int index = c.getColumnId();
-                    try {
-                        Value v = c.convert(r[j]);
-                        newRow.setValue(index, v);
-                    } catch (DbException ex) {
-                        throw setRow(ex, count, getSQL(r));
-                    }
-                }
-                replace(newRow);
-            }
-            rows.close();
-        }
-        return count;
-    }
-
-    private void replace(Row row) {
-        int count = update(row);
-        if (count == 0) {
-            try {
-                table.validateConvertUpdateSequence(session, row);
-                //boolean done = table.fireBeforeRow(session, null, row);
-                //if (!done) {
-                //    table.lock(session, true, false);
-                //    table.addRow(session, row);
-                //    table.fireAfterRow(session, null, row, false);
-                //}
-            } catch (DbException e) {
-                if (e.getErrorCode() == ErrorCode.DUPLICATE_KEY_1) {
-                    // possibly a concurrent replace or insert
-                    Index index = (Index) e.getSource();
-                    if (index != null) {
-                        // verify the index columns match the key
-                        Column[] indexColumns = index.getColumns();
-                        boolean indexMatchesKeys = false;
-                        if (indexColumns.length <= keys.length) {
-                            for (int i = 0; i < indexColumns.length; i++) {
-                                if (indexColumns[i] != keys[i]) {
-                                    indexMatchesKeys = false;
-                                    break;
-                                }
-                            }
-                        }
-                        if (indexMatchesKeys) {
-                            throw DbException.get(ErrorCode.CONCURRENT_UPDATE_1, table.getName());
-                        }
-                    }
-                }
-                throw e;
-            }
-        } else if (count != 1) {
-            throw DbException.get(ErrorCode.DUPLICATE_KEY_1, table.getSQL());
-        }
-    }
-
-    private int update(Row row) {
-        // if there is no valid primary key,
-        // the statement degenerates to an INSERT
-        if (update == null) {
-            return 0;
-        }
-        ArrayList<Parameter> k = update.getParameters();
-        for (int i = 0; i < columns.length; i++) {
-            Column col = columns[i];
-            Value v = row.getValue(col.getColumnId());
-            Parameter p = k.get(i);
-            p.setValue(v);
-        }
-        for (int i = 0; i < keys.length; i++) {
-            Column col = keys[i];
-            Value v = row.getValue(col.getColumnId());
-            if (v == null) {
-                throw DbException.get(ErrorCode.COLUMN_CONTAINS_NULL_VALUES_1, col.getSQL());
-            }
-            Parameter p = k.get(columns.length + i);
-            p.setValue(v);
-        }
-        return update.update();
-    }
 
     @Override
     public String getPlanSQL() {
@@ -321,6 +199,32 @@ public class Replace extends Prepared {
     @Override
     public boolean isCacheable() {
         return true;
+    }
+    
+    //getter
+    
+    public ArrayList<Expression[]> getList() {
+        return list;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Column[] getColumns() {
+        return columns;
+    }
+
+    public Column[] getKeys() {
+        return keys;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public Prepared getUpdate() {
+        return update;
     }
 
 }

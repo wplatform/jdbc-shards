@@ -18,18 +18,11 @@ package com.wplatform.ddal.command.dml;
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.expression.Expression;
-import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.PlanItem;
-import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.ResultInterface;
-import com.wplatform.ddal.result.Row;
-import com.wplatform.ddal.result.RowList;
 import com.wplatform.ddal.util.StringUtils;
-import com.wplatform.ddal.value.Value;
-import com.wplatform.ddal.value.ValueNull;
 
 /**
  * This class represents the statement
@@ -55,55 +48,6 @@ public class Delete extends Prepared {
 
     public void setCondition(Expression condition) {
         this.condition = condition;
-    }
-
-    @Override
-    public int update() {
-        throw DbException.getUnsupportedException("TODO");
-    }
-
-    public int deleteRows() {
-        tableFilter.startQuery(session);
-        tableFilter.reset();
-        Table table = tableFilter.getTable();
-        session.getUser().checkRight(table, Right.DELETE);
-        //table.lock(session, true, false);
-        RowList rows = new RowList(session);
-        int limitRows = -1;
-        if (limitExpr != null) {
-            Value v = limitExpr.getValue(session);
-            if (v != ValueNull.INSTANCE) {
-                limitRows = v.getInt();
-            }
-        }
-        try {
-            setCurrentRowNumber(0);
-            int count = 0;
-            while (limitRows != 0 && tableFilter.next()) {
-                setCurrentRowNumber(rows.size() + 1);
-                if (condition == null || Boolean.TRUE.equals(
-                        condition.getBooleanValue(session))) {
-                    Row row = tableFilter.get();
-                    rows.add(row);
-                    count++;
-                    if (limitRows >= 0 && count >= limitRows) {
-                        break;
-                    }
-                }
-            }
-            int rowScanCount = 0;
-            for (rows.reset(); rows.hasNext(); ) {
-                if ((++rowScanCount & 127) == 0) {
-                    checkCanceled();
-                }
-                Row row = rows.next();
-                //table.removeRow(session, row);
-            }
-
-            return count;
-        } finally {
-            rows.close();
-        }
     }
 
     @Override
@@ -156,6 +100,19 @@ public class Delete extends Prepared {
     @Override
     public boolean isCacheable() {
         return true;
+    }
+    
+    // getter
+    public Expression getCondition() {
+        return condition;
+    }
+
+    public TableFilter getTableFilter() {
+        return tableFilter;
+    }
+
+    public Expression getLimitExpr() {
+        return limitExpr;
     }
 
 }

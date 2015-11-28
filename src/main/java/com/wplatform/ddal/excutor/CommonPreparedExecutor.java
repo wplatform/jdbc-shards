@@ -22,12 +22,10 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.dispatch.RoutingHandler;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
@@ -41,12 +39,10 @@ import com.wplatform.ddal.value.Value;
  */
 public abstract class CommonPreparedExecutor<T extends Prepared> implements PreparedExecutor {
 
-    protected T prepared;
-    protected Session session;
-    protected Database database;
-    protected ThreadPoolExecutor jdbcExecutor;
-    protected RoutingHandler routingHandler;
-
+    protected final T prepared;
+    protected final Session session;
+    protected final Database database;
+    protected final ThreadPoolExecutor jdbcExecutor;
     /**
      * @param session
      * @param prepared
@@ -58,6 +54,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         this.database = session.getDatabase();
         this.jdbcExecutor = session.getDataSourceRepository().getJdbcExecutor();
     }
+
     /**
      * Execute the query.
      *
@@ -90,12 +87,12 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
      */
     public TableMate getTableMate(String tableName) {
         TableMate table = findTableMate(tableName);
-        if(table != null) {
+        if (table != null) {
             return table;
         }
         throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
     }
-    
+
     /**
      * @param tableName
      */
@@ -118,7 +115,15 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         }
         return null;
     }
-    
+
+    public TableMate castTableMate(Table table) {
+        if (table instanceof TableMate) {
+            return (TableMate) table;
+        }
+        String className = table == null ? "null" : table.getClass().getName();
+        throw new IllegalStateException("Type mismatch:" + className);
+    }
+
     protected JdbcWorker<Integer> createUpdateWorker(String shardName, String sql, List<Value> params) {
         return new JdbcUpdateWorker(session, shardName, sql, params);
     }
@@ -127,10 +132,9 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         return new JdbcQueryWorker(session, shardName, sql, params, maxrows);
     }
 
-    protected JdbcWorker<Integer[]> createBatchUpdateWorker(String shardName, String sql, List<Value>[] array) {
+    protected JdbcWorker<Integer[]> createBatchUpdateWorker(String shardName, String sql, List<List<Value>> array) {
         return new BatchUpdateWorker(session, shardName, sql, array);
     }
-
 
     protected String identifier(String s) {
         return database.getSettings().databaseToUpper ? StringUtils.toUpperEnglish(s) : s;

@@ -25,6 +25,7 @@ import com.wplatform.ddal.command.expression.Comparison;
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.TableMate;
+import com.wplatform.ddal.dispatch.function.PartitionFunction;
 import com.wplatform.ddal.dispatch.rule.*;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
@@ -297,6 +298,13 @@ public class RoutingHandlerImpl implements RoutingHandler {
             comp = -comp;
         }
         return comp > 0 ? a : b;
+    }
+
+
+    @Override
+    public PartitionFunction getPartitionFunction(TableMate table) {
+        RuleExpression ruleExpression = table.getTableRouter().getRuleExpression();
+        return ruleExpression.getFunction();
     }
 
 }

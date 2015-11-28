@@ -81,7 +81,7 @@ public abstract class Prepared {
      * @param values the value list
      * @return the SQL snippet
      */
-    protected static String getSQL(Value[] values) {
+    public static String getSQL(Value[] values) {
         StatementBuilder buff = new StatementBuilder();
         for (Value v : values) {
             buff.appendExceptFirst(", ");
@@ -98,7 +98,7 @@ public abstract class Prepared {
      * @param list the expression list
      * @return the SQL snippet
      */
-    protected static String getSQL(Expression[] list) {
+    public static String getSQL(Expression[] list) {
         StatementBuilder buff = new StatementBuilder();
         for (Expression e : list) {
             buff.appendExceptFirst(", ");
@@ -371,7 +371,7 @@ public abstract class Prepared {
      *
      * @param rowNumber the row number
      */
-    protected void setCurrentRowNumber(int rowNumber) {
+    public void setCurrentRowNumber(int rowNumber) {
         if ((++rowScanCount & 127) == 0) {
             checkCanceled();
         }
@@ -396,7 +396,7 @@ public abstract class Prepared {
      * @param values the values of the row
      * @return the exception
      */
-    protected DbException setRow(DbException e, int rowId, String values) {
+    public DbException setRow(DbException e, int rowId, String values) {
         StringBuilder buff = new StringBuilder();
         if (sqlStatement != null) {
             buff.append(sqlStatement);

@@ -59,23 +59,21 @@ public class TableMate extends Table {
 
     private static final int MAX_RETRY = 2;
     private static final long ROW_COUNT_APPROXIMATION = 100000;
-    
+
     private final boolean globalTemporary;
     private final ArrayList<Index> indexes = New.arrayList();
     private Index scanIndex;
-    
-    
+
     private TableRouter tableRouter;
     private TableNode[] shards;
     private int scanLevel;
-    
+
     private DbException initException;
     private boolean storesLowerCase;
     private boolean storesMixedCase;
     private boolean storesMixedCaseQuoted;
     private boolean supportsMixedCaseIdentifiers;
-    
-    
+
     public TableMate(CreateTableData data) {
         super(data.schema, data.id, data.tableName);
         this.globalTemporary = data.globalTemporary;
@@ -86,12 +84,12 @@ public class TableMate extends Table {
         scanIndex = new IndexMate(this, data.id, null, IndexColumn.wrap(cols), IndexType.createScan());
         indexes.add(scanIndex);
     }
-    
+
     public TableMate(Schema schema, int id, String name) {
         super(schema, id, name);
         this.globalTemporary = false;
     }
-    
+
     /**
      * @return the scanIndex
      */
@@ -133,7 +131,7 @@ public class TableMate extends Table {
     public void setScanLevel(int scanLevel) {
         this.scanLevel = scanLevel;
     }
-    
+
     /**
      * @return the shards
      */
@@ -153,48 +151,56 @@ public class TableMate extends Table {
      * @see com.wplatform.ddal.dispatch.rule.TableRouter#getPartition()
      */
     public TableNode[] getPartitionNode() {
-        if(tableRouter != null) {
+        if (tableRouter != null) {
             List<TableNode> partition = tableRouter.getPartition();
             return partition.toArray(new TableNode[partition.size()]);
         }
         return shards;
-        
+
     }
+
     /**
      * validation the rule columns is in the table columns
      */
     public void validationRuleColumn() {
-        if(initException != null) {
-           return; 
+        if (initException != null) {
+            return;
         }
-        if(tableRouter != null) {
+        if (tableRouter != null) {
             for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
                 Column matched = null;
                 for (Column column : columns) {
                     String colName = column.getName();
-                    if(colName.equalsIgnoreCase(ruleCol.getName())) {
+                    if (colName.equalsIgnoreCase(ruleCol.getName())) {
                         matched = column;
                         break;
-                    }                
+                    }
                 }
-                if(matched == null){
-                    throw DbException.throwInternalError("The rule column " + ruleCol
-                            + " does not exist in "+ getName() + " table." );
+                if (matched == null) {
+                    throw DbException.throwInternalError(
+                            "The rule column " + ruleCol + " does not exist in " + getName() + " table.");
                 }
             }
         }
     }
 
-
-
     public void check() {
-        if(initException != null) {
+        if (initException != null) {
+            Column[] cols = {};
+            setColumns(cols);
             throw initException;
         }
     }
-    
+
     public boolean isMock() {
         return initException != null;
+    }
+
+    public void markDeleted() {
+        Column[] cols = {};
+        setColumns(cols);
+        indexes.clear();
+        initException = DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, this.getSQL());
     }
 
     @Override
@@ -222,8 +228,6 @@ public class TableMate extends Table {
         return indexes;
     }
 
-    /* (non-Javadoc)
-     * @see com.suning.snfddal.dbobject.table.Table#isDeterministic() */
     @Override
     public boolean isDeterministic() {
         return false;
@@ -241,12 +245,12 @@ public class TableMate extends Table {
 
     @Override
     public long getRowCountApproximation() {
-        if(this.tableRouter == null) {
+        if (this.tableRouter == null) {
             return ROW_COUNT_APPROXIMATION;
         } else {
             return tableRouter.getPartition().size() * ROW_COUNT_APPROXIMATION;
         }
-        
+
     }
 
     @Override
@@ -258,19 +262,18 @@ public class TableMate extends Table {
     public Index getScanIndex(Session session) {
         return scanIndex;
     }
-    
+
     private Index addIndex(ArrayList<Column> list, IndexType indexType) {
         Column[] cols = new Column[list.size()];
         list.toArray(cols);
         Index index = new IndexMate(this, 0, null, IndexColumn.wrap(cols), indexType);
         indexes.add(index);
         return index;
-   }
-    
-    
+    }
+
     public void loadMataData(Session session) {
         TableNode[] nodes = getPartitionNode();
-        if(nodes == null || nodes.length < 1) {
+        if (nodes == null || nodes.length < 1) {
             throw new IllegalStateException();
         }
         TableNode matadataNode = nodes[0];
@@ -282,13 +285,12 @@ public class TableMate extends Table {
             trace.debug("Load the {0} metadata success.", getName());
             initException = null;
         } catch (DbException e) {
-            trace.debug("Fail to load {0} metadata from table {1}.{2}. error: {3}",
-                    getName(), shardName, tableName, e.getCause().getMessage());
+            trace.debug("Fail to load {0} metadata from table {1}.{2}. error: {3}", getName(), shardName, tableName,
+                    e.getCause().getMessage());
             initException = e;
-            Column[] cols = { };
+            Column[] cols = {};
             setColumns(cols);
-            scanIndex = new IndexMate(this, 0, null, IndexColumn.wrap(cols),
-                    IndexType.createNonUnique());
+            scanIndex = new IndexMate(this, 0, null, IndexColumn.wrap(cols), IndexType.createNonUnique());
             indexes.add(scanIndex);
         }
     }
@@ -297,7 +299,7 @@ public class TableMate extends Table {
      * @param session
      */
     public void readMataData(Session session, TableNode matadataNode) {
-        for (int retry = 0; ; retry++) {
+        for (int retry = 0;; retry++) {
             try {
                 Connection conn = null;
                 String tableName = matadataNode.getCompositeObjectName();
@@ -319,10 +321,9 @@ public class TableMate extends Table {
                 }
             }
         }
-        
+
     }
-    
-    
+
     private void tryReadMetaData(Connection conn, String tableName) throws SQLException {
 
         DatabaseMetaData meta = conn.getMetaData();
@@ -406,10 +407,9 @@ public class TableMate extends Table {
         columnList.toArray(cols);
         setColumns(cols);
         int id = getId();
-        scanIndex = new IndexMate(this, id, null, IndexColumn.wrap(cols),
-                IndexType.createNonUnique());
+        scanIndex = new IndexMate(this, id, null, IndexColumn.wrap(cols), IndexType.createNonUnique());
         indexes.add(scanIndex);
-        //load primary keys
+        // load primary keys
         try {
             rs = meta.getPrimaryKeys(null, null, tableName);
         } catch (Exception e) {
@@ -486,9 +486,7 @@ public class TableMate extends Table {
             addIndex(list, indexType);
         }
     }
-    
-    
-    
+
     private String convertColumnName(String columnName) {
         if ((storesMixedCase || storesLowerCase) && columnName.equals(StringUtils.toLowerEnglish(columnName))) {
             columnName = StringUtils.toUpperEnglish(columnName);
@@ -501,28 +499,27 @@ public class TableMate extends Table {
         }
         return columnName;
     }
-    
-    
+
     private static long convertPrecision(int sqlType, long precision) {
         // workaround for an Oracle problem:
         // for DATE columns, the reported precision is 7
         // for DECIMAL columns, the reported precision is 0
         switch (sqlType) {
-            case Types.DECIMAL:
-            case Types.NUMERIC:
-                if (precision == 0) {
-                    precision = 65535;
-                }
-                break;
-            case Types.DATE:
-                precision = Math.max(ValueDate.PRECISION, precision);
-                break;
-            case Types.TIMESTAMP:
-                precision = Math.max(ValueTimestamp.PRECISION, precision);
-                break;
-            case Types.TIME:
-                precision = Math.max(ValueTime.PRECISION, precision);
-                break;
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+            if (precision == 0) {
+                precision = 65535;
+            }
+            break;
+        case Types.DATE:
+            precision = Math.max(ValueDate.PRECISION, precision);
+            break;
+        case Types.TIMESTAMP:
+            precision = Math.max(ValueTimestamp.PRECISION, precision);
+            break;
+        case Types.TIME:
+            precision = Math.max(ValueTime.PRECISION, precision);
+            break;
         }
         return precision;
     }
@@ -531,16 +528,14 @@ public class TableMate extends Table {
         // workaround for an Oracle problem:
         // for DECIMAL columns, the reported precision is -127
         switch (sqlType) {
-            case Types.DECIMAL:
-            case Types.NUMERIC:
-                if (scale < 0) {
-                    scale = 32767;
-                }
-                break;
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+            if (scale < 0) {
+                scale = 32767;
+            }
+            break;
         }
         return scale;
     }
-
-    
 
 }

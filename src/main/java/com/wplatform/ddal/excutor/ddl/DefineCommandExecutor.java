@@ -43,6 +43,7 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
      * @param nodes
      */
     public void executeOn(TableNode[] nodes) {
+        session.checkCanceled();
         List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
         for (TableNode node : nodes) {
             String sql = doTranslate(node);

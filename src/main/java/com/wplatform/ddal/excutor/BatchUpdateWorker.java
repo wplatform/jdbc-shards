@@ -34,9 +34,9 @@ import com.wplatform.ddal.value.Value;
  */
 public class BatchUpdateWorker extends JdbcWorker<Integer[]> {
 
-    protected final List<Value>[] array;
+    protected final List<List<Value>> array;
 
-    public BatchUpdateWorker(Session session, String shardName, String sql, List<Value>[] array) {
+    public BatchUpdateWorker(Session session, String shardName, String sql, List<List<Value>> array) {
         super(session, shardName, sql, null);
         this.array = array;
     }
@@ -47,7 +47,7 @@ public class BatchUpdateWorker extends JdbcWorker<Integer[]> {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            if (array == null || array.length < 1) {
+            if (array == null || array.size() < 1) {
                 throw new IllegalArgumentException();
             }
             DataSource dataSource = getDataSource();

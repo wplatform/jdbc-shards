@@ -13,37 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wplatform.ddal.command.ddl;
+package com.wplatform.ddal.excutor.dml;
 
-import com.wplatform.ddal.command.CommandInterface;
-import com.wplatform.ddal.dbobject.table.Table;
-import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.command.dml.Select;
+import com.wplatform.ddal.excutor.CommonPreparedExecutor;
+import com.wplatform.ddal.result.ResultInterface;
 
 /**
- * This class represents the statement
- * TRUNCATE TABLE
+ * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
+ *
  */
-public class TruncateTable extends DefineCommand {
+public class SelectExecutor extends CommonPreparedExecutor<Select> {
 
-    private Table table;
-
-    public TruncateTable(Session session) {
-        super(session);
-    }
-
-    public void setTable(Table table) {
-        this.table = table;
+    /**
+     * @param prepared
+     */
+    public SelectExecutor(Select prepared) {
+        super(prepared);
     }
 
     @Override
-    public int getType() {
-        return CommandInterface.TRUNCATE_TABLE;
+    public ResultInterface executeQuery(int maxrows) {
+        return super.executeQuery(maxrows);
     }
-
-    public Table getTable() {
-        return table;
-    }
-    
     
 
 }

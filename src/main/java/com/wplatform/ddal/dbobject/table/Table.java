@@ -26,7 +26,6 @@ import com.wplatform.ddal.command.expression.ExpressionVisitor;
 import com.wplatform.ddal.dbobject.DbObject;
 import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.index.Index;
-import com.wplatform.ddal.dbobject.index.IndexType;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.schema.SchemaObjectBase;
 import com.wplatform.ddal.dbobject.schema.Sequence;
