@@ -83,53 +83,10 @@ public interface SessionInterface extends Closeable {
     SessionInterface reconnect(boolean write);
 
     /**
-     * Check if this session is in auto-commit mode.
-     *
-     * @return true if the session is in auto-commit mode
-     */
-    boolean getAutoCommit();
-
-    /**
-     * Set the auto-commit mode. This call doesn't commit the current
-     * transaction.
-     *
-     * @param autoCommit the new value
-     */
-    void setAutoCommit(boolean autoCommit);
-
-    /**
      * Add a temporary LOB, which is closed when the session commits.
      *
      * @param v the value
      */
     void addTemporaryLob(Value v);
-
-    /**
-     * Get transaction isolation level
-     *
-     * @return return the transaction isolation
-     */
-    int getTransactionIsolation();
-
-    /**
-     * Set the transaction isolation level for the current transaction.
-     *
-     * @param level isolation value
-     */
-    void setTransactionIsolation(int level);
-
-    /**
-     * Check if this session is in read-only mode.
-     *
-     * @return true if the session is in read-only mode.
-     */
-    boolean isReadOnly();
-
-    /**
-     * Set the read-only mode.
-     *
-     * @param readOnly the new value
-     */
-    void setReadOnly(boolean readOnly);
 
 }

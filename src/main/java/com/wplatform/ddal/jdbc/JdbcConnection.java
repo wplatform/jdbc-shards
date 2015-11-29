@@ -19,7 +19,22 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -34,7 +49,12 @@ import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.Utils;
-import com.wplatform.ddal.value.*;
+import com.wplatform.ddal.value.CompareMode;
+import com.wplatform.ddal.value.Value;
+import com.wplatform.ddal.value.ValueInt;
+import com.wplatform.ddal.value.ValueLobDb;
+import com.wplatform.ddal.value.ValueNull;
+import com.wplatform.ddal.value.ValueString;
 
 /**
  * <p>
@@ -54,9 +74,15 @@ public class JdbcConnection extends TraceObject implements Connection {
     // ResultSet.HOLD_CURSORS_OVER_COMMIT
     private int holdability = 1;
     private SessionInterface session;
+    private CommandInterface readOnlyTrue, readOnlyFalse;
+    private CommandInterface autoCommitTrue, autoCommitFalse;
+    private CommandInterface setIsolation;
     private CommandInterface commit, rollback;
     private CommandInterface getGeneratedKeys;
     private CommandInterface setQueryTimeout, getQueryTimeout;
+    private boolean autoCommit = true;
+    private boolean readOnly;
+    private int transactionIsolation;
     private int savepointId;
     private String catalog;
     private Statement executingStatement;
@@ -579,6 +605,11 @@ public class JdbcConnection extends TraceObject implements Connection {
     private void closePreparedCommands() {
         commit = closeAndSetNull(commit);
         rollback = closeAndSetNull(rollback);
+        autoCommitTrue = closeAndSetNull(autoCommitTrue);
+        autoCommitFalse = closeAndSetNull(autoCommitFalse);
+        readOnlyFalse = closeAndSetNull(readOnlyFalse);
+        readOnlyTrue = closeAndSetNull(readOnlyTrue);
+        setIsolation = closeAndSetNull(setIsolation);
         getGeneratedKeys = closeAndSetNull(getGeneratedKeys);
         getQueryTimeout = closeAndSetNull(getQueryTimeout);
         setQueryTimeout = closeAndSetNull(setQueryTimeout);
@@ -595,7 +626,7 @@ public class JdbcConnection extends TraceObject implements Connection {
         try {
             checkClosed();
             debugCodeCall("getAutoCommit");
-            return session.getAutoCommit();
+            return autoCommit;
         } catch (Exception e) {
             throw logAndConvert(e);
         }
@@ -615,10 +646,14 @@ public class JdbcConnection extends TraceObject implements Connection {
                 debugCode("setAutoCommit(" + autoCommit + ");");
             }
             checkClosed();
-            if (autoCommit && !session.getAutoCommit()) {
-                commit();
+            if (readOnly) {
+                autoCommitTrue = prepareCommand("SET AUTOCOMMIT TRUE", autoCommitTrue);
+                autoCommitTrue.executeUpdate();
+            } else {
+                autoCommitFalse = prepareCommand("SET AUTOCOMMIT FALSE", autoCommitFalse);
+                autoCommitFalse.executeUpdate();
             }
-            session.setAutoCommit(autoCommit);
+            this.autoCommit = autoCommit;
         } catch (Exception e) {
             throw logAndConvert(e);
         }
@@ -713,7 +748,7 @@ public class JdbcConnection extends TraceObject implements Connection {
                 debugCode("isReadOnly");
             }
             checkClosed();
-            return session.isReadOnly();
+            return readOnly;
 
         } catch (Exception e) {
             throw logAndConvert(e);
@@ -734,7 +769,13 @@ public class JdbcConnection extends TraceObject implements Connection {
                 debugCode("setReadOnly(" + readOnly + ");");
             }
             checkClosed();
-            session.setReadOnly(readOnly);
+            if (readOnly) {
+                readOnlyTrue = prepareCommand("SET TRANSACTION READ ONLY", readOnlyTrue);
+                readOnlyTrue.executeUpdate();
+            } else {
+                readOnlyFalse = prepareCommand("SET TRANSACTION READ WRITE", readOnlyFalse);
+                readOnlyFalse.executeUpdate();
+            }
         } catch (Exception e) {
             throw logAndConvert(e);
         }
@@ -897,7 +938,7 @@ public class JdbcConnection extends TraceObject implements Connection {
                 debugCode("getTransactionIsolation");
             }
             checkClosed();
-            return session.getTransactionIsolation();
+            return transactionIsolation;
         } catch (Exception e) {
             throw logAndConvert(e);
         }
@@ -944,8 +985,10 @@ public class JdbcConnection extends TraceObject implements Connection {
                 default:
                     throw DbException.getInvalidValueException("transaction isolation", level);
             }
-            commit();
-            session.setTransactionIsolation(level);
+            setIsolation = prepareCommand("SET TRANSACTION ISOLATION LEVEL ?", setIsolation);
+            setIsolation.getParameters().get(0).setValue(ValueInt.get(level), false);
+            setIsolation.executeUpdate();
+            transactionIsolation = level;
         } catch (Exception e) {
             throw logAndConvert(e);
         }

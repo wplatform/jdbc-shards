@@ -26,6 +26,7 @@ import com.wplatform.ddal.command.dml.Call;
 import com.wplatform.ddal.command.dml.Select;
 import com.wplatform.ddal.command.dml.SelectUnion;
 import com.wplatform.ddal.command.dml.Set;
+import com.wplatform.ddal.command.dml.TransactionCommand;
 import com.wplatform.ddal.excutor.ddl.AlterTableAddConstraintExecutor;
 import com.wplatform.ddal.excutor.ddl.AlterTableAlterColumnExecutor;
 import com.wplatform.ddal.excutor.ddl.CreateTableExecutor;
@@ -35,6 +36,7 @@ import com.wplatform.ddal.excutor.dml.CallExecutor;
 import com.wplatform.ddal.excutor.dml.SelectExecutor;
 import com.wplatform.ddal.excutor.dml.SelectUnionExecutor;
 import com.wplatform.ddal.excutor.dml.SetExecutor;
+import com.wplatform.ddal.excutor.dml.TransactionExecutor;
 import com.wplatform.ddal.message.DbException;
 
 /**
@@ -103,7 +105,10 @@ public class ExecutorFactory implements PreparedExecutorFactory {
         case CommandInterface.ROLLBACK_TO_SAVEPOINT:
         case CommandInterface.COMMIT_TRANSACTION:
         case CommandInterface.ROLLBACK_TRANSACTION:
-            return new SetExecutor((Set) prepared);
+        case CommandInterface.TRANSACTION_ISOLATION:
+        case CommandInterface.TRANSACTION_READONLY_FALSE:
+        case CommandInterface.TRANSACTION_READONLY_TRUE:
+            return new TransactionExecutor((TransactionCommand) prepared);
         default:
             throw DbException.getUnsupportedException("statemets type=" + type);
         }

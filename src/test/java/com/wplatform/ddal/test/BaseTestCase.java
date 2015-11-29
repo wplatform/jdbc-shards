@@ -89,7 +89,7 @@ public abstract class BaseTestCase {
         try {
             JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setConfigLocation(configLocation);
-            dataSource.setStdoutLevel("DEBUG");
+            dataSource.setStdoutLevel("ERROR");
             dataSource.setFileLevel("DEBUG");
             dataSource.setLogFileName("database.log");
             dataSource.init();

@@ -15,7 +15,9 @@
  */
 package com.wplatform.ddal.command.dml;
 
+
 import com.wplatform.ddal.command.Prepared;
+import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.result.ResultInterface;
 
@@ -27,6 +29,7 @@ public class TransactionCommand extends Prepared {
     private final int type;
     private String savepointName;
     private String transactionName;
+    private Expression expression;
 
     public TransactionCommand(Session session, int type) {
         super(session);
@@ -73,6 +76,14 @@ public class TransactionCommand extends Prepared {
 
     public String getTransactionName() {
         return transactionName;
+    }
+
+    public Expression getExpression() {
+        return expression;
+    }
+
+    public void setExpression(Expression expression) {
+        this.expression = expression;
     }
     
     

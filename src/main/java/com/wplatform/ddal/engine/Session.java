@@ -292,12 +292,10 @@ public class Session implements SessionInterface {
         }
     }
 
-    @Override
     public boolean getAutoCommit() {
         return autoCommit;
     }
 
-    @Override
     public void setAutoCommit(boolean b) {
         autoCommit = b;
     }
@@ -1013,12 +1011,10 @@ public class Session implements SessionInterface {
         temporaryLobs.add(v);
     }
 
-    @Override
     public int getTransactionIsolation() {
         return transactionIsolation;
     }
 
-    @Override
     public void setTransactionIsolation(int level) {
         switch (level) {
         case Connection.TRANSACTION_NONE:
@@ -1033,12 +1029,10 @@ public class Session implements SessionInterface {
         transactionIsolation = level;
     }
 
-    @Override
     public boolean isReadOnly() {
         return readOnly;
     }
 
-    @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
     }

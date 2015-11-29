@@ -436,31 +436,15 @@ public interface CommandInterface {
      * The type of a ROLLBACK TRANSACTION statement.
      */
     int ROLLBACK_TRANSACTION = 79;
-
-    /**
-     * The type of a SHUTDOWN statement.
-     */
-    int SHUTDOWN = 80;
-
-    /**
-     * The type of a SHUTDOWN IMMEDIATELY statement.
-     */
-    int SHUTDOWN_IMMEDIATELY = 81;
-
-    /**
-     * The type of a SHUTDOWN COMPACT statement.
-     */
-    int SHUTDOWN_COMPACT = 82;
-
     /**
      * The type of a BEGIN {WORK|TRANSACTION} statement.
      */
     int BEGIN = 83;
+    
+    int TRANSACTION_READONLY_TRUE = 80;
+    int TRANSACTION_READONLY_FALSE = 81;
+    int TRANSACTION_ISOLATION = 82;
 
-    /**
-     * The type of a SHUTDOWN DEFRAG statement.
-     */
-    int SHUTDOWN_DEFRAG = 84;
 
     /**
      * Get command type.

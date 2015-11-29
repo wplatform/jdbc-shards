@@ -17,6 +17,7 @@ package com.wplatform.ddal.excutor.dml;
 
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.dml.TransactionCommand;
+import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 
@@ -68,6 +69,20 @@ public class TransactionExecutor extends CommonPreparedExecutor<TransactionComma
         case CommandInterface.ROLLBACK_TRANSACTION:
             session.getUser().checkAdmin();
             session.setPreparedTransaction(prepared.getTransactionName(), false);
+            break;
+        case CommandInterface.TRANSACTION_ISOLATION:
+            session.getUser().checkAdmin();
+            Expression expr = prepared.getExpression();
+            expr = expr.optimize(session);
+            session.setTransactionIsolation(expr.getValue(session).getInt());
+            break;
+        case CommandInterface.TRANSACTION_READONLY_FALSE:
+            session.getUser().checkAdmin();
+            session.setReadOnly(false);
+            break;
+        case CommandInterface.TRANSACTION_READONLY_TRUE:
+            session.getUser().checkAdmin();
+            session.setReadOnly(true);
             break;
         default:
             DbException.throwInternalError("type=" + type);

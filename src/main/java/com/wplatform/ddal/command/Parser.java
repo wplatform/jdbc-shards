@@ -511,8 +511,6 @@ public class Parser {
                         c = parseSet();
                     } else if (readIf("SAVEPOINT")) {
                         c = parseSavepoint();
-                    } else if (readIf("SHUTDOWN")) {
-                        c = parseShutdown();
                     } else if (readIf("SHOW")) {
                         c = parseShow();
                     }
@@ -636,20 +634,6 @@ public class Parser {
                 CommandInterface.COMMIT);
         readIf("WORK");
         return command;
-    }
-
-    private TransactionCommand parseShutdown() {
-        int type = CommandInterface.SHUTDOWN;
-        if (readIf("IMMEDIATELY")) {
-            type = CommandInterface.SHUTDOWN_IMMEDIATELY;
-        } else if (readIf("COMPACT")) {
-            type = CommandInterface.SHUTDOWN_COMPACT;
-        } else if (readIf("DEFRAG")) {
-            type = CommandInterface.SHUTDOWN_DEFRAG;
-        } else {
-            readIf("SCRIPT");
-        }
-        return new TransactionCommand(session, type);
     }
 
     private TransactionCommand parseRollback() {
@@ -4841,6 +4825,9 @@ public class Parser {
         } else if (readIf("JAVA_OBJECT_SERIALIZER")) {
             readIfEqualOrTo();
             return parseSetJavaObjectSerializer();
+        } else if (readIf("TRANSACTION")) {
+            readIfEqualOrTo();
+            return parseTransactionCommand();
         } else {
             if (isToken("LOGSIZE")) {
                 // HSQLDB compatibility
@@ -5598,5 +5585,26 @@ public class Parser {
         initialize(sql);
         read();
         return readTableOrView();
+    }
+    /**
+     * added method. parse MySQL style TRANSACTION statements
+     * @return
+     */
+    private TransactionCommand parseTransactionCommand() {
+        TransactionCommand command;
+        if (readIf("ISOLATION")) {
+            read("LEVEL");
+            Expression expr = readExpression();
+            command = new TransactionCommand(session, CommandInterface.TRANSACTION_ISOLATION);
+            command.setExpression(expr);
+            return command;
+        } else if (readIf("READ")) {
+            if (readIf("WRITE")) {
+                return new TransactionCommand(session, CommandInterface.TRANSACTION_READONLY_FALSE);
+            } else if (readIf("ONLY")) {
+                return new TransactionCommand(session, CommandInterface.COMMIT_TRANSACTION);
+            }
+        }
+        throw getSyntaxError();
     }
 }
