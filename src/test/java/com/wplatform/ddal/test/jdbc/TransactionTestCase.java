@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
+import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 
@@ -16,7 +17,11 @@ public class TransactionTestCase extends BaseTestCase {
     private Connection conn1, conn2;
 
     @Test
-    public void test() throws SQLException {
+    public void test() throws Exception {
+        setQueryTimeout();
+        testSetAutoCommit();
+        testSetReadOnly();
+        testsetIsolationLevel();
         testTableLevelLocking();
     }
 
@@ -82,6 +87,91 @@ public class TransactionTestCase extends BaseTestCase {
 
         conn1.close();
         conn2.close();
+    }
+    
+   
+    
+    
+    public void setQueryTimeout() throws Exception {
+        JdbcConnection conn = null;
+        try {
+            conn = (JdbcConnection) getConnection();
+            conn.setQueryTimeout(10);
+        } finally {
+            close(conn, null, null);
+        }
+    }
+    
+    public void testSetAutoCommit() throws Exception {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+            conn.setAutoCommit(true);
+        } finally {
+            close(conn, null, null);
+        }
+    }
+    
+
+    
+    public void testSetReadOnly() throws Exception {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setReadOnly(false);
+            conn.setReadOnly(true);
+        } finally {
+            close(conn, null, null);
+        }
+    }
+    
+    public void testsetIsolationLevel() throws Exception {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+            conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+        }catch(Exception e) {
+            
+        }finally {
+            close(conn, null, null);
+        }
+    }
+    
+    @Test
+    public void performance() throws Exception {
+        Connection conn = null;
+        try {
+            long start = System.currentTimeMillis();
+
+            for (int i = 0; i < 10000; i++) {
+                conn = getConnection();
+                conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                close(conn, null, null);
+            }
+
+            long end = System.currentTimeMillis();
+            System.out.println("cost " + (end - start) + "ms.");
+            /*
+            start = System.currentTimeMillis();
+            for (int i = 0; i < 10000; i++) {
+                conn = getConnection();
+                conn.getTransactionIsolation();
+                close(conn, null, null);
+            }
+            end = System.currentTimeMillis();
+            System.out.println("cost " + (end - start) + "ms.");
+            */
+
+        }catch(Exception e) {
+            
+        }finally {
+            close(conn, null, null);
+        }
     }
 
 }

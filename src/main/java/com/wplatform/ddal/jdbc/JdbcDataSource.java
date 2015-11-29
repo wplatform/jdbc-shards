@@ -15,6 +15,12 @@
  */
 package com.wplatform.ddal.jdbc;
 
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import com.wplatform.ddal.command.dml.SetTypes;
@@ -25,15 +31,8 @@ import com.wplatform.ddal.dbobject.User;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.TraceSystem;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
-
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -54,10 +53,6 @@ public class JdbcDataSource implements DataSource {
 
     private int maxMemoryRows = -1;
     private int maxOperationMemory = -1;
-
-    private String stdoutLevel;
-    private String fileLevel;
-    private String logFileName;
 
     private String configLocation;
     private Database database;
@@ -324,48 +319,6 @@ public class JdbcDataSource implements DataSource {
     }
 
     /**
-     * @return the stdoutLevel
-     */
-    public String getStdoutLevel() {
-        return stdoutLevel;
-    }
-
-    /**
-     * @param stdoutLevel the stdoutLevel to set
-     */
-    public void setStdoutLevel(String stdoutLevel) {
-        this.stdoutLevel = stdoutLevel;
-    }
-
-    /**
-     * @return the fileLevel
-     */
-    public String getFileLevel() {
-        return fileLevel;
-    }
-
-    /**
-     * @param fileLevel the fileLevel to set
-     */
-    public void setFileLevel(String fileLevel) {
-        this.fileLevel = fileLevel;
-    }
-
-    /**
-     * @return the logFileName
-     */
-    public String getLogFileName() {
-        return logFileName;
-    }
-
-    /**
-     * @param logFileName the logFileName to set
-     */
-    public void setLogFileName(String logFileName) {
-        this.logFileName = logFileName;
-    }
-
-    /**
      * @return the defaultQueryTimeout
      */
     public int getDefaultQueryTimeout() {
@@ -442,36 +395,7 @@ public class JdbcDataSource implements DataSource {
         if (this.maxOperationMemory > -1) {
             configuration.setProperty(SetTypes.MAX_OPERATION_MEMORY, this.maxOperationMemory);
         }
-        configuration.setProperty(SetTypes.TRACE_FILE_NAME, this.logFileName);
-
-        if ("TRACE".equalsIgnoreCase(this.stdoutLevel)
-                || "DEBUG".equalsIgnoreCase(this.stdoutLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT, TraceSystem.DEBUG);
-        } else if ("INFO".equalsIgnoreCase(this.stdoutLevel)
-                || "WARN".equalsIgnoreCase(this.stdoutLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT, TraceSystem.INFO);
-        } else if ("ERROR".equalsIgnoreCase(this.stdoutLevel)
-                || "FATAL".equalsIgnoreCase(this.stdoutLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT, TraceSystem.ERROR);
-        } else {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
-                    TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
-        }
-
-        if ("TRACE".equalsIgnoreCase(this.fileLevel) || "DEBUG".equalsIgnoreCase(this.fileLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_FILE, TraceSystem.DEBUG);
-        } else if ("INFO".equalsIgnoreCase(this.fileLevel)
-                || "WARN".equalsIgnoreCase(this.fileLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_FILE, TraceSystem.INFO);
-        } else if ("ERROR".equalsIgnoreCase(this.fileLevel)
-                || "FATAL".equalsIgnoreCase(this.fileLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_FILE, TraceSystem.ERROR);
-        } else if ("ADAPTER".equalsIgnoreCase(this.fileLevel)) {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_FILE, TraceSystem.ADAPTER);
-        } else {
-            configuration.setProperty(SetTypes.TRACE_LEVEL_FILE,
-                    TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
-        }
+        
         if (this.dataSourceProvider != null) {
             configuration.setDataSourceProvider(this.dataSourceProvider);
         }

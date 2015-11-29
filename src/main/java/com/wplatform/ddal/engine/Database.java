@@ -61,7 +61,6 @@ public class Database {
 
     public static final String SYSTEM_USER_NAME = "MASTER";
 
-    private final String databaseName;
     private final HashMap<String, Role> roles = New.hashMap();
     private final HashMap<String, User> users = New.hashMap();
     private final HashMap<String, Setting> settings = New.hashMap();
@@ -92,23 +91,15 @@ public class Database {
     public Database(Configuration configuration) {
         this.configuration = configuration;
         this.compareMode = CompareMode.getInstance(null, 0);
-        this.dbSettings = DbSettings.getInstance(null);
+        this.dbSettings = DbSettings.getInstance(configuration.getSettings());
 
         String sqlMode = configuration.getProperty(SetTypes.MODE, Mode.MY_SQL);
         Mode settingMode = Mode.getInstance(sqlMode);
         if (settingMode != null) {
             this.mode = settingMode;
         }
-        int traceLevelFile = configuration.getIntProperty(SetTypes.TRACE_LEVEL_FILE,
-                TraceSystem.DEFAULT_TRACE_LEVEL_FILE);
-        int traceLevelSystemOut = configuration.getIntProperty(SetTypes.TRACE_LEVEL_SYSTEM_OUT,
-                TraceSystem.DEFAULT_TRACE_LEVEL_SYSTEM_OUT);
-
-        String traceFile = configuration.getProperty(SetTypes.TRACE_FILE_NAME, null);
-        databaseName = configuration.getSchemaConfig().getName();
-        traceSystem = new TraceSystem(traceFile);
-        traceSystem.setLevelFile(traceLevelFile);
-        traceSystem.setLevelSystemOut(traceLevelSystemOut);
+        traceSystem = new TraceSystem(null);
+        traceSystem.setLevelFile(TraceSystem.ADAPTER);
         trace = traceSystem.getTrace(Trace.DATABASE);
         dsRepository = new DataSourceRepository(this);
         openDatabase();
@@ -144,7 +135,6 @@ public class Database {
                 }
                 this.addSchemaObject(tableMate);
             }
-            trace.info("opened {0}", databaseName);
         } finally {
             sysSession.close();
         }
@@ -379,7 +369,6 @@ public class Database {
             }
         }
         dsRepository.close();
-        trace.info("Database {0} closed", databaseName);
         traceSystem.close();
     }
 

@@ -43,7 +43,7 @@ public class SetExecutor extends CommonPreparedExecutor<Set> {
     public int executeUpdate() {
         Database database = session.getDatabase();
         String stringValue = prepared.getStringValue();
-        int type = prepared.getType();
+        int type = prepared.getSetType();
         switch (type) {
         case SetTypes.QUERY_TIMEOUT: {
             if (getIntValue() < 0) {

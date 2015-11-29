@@ -89,9 +89,6 @@ public abstract class BaseTestCase {
         try {
             JdbcDataSource dataSource = new JdbcDataSource();
             dataSource.setConfigLocation(configLocation);
-            dataSource.setStdoutLevel("ERROR");
-            dataSource.setFileLevel("DEBUG");
-            dataSource.setLogFileName("database.log");
             dataSource.init();
             this.dataSource = dataSource;
         } catch (RuntimeException e) {

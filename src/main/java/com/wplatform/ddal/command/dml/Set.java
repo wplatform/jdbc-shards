@@ -91,6 +91,11 @@ public class Set extends Prepared {
     }
     
     //getters
+    
+    public int getSetType() {
+        return type;
+    }
+    
     public Expression getExpression() {
         return expression;
     }

@@ -192,14 +192,16 @@ public class TraceSystem implements TraceWriter {
      */
     public void setLevelFile(int level) {
         if (level == ADAPTER) {
-            String adapterClass = "org.h2.message.TraceWriterAdapter";
+            /*
+            String adapterClass = "com.wplatform.ddal.message.TraceWriterAdapter";
             try {
                 writer = (TraceWriter) Class.forName(adapterClass).newInstance();
             } catch (Throwable e) {
                 e = DbException.get(ErrorCode.CLASS_NOT_FOUND_1, e, adapterClass);
                 write(ERROR, Trace.DATABASE, adapterClass, e);
                 return;
-            }
+            }*/
+            writer = new TraceWriterAdapter();
             String name = fileName;
             if (name != null) {
                 if (name.endsWith(Constants.SUFFIX_TRACE_FILE)) {

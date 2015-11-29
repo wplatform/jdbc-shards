@@ -18,8 +18,8 @@
 
 package com.wplatform.ddal.config;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import com.wplatform.ddal.command.dml.SetTypes;
@@ -36,7 +36,7 @@ public class Configuration {
     private final Map<String, ShardConfig> cluster = New.hashMap();
     private final Map<String, Object> ruleAlgorithms = New.hashMap();
     private final Map<String, TableRouter> temporary = New.hashMap();
-    private Properties prop = new Properties();
+    private HashMap<String,String> prop = New.hashMap();
     private SchemaConfig schemaConfig = new SchemaConfig();
     private DataSourceProvider dataSourceProvider;
 
@@ -61,7 +61,7 @@ public class Configuration {
     /**
      * @return
      */
-    public Properties getSettings() {
+    public HashMap<String,String> getSettings() {
         return this.prop;
     }
 
@@ -186,7 +186,7 @@ public class Configuration {
         }
         // value is null if the value is an object
         if (value != null) {
-            prop.setProperty(key, value);
+            prop.put(key, value);
         }
     }
 
@@ -219,7 +219,7 @@ public class Configuration {
     public void setProperty(String key, String value) {
         // value is null if the value is an object
         if (value != null) {
-            prop.setProperty(key, value);
+            prop.put(key, value);
         }
     }
 
