@@ -25,7 +25,7 @@ import java.sql.SQLException;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public final class RoutingConnection extends RoutingSupport implements InvocationHandler {
+public final class SmartConnection extends SmartSupport implements InvocationHandler {
 
     private String username;
     private String password;
@@ -42,7 +42,7 @@ public final class RoutingConnection extends RoutingSupport implements Invocatio
      * @param traceable
      * @throws SQLException
      */
-    protected RoutingConnection(DataSourceRepository database, RoutingDataSource dataSource) {
+    protected SmartConnection(DataSourceRepository database, SmartDataSource dataSource) {
         super(database, dataSource);
     }
 
@@ -53,7 +53,7 @@ public final class RoutingConnection extends RoutingSupport implements Invocatio
      * @param password
      * @throws SQLException
      */
-    protected RoutingConnection(DataSourceRepository database, RoutingDataSource dataSource, String username,
+    protected SmartConnection(DataSourceRepository database, SmartDataSource dataSource, String username,
             String password) {
         this(database, dataSource);
         this.username = username;
@@ -67,8 +67,8 @@ public final class RoutingConnection extends RoutingSupport implements Invocatio
      * @return - the connection with exception trace
      * @throws SQLException
      */
-    public static Connection newInstance(DataSourceRepository database, RoutingDataSource dataSource) {
-        InvocationHandler handler = new RoutingConnection(database, dataSource);
+    public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource) {
+        InvocationHandler handler = new SmartConnection(database, dataSource);
         ClassLoader cl = Connection.class.getClassLoader();
         return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);
     }
@@ -80,9 +80,9 @@ public final class RoutingConnection extends RoutingSupport implements Invocatio
      * @return - the connection with exception trace
      * @throws SQLException
      */
-    public static Connection newInstance(DataSourceRepository database, RoutingDataSource dataSource, String username,
+    public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource, String username,
             String password) {
-        InvocationHandler handler = new RoutingConnection(database, dataSource, username, password);
+        InvocationHandler handler = new SmartConnection(database, dataSource, username, password);
         ClassLoader cl = Connection.class.getClassLoader();
         return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);
     }

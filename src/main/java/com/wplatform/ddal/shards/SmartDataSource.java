@@ -35,7 +35,7 @@ import com.wplatform.ddal.util.StringUtils;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class RoutingDataSource implements DataSource, Failover {
+public class SmartDataSource implements DataSource, Failover {
     
     
 
@@ -56,7 +56,7 @@ public class RoutingDataSource implements DataSource, Failover {
      * @param readable
      * @param datasource
      */
-    public RoutingDataSource(DataSourceRepository database, String shardName, List<DataSourceMarker> menbers) {
+    public SmartDataSource(DataSourceRepository database, String shardName, List<DataSourceMarker> menbers) {
         if (database == null) {
             throw new IllegalArgumentException("No dataSource repository specified");
         }
@@ -141,12 +141,12 @@ public class RoutingDataSource implements DataSource, Failover {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return RoutingConnection.newInstance(database, this);
+        return SmartConnection.newInstance(database, this);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return RoutingConnection.newInstance(database, this, username, password);
+        return SmartConnection.newInstance(database, this, username, password);
     }
     
     public DataSourceMarker doRoute(boolean readOnly) {

@@ -100,7 +100,7 @@ public class DataSourceRepository {
                 throw new DataSourceException("No datasource in " + value.getName());
             }
             registered.addAll(shardDs);
-            DataSource dataSource = shardDs.size() > 1 ? new RoutingDataSource(this, value.getName(), shardDs)
+            DataSource dataSource = shardDs.size() > 1 ? new SmartDataSource(this, value.getName(), shardDs)
                     : shardDs.get(0).getDataSource();
             shardMaping.put(value.getName(), dataSource);
         }
