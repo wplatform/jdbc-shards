@@ -31,8 +31,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.LocalResult;
-import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.result.ResultTarget;
+import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 
@@ -45,6 +45,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected final Session session;
     protected final Database database;
     protected final ThreadPoolExecutor jdbcExecutor;
+    protected final List<JdbcWorker<?>> runingWorkers;
     /**
      * @param prepared
      */
@@ -54,6 +55,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         this.session = prepared.getSession();
         this.database = session.getDatabase();
         this.jdbcExecutor = session.getDataSourceRepository().getJdbcExecutor();
+        this.runingWorkers = New.linkedList();
     }
 
     /**
@@ -92,7 +94,16 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     }
 
     protected T getPrepared() {
-        return this.prepared;
+        return prepared;
+    }
+    
+    /**
+     * Gets the current query timeout in MILLISECONDS.
+     * @see session.getQueryTimeout()
+     * @return query timeout
+     */
+    protected int getQueryTimeout() {
+        return session.getQueryTimeout();
     }
 
     /**
@@ -129,7 +140,32 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         return null;
     }
 
-    public TableMate castTableMate(Table table) {
+    @Override
+    public void kill() {
+        for (JdbcWorker<?> jdbcWorker : runingWorkers) {
+            jdbcWorker.cancel();
+            jdbcWorker.closeResource();
+        }
+        runingWorkers.clear();
+    }
+    
+    protected <E> void addRuningJdbcWorker(JdbcWorker<E> worker) {
+        runingWorkers.add(worker);
+    }
+    
+    protected <E> void addRuningJdbcWorkers(List<JdbcWorker<E>> workers) {
+        runingWorkers.addAll(workers);
+    }
+    
+    protected <E> void removeRuningJdbcWorker(JdbcWorker<E> worker) {
+        runingWorkers.remove(worker);
+    }
+    
+    protected <E> void removeRuningJdbcWorkers(List<JdbcWorker<E>> workers) {
+        runingWorkers.removeAll(workers);
+    }
+
+    protected TableMate castTableMate(Table table) {
         if (table instanceof TableMate) {
             return (TableMate) table;
         }

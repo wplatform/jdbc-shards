@@ -20,7 +20,6 @@ package com.wplatform.ddal.excutor;
 
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.LocalResult;
-import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.result.ResultTarget;
 
 /**
@@ -51,4 +50,10 @@ public interface PreparedExecutor {
      * @throws DbException if it is a query
      */
     int executeUpdate();
+    /**
+     * kill a currently running PreparedExecutor.
+     * This operation will cancel all opened JDBC statements 
+     * and close all opened JDBC connections
+     */
+    void kill();
 }

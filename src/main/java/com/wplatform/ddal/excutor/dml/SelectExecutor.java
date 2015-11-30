@@ -15,6 +15,10 @@
  */
 package com.wplatform.ddal.excutor.dml;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.wplatform.ddal.command.dml.Select;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.ExpressionColumn;
@@ -25,23 +29,23 @@ import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.dbobject.table.TableMate;
+import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Database;
-import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.LocalResult;
 import com.wplatform.ddal.result.ResultTarget;
+import com.wplatform.ddal.result.SearchRow;
 import com.wplatform.ddal.result.SortOrder;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
 
-import java.util.ArrayList;
-
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class SelectExecutor extends CommonPreparedExecutor<Select> {
+public class SelectExecutor extends PreparedRoutingExecutor<Select> {
 
     /**
      * @param prepared
@@ -62,6 +66,7 @@ public class SelectExecutor extends CommonPreparedExecutor<Select> {
         boolean randomAccessResult = prepared.isRandomAccessResult();
         boolean isGroupQuery = prepared.isGroupQuery();
         boolean isGroupSortedQuery = prepared.isGroupSortedQuery();
+        boolean isQuickAggregateQuery = prepared.isQuickAggregateQuery();
         Expression offsetExpr = prepared.getOffset();
         TableFilter topTableFilter = prepared.getTopTableFilter();
         int limitRows = maxRows == 0 ? -1 : maxRows;
@@ -213,39 +218,123 @@ public class SelectExecutor extends CommonPreparedExecutor<Select> {
             }
         }
     }
+    
+    private void queryQuick(int columnCount, ResultTarget result) {
+        ArrayList<Expression> expressions = prepared.getExpressions();
+        Value[] row = new Value[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            Expression expr = expressions.get(i);
+            row[i] = expr.getValue(session);
+        }
+        result.addRow(row);
+    }
+    
+    private void queryGroupSorted(int columnCount, ResultTarget result) {
+        int rowNumber = 0;
+        setCurrentRowNumber(0);
+        currentGroup = null;
+        Value[] previousKeyValues = null;
+        while (topTableFilter.next()) {
+            setCurrentRowNumber(rowNumber + 1);
+            if (condition == null ||
+                    Boolean.TRUE.equals(condition.getBooleanValue(session))) {
+                rowNumber++;
+                Value[] keyValues = new Value[groupIndex.length];
+                // update group
+                for (int i = 0; i < groupIndex.length; i++) {
+                    int idx = groupIndex[i];
+                    Expression expr = expressions.get(idx);
+                    keyValues[i] = expr.getValue(session);
+                }
+
+                if (previousKeyValues == null) {
+                    previousKeyValues = keyValues;
+                    currentGroup = New.hashMap();
+                } else if (!Arrays.equals(previousKeyValues, keyValues)) {
+                    addGroupSortedRow(previousKeyValues, columnCount, result);
+                    previousKeyValues = keyValues;
+                    currentGroup = New.hashMap();
+                }
+                currentGroupRowId++;
+
+                for (int i = 0; i < columnCount; i++) {
+                    if (groupByExpression == null || !groupByExpression[i]) {
+                        Expression expr = expressions.get(i);
+                        expr.updateAggregate(session);
+                    }
+                }
+            }
+        }
+        if (previousKeyValues != null) {
+            addGroupSortedRow(previousKeyValues, columnCount, result);
+        }
+    }
+    
+    
+    private void addGroupSortedRow(Value[] keyValues, int columnCount,
+            ResultTarget result) {
+        Value[] row = new Value[columnCount];
+        for (int j = 0; groupIndex != null && j < groupIndex.length; j++) {
+            row[groupIndex[j]] = keyValues[j];
+        }
+        for (int j = 0; j < columnCount; j++) {
+            if (groupByExpression != null && groupByExpression[j]) {
+                continue;
+            }
+            Expression expr = expressions.get(j);
+            row[j] = expr.getValue(session);
+        }
+        if (isHavingNullOrFalse(row)) {
+            return;
+        }
+        row = keepOnlyDistinct(row, columnCount);
+        result.addRow(row);
+    }
 
     private void scanLevelValidation(TableFilter filter) {
         Table test = filter.getTable();
-        if(!(test instanceof Table)) {
+        if (!(test instanceof Table)) {
             return;
         }
         TableMate table = castTableMate(test);
+        table.check();
         Index index = filter.getIndex();
         int scanLevel = table.getScanLevel();
         switch (scanLevel) {
             case TableConfig.SCANLEVEL_UNLIMITED:
                 break;
             case TableConfig.SCANLEVEL_FILTER:
-                if(filter.getFilterCondition() == null) {
-                    throw DbException.get(ErrorCode.CONDITION_NOT_ALLOWED_FOR_scan_TABLE,table.getSQL());
+                if (filter.getFilterCondition() == null) {
+                    throw DbException.get(ErrorCode.NOT_ALLOWED_TO_SCAN_TABLE,
+                            table.getSQL(), "filter", "filter");
                 }
                 break;
             case TableConfig.SCANLEVEL_ANYINDEX:
-                if(index.getIndexType().isScan()) {
-                    throw DbException.get(ErrorCode.CONDITION_NOT_ALLOWED_FOR_scan_TABLE,table.getSQL());
+                if (index.getIndexType().isScan()) {
+                    throw DbException.get(ErrorCode.NOT_ALLOWED_TO_SCAN_TABLE,
+                            table.getSQL(), "anyIndex", "index");
                 }
                 break;
             case TableConfig.SCANLEVEL_UNIQUEINDEX:
-                if(!index.getIndexType().isUnique()) {
-                    throw DbException.get(ErrorCode.CONDITION_NOT_ALLOWED_FOR_scan_TABLE,table.getSQL());
+                if (!index.getIndexType().isUnique()) {
+                    throw DbException.get(ErrorCode.NOT_ALLOWED_TO_SCAN_TABLE,
+                            table.getSQL(), "uniqueIndex", "unique index");
                 }
                 break;
             case TableConfig.SCANLEVEL_SHARDINGKEY:
-                if(!index.getIndexType().isShardingKey()) {
-                    throw DbException.get(ErrorCode.CONDITION_NOT_ALLOWED_FOR_scan_TABLE,table.getSQL());
+                if (!index.getIndexType().isShardingKey()) {
+                    throw DbException.get(ErrorCode.NOT_ALLOWED_TO_SCAN_TABLE,
+                            table.getSQL(), "shardingKey", "sharding key");
                 }
                 break;
-            default: throw DbException.throwInternalError("error table scan level " + scanLevel);
+            default:
+                throw DbException.throwInternalError("error table scan level " + scanLevel);
         }
+    }
+
+
+    @Override
+    protected List<Value> doTranslate(TableNode node, SearchRow row, StatementBuilder buff) {
+        return null;
     }
 }

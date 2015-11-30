@@ -78,7 +78,7 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
         TableMate table = findTableMate(tableName);
         if (table != null) {
             TableNode[] nodes = table.getPartitionNode();
-            executeOn(nodes);
+            execute(nodes);
             table.markDeleted();
         }
         next = prepared.getNext();

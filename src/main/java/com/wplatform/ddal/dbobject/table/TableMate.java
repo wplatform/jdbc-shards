@@ -147,10 +147,7 @@ public class TableMate extends Table {
     /**
      * validation the rule columns is in the table columns
      */
-    public void validationRuleColumn() {
-        if (initException != null) {
-            return;
-        }
+    private void validationRuleColumn(Column[] columns) {
         if (tableRouter != null) {
             for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
                 Column matched = null;
@@ -173,11 +170,12 @@ public class TableMate extends Table {
         if (initException != null) {
             Column[] cols = {};
             setColumns(cols);
+            indexes.clear();
             throw initException;
         }
     }
 
-    public boolean isMock() {
+    public boolean isInited() {
         return initException != null;
     }
 
@@ -390,10 +388,26 @@ public class TableMate extends Table {
         }
         Column[] cols = new Column[columnList.size()];
         columnList.toArray(cols);
+        validationRuleColumn(cols);
         setColumns(cols);
+        // create scan index
         int id = getId();
         scanIndex = new IndexMate(this, id, null, IndexColumn.wrap(cols), IndexType.createNonUnique());
         indexes.add(scanIndex);
+        // create shardingKey index
+        if (tableRouter != null) {
+            ArrayList<Column> shardCol = New.arrayList();
+            for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
+                for (Column column : columns) {
+                    String colName = column.getName();
+                    if (colName.equalsIgnoreCase(ruleCol.getName())) {
+                        shardCol.add(column);
+                    }
+                }
+            }
+            addIndex(shardCol, IndexType.createShardingKey(false));
+        }
+        
         // load primary keys
         try {
             rs = meta.getPrimaryKeys(null, null, tableName);

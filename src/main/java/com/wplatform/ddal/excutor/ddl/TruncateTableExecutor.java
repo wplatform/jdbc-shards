@@ -42,7 +42,7 @@ public class TruncateTableExecutor extends DefineCommandExecutor<TruncateTable> 
         session.commit(true);
         session.getUser().checkRight(table, Right.DELETE);
         TableNode[] nodes = table.getPartitionNode();
-        executeOn(nodes);
+        execute(nodes);
         return 0;
     
     }

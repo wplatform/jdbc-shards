@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.dbobject.index.IndexCondition;
@@ -93,9 +94,16 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
             workers.add(createBatchUpdateWorker(shardName, sql, array));
         }
         try {
+            addRuningJdbcWorkers(workers);
             int affectRows = 0;
             if (workers.size() > 1) {
-                List<Future<Integer[]>> invokeAll = jdbcExecutor.invokeAll(workers);
+                int queryTimeout = getQueryTimeout();//MILLISECONDS
+                List<Future<Integer[]>> invokeAll;
+                if(queryTimeout > 0) {
+                    invokeAll = jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
+                } else {
+                    invokeAll = jdbcExecutor.invokeAll(workers);
+                }
                 for (Future<Integer[]> future : invokeAll) {
                     Integer[] integers = future.get();
                     for (Integer integer : integers) {
@@ -114,6 +122,7 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
         } catch (ExecutionException e) {
             throw DbException.convert(e.getCause());
         } finally {
+            removeRuningJdbcWorkers(workers);
             for (JdbcWorker<Integer[]> jdbcWorker : workers) {
                 jdbcWorker.closeResource();
             }
@@ -140,9 +149,16 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
             workers.add(createUpdateWorker(node.getShardName(), sqlBuff.toString(), params));
         }
         try {
+            addRuningJdbcWorkers(workers);
             int affectRows = 0;
             if (workers.size() > 1) {
-                List<Future<Integer>> invokeAll = jdbcExecutor.invokeAll(workers);
+                int queryTimeout = getQueryTimeout();//MILLISECONDS
+                List<Future<Integer>> invokeAll;
+                if(queryTimeout > 0) {
+                    invokeAll = jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
+                } else {
+                    invokeAll = jdbcExecutor.invokeAll(workers);
+                }
                 for (Future<Integer> future : invokeAll) {
                     affectRows += future.get();
                 }
@@ -155,12 +171,12 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
         } catch (ExecutionException e) {
             throw DbException.convert(e.getCause());
         } finally {
+            removeRuningJdbcWorkers(workers);
             for (JdbcWorker<Integer> jdbcWorker : workers) {
                 jdbcWorker.closeResource();
             }
         }
     }
-    
     /**
      * build insert statement
      * @param forTable

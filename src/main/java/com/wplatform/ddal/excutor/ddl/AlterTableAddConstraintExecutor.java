@@ -66,7 +66,7 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY:
         case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE:
         case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
-            executeOn(tableNodes);
+            execute(tableNodes);
             break;
         }
 

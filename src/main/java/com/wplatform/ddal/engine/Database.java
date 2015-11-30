@@ -131,7 +131,6 @@ public class Database {
                 tableMate.loadMataData(sysSession);
                 if (tableConfig.isValidation()) {
                     tableMate.check();
-                    tableMate.validationRuleColumn();
                 }
                 this.addSchemaObject(tableMate);
             }

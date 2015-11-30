@@ -31,7 +31,7 @@ public class IndexType {
     public static IndexType createShardingKey(boolean hash) {
         IndexType type = new IndexType();
         type.shardingKey = true;
-        type.primaryKey = true;
+        type.primaryKey = false;
         type.hash = hash;
         type.unique = true;
         return type;

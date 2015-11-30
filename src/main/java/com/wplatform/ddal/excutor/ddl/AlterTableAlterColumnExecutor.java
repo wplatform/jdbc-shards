@@ -76,7 +76,7 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
         case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: 
         case CommandInterface.ALTER_TABLE_ADD_COLUMN: 
         case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
-            executeOn(tableNodes);
+            execute(tableNodes);
             table.loadMataData(session);
             break;
         }

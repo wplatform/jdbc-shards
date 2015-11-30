@@ -60,7 +60,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
         if (tableMate == null) {
             throw DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, tableName);
         }
-        if (!tableMate.isMock()) {
+        if (!tableMate.isInited()) {
             if (prepared.isIfNotExists()) {
                 return 0;
             }
@@ -112,7 +112,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                 }
             }
             TableNode[] nodes = tableMate.getPartitionNode();
-            executeOn(nodes);
+            execute(nodes);
             if (query != null) {
                 Insert insert = new Insert(session);
                 insert.setSortedInsertMode(prepared.isSortedInsertMode());

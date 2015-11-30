@@ -17,6 +17,7 @@ package com.wplatform.ddal.excutor.ddl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.expression.Parameter;
@@ -42,7 +43,7 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
      * 
      * @param nodes
      */
-    public void executeOn(TableNode[] nodes) {
+    public void execute(TableNode[] nodes) {
         session.checkCanceled();
         List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
         for (TableNode node : nodes) {
@@ -54,16 +55,23 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
             }
             workers.add(createUpdateWorker(node.getShardName(), sql, params));
         }
+        addRuningJdbcWorkers(workers);
         try {
             // DDL statement returns nothing.
             if (workers.size() > 1) {
-                jdbcExecutor.invokeAll(workers);
+                int queryTimeout = getQueryTimeout();//MILLISECONDS
+                if(queryTimeout > 0) {
+                    jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
+                } else {
+                    jdbcExecutor.invokeAll(workers);
+                }    
             } else if (workers.size() == 1) {
                 workers.get(0).doWork();
             }
         } catch (InterruptedException e) {
             throw DbException.convert(e);
         } finally {
+            removeRuningJdbcWorkers(workers);
             for (JdbcWorker<Integer> jdbcWorker : workers) {
                 jdbcWorker.closeResource();
             }
