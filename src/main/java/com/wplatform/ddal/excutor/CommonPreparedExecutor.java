@@ -30,7 +30,9 @@ import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.result.LocalResult;
 import com.wplatform.ddal.result.ResultInterface;
+import com.wplatform.ddal.result.ResultTarget;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 
@@ -44,7 +46,6 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected final Database database;
     protected final ThreadPoolExecutor jdbcExecutor;
     /**
-     * @param session
      * @param prepared
      */
     public CommonPreparedExecutor(T prepared) {
@@ -58,12 +59,24 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     /**
      * Execute the query.
      *
-     * @param maxrows the maximum number of rows to return
+     * @param maxRows the maximum number of rows to return
      * @return the result set
      * @throws DbException if it is not a query
      */
     @Override
-    public ResultInterface executeQuery(int maxrows) {
+    public LocalResult executeQuery(int maxRows) {
+       return executeQuery(maxRows,null);
+    }
+
+    /**
+     * Execute the query, writing the result to the target result.
+     *
+     * @param maxRows  the maximum number of rows to return
+     * @param target the target result (null will return the result)
+     * @return the result set (if the target is not set).
+     */
+    @Override
+    public LocalResult executeQuery(int maxRows, ResultTarget target) {
         throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
     }
 

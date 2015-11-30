@@ -1307,4 +1307,80 @@ public class Select extends Query {
         return sort;
     }
 
+    //getters
+    public SortOrder getSort() {
+        return sort;
+    }
+
+    public ArrayList<TableFilter> getFilters() {
+        return filters;
+    }
+
+    public Expression[] getExpressionArray() {
+        return expressionArray;
+    }
+
+    public Expression getCondition() {
+        return condition;
+    }
+
+    public int getVisibleColumnCount() {
+        return visibleColumnCount;
+    }
+
+    public int getDistinctColumnCount() {
+        return distinctColumnCount;
+    }
+
+    public ArrayList<SelectOrderBy> getOrderList() {
+        return orderList;
+    }
+
+    public ArrayList<Expression> getGroup() {
+        return group;
+    }
+
+    public int[] getGroupIndex() {
+        return groupIndex;
+    }
+
+    public boolean[] getGroupByExpression() {
+        return groupByExpression;
+    }
+
+    public int getHavingIndex() {
+        return havingIndex;
+    }
+
+    public boolean isGroupQuery() {
+        return isGroupQuery;
+    }
+
+    public boolean isGroupSortedQuery() {
+        return isGroupSortedQuery;
+    }
+
+    public boolean isForUpdate() {
+        return isForUpdate;
+    }
+
+    public boolean isForUpdateMvcc() {
+        return isForUpdateMvcc;
+    }
+
+    public boolean isDistinctQuery() {
+        return isDistinctQuery;
+    }
+
+    public boolean isPrepared() {
+        return isPrepared;
+    }
+
+    public boolean isCheckInit() {
+        return checkInit;
+    }
+
+    public boolean isSortUsingIndex() {
+        return sortUsingIndex;
+    }
 }

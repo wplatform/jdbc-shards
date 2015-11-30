@@ -24,10 +24,15 @@ import com.wplatform.ddal.engine.Constants;
 
 public class TableConfig {
 
+    public static final int SCANLEVEL_UNLIMITED = 1;
+    public static final int SCANLEVEL_FILTER = 2;
+    public static final int SCANLEVEL_ANYINDEX = 3;
+    public static final int SCANLEVEL_UNIQUEINDEX = 4;
+    public static final int SCANLEVEL_SHARDINGKEY = 5;
 
     private SchemaConfig schemaConfig;
     private String name;    
-    private int scanLevel = Constants.SCANLEVEL_ANYINDEX;
+    private int scanLevel = SCANLEVEL_ANYINDEX;
     private boolean validation;
     private TableNode[] shards;
     private TableRouter tableRouter;

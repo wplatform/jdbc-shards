@@ -276,7 +276,9 @@ public class DbException extends RuntimeException {
     public static DbException convertInvocation(InvocationTargetException te,
                                                 String message) {
         Throwable t = te.getTargetException();
-        if (t instanceof SQLException || t instanceof DbException) {
+        if (t instanceof SQLException
+                || t instanceof DbException
+                || t instanceof InvocationTargetException) {
             return convert(t);
         }
         message = message == null ? t.getMessage() : message + ": " + t.getMessage();

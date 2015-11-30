@@ -525,4 +525,9 @@ public abstract class Query extends Prepared {
         return v.getInt();
     }
 
+    //getters
+
+    public boolean isRandomAccessResult() {
+        return randomAccessResult;
+    }
 }

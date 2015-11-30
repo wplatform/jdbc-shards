@@ -15,24 +15,25 @@
  */
 package com.wplatform.ddal.excutor;
 
+import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.excutor.JdbcWorker;
+import com.wplatform.ddal.excutor.Optional;
+import com.wplatform.ddal.util.StatementBuilder;
+import com.wplatform.ddal.value.Value;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.sql.DataSource;
-
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.util.StatementBuilder;
-import com.wplatform.ddal.value.Value;
-
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  *
  */
-public class JdbcUpdateWorker extends JdbcWorker<Integer> {
+public class JdbcCallWorker extends JdbcWorker<Integer> {
 
-    public JdbcUpdateWorker(Session session, String shardName, String sql, List<Value> params) {
+    public JdbcCallWorker(Session session, String shardName, String sql, List<Value> params) {
         super(session, shardName, sql, params);
     }
 
@@ -49,9 +50,9 @@ public class JdbcUpdateWorker extends JdbcWorker<Integer> {
             conn = session.applyConnection(dataSource, optional);
             attach(conn);
             if (trace.isDebugEnabled()) {
-                trace.debug("{0} Preparing call: {1};", shardName, sql);
+                trace.debug("{0} Preparing: {1};", shardName, sql);
             }
-            stmt = conn.prepareCall(sql);
+            stmt = conn.prepareStatement(sql);
             attach(stmt);
             applyQueryTimeout(stmt);
             if (params != null) {
@@ -71,7 +72,7 @@ public class JdbcUpdateWorker extends JdbcWorker<Integer> {
         } catch (SQLException e) {
             StatementBuilder buff = new StatementBuilder();
             buff.append(shardName).append(" executing executeUpdate error:").append(sql);
-            if (params != null && 0 < params.size()) {
+            if (params != null && params.size() > 0) {
                 buff.append("\n{");
                 int i = 1;
                 for (Value v : params) {

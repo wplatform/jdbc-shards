@@ -273,15 +273,15 @@ public class XmlConfigParser {
      */
     private void setTableScanLevel(TableConfig config, String scanLevel) {
         if ("unlimited".equals(scanLevel)) {
-            config.setScanLevel(Constants.SCANLEVEL_UNLIMITED);
+            config.setScanLevel(TableConfig.SCANLEVEL_UNLIMITED);
         } else if ("filter".equals(scanLevel)) {
-            config.setScanLevel(Constants.SCANLEVEL_FILTER);
+            config.setScanLevel(TableConfig.SCANLEVEL_FILTER);
         } else if ("anyIndex".equals(scanLevel)) {
-            config.setScanLevel(Constants.SCANLEVEL_ANYINDEX);
+            config.setScanLevel(TableConfig.SCANLEVEL_ANYINDEX);
         } else if ("uniqueIndex".equals(scanLevel)) {
-            config.setScanLevel(Constants.SCANLEVEL_UNIQUEINDEX);
+            config.setScanLevel(TableConfig.SCANLEVEL_UNIQUEINDEX);
         } else if ("shardingKey".equals(scanLevel)) {
-            config.setScanLevel(Constants.SCANLEVEL_SHARDINGKEY);
+            config.setScanLevel(TableConfig.SCANLEVEL_SHARDINGKEY);
         }
     }
 

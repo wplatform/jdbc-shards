@@ -89,21 +89,6 @@ public class TableMate extends Table {
         super(schema, id, name);
         this.globalTemporary = false;
     }
-
-    /**
-     * @return the scanIndex
-     */
-    public Index getScanIndex() {
-        return scanIndex;
-    }
-
-    /**
-     * @param scanIndex the scanIndex to set
-     */
-    public void setScanIndex(Index scanIndex) {
-        this.scanIndex = scanIndex;
-    }
-
     /**
      * @return the tableRouter
      */

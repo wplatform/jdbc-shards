@@ -15,6 +15,8 @@
  */
 package com.wplatform.ddal.excutor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -138,7 +140,12 @@ public abstract class JdbcWorker<T> implements Callable<T> {
     
     protected void applyQueryTimeout(Statement stmt) throws SQLException {
         //The session timeout of a query in milliseconds
-        stmt.setQueryTimeout(session.getQueryTimeout() / 1000);
+        int queryTimeout = session.getQueryTimeout();
+        if(queryTimeout > 0) {
+            int seconds = queryTimeout / 1000;
+            trace.debug("apply {0} query time out from statement.", seconds);
+            stmt.setQueryTimeout(seconds);
+        }
     }
     
 
@@ -158,5 +165,18 @@ public abstract class JdbcWorker<T> implements Callable<T> {
     protected static DbException wrapException(String sql, Exception ex) {
         SQLException e = DbException.toSQLException(ex);
         return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
+    }
+
+    private static Throwable unwrapThrowable(Throwable wrapped) {
+        Throwable unwrapped = wrapped;
+        while (true) {
+            if (unwrapped instanceof InvocationTargetException) {
+                unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
+            } else if (unwrapped instanceof UndeclaredThrowableException) {
+                unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
+            } else {
+                return unwrapped;
+            }
+        }
     }
 }

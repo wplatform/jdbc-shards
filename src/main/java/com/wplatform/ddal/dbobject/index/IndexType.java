@@ -21,13 +21,23 @@ package com.wplatform.ddal.dbobject.index;
  */
 public class IndexType {
 
-    private boolean primaryKey, unique, hash, scan, spatial;
-    private boolean belongsToConstraint;
+    private boolean shardingKey, primaryKey, unique, hash, scan, spatial;
 
     /**
      * Create a primary key index.
-     *
-     * @param persistent if the index is persistent
+     * @param hash       if a hash index should be used
+     * @return the index type
+     */
+    public static IndexType createShardingKey(boolean hash) {
+        IndexType type = new IndexType();
+        type.shardingKey = true;
+        type.primaryKey = true;
+        type.hash = hash;
+        type.unique = true;
+        return type;
+    }
+    /**
+     * Create a primary key index.
      * @param hash       if a hash index should be used
      * @return the index type
      */
@@ -42,7 +52,6 @@ public class IndexType {
     /**
      * Create a unique index.
      *
-     * @param persistent if the index is persistent
      * @param hash       if a hash index should be used
      * @return the index type
      */
@@ -56,7 +65,6 @@ public class IndexType {
     /**
      * Create a non-unique index.
      *
-     * @param persistent if the index is persistent
      * @return the index type
      */
     public static IndexType createNonUnique() {
@@ -66,7 +74,6 @@ public class IndexType {
     /**
      * Create a non-unique index.
      *
-     * @param persistent if the index is persistent
      * @param hash       if a hash index should be used
      * @param spatial    if a spatial index should be used
      * @return the index type
@@ -82,32 +89,12 @@ public class IndexType {
     /**
      * Create a scan pseudo-index.
      *
-     * @param persistent if the index is persistent
      * @return the index type
      */
     public static IndexType createScan() {
         IndexType type = new IndexType();
         type.scan = true;
         return type;
-    }
-
-    /**
-     * If the index is created because of a constraint. Such indexes are to be
-     * dropped once the constraint is dropped.
-     *
-     * @return if the index belongs to a constraint
-     */
-    public boolean getBelongsToConstraint() {
-        return belongsToConstraint;
-    }
-
-    /**
-     * Sets if this index belongs to a constraint.
-     *
-     * @param belongsToConstraint if the index belongs to a constraint
-     */
-    public void setBelongsToConstraint(boolean belongsToConstraint) {
-        this.belongsToConstraint = belongsToConstraint;
     }
 
     /**
@@ -133,6 +120,14 @@ public class IndexType {
      *
      * @return true if it references a primary key constraint
      */
+    public boolean isShardingKey() {
+        return shardingKey;
+    }
+    /**
+     * Does this index belong to a primary key constraint?
+     *
+     * @return true if it references a primary key constraint
+     */
     public boolean isPrimaryKey() {
         return primaryKey;
     }
@@ -144,33 +139,6 @@ public class IndexType {
      */
     public boolean isUnique() {
         return unique;
-    }
-
-    /**
-     * Get the SQL snippet to create such an index.
-     *
-     * @return the SQL snippet
-     */
-    public String getSQL() {
-        StringBuilder buff = new StringBuilder();
-        if (primaryKey) {
-            buff.append("PRIMARY KEY");
-            if (hash) {
-                buff.append(" HASH");
-            }
-        } else {
-            if (unique) {
-                buff.append("UNIQUE ");
-            }
-            if (hash) {
-                buff.append("HASH ");
-            }
-            if (spatial) {
-                buff.append("SPATIAL ");
-            }
-            buff.append("INDEX");
-        }
-        return buff.toString();
     }
 
     /**

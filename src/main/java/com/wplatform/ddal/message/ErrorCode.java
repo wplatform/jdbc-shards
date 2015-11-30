@@ -1909,6 +1909,8 @@ public class ErrorCode {
      */
     public static final int JAVA_OBJECT_SERIALIZER_CHANGE_WITH_DATA_TABLE = 90141;
 
+    public static final int FILTER_NOT_ALLOWED_FOR_SCAN_TABLE = 90142;
+
 
     // next are 90039, 90051, 90056, 90110, 90122, 90142
 
