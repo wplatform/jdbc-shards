@@ -61,7 +61,7 @@ public class XmlRuleConfigParser {
             ruleColumn.setRequired(Boolean.valueOf(required));
         }
         if (!StringUtils.isNullOrEmpty(type)) {
-            ruleColumn.setType(type.toLowerCase());
+            //ruleColumn.setType(type.toLowerCase());
         }
         return ruleColumn;
     }

@@ -106,7 +106,7 @@ public class CreateTableExecutor extends DefineCommandExecutor<CreateTable> {
                         Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(tableNodes, refTableNodes);
                         if (symmetryRelation == null) {
                             throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
-                                    "The original table and the reference table should be symmetrical.");
+                                    "Create foreign key for table,the original table and the reference table should be symmetrical.");
                         }
                     }
                 }

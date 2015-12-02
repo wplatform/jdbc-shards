@@ -39,7 +39,7 @@ public class ScriptRunnerTestCase extends BaseTestCase {
     
     @Test
     public void runCreateScript() throws Exception {
-      Connection conn = dataSource.getConnection();
+      Connection conn = getConnection();
       ScriptRunner runner = new ScriptRunner(conn);
       runner.setAutoCommit(true);
       runner.setStopOnError(true);

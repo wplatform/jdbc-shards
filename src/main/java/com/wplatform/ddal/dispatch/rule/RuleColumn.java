@@ -29,29 +29,9 @@ public class RuleColumn implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<String, String> typeMap = new HashMap<String, String>();
-
-    static {
-        typeMap.put("int", "java.lang.Integer");
-        typeMap.put("short", "java.lang.Short");
-        typeMap.put("long", "java.lang.Long");
-        typeMap.put("byte", "java.lang.Byte");
-        typeMap.put("char", "java.lang.Character");
-        typeMap.put("boolean", "java.lang.Boolean");
-        typeMap.put("float", "java.lang.Float");
-        typeMap.put("double", "java.lang.Double");
-        typeMap.put("string", "java.lang.String");
-        typeMap.put("date", "java.sql.Date");
-        typeMap.put("time", "java.sql.Time");
-        typeMap.put("timestamp", "java.sql.Timestamp");
-        typeMap.put("bigdecimal", "java.math.BigDecimal");
-    }
-
     private String name;
 
-    private String type;
-
-    private boolean required = true;
+    private boolean required;
 
     /**
      * @return the name
@@ -68,20 +48,6 @@ public class RuleColumn implements Serializable {
     }
 
     /**
-     * @return the type
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * @param type the type to set
-     */
-    public void setType(String type) {
-        this.type = typeMap.containsKey(type) ? typeMap.get(type) : type;
-    }
-
-    /**
      * @return the required
      */
     public boolean isRequired() {
@@ -95,40 +61,28 @@ public class RuleColumn implements Serializable {
         this.required = required;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RuleColumn that = (RuleColumn) o;
+
+        if (required != that.required) return false;
+        return !(name != null ? !name.equals(that.name) : that.name != null);
+
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.toLowerCase().hashCode());
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (required ? 1 : 0);
         return result;
     }
 
     /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RuleColumn other = (RuleColumn) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equalsIgnoreCase(other.name))
-            return false;
-        return true;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+         * @see java.lang.Object#toString()
+         */
     @Override
     public String toString() {
         return "${" + name + "}";

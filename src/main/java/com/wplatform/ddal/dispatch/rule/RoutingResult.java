@@ -19,6 +19,7 @@
 package com.wplatform.ddal.dispatch.rule;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -54,11 +55,12 @@ public class RoutingResult implements Serializable {
         return new RoutingResult(nodes, nodes);
     }
 
+    public static RoutingResult fixedResult(List<TableNode> nodes) {
+        return new RoutingResult(nodes, nodes);
+    }
+
     public static RoutingResult fixedResult(TableNode[] tableNode) {
-        List<TableNode> nodes = New.arrayList(tableNode.length);
-        for (TableNode node : nodes) {
-            nodes.add(node);
-        }
+        List<TableNode> nodes = Arrays.asList(tableNode);
         return new RoutingResult(nodes, nodes);
     }
 
@@ -86,7 +88,7 @@ public class RoutingResult implements Serializable {
     }
 
     public TableNode[] group() {
-        List<TableNode> result = null;
+        List<TableNode> result;
         if (isMultipleNode()) {
             Set<String> shards = shardNames();
             result = New.arrayList(shards.size());

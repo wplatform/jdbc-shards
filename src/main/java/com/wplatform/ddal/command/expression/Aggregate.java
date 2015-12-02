@@ -260,33 +260,6 @@ public class Aggregate extends Expression {
 
     @Override
     public Value getValue(Session session) {
-        if (select.isQuickAggregateQuery()) {
-            switch (type) {
-                case COUNT:
-                case COUNT_ALL:
-                    Table table = select.getTopTableFilter().getTable();
-                    return ValueLong.get(table.getRowCount(session));
-                case MIN:
-                case MAX:
-                    boolean first = type == MIN;
-                    Index index = getColumnIndex();
-                    int sortType = index.getIndexColumns()[0].sortType;
-                    if ((sortType & SortOrder.DESCENDING) != 0) {
-                        first = !first;
-                    }
-                    //Cursor cursor = index.findFirstOrLast(session, first);
-                    //SearchRow row = cursor.getSearchRow();
-                    //Value v;
-                    //if (row == null) {
-                    //    v = ValueNull.INSTANCE;
-                    //} else {
-                    //    v = row.getValue(index.getColumns()[0].getColumnId());
-                    //}
-                    return null;
-                default:
-                    DbException.throwInternalError("type=" + type);
-            }
-        }
         HashMap<Expression, Object> group = select.getCurrentGroup();
         if (group == null) {
             throw DbException.get(ErrorCode.INVALID_USE_OF_AGGREGATE_FUNCTION_1, getSQL());

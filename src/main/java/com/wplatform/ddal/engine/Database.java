@@ -123,7 +123,7 @@ public class Database {
             List<TableConfig> ctList = sc.getTables();
             for (TableConfig tableConfig : ctList) {
                 String identifier = tableConfig.getName();
-                identifier = dbSettings.databaseToUpper ? StringUtils.toUpperEnglish(identifier) : identifier;
+                identifier = identifier(identifier);
                 TableMate tableMate = new TableMate(schema, allocateObjectId(), identifier);
                 tableMate.setTableRouter(tableConfig.getTableRouter());
                 tableMate.setShards(tableConfig.getShards());
@@ -696,6 +696,16 @@ public class Database {
             return true;
         }
         return !dbSettings.databaseToUpper && a.equalsIgnoreCase(b);
+    }
+
+    /**
+     * String to database identifier against dbSettings
+     * @param identifier
+     * @return
+     */
+    public String identifier(String identifier) {
+        identifier = dbSettings.databaseToUpper ? StringUtils.toUpperEnglish(identifier) : identifier;
+        return identifier;
     }
 
     /**

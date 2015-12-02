@@ -83,5 +83,24 @@ public class RuleExpression implements Serializable {
         return function;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        RuleExpression that = (RuleExpression) o;
+
+        if (ruleColumns != null ? !ruleColumns.equals(that.ruleColumns) : that.ruleColumns != null) return false;
+        if (expression != null ? !expression.equals(that.expression) : that.expression != null) return false;
+        return !(function != null ? !function.equals(that.function) : that.function != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ruleColumns != null ? ruleColumns.hashCode() : 0;
+        result = 31 * result + (expression != null ? expression.hashCode() : 0);
+        result = 31 * result + (function != null ? function.hashCode() : 0);
+        return result;
+    }
 }

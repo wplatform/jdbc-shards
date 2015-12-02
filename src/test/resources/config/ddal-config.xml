@@ -2,7 +2,7 @@
 <!DOCTYPE ddal-config PUBLIC "-//wplatform.com//DTD ddal-config//EN" "http://wplatform.com/dtd/ddal-config.dtd">
 <ddal-config>
 
-	<schema name="PUBLIC" shard="shard2">
+	<schema name="myApp" shard="shard0">
 	
 		<tableGroup router="customer_group" validation="false">
 			<table name="customers"/>
@@ -21,16 +21,16 @@
 	</schema>
 
 	<cluster>
-		<shard name="shard1">
+		<shard name="shard0">
 			<member ref="db1m"/>
 		</shard>
-		<shard name="shard2">
+		<shard name="shard1">
 			<member ref="db2m"/>
 		</shard>
-		<shard name="shard3">
+		<shard name="shard2">
 			<member ref="db3m"/>
 		</shard>
-		<shard name="shard4">
+		<shard name="shard3">
 			<member ref="db4m"/>
 		</shard>
 	</cluster>

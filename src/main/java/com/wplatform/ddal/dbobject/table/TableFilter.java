@@ -475,6 +475,14 @@ public class TableFilter implements ColumnResolver {
     }
 
     /**
+     * test the table is table mata
+     * @return
+     */
+    public boolean isFromTableMate() {
+        return table instanceof TableMate;
+    }
+
+    /**
      * Add an index condition.
      *
      * @param condition the index condition

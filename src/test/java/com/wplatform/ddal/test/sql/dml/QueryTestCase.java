@@ -24,12 +24,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.wplatform.ddal.test.BaseTestCase;
-import com.wplatform.ddal.util.New;
+
+import junit.framework.Assert;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -69,123 +68,12 @@ public class QueryTestCase extends BaseTestCase{
     }
     
     
-    
-    @Test
-    public void testQuery_SimpleAggregate(){
-        String sql = "SELECT count(*), max(f_student_id), avg(t_score),sum(t_score) FROM t_student_course";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_Count(){
-        String sql = "SELECT count(1) FROM t_student_course";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_Count1(){
-        String sql = "SELECT count(DISTINCT f_student_id) FROM t_student_course";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_distinct(){
-        String sql = "SELECT DISTINCT f_id, f_student_id, t_course_name, f_course_no, t_score, t_learn_year, f_gmt FROM t_student_course";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_Aggregate_GroupBy(){
-        String sql = " SELECT  f_student_id, max(t_score), avg(t_score), count(1) FROM t_student_course group by f_student_id";
-        this.query_Sql(sql, null);
-    }
-
 
     @Test
-    public void testQuery_SimpleOR(){
-        String sql = "SELECT * FROM t_student where f_student_id > 3 or f_school_id < 100";
+    public void test_inner_join_conndiditon(){
+        String sql = "SELECT * FROM orders a inner join order_items b on a.order_id=b.order_id inner join order_status c on b.order_id = c.order_id where customer_id = 1";
         this.query_Sql(sql, null);
     }
-    
-    @Test
-    public void testQuery_SimpleAnd(){
-        String sql = "SELECT * FROM t_student where f_student_id > 3 and F_SCHOOL_ID < 100";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_UnEvaluatableConddition(){
-        String sql = "SELECT * FROM t_student where f_student_id = F_SCHOOL_ID ";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_AlwaysFlaseConddition(){
-        String sql = "SELECT * FROM t_student where f_student_id = 8 and f_student_id < 5 ";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_HalfFlaseConddition(){
-        String sql = "SELECT * FROM t_student where f_student_id IN (8,9,10) and f_student_id > 8 ";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_SimpleInnerJoinOr(){
-        String sql = "SELECT * FROM t_student a inner join t_student_course b on a.f_student_id = b.f_student_id  where a.f_student_id > 3 or b.f_id < 100";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_SimpleInnerJoinAnd(){
-        String sql = "SELECT * FROM t_student a inner join t_student_course b on a.f_student_id = b.f_student_id  where a.f_student_id > ? and b.f_id < ?";
-        List<Object> args = New.arrayList();
-        args.add(3);
-        args.add(100);
-        this.query_Sql(sql, args);
-    }
-    
-    @Test
-    public void testQuery_SubQueryIn(){
-        String sql = "SELECT * FROM t_student where f_student_id in (select f_student_id from t_student_course where t_score > 80)";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_SubQueryEqAny(){
-        String sql = "SELECT * FROM t_student where f_student_id = any(select f_student_id from t_student_course where t_score > 80)";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_SubQueryEq(){
-        String sql = "SELECT * FROM t_student where f_student_id = (select f_student_id from t_student_course where t_score = 80)";
-        this.query_Sql(sql, null);
-    }
-    
-    @Test
-    public void testQuery_SubQueryExists(){
-        String sql = "SELECT * FROM t_student a where exists(select 1 from t_student_course where t_score > 80 and a.f_student_id = f_student_id)";
-        this.query_Sql(sql, null);
-    }
-    
-    
-    @Test
-    public void testQuery_SubQueryExists2(){
-        String sql = "SELECT * FROM t_student a where exists(select 1 from t_student_course where t_score > 80)";
-        this.query_Sql(sql, null);
-    }
-    
-    
-    @Test
-    public void testQuery_SubQuery(){
-        String sql = "SELECT * FROM (select * from t_student_course where t_score > 80) a, t_student b where a.f_student_id = b.f_student_id";
-        this.query_Sql(sql, null);
-    }
-
-
-    
     
   
 }

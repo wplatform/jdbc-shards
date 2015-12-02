@@ -18,10 +18,6 @@
 
 package com.wplatform.ddal.excutor;
 
-import java.sql.ResultSet;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
@@ -33,8 +29,11 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.LocalResult;
 import com.wplatform.ddal.result.ResultTarget;
 import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
+
+import java.sql.ResultSet;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -99,7 +98,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     
     /**
      * Gets the current query timeout in MILLISECONDS.
-     * @see session.getQueryTimeout()
+     * @see Session.getQueryTimeout()
      * @return query timeout
      */
     protected int getQueryTimeout() {
@@ -186,7 +185,6 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     }
 
     protected String identifier(String s) {
-        return database.getSettings().databaseToUpper ? StringUtils.toUpperEnglish(s) : s;
-
+        return database.identifier(s);
     }
 }

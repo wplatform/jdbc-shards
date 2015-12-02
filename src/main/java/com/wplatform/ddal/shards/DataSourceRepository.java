@@ -22,12 +22,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 import javax.sql.DataSource;
@@ -184,7 +179,7 @@ public class DataSourceRepository {
             if (keepAliveTime <= 0) {
                 keepAliveTime = 15 * 60000; // 15 MINUTES
             }
-            BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(capacity);
+            BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(capacity);
             jdbcExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
                     workQueue, New.customThreadFactory("jdbc-worker"), new AbortPolicy());
             jdbcExecutor.allowCoreThreadTimeOut(true);

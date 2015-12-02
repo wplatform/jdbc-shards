@@ -35,6 +35,7 @@ import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
 import com.wplatform.ddal.dbobject.index.IndexType;
 import com.wplatform.ddal.dbobject.schema.Schema;
+import com.wplatform.ddal.dispatch.rule.RoutingResult;
 import com.wplatform.ddal.dispatch.rule.RuleColumn;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
@@ -122,6 +123,14 @@ public class TableMate extends Table {
      */
     public TableNode[] getShards() {
         return shards;
+    }
+
+    /**
+     * test the table is global table.
+     * @return
+     */
+    public boolean isReplication() {
+        return shards != null && shards.length > 1;
     }
 
     /**
@@ -292,7 +301,9 @@ public class TableMate extends Table {
                     DataSource dataSource = dsRepository.getDataSourceByShardName(shardName);
                     Optional optional = Optional.build().shardName(shardName).readOnly(false);
                     conn = session.applyConnection(dataSource, optional);
+                    tableName = database.identifier(tableName);
                     tryReadMetaData(conn, tableName);
+                    return;
                 } catch (Exception e) {
                     throw DbException.convert(e);
                 } finally {
@@ -407,7 +418,7 @@ public class TableMate extends Table {
             }
             addIndex(shardCol, IndexType.createShardingKey(false));
         }
-        
+
         // load primary keys
         try {
             rs = meta.getPrimaryKeys(null, null, tableName);
@@ -535,6 +546,43 @@ public class TableMate extends Table {
             break;
         }
         return scale;
+    }
+
+    public boolean isRelationSymmetry(TableMate o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null)  {
+            return false;
+        }
+        if(tableRouter != null) {
+            if(o.tableRouter != null) {
+                return tableRouter.equals(o.tableRouter);
+            } else {
+                return isNodeMatch(getPartitionNode(), o.getPartitionNode());
+            }
+        }  else {
+            return isNodeMatch(getPartitionNode(), o.getPartitionNode());
+        }
+
+    }
+
+    private static boolean isNodeMatch(TableNode[] nodes1, TableNode[] nodes2) {
+        TableNode[] group1 = RoutingResult.fixedResult(nodes1).group();
+        TableNode[] group2 = RoutingResult.fixedResult(nodes2).group();
+        for (TableNode tableNode1 : group1) {
+            boolean isMatched = false;
+            for (TableNode tableNode2 : group2) {
+                if (tableNode1.getShardName().equals(tableNode2.getShardName())) {
+                    isMatched = true;
+                    break;
+                }
+            }
+            if (!isMatched) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

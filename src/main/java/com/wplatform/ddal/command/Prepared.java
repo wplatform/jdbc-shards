@@ -230,13 +230,7 @@ public abstract class Prepared {
      * @throws DbException if it is not a query
      */
     public ResultInterface query(int maxrows) {
-        session.checkCanceled();
-        PreparedExecutorFactory pef = session.getPreparedExecutorFactory();
-        PreparedExecutor executor = pef.newExecutor(this);
-        if(executor == null) {
-            throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
-        }
-        return executor.executeQuery(maxrows);
+        throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
     }
 
     /**
