@@ -7,4 +7,4 @@ jdbc-shards是基于关系型数据库集群实现的一个轻量级SQL引擎，
 - 分库分表，支持跨结点查询，支持join,count,order by,group by以及聚合函数等的SQL持性
 - 读写分离支持，支持问题数据库隔离和自动恢复
 - 对前端应用透明，屏蔽分布式数据库的复杂逻辑，使访问多个数据库像访问一个数据库那样
-- 兼容主流的数据库MySql,Oracle,DB2,SQLServer,PostgreSQL的SQL语法
+- 兼容主流的数据库MySql,PostgreSQL,Oracle,DB2,SQLServer的SQL语法
