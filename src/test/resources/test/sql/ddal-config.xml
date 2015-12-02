@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ddal-config PUBLIC "-//wplatform.com//DTD ddal-config//EN" "http://wplatform.com/dtd/ddal-config.dtd">
+<ddal-config>
+
+
+	<schema name="PUBLIC" shard="shard1" validation="false">
+
+		<tableGroup router="partition_group">
+			<table name="partition_parent"/>
+			<table name="partition_child"/>
+		</tableGroup>
+
+		<table name="replication_parent" shard="shard0,shard1,shard2,shard3"/>
+		<table name="replication_child" shard="shard0,shard1,shard2,shard3"/>
+
+		<table name="parent"/>
+		<table name="child"/>
+		<table name="test"/>
+		<table name="t1"/>
+	</schema>
+
+	<cluster>
+		<shard name="shard0">
+			<member ref="db1m"/>
+		</shard>
+		<shard name="shard1">
+			<member ref="db2m"/>
+		</shard>
+		<shard name="shard2">
+			<member ref="db3m"/>
+		</shard>
+		<shard name="shard3">
+			<member ref="db4m"/>
+		</shard>
+	</cluster>
+
+
+	<dataNodes>
+		<datasource id="db1m" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db1" />
+			<property name="username" value="root" />
+			<property name="password" value="admin" />
+		</datasource>
+		<datasource id="db2m" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db2" />
+			<property name="username" value="root" />
+			<property name="password" value="admin" />
+		</datasource>
+		<datasource id="db3m" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db3" />
+			<property name="username" value="root" />
+			<property name="password" value="admin" />
+		</datasource>
+		<datasource id="db4m" class="org.apache.commons.dbcp.BasicDataSource">
+			<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+			<property name="url" value="jdbc:mysql://10.199.249.251:3306/ddal_db4" />
+			<property name="username" value="root" />
+			<property name="password" value="admin" />
+		</datasource>
+	</dataNodes>
+	
+	
+	<tableRules>
+		<tableRule resource="test/sql/ddal-rule.xml"/>
+	</tableRules>
+
+</ddal-config>

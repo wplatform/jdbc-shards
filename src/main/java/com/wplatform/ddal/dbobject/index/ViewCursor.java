@@ -1,0 +1,62 @@
+/*
+ * Copyright 2014-2015 the original author or authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.wplatform.ddal.dbobject.index;
+
+import com.wplatform.ddal.result.Row;
+import com.wplatform.ddal.result.SearchRow;
+
+/**
+ * The cursor implementation of a view index.
+ */
+public class ViewCursor implements Cursor {
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#get()
+     */
+    @Override
+    public Row get() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#getSearchRow()
+     */
+    @Override
+    public SearchRow getSearchRow() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#next()
+     */
+    @Override
+    public boolean next() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.suning.snfddal.dbobject.index.Cursor#previous()
+     */
+    @Override
+    public boolean previous() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+}

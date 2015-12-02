@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="false" context="typecomment_context" deleted="false" description="Comment for created types" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.typecomment" name="typecomment">/**
+ * @author &lt;a href="mailto:jorgie.mail@gmail.com"&gt;jorgie li&lt;/a&gt;
+ *
+ * ${tags}
+ */</template></templates>

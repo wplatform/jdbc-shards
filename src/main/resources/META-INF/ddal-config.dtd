@@ -1,42 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
-       Copyright 2014 suning.com Holding Ltd.
-
-       Licensed under the Apache License, Version 2.0 (the "License");
-       you may not use this file except in compliance with the License.
-       You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-       Unless required by applicable law or agreed to in writing, software
-       distributed under the License is distributed on an "AS IS" BASIS,
-       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-       See the License for the specific language governing permissions and
-       limitations under the License.
+		Copyright 2014-2015 the original author or authors
+		
+		Licensed under the Apache License, Version 2.0 (the “License”);
+		you may not use this file except in compliance with the License.
+		You may obtain a copy of the License at
+		
+		     http://www.apache.org/licenses/LICENSE-2.0
+		
+		Unless required by applicable law or agreed to in writing, software
+		distributed under the License is distributed on an “AS IS” BASIS,
+		WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+		See the License for the specific language governing permissions and
+		limitations under the License.
 
 -->
 <!ELEMENT ddal-config (settings?,schema,cluster,dataNodes?,tableRules?,ruleAlgorithms?)>
 
 <!ELEMENT settings (property*)>
 
-<!ELEMENT schema (table*)>
-<!ATTLIST schema 
+<!ELEMENT schema (tableGroup*, table*)>
+<!ATTLIST schema
 name CDATA #REQUIRED
-metadata CDATA #IMPLIED
+shard CDATA #IMPLIED
+validation (true|false) #IMPLIED
 >
 
 
 <!ELEMENT cluster (shard+)>
-<!ELEMENT shard (property*)>
-<!ATTLIST shard 
+<!ELEMENT shard (member+)>
+<!ATTLIST shard
 name CDATA #REQUIRED
 >
 
 
 <!ELEMENT dataNodes (datasource+)>
 <!ELEMENT datasource (property*)>
-<!ATTLIST datasource 
+<!ATTLIST datasource
 id CDATA #REQUIRED
 class CDATA #IMPLIED
 jndi-name CDATA #IMPLIED
@@ -44,13 +45,13 @@ jndi-name CDATA #IMPLIED
 
 <!ELEMENT tableRules (tableRule+)>
 <!ELEMENT tableRule (#PCDATA)>
-<!ATTLIST tableRule 
+<!ATTLIST tableRule
 resource CDATA #REQUIRED
 >
 
 <!ELEMENT ruleAlgorithms (ruleAlgorithm*)>
 <!ELEMENT ruleAlgorithm (property*)>
-<!ATTLIST ruleAlgorithm 
+<!ATTLIST ruleAlgorithm
 name CDATA #REQUIRED
 class CDATA #REQUIRED
 >
@@ -58,12 +59,30 @@ class CDATA #REQUIRED
 <!ELEMENT table (#PCDATA)>
 <!ATTLIST table
 name CDATA #REQUIRED
-metadata CDATA #IMPLIED
 router CDATA #IMPLIED
+shard CDATA #IMPLIED
+validation (true|false) #IMPLIED
+scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
+>
+
+<!ELEMENT tableGroup (table+)>
+<!ATTLIST tableGroup
+shard CDATA #IMPLIED
+router CDATA #IMPLIED
+validation (true|false) #IMPLIED
+scanLevel (unlimited|filter|anyIndex|uniqueIndex|shardingKey) #IMPLIED
 >
 
 <!ELEMENT property (#PCDATA)>
-<!ATTLIST property 
+<!ATTLIST property
 name CDATA #REQUIRED
 value CDATA #REQUIRED
+>
+
+
+<!ELEMENT member (#PCDATA)>
+<!ATTLIST member
+ref CDATA #REQUIRED
+wWeight CDATA #IMPLIED
+rWeight CDATA #IMPLIED
 >

@@ -1,16 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<!-- 
-	<parent> 
-		<artifactId>snf-parent</artifactId> 
-		<groupId>com.suning.framework</groupId> 
-		<version>2.2.41</version> 
-	</parent> 
-	-->
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jdbc-shards</artifactId>
-	<groupId>com.suning.framework</groupId>
+	<groupId>com.wplatform.ddal</groupId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>jdbc-shards</name>
@@ -25,8 +18,8 @@
 	<developers>
 		<developer>
 			<id>jorgie</id>
-			<name>jorgie.lee</name>
-			<email>jorgie.mail@gmail.com</email>
+			<name>jorgie.li</name>
+			<email>jorgie@qq.com</email>
 		</developer>
 	</developers>
 
@@ -51,14 +44,19 @@
 			<version>2.6.9</version>
 		</dependency>
 		<dependency>
+			<groupId>org.mapdb</groupId>
+			<artifactId>mapdb</artifactId>
+			<version>1.0.7</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.10</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.10</version>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jta</artifactId>
+			<version>3.9.3</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -85,7 +83,12 @@
 			<version>5.1.29</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.0.13</version>
+		    <scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -138,6 +141,41 @@
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 					</links>
 				</configuration>
+			</plugin>
+			
+			<!-- http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
+			<plugin>
+				<!-- Working with multi-module projects -->
+				<inherited>false</inherited>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<version>1.10.b1</version>
+				<configuration>
+					<header>${basedir}/license.txt</header>
+					<failIfMissing>true</failIfMissing>
+					<aggregate>true</aggregate>
+					<strictCheck>true</strictCheck>
+					<properties>
+						<!-- <year>2015</year> -->
+					</properties>
+					<mapping>
+						<java>SLASHSTAR_STYLE</java>
+					</mapping>
+					<includes>
+						<include>src/main/java/**/*.java</include>
+						<include>src/test/java/**/*.java</include>
+					</includes>
+					<encoding>UTF-8</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check-headers</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
