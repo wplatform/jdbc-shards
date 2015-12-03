@@ -1,13 +1,12 @@
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.test.BaseTestCase;
 
 /**
  * Test for limit updates.

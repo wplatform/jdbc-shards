@@ -1,29 +1,18 @@
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.test.BaseTestCase;
+import com.wplatform.ddal.util.Task;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.RowId;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.UUID;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.test.BaseTestCase;
-import com.wplatform.ddal.util.Task;
 
 /**
  * Tests for the PreparedStatement implementation.

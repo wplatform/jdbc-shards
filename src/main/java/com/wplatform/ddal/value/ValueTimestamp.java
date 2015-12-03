@@ -15,6 +15,11 @@
  */
 package com.wplatform.ddal.value;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.util.DateTimeUtils;
+import com.wplatform.ddal.util.MathUtils;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -22,11 +27,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.util.DateTimeUtils;
-import com.wplatform.ddal.util.MathUtils;
 
 /**
  * Implementation of the TIMESTAMP data type.

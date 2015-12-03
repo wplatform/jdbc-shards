@@ -15,14 +15,6 @@
  */
 package com.wplatform.ddal.dbobject;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.schema.Schema;
@@ -41,6 +33,14 @@ import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueArray;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents a user-defined function, or alias.

@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.message;
 
+import com.wplatform.ddal.util.StringUtils;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Map;
-
-import com.wplatform.ddal.util.StringUtils;
 
 /**
  * The base class for objects that can print trace information about themselves.

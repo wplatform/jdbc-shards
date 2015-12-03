@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.value.Value;
+
+import java.util.List;
 
 /**
  * A column alias as in SELECT 'Hello' AS NAME ...

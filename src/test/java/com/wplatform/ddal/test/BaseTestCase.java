@@ -15,45 +15,26 @@
  */
 package com.wplatform.ddal.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.SimpleTimeZone;
-import java.util.UUID;
-
-import javax.sql.DataSource;
-
-import org.junit.After;
-
 import com.wplatform.ddal.jdbc.JdbcDataSource;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.test.utils.ProxyCodeGenerator;
 import com.wplatform.ddal.test.utils.ResultVerifier;
 import com.wplatform.ddal.util.FilePath;
 import com.wplatform.ddal.util.Utils;
+import org.junit.After;
+
+import javax.sql.DataSource;
+import java.io.*;
+import java.lang.reflect.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.SimpleTimeZone;
+import java.util.UUID;
 
 public abstract class BaseTestCase {
 

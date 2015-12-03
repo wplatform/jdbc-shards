@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.shards;
 
+import com.wplatform.ddal.util.MurmurHash;
+
 import java.util.Collection;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import com.wplatform.ddal.util.MurmurHash;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

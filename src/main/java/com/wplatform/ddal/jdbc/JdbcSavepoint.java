@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 /**
  * A savepoint is a point inside a transaction to where a transaction can be

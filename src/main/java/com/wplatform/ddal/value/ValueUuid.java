@@ -15,15 +15,15 @@
  */
 package com.wplatform.ddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.UUID;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.UUID;
 
 /**
  * Implementation of the UUID data type.

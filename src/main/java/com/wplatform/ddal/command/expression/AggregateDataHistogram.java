@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.util.ValueHashMap;
@@ -25,6 +22,9 @@ import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueArray;
 import com.wplatform.ddal.value.ValueLong;
+
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Data stored while calculating a HISTOGRAM aggregate.

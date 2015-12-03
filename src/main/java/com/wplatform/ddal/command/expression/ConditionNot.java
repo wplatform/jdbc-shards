@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * A NOT condition.

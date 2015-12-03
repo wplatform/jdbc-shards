@@ -15,11 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
@@ -30,6 +25,11 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueArray;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * An expression is a operation, a value, or a function in a query.

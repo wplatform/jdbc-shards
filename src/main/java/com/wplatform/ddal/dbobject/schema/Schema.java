@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.schema;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.ddl.CreateTableData;
 import com.wplatform.ddal.dbobject.DbObject;
 import com.wplatform.ddal.dbobject.DbObjectBase;
@@ -34,6 +30,10 @@ import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * A schema as created by the SQL statement CREATE SCHEMA

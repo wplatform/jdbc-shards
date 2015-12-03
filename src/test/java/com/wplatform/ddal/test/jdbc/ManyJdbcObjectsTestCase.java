@@ -5,16 +5,10 @@
  */
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import com.wplatform.ddal.test.BaseTestCase;
 import org.junit.Test;
 
-import com.wplatform.ddal.test.BaseTestCase;
+import java.sql.*;
 
 /**
  * Tests the server by creating many JDBC objects (result sets and so on).

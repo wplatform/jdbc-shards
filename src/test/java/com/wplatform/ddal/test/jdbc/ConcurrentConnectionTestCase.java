@@ -1,14 +1,13 @@
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.test.BaseTestCase;
+import com.wplatform.ddal.util.Task;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.test.BaseTestCase;
-import com.wplatform.ddal.util.Task;
 
 /**
  * Test concurrent usage of the same connection.

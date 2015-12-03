@@ -20,7 +20,6 @@ package com.wplatform.ddal.config;
 
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
-import com.wplatform.ddal.engine.Constants;
 
 public class TableConfig {
 

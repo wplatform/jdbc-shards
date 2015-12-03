@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Mode;
@@ -24,6 +22,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.value.*;
+
+import java.util.List;
 
 /**
  * A mathematical expression, or string concatenation.

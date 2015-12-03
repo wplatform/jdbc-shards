@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.jdbc;
 
+import com.wplatform.ddal.engine.Constants;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-
-import com.wplatform.ddal.engine.Constants;
 
 /**
  * Represents a database exception.

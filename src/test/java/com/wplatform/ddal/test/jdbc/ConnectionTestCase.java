@@ -18,17 +18,15 @@
 
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.test.BaseTestCase;
+import junit.framework.Assert;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.test.BaseTestCase;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.index;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.IndexColumn;
@@ -26,6 +24,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.Row;
 import com.wplatform.ddal.result.SearchRow;
+
+import java.util.ArrayList;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

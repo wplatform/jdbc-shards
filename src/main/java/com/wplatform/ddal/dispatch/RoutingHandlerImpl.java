@@ -18,9 +18,6 @@
 
 package com.wplatform.ddal.dispatch;
 
-import java.util.List;
-import java.util.Map;
-
 import com.wplatform.ddal.command.expression.Comparison;
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.Column;
@@ -36,6 +33,9 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueLong;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.result;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * A list of rows. If the list grows too large, it is buffered to disk

@@ -15,6 +15,9 @@
  */
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -22,9 +25,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
 
 import static java.lang.Math.abs;
 

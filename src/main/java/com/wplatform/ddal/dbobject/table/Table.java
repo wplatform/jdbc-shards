@@ -17,10 +17,6 @@
 // $Id$
 package com.wplatform.ddal.dbobject.table;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.ExpressionVisitor;
 import com.wplatform.ddal.dbobject.DbObject;
@@ -34,14 +30,14 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
-import com.wplatform.ddal.result.Row;
-import com.wplatform.ddal.result.SearchRow;
-import com.wplatform.ddal.result.SimpleRow;
-import com.wplatform.ddal.result.SimpleRowValue;
-import com.wplatform.ddal.result.SortOrder;
+import com.wplatform.ddal.result.*;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * This is the base class for most tables. A table contains a list of columns

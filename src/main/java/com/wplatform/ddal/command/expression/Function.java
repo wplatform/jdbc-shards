@@ -15,16 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import static com.wplatform.ddal.util.ToChar.toChar;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.PatternSyntaxException;
-
 import com.wplatform.ddal.command.Command;
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.dbobject.schema.Schema;
@@ -41,6 +31,16 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.Csv;
 import com.wplatform.ddal.util.*;
 import com.wplatform.ddal.value.*;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.PatternSyntaxException;
+
+import static com.wplatform.ddal.util.ToChar.toChar;
 
 /**
  * This class implements most built-in functions of this database.

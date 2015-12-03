@@ -15,6 +15,12 @@
  */
 package com.wplatform.ddal.message;
 
+import com.wplatform.ddal.engine.Constants;
+import com.wplatform.ddal.jdbc.JdbcSQLException;
+import com.wplatform.ddal.util.SortedProperties;
+import com.wplatform.ddal.util.StringUtils;
+import com.wplatform.ddal.util.Utils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,13 +30,6 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map.Entry;
-
-import com.wplatform.ddal.engine.Constants;
-import com.wplatform.ddal.jdbc.JdbcSQLException;
-import com.wplatform.ddal.util.SortedProperties;
-import com.wplatform.ddal.util.StringUtils;
-import com.wplatform.ddal.util.Utils;
-
 import java.util.Properties;
 
 /**

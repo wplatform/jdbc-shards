@@ -15,6 +15,13 @@
  */
 package com.wplatform.ddal.result;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.util.JdbcUtils;
+import com.wplatform.ddal.util.MathUtils;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.value.DataType;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -23,13 +30,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.util.JdbcUtils;
-import com.wplatform.ddal.util.MathUtils;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.value.DataType;
 
 /**
  * This class is a simple result set and meta data implementation.

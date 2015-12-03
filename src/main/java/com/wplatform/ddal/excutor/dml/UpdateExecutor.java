@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.excutor.dml;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.wplatform.ddal.command.dml.Update;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.Right;
@@ -33,6 +29,10 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

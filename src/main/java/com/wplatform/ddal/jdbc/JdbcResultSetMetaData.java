@@ -15,15 +15,15 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.value.DataType;
+
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * Represents the meta data for a ResultSet.

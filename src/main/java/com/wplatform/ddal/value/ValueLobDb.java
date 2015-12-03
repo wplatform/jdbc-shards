@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.value;
 
-import java.io.*;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.*;
+
+import java.io.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * A implementation of the BLOB and CLOB data types.

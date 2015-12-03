@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.result;
 
-import java.io.*;
-import java.sql.*;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
@@ -27,6 +23,10 @@ import com.wplatform.ddal.util.IOUtils;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.io.*;
+import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * A facility to read from and write to CSV (comma separated values) files. When

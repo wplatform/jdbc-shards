@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.value;
 
-import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.Locale;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * An implementation of CompareMode that uses the ICU4J Collator.

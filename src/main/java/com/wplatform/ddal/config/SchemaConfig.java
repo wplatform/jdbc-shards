@@ -18,10 +18,10 @@
 
 package com.wplatform.ddal.config;
 
+import com.wplatform.ddal.util.New;
+
 import java.io.Serializable;
 import java.util.List;
-
-import com.wplatform.ddal.util.New;
 
 public class SchemaConfig implements Serializable {
     private static final long serialVersionUID = 1L;

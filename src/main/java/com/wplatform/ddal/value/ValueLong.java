@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.value;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.util.MathUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.util.MathUtils;
 
 /**
  * Implementation of the BIGINT data type.

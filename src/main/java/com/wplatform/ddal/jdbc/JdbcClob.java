@@ -15,11 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.io.*;
-import java.sql.Clob;
-import java.sql.NClob;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
@@ -27,6 +22,11 @@ import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.util.IOUtils;
 import com.wplatform.ddal.util.Task;
 import com.wplatform.ddal.value.Value;
+
+import java.io.*;
+import java.sql.Clob;
+import java.sql.NClob;
+import java.sql.SQLException;
 
 /**
  * Represents a CLOB value.

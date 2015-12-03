@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.HashSet;
-
 import com.wplatform.ddal.dbobject.DbObject;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.Table;
+
+import java.util.HashSet;
 
 /**
  * The visitor pattern is used to iterate through all expressions of a query

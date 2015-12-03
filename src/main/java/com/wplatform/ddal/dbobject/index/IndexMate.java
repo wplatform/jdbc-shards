@@ -115,9 +115,15 @@ public class IndexMate extends SchemaObjectBase implements Index {
             int index = column.getColumnId();
             int mask = masks[index];
             if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {
+
                 if (i == columns.length - 1 && getIndexType().isUnique()) {
-                    cost = 3;
-                    break;
+                    if (getIndexType().isShardingKey()) {
+                        cost = 3;
+                        break;
+                    } else {
+                        cost = 3;
+                        break;
+                    }
                 }
                 totalSelectivity = 100 - ((100 - totalSelectivity)
                         * (100 - column.getSelectivity()) / 100);

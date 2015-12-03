@@ -15,18 +15,13 @@
  */
 package com.wplatform.ddal.excutor;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

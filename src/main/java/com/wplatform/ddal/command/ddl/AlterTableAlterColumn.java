@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statements

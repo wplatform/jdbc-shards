@@ -18,11 +18,10 @@
 
 package com.wplatform.ddal.config;
 
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
 
+import javax.sql.DataSource;
 import java.util.Map;
 
 /**

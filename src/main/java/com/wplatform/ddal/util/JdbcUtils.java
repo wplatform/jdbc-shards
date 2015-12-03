@@ -15,14 +15,13 @@
  */
 package com.wplatform.ddal.util;
 
-import javax.naming.Context;
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.Utils.ClassFactory;
 
+import javax.naming.Context;
+import javax.sql.DataSource;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;

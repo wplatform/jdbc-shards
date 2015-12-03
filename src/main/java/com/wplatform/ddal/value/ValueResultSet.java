@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.value;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.result.SimpleResultSet;
+import com.wplatform.ddal.util.StatementBuilder;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.result.SimpleResultSet;
-import com.wplatform.ddal.util.StatementBuilder;
 
 /**
  * Implementation of the RESULT_SET data type.

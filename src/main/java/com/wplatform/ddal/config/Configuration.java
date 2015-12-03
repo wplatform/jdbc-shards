@@ -18,15 +18,15 @@
 
 package com.wplatform.ddal.config;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.New;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

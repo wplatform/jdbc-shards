@@ -15,16 +15,16 @@
  */
 package com.wplatform.ddal.dbobject.index;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.Row;
 import com.wplatform.ddal.result.SearchRow;
 import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
  * A cursor for a function that returns a JDBC result set.

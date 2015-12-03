@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
@@ -31,6 +29,8 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueBoolean;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * An 'in' condition with a subquery, as in WHERE ID IN(SELECT ...)

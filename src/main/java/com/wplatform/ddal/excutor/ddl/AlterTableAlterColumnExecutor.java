@@ -18,8 +18,6 @@
 
 package com.wplatform.ddal.excutor.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.ddl.AlterTableAlterColumn;
 import com.wplatform.ddal.dbobject.Right;
@@ -30,6 +28,8 @@ import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.StatementBuilder;
+
+import java.util.ArrayList;
 
 /**
  * This executor execute the statements

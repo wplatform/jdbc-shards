@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.*;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.engine.SysProperties;
@@ -26,6 +23,9 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.New;
+
+import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Represents a statement.

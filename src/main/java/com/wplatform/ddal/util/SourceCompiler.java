@@ -15,14 +15,13 @@
  */
 package com.wplatform.ddal.util;
 
-import javax.tools.*;
-import javax.tools.JavaFileObject.Kind;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 
+import javax.tools.*;
+import javax.tools.JavaFileObject.Kind;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;

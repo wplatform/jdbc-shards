@@ -1,13 +1,12 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Transaction isolation level tests.

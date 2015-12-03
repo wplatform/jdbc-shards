@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.engine;
 
-import java.io.Closeable;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.value.Value;
+
+import java.io.Closeable;
 
 /**
  * A local or remote session. A session represents a database connection.

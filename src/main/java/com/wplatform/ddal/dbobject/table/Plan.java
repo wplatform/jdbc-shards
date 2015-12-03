@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.ExpressionVisitor;
 import com.wplatform.ddal.dbobject.table.TableFilter.TableFilterVisitor;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A possible query execution plan. The time required to execute a query depends

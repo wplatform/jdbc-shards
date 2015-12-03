@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Session;
@@ -25,6 +23,8 @@ import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueBoolean;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * An 'and' or 'or' condition as in WHERE ID=1 AND NAME=?

@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.dbobject;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.Trace;
+
+import java.util.ArrayList;
 
 /**
  * The base class for all database objects.

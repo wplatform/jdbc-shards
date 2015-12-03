@@ -1,20 +1,12 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.value.DataType;
+import org.junit.Test;
+
+import java.sql.*;
 
 /**
  * Test for the DatabaseMetaData implementation.

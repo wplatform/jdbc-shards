@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Arrays;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * Implementation of the BINARY data type.

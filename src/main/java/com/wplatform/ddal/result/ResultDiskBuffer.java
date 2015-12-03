@@ -15,12 +15,6 @@
  */
 package com.wplatform.ddal.result;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.engine.SysProperties;
@@ -29,6 +23,12 @@ import com.wplatform.ddal.util.Data;
 import com.wplatform.ddal.util.FileUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 /**
  * This class implements the disk buffer for the LocalResult class.

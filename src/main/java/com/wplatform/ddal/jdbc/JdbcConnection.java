@@ -15,30 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Executor;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SessionInterface;
@@ -49,12 +25,16 @@ import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.Utils;
-import com.wplatform.ddal.value.CompareMode;
-import com.wplatform.ddal.value.Value;
-import com.wplatform.ddal.value.ValueInt;
-import com.wplatform.ddal.value.ValueLobDb;
-import com.wplatform.ddal.value.ValueNull;
-import com.wplatform.ddal.value.ValueString;
+import com.wplatform.ddal.value.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.sql.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * <p>

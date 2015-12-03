@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.value;
 
+import com.wplatform.ddal.message.DbException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.*;
-
-import com.wplatform.ddal.message.DbException;
 
 /**
  * Implementation of NULL. NULL is not a regular data type.

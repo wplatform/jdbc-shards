@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.message;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.ParameterInterface;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
 
 /**
  * This class represents a trace module.

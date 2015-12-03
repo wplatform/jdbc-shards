@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.command.expression.*;
@@ -36,6 +33,9 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * A view is a virtual table that is defined by a query.

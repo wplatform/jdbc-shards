@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
@@ -26,6 +24,8 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueBoolean;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.List;
 
 /**
  * A parameter of a prepared statement.

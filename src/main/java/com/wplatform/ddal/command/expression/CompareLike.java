@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
@@ -27,6 +23,10 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.value.*;
+
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Pattern matching comparison expression: WHERE NAME LIKE ?

@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.util;
 
-import java.io.*;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
+
+import java.io.*;
 
 /**
  * This utility class contains input/output functions.

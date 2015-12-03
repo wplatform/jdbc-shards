@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.command;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.ParameterInterface;
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Database;
@@ -26,6 +23,9 @@ import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.result.ResultInterface;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Represents a SQL statement. This object is only used on the server side.

@@ -15,12 +15,6 @@
  */
 package com.wplatform.ddal.result;
 
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
@@ -30,6 +24,12 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * This class is used for updatable result sets. An updatable row provides

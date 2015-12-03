@@ -1,16 +1,10 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
+import java.sql.*;
 
 /**
  * Tests Statement.cancel

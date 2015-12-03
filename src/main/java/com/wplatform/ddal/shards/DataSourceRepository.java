@@ -15,18 +15,6 @@
  */
 package com.wplatform.ddal.shards;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.config.DataSourceException;
 import com.wplatform.ddal.config.DataSourceProvider;
@@ -37,6 +25,17 @@ import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

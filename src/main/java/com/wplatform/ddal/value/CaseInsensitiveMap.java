@@ -15,9 +15,9 @@
  */
 package com.wplatform.ddal.value;
 
-import java.util.HashMap;
-
 import com.wplatform.ddal.util.StringUtils;
+
+import java.util.HashMap;
 
 /**
  * A hash map with a case-insensitive string key.

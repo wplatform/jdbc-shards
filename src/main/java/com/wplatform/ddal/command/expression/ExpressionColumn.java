@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.HashMap;
-import java.util.List;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.dml.Select;
 import com.wplatform.ddal.command.dml.SelectListColumnResolver;
@@ -34,6 +31,9 @@ import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueBoolean;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A expression that represents a column of a table or view.

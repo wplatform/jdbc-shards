@@ -5,16 +5,15 @@
  */
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.test.BaseTestCase;
 
 /**
  * Tests a custom BigDecimal implementation, as well

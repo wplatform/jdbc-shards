@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.expression.Expression;
@@ -25,6 +23,8 @@ import com.wplatform.ddal.engine.Procedure;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statement

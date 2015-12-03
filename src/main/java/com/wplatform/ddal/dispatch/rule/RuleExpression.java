@@ -18,10 +18,10 @@
 
 package com.wplatform.ddal.dispatch.rule;
 
+import com.wplatform.ddal.dispatch.function.PartitionFunction;
+
 import java.io.Serializable;
 import java.util.List;
-
-import com.wplatform.ddal.dispatch.function.PartitionFunction;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

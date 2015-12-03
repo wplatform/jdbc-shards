@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.*;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
@@ -25,6 +23,8 @@ import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.SimpleResultSet;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.sql.*;
 
 /**
  * Represents the meta data for a database.

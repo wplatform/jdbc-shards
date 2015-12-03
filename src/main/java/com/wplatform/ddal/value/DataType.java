@@ -15,15 +15,6 @@
  */
 package com.wplatform.ddal.value;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.engine.SysProperties;
@@ -36,6 +27,15 @@ import com.wplatform.ddal.result.SimpleResultSet;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.Utils;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * This class contains meta data information about data types,

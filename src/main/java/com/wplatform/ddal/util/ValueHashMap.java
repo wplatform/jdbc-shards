@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.util;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * This hash map supports keys of type Value.

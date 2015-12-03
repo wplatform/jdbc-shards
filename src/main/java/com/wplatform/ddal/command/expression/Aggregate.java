@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.*;
-
 import com.wplatform.ddal.command.dml.Select;
 import com.wplatform.ddal.command.dml.SelectOrderBy;
 import com.wplatform.ddal.dbobject.index.Index;
@@ -32,6 +30,8 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.*;
+
+import java.util.*;
 
 /**
  * Implements the integrated aggregate functions, such as COUNT, MAX, SUM.

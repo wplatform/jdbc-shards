@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
@@ -24,6 +22,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueArray;
+
+import java.util.List;
 
 /**
  * A list of expressions, as in (ID, NAME).

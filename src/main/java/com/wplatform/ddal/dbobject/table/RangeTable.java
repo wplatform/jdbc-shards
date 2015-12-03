@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
@@ -25,6 +23,8 @@ import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * The table SYSTEM_RANGE is a virtual table that generates incrementing numbers

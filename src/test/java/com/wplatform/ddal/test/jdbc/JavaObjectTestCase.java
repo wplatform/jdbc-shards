@@ -1,19 +1,13 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.UUID;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
+import java.io.Serializable;
+import java.sql.*;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class JavaObjectTestCase extends BaseTestCase {
 

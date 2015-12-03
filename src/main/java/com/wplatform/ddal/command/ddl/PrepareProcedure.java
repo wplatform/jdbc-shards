@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statement

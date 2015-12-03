@@ -9,11 +9,7 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 import org.junit.Test;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 /**
  * Test ALTER statements.
  */

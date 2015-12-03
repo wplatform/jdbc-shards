@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.dbobject.RightOwner;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.engine.Database;
@@ -24,6 +22,8 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statements

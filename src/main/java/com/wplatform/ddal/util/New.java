@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.value.CaseInsensitiveMap;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.wplatform.ddal.value.CaseInsensitiveMap;
 
 /**
  * This class contains static methods to construct commonly used generic objects

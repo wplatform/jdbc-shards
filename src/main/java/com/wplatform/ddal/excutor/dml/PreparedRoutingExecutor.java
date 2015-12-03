@@ -15,14 +15,6 @@
  */
 package com.wplatform.ddal.excutor.dml;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.Column;
@@ -39,6 +31,14 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

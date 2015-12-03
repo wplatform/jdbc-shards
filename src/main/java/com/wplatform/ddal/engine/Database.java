@@ -15,23 +15,11 @@
  */
 package com.wplatform.ddal.engine;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.config.SchemaConfig;
 import com.wplatform.ddal.config.TableConfig;
-import com.wplatform.ddal.dbobject.Comment;
-import com.wplatform.ddal.dbobject.DbObject;
-import com.wplatform.ddal.dbobject.Right;
-import com.wplatform.ddal.dbobject.Role;
-import com.wplatform.ddal.dbobject.Setting;
-import com.wplatform.ddal.dbobject.User;
+import com.wplatform.ddal.dbobject.*;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.schema.SchemaObject;
@@ -53,6 +41,8 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.CaseInsensitiveMap;
 import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
+
+import java.util.*;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

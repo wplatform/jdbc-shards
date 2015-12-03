@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.result;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
@@ -27,6 +23,10 @@ import com.wplatform.ddal.util.ValueHashMap;
 import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueArray;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * A local result set contains all row data of a result set.

@@ -15,17 +15,6 @@
  */
 package com.wplatform.ddal.engine;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.command.Command;
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Parser;
@@ -52,6 +41,11 @@ import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueLong;
 import com.wplatform.ddal.value.ValueNull;
 import com.wplatform.ddal.value.ValueString;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * A session represents an embedded database connection. When using the server

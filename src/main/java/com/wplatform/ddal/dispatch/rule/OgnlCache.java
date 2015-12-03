@@ -15,13 +15,12 @@
  */
 package com.wplatform.ddal.dispatch.rule;
 
+import com.wplatform.ddal.config.parser.ParsingException;
 import ognl.*;
 
 import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.wplatform.ddal.config.parser.ParsingException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

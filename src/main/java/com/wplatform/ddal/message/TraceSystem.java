@@ -15,18 +15,18 @@
  */
 package com.wplatform.ddal.message;
 
+import com.wplatform.ddal.engine.Constants;
+import com.wplatform.ddal.jdbc.JdbcSQLException;
+import com.wplatform.ddal.util.FileUtils;
+import com.wplatform.ddal.util.IOUtils;
+import com.wplatform.ddal.util.New;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-
-import com.wplatform.ddal.engine.Constants;
-import com.wplatform.ddal.jdbc.JdbcSQLException;
-import com.wplatform.ddal.util.FileUtils;
-import com.wplatform.ddal.util.IOUtils;
-import com.wplatform.ddal.util.New;
 
 /**
  * The trace mechanism is the logging facility of this database. There is

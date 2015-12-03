@@ -18,13 +18,13 @@
 
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.message.DbException;
+
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.sql.*;
-
-import com.wplatform.ddal.message.DbException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

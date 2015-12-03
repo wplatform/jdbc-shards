@@ -1,10 +1,10 @@
 
 package com.wplatform.ddal.test.utils;
 
+import com.wplatform.ddal.message.DbException;
+
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-
-import com.wplatform.ddal.message.DbException;
 
 /**
  * Helper class to simplify negative testing. Usage:

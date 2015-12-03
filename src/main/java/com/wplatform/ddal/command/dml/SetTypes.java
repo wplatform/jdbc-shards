@@ -15,9 +15,9 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * The list of setting for a SET statement.

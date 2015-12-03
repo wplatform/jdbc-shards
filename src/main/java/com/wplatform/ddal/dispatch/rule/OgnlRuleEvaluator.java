@@ -18,12 +18,12 @@
 
 package com.wplatform.ddal.dispatch.rule;
 
-import java.util.List;
-import java.util.Map;
-
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

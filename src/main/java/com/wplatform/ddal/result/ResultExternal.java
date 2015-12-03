@@ -15,9 +15,9 @@
  */
 package com.wplatform.ddal.result;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * This interface is used to extend the LocalResult class, if data does not fit

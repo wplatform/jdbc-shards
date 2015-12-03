@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.engine;
 
-import java.util.HashMap;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.Utils;
+
+import java.util.HashMap;
 
 /**
  * The base class for settings.

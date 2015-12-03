@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.IndexColumn;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * This class represents the statement ALTER TABLE ADD CONSTRAINT

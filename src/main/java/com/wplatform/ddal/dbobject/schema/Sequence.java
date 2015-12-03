@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.dbobject.schema;
 
-import java.math.BigInteger;
-
 import com.wplatform.ddal.dbobject.DbObject;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
+
+import java.math.BigInteger;
 
 /**
  * A sequence is created using the statement

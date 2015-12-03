@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.Random;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.dbobject.table.Plan;
 import com.wplatform.ddal.dbobject.table.PlanItem;
@@ -24,6 +22,8 @@ import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.BitField;
 import com.wplatform.ddal.util.Permutations;
+
+import java.util.Random;
 
 /**
  * The optimizer is responsible to find the best execution plan

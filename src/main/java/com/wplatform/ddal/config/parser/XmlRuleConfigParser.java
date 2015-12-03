@@ -18,9 +18,6 @@
 
 package com.wplatform.ddal.config.parser;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.dispatch.rule.RuleColumn;
 import com.wplatform.ddal.dispatch.rule.RuleExpression;
@@ -28,6 +25,8 @@ import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
 import java.util.ArrayList;

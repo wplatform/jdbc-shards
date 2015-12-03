@@ -5,13 +5,12 @@
  */
 package com.wplatform.ddal.test.sql.ddl;
 
+import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.test.BaseTestCase;
 
 /**
  * Test DROP statement

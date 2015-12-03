@@ -17,19 +17,6 @@
 // $Id$
 package com.wplatform.ddal.dbobject.table;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.command.ddl.CreateTableData;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
@@ -43,6 +30,7 @@ import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.result.SortOrder;
 import com.wplatform.ddal.shards.DataSourceRepository;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.MathUtils;
@@ -53,13 +41,19 @@ import com.wplatform.ddal.value.ValueDate;
 import com.wplatform.ddal.value.ValueTime;
 import com.wplatform.ddal.value.ValueTimestamp;
 
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class TableMate extends Table {
 
     private static final int MAX_RETRY = 2;
-    private static final long ROW_COUNT_APPROXIMATION = 100000;
+    private static final long ROW_COUNT_APPROXIMATION = 1000;
 
     private final boolean globalTemporary;
     private final ArrayList<Index> indexes = New.arrayList();
@@ -237,12 +231,7 @@ public class TableMate extends Table {
 
     @Override
     public long getRowCountApproximation() {
-        if (this.tableRouter == null) {
-            return ROW_COUNT_APPROXIMATION;
-        } else {
-            return tableRouter.getPartition().size() * ROW_COUNT_APPROXIMATION;
-        }
-
+        return getPartitionNode().length * ROW_COUNT_APPROXIMATION;
     }
 
     @Override
@@ -255,12 +244,17 @@ public class TableMate extends Table {
         return scanIndex;
     }
 
-    private Index addIndex(ArrayList<Column> list, IndexType indexType) {
+    private Index addIndex(String name, ArrayList<Column> list, IndexType indexType) {
         Column[] cols = new Column[list.size()];
         list.toArray(cols);
-        Index index = new IndexMate(this, 0, null, IndexColumn.wrap(cols), indexType);
+        Index index = new IndexMate(this, 0, name, IndexColumn.wrap(cols), indexType);
         indexes.add(index);
         return index;
+    }
+
+    @Override
+    public PlanItem getBestPlanItem(Session session, int[] masks, TableFilter filter, SortOrder sortOrder) {
+        return super.getBestPlanItem(session, masks, filter, sortOrder);
     }
 
     public void loadMataData(Session session) {
@@ -403,21 +397,8 @@ public class TableMate extends Table {
         setColumns(cols);
         // create scan index
         int id = getId();
-        scanIndex = new IndexMate(this, id, null, IndexColumn.wrap(cols), IndexType.createNonUnique());
+        scanIndex = new IndexMate(this, id, "$scanIndex", IndexColumn.wrap(cols), IndexType.createNonUnique());
         indexes.add(scanIndex);
-        // create shardingKey index
-        if (tableRouter != null) {
-            ArrayList<Column> shardCol = New.arrayList();
-            for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
-                for (Column column : columns) {
-                    String colName = column.getName();
-                    if (colName.equalsIgnoreCase(ruleCol.getName())) {
-                        shardCol.add(column);
-                    }
-                }
-            }
-            addIndex(shardCol, IndexType.createShardingKey(false));
-        }
 
         // load primary keys
         try {
@@ -451,7 +432,7 @@ public class TableMate extends Table {
                     list.set(idx - 1, column);
                 }
             } while (rs.next());
-            addIndex(list, IndexType.createPrimaryKey(false));
+            addIndex(pkName, list, IndexType.createPrimaryKey(false));
             rs.close();
         }
 
@@ -476,7 +457,7 @@ public class TableMate extends Table {
                     continue;
                 }
                 if (indexName != null && !indexName.equals(newIndex)) {
-                    addIndex(list, indexType);
+                    addIndex(indexName, list, indexType);
                     indexName = null;
                 }
                 if (indexName == null) {
@@ -493,8 +474,9 @@ public class TableMate extends Table {
             rs.close();
         }
         if (indexName != null) {
-            addIndex(list, indexType);
+            addIndex(indexName, list, indexType);
         }
+        shardingKeyIndex();
     }
 
     private String convertColumnName(String columnName) {
@@ -565,6 +547,46 @@ public class TableMate extends Table {
             return isNodeMatch(getPartitionNode(), o.getPartitionNode());
         }
 
+    }
+
+
+    private void shardingKeyIndex() {
+        // create shardingKey index
+        if (tableRouter != null) {
+            ArrayList<Index> indexes = getIndexes();
+            List<RuleColumn> ruleColumns = tableRouter.getRuleColumns();
+            boolean isMatch = false;
+            for (Index index : indexes) {
+                Column[] columns = index.getColumns();
+                if (columns.length != ruleColumns.size()) {
+                    continue;
+                }
+                boolean shardingKeyIndex = true;
+                for (int idx = 0; idx < columns.length; idx++) {
+                    String name = columns[idx].getName();
+                    String name1 = ruleColumns.get(idx).getName();
+                    if (!name.equalsIgnoreCase(name1)) {
+                        shardingKeyIndex = false;
+                    }
+                }
+                if (shardingKeyIndex) {
+                    index.getIndexType().shardingKeyIndex();
+                    isMatch = true;
+                }
+            }
+            if (!isMatch) {
+                ArrayList<Column> shardCol = New.arrayList();
+                for (RuleColumn ruleCol : ruleColumns) {
+                    for (Column column : columns) {
+                        String colName = column.getName();
+                        if (colName.equalsIgnoreCase(ruleCol.getName())) {
+                            shardCol.add(column);
+                        }
+                    }
+                }
+                addIndex("$shardingKey", shardCol, IndexType.createShardingKey(false));
+            }
+        }
     }
 
     private static boolean isNodeMatch(TableNode[] nodes1, TableNode[] nodes2) {

@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.result;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import com.wplatform.ddal.command.dml.SelectOrderBy;
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.ExpressionColumn;
@@ -31,6 +27,10 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * A sort order represents an ORDER BY clause in a query.

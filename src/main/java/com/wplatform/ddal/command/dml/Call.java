@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.sql.ResultSet;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.expression.Expression;
@@ -26,6 +24,8 @@ import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.result.LocalResult;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.value.Value;
+
+import java.sql.ResultSet;
 
 /**
  * This class represents the statement

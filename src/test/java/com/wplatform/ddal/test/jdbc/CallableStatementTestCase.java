@@ -1,28 +1,18 @@
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.result.SimpleResultSet;
+import com.wplatform.ddal.test.BaseTestCase;
+import com.wplatform.ddal.util.IOUtils;
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.Ref;
-import java.sql.ResultSet;
-import java.sql.RowId;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.util.Collections;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.result.SimpleResultSet;
-import com.wplatform.ddal.test.BaseTestCase;
-import com.wplatform.ddal.util.IOUtils;
 
 /**
  * Tests for the CallableStatement class.

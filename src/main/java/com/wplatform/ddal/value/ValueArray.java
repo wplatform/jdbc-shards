@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.value;
 
-import java.lang.reflect.Array;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
+
+import java.lang.reflect.Array;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
 
 /**
  * Implementation of the ARRAY data type.

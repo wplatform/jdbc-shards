@@ -15,10 +15,10 @@
  */
 package com.wplatform.ddal.engine;
 
-import java.util.HashMap;
-
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.util.HashMap;
 
 /**
  * The compatibility modes. There is a fixed set of modes (for example

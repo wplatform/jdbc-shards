@@ -1,15 +1,14 @@
 package com.wplatform.ddal.test.jdbc;
 
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.test.BaseTestCase;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.test.BaseTestCase;
 
 public class NativeSQLTestCase extends BaseTestCase {
 

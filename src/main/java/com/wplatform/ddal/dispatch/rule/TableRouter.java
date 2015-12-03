@@ -18,12 +18,12 @@
 
 package com.wplatform.ddal.dispatch.rule;
 
+import com.wplatform.ddal.config.Configuration;
+import com.wplatform.ddal.util.New;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
-
-import com.wplatform.ddal.config.Configuration;
-import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.ParameterMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.expression.ParameterInterface;
 import com.wplatform.ddal.message.DbException;
@@ -27,6 +23,10 @@ import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
+
+import java.sql.ParameterMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Information about the parameters of a prepared statement.

@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
@@ -28,6 +26,8 @@ import com.wplatform.ddal.result.SimpleResultSet;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.*;
+
+import java.util.ArrayList;
 
 /**
  * Implementation of the functions TABLE(..) and TABLE_DISTINCT(..).

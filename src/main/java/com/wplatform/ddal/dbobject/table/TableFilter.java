@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.dml.Select;
 import com.wplatform.ddal.command.expression.Comparison;
@@ -39,6 +37,8 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueLong;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * A table filter represents a table that is used in a query. There is one such

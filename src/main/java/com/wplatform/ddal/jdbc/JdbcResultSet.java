@@ -15,15 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.*;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
@@ -35,6 +26,15 @@ import com.wplatform.ddal.util.IOUtils;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.*;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>

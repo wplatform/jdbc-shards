@@ -18,20 +18,17 @@
 
 package com.wplatform.ddal.test.sql.dml;
 
-import java.math.BigDecimal;
+import com.wplatform.ddal.test.BaseTestCase;
+import com.wplatform.ddal.util.New;
+import junit.framework.Assert;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-
-import org.junit.Test;
-
-import junit.framework.Assert;
-
-import com.wplatform.ddal.test.BaseTestCase;
-import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

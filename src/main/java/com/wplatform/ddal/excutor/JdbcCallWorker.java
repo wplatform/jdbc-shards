@@ -16,8 +16,6 @@
 package com.wplatform.ddal.excutor;
 
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.excutor.JdbcWorker;
-import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 

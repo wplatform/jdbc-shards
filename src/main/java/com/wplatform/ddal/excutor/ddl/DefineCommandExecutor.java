@@ -15,10 +15,6 @@
  */
 package com.wplatform.ddal.excutor.ddl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.dispatch.rule.TableNode;
@@ -27,6 +23,10 @@ import com.wplatform.ddal.excutor.JdbcWorker;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

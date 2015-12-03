@@ -15,6 +15,14 @@
  */
 package com.wplatform.ddal.jdbc;
 
+import com.wplatform.ddal.command.expression.ParameterInterface;
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.message.TraceObject;
+import com.wplatform.ddal.util.BitField;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.value.ValueNull;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -23,14 +31,6 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.wplatform.ddal.command.expression.ParameterInterface;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.message.TraceObject;
-import com.wplatform.ddal.util.BitField;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.value.ValueNull;
 
 /**
  * Represents a callable statement.

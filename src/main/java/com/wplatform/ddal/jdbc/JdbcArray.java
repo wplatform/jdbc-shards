@@ -15,17 +15,17 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Map;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.TraceObject;
 import com.wplatform.ddal.result.SimpleResultSet;
 import com.wplatform.ddal.value.Value;
+
+import java.sql.Array;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * Represents an ARRAY value.

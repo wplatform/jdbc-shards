@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.wplatform.ddal.command.Command;
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.Prepared;
@@ -31,6 +28,9 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class represents the statement

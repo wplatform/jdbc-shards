@@ -15,11 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.FunctionCall;
 import com.wplatform.ddal.command.expression.TableFunction;
@@ -36,6 +31,11 @@ import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
 import com.wplatform.ddal.value.ValueResultSet;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * A table backed by a system or user-defined function that returns a result

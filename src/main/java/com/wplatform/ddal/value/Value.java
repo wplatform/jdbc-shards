@@ -15,14 +15,6 @@
  */
 package com.wplatform.ddal.value;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.lang.ref.SoftReference;
-import java.math.BigDecimal;
-import java.sql.*;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
@@ -32,6 +24,14 @@ import com.wplatform.ddal.util.DateTimeUtils;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.lang.ref.SoftReference;
+import java.math.BigDecimal;
+import java.sql.*;
 
 /**
  * This is the base class for all value classes.

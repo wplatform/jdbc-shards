@@ -15,15 +15,15 @@
  */
 package com.wplatform.ddal.util;
 
-import java.lang.ref.SoftReference;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+
+import java.lang.ref.SoftReference;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * A few String utility functions.

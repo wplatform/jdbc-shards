@@ -5,17 +5,12 @@
  */
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Types;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.JavaObjectSerializer;
 import com.wplatform.ddal.util.JdbcUtils;
+import org.junit.Test;
+
+import java.sql.*;
 
 /**
  * Tests {@link JavaObjectSerializer}.

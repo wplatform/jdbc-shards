@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.dbobject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.engine.Database;
@@ -27,6 +24,9 @@ import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents a user object.

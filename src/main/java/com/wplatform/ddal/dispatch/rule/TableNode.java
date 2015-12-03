@@ -18,9 +18,9 @@
 
 package com.wplatform.ddal.dispatch.rule;
 
-import java.io.Serializable;
-
 import com.wplatform.ddal.util.StringUtils;
+
+import java.io.Serializable;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

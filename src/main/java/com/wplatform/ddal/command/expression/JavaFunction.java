@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.List;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.dbobject.FunctionAlias;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
@@ -25,6 +23,8 @@ import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.*;
+
+import java.util.List;
 
 /**
  * This class wraps a user-defined function.

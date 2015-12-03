@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.command;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Parameter;
 import com.wplatform.ddal.command.expression.ParameterInterface;
 import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * Represents a single SQL statements.

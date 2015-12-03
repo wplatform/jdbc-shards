@@ -15,20 +15,9 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.CommandInterface;
-import com.wplatform.ddal.command.expression.Comparison;
-import com.wplatform.ddal.command.expression.ConditionAndOr;
-import com.wplatform.ddal.command.expression.Expression;
-import com.wplatform.ddal.command.expression.ExpressionColumn;
-import com.wplatform.ddal.command.expression.ExpressionVisitor;
-import com.wplatform.ddal.command.expression.Parameter;
-import com.wplatform.ddal.command.expression.Wildcard;
+import com.wplatform.ddal.command.expression.*;
 import com.wplatform.ddal.dbobject.table.*;
-import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.engine.SysProperties;
@@ -43,6 +32,10 @@ import com.wplatform.ddal.result.SortOrder;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * This class represents a simple SELECT statement.

@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.value;
 
-import java.text.CollationKey;
-import java.text.Collator;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.SmallLRUCache;
+
+import java.text.CollationKey;
+import java.text.Collator;
 
 /**
  * The default implementation of CompareMode. It uses java.text.Collator.

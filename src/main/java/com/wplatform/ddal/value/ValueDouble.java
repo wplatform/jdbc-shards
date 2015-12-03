@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the DOUBLE data type.

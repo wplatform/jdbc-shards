@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.command.ddl;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.dbobject.schema.Schema;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.util.New;
+
+import java.util.ArrayList;
 
 /**
  * The data required to create a table.

@@ -15,6 +15,8 @@
  */
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.engine.Constants;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,8 +25,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
 import java.util.*;
-
-import com.wplatform.ddal.engine.Constants;
 
 /**
  * Utility methods

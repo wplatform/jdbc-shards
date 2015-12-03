@@ -1,27 +1,14 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.Writer;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Random;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.jdbc.JdbcConnection;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.IOUtils;
+import org.junit.Test;
+
+import java.io.*;
+import java.sql.*;
+import java.util.Random;
 
 /**
  * Test the Blob, Clob, and NClob implementations.

@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.ValueHashMap;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
 
 /**
  * Data stored while calculating a GROUP_CONCAT aggregate.

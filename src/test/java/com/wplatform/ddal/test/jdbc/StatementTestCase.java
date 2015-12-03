@@ -1,21 +1,15 @@
 package com.wplatform.ddal.test.jdbc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Properties;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.jdbc.JdbcStatement;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.New;
+import org.junit.Test;
+
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Properties;
 
 
 public class StatementTestCase extends BaseTestCase {

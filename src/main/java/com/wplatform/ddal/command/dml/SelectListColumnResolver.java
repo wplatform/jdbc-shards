@@ -15,14 +15,14 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.command.expression.Expression;
 import com.wplatform.ddal.command.expression.ExpressionColumn;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * This class represents a column resolver for the column list of a SELECT

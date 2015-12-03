@@ -15,14 +15,12 @@
  */
 package com.wplatform.ddal.shards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-
 import com.wplatform.ddal.message.Trace;
 import com.wplatform.ddal.util.New;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

@@ -15,6 +15,13 @@
  */
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.engine.Constants;
+import com.wplatform.ddal.engine.SysProperties;
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.result.SimpleResultSet;
+import com.wplatform.ddal.value.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -24,13 +31,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
-import com.wplatform.ddal.engine.Constants;
-import com.wplatform.ddal.engine.SysProperties;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
-import com.wplatform.ddal.result.SimpleResultSet;
-import com.wplatform.ddal.value.*;
 
 /**
  * This class represents a byte buffer that contains persistent data of a page.

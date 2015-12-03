@@ -18,6 +18,11 @@
 
 package com.wplatform.ddal.shards;
 
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,12 +30,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

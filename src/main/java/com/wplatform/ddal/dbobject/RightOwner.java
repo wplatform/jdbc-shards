@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.dbobject;
 
-import java.util.HashMap;
-
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.util.New;
+
+import java.util.HashMap;
 
 /**
  * A right owner (sometimes called principal).

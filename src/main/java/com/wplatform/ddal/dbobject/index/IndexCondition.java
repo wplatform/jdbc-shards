@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.index;
 
-import java.util.*;
-
 import com.wplatform.ddal.command.dml.Query;
 import com.wplatform.ddal.command.expression.Comparison;
 import com.wplatform.ddal.command.expression.Expression;
@@ -30,6 +28,8 @@ import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
+
+import java.util.*;
 
 /**
  * A index condition object is made for each condition that can potentially use

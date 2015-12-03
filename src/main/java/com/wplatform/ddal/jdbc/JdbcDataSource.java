@@ -15,14 +15,6 @@
  */
 package com.wplatform.ddal.jdbc;
 
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.command.dml.SetTypes;
 import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.config.DataSourceProvider;
@@ -33,6 +25,13 @@ import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.util.Utils;
+
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

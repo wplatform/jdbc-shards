@@ -15,12 +15,6 @@
  */
 package com.wplatform.ddal.command;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.ddl.*;
 import com.wplatform.ddal.command.dml.*;
 import com.wplatform.ddal.command.expression.*;
@@ -42,6 +36,12 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.*;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * The parser is used to convert a SQL statement string to an command object.

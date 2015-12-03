@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.excutor.dml;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.wplatform.ddal.command.Prepared;
 import com.wplatform.ddal.command.dml.Insert;
 import com.wplatform.ddal.command.dml.Query;
@@ -34,6 +31,9 @@ import com.wplatform.ddal.result.SearchRow;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

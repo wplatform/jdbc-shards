@@ -15,6 +15,10 @@
  */
 package com.wplatform.ddal.util;
 
+import com.wplatform.ddal.engine.SysProperties;
+import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.message.ErrorCode;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -23,10 +27,6 @@ import java.nio.channels.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.wplatform.ddal.engine.SysProperties;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.message.ErrorCode;
 
 /**
  * A path to a file. It similar to the Java 7 <code>java.nio.file.Path</code>,

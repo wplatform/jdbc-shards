@@ -15,10 +15,10 @@
  */
 package com.wplatform.ddal.dbobject;
 
-import java.util.ArrayList;
-
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
+
+import java.util.ArrayList;
 
 /**
  * A database object such as a table, an index, or a user.

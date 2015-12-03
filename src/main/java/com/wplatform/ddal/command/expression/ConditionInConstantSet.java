@@ -15,11 +15,6 @@
  */
 package com.wplatform.ddal.command.expression;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
-
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.ColumnResolver;
 import com.wplatform.ddal.dbobject.table.TableFilter;
@@ -29,6 +24,11 @@ import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueBoolean;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Used for optimised IN(...) queries where the contents of the IN list are all

@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.Utils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * Implementation of the OBJECT data type.

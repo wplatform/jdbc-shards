@@ -18,14 +18,14 @@
 
 package com.wplatform.ddal.dispatch;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.dispatch.function.PartitionFunction;
 import com.wplatform.ddal.dispatch.rule.RoutingResult;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.result.SearchRow;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

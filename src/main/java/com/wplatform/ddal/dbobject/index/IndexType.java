@@ -28,19 +28,6 @@ public class IndexType {
      * @param hash       if a hash index should be used
      * @return the index type
      */
-    public static IndexType createShardingKey(boolean hash) {
-        IndexType type = new IndexType();
-        type.shardingKey = true;
-        type.primaryKey = false;
-        type.hash = hash;
-        type.unique = true;
-        return type;
-    }
-    /**
-     * Create a primary key index.
-     * @param hash       if a hash index should be used
-     * @return the index type
-     */
     public static IndexType createPrimaryKey(boolean hash) {
         IndexType type = new IndexType();
         type.primaryKey = true;
@@ -95,6 +82,24 @@ public class IndexType {
         IndexType type = new IndexType();
         type.scan = true;
         return type;
+    }
+
+    /**
+     * Create a sharding key index.
+     * @param hash       if a hash index should be used
+     * @return the index type
+     */
+    public static IndexType createShardingKey(boolean hash) {
+        IndexType type = new IndexType();
+        type.shardingKey = true;
+        type.primaryKey = false;
+        type.hash = hash;
+        type.unique = false;
+        return type;
+    }
+
+    public void shardingKeyIndex() {
+        this.shardingKey = true;
     }
 
     /**

@@ -15,9 +15,6 @@
  */
 package com.wplatform.ddal.command.dml;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.expression.*;
 import com.wplatform.ddal.dbobject.table.Column;
@@ -37,6 +34,9 @@ import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueInt;
 import com.wplatform.ddal.value.ValueNull;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Represents a union SELECT statement.

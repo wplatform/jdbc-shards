@@ -15,12 +15,12 @@
  */
 package com.wplatform.ddal.value;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the VARCHAR data type.

@@ -18,15 +18,13 @@
 
 package com.wplatform.ddal.test.tools;
 
+import com.wplatform.ddal.util.IOUtils;
+import com.wplatform.ddal.value.ValueLobDb;
+import org.junit.Test;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-
-import org.junit.Test;
-
-import com.wplatform.ddal.util.FileUtils;
-import com.wplatform.ddal.util.IOUtils;
-import com.wplatform.ddal.value.ValueLobDb;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

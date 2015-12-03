@@ -15,13 +15,13 @@
  */
 package com.wplatform.ddal.value;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.util.MathUtils;
+
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Implementation of the DECIMAL data type.

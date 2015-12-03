@@ -18,17 +18,15 @@
 
 package com.wplatform.ddal.test.tools;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.sql.Connection;
-
-import org.junit.Test;
-
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.ScriptRunner;
 import com.wplatform.ddal.util.Utils;
-
 import junit.framework.Assert;
+import org.junit.Test;
+
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.sql.Connection;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

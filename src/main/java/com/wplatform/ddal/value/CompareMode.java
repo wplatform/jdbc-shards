@@ -15,11 +15,11 @@
  */
 package com.wplatform.ddal.value;
 
-import java.text.Collator;
-import java.util.Locale;
-
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.util.StringUtils;
+
+import java.text.Collator;
+import java.util.Locale;
 
 /**
  * Instances of this class can compare strings. Case sensitive and case

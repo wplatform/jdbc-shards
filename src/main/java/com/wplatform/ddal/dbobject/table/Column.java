@@ -15,8 +15,6 @@
  */
 package com.wplatform.ddal.dbobject.table;
 
-import java.sql.ResultSetMetaData;
-
 import com.wplatform.ddal.command.Parser;
 import com.wplatform.ddal.command.expression.*;
 import com.wplatform.ddal.dbobject.schema.Schema;
@@ -30,6 +28,8 @@ import com.wplatform.ddal.result.Row;
 import com.wplatform.ddal.util.MathUtils;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.*;
+
+import java.sql.ResultSetMetaData;
 
 /**
  * This class represents a column in a table.
