@@ -26,6 +26,7 @@ import com.wplatform.ddal.dispatch.rule.RoutingResult;
 import com.wplatform.ddal.dispatch.rule.RuleColumn;
 import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.dispatch.rule.TableRouter;
+import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.message.DbException;
@@ -53,7 +54,6 @@ import java.util.List;
 public class TableMate extends Table {
 
     private static final int MAX_RETRY = 2;
-    private static final long ROW_COUNT_APPROXIMATION = 1000;
 
     private final boolean globalTemporary;
     private final ArrayList<Index> indexes = New.arrayList();
@@ -231,7 +231,10 @@ public class TableMate extends Table {
 
     @Override
     public long getRowCountApproximation() {
-        return getPartitionNode().length * ROW_COUNT_APPROXIMATION;
+        if (tableRouter != null) {
+            return tableRouter.getPartition().size() * Constants.COST_ROW_OFFSET;
+        }
+        return Constants.COST_ROW_OFFSET;
     }
 
     @Override
