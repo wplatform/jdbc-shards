@@ -105,8 +105,6 @@ public class IndexMate extends SchemaObjectBase implements Index {
                                      TableFilter filter, SortOrder sortOrder) {
         rowCount += Constants.COST_ROW_OFFSET;
         long cost = rowCount;
-        long rows = rowCount;
-        int totalSelectivity = 0;
         if (masks == null) {
             return cost;
         }
@@ -115,32 +113,25 @@ public class IndexMate extends SchemaObjectBase implements Index {
             int index = column.getColumnId();
             int mask = masks[index];
             if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {
-
                 if (i == columns.length - 1 && getIndexType().isUnique()) {
                     if (getIndexType().isShardingKey()) {
-                        cost = 3;
+                        cost = rowCount / 2000;
                         break;
                     } else {
-                        cost = 3;
+                        cost = rowCount / 500;
                         break;
                     }
                 }
-                totalSelectivity = 100 - ((100 - totalSelectivity)
-                        * (100 - column.getSelectivity()) / 100);
-                long distinctRows = rowCount * totalSelectivity / 100;
-                if (distinctRows <= 0) {
-                    distinctRows = 1;
-                }
-                rows = Math.max(rowCount / distinctRows, 1);
-                cost = 2 + rows;
+                cost = getIndexType().isShardingKey() ? rowCount / 1000 : rowCount / 200;
+                break;
             } else if ((mask & IndexCondition.RANGE) == IndexCondition.RANGE) {
-                cost = 2 + rows / 4;
+                cost = getIndexType().isShardingKey() ? rowCount / 100 : rowCount / 80;
                 break;
             } else if ((mask & IndexCondition.START) == IndexCondition.START) {
-                cost = 2 + rows / 3;
+                cost = getIndexType().isShardingKey() ? rowCount / 50 : rowCount / 30;
                 break;
             } else if ((mask & IndexCondition.END) == IndexCondition.END) {
-                cost = rows / 3;
+                cost = getIndexType().isShardingKey() ? rowCount / 10 : rowCount / 8;
                 break;
             } else {
                 break;

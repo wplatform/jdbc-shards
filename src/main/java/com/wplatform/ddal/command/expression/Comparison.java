@@ -49,8 +49,8 @@ public class Comparison extends Condition {
     /**
      * The comparison type meaning = as in ID=1.
      */
-    public static final int EQUAL = 0;
 
+    public static final int EQUAL = 0;
     /**
      * The comparison type meaning ID IS 1 (ID IS NOT DISTINCT FROM 1).
      */

@@ -145,7 +145,6 @@ public abstract class BaseTestCase {
      * Open a database connection in admin mode. The default user name and
      * password is used.
      *
-     * @param name the database name
      * @return the connection
      */
     public Connection getConnection() throws SQLException {
@@ -1327,7 +1326,16 @@ public abstract class BaseTestCase {
     protected String getTestName() {
         return getClass().getSimpleName();
     }
-    
-    
+
+    public Connection getH2Connection() {
+        String url = "jdbc:h2:~/testdb";
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(url, System.getProperties());
+        } catch (SQLException e) {
+            throw new IllegalArgumentException();
+        }
+        return conn;
+    }
 
 }

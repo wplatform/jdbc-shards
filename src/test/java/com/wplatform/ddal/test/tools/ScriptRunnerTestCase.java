@@ -37,18 +37,28 @@ public class ScriptRunnerTestCase extends BaseTestCase {
     
     @Test
     public void runCreateScript() throws Exception {
-      Connection conn = getConnection();
-      ScriptRunner runner = new ScriptRunner(conn);
-      runner.setAutoCommit(true);
-      runner.setStopOnError(true);
+        Connection conn = getConnection();
+        runOn(conn);
+    }
 
-      String resource = "script/mysql_script.sql";
-      Reader reader = new InputStreamReader(Utils.getResourceAsStream(resource));
+    private void runOn(Connection conn) {
+        ScriptRunner runner = new ScriptRunner(conn);
+        runner.setAutoCommit(true);
+        runner.setStopOnError(true);
 
-      try {
-        runner.runScript(reader);
-      } catch (Exception e) {
-          Assert.fail(e.getMessage());
-      }
+        String resource = "script/mysql_script.sql";
+        Reader reader = new InputStreamReader(Utils.getResourceAsStream(resource));
+
+        try {
+            runner.runScript(reader);
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void runOnH2() throws Exception {
+        Connection conn = getH2Connection();
+        runOn(conn);
     }
 }
