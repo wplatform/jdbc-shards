@@ -29,18 +29,17 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
-public class BatchUpdateWorker extends JdbcWorker<Integer[]> {
+public class JdbcBatchUpdateWorker extends JdbcWorker<Integer[]> {
 
     protected final List<List<Value>> array;
 
-    public BatchUpdateWorker(Session session, String shardName, String sql, List<List<Value>> array) {
+    public JdbcBatchUpdateWorker(Session session, String shardName, String sql, List<List<Value>> array) {
         super(session, shardName, sql, null);
         this.array = array;
     }
-    
-    
+
+
     @Override
     public Integer[] doWork() {
         Connection conn = null;

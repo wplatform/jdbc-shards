@@ -26,16 +26,14 @@ import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Represents a user object.
  */
 public class User extends RightOwner {
 
-    private byte[] salt;
-    private byte[] passwordHash;
     private boolean admin;
+    private String password;
 
     public User(Database database, int id, String userName) {
         super(database, id, userName, Trace.USER);
@@ -49,28 +47,6 @@ public class User extends RightOwner {
         this.admin = admin;
     }
 
-    /**
-     * Set the salt and hash of the password for this user.
-     *
-     * @param salt the salt
-     * @param hash the password hash
-     */
-    public void setSaltAndHash(byte[] salt, byte[] hash) {
-        this.salt = salt;
-        this.passwordHash = hash;
-    }
-
-    /**
-     * Set the user name password hash. A random salt is generated as well.
-     * The parameter is filled with zeros after use.
-     *
-     * @param userPasswordHash the user name password hash
-     */
-    public void setUserPasswordHash(byte[] userPasswordHash) {
-        if (userPasswordHash != null) {
-            salt = passwordHash = userPasswordHash;
-        }
-    }
 
     /**
      * Checks that this user has the given rights for this database object.
@@ -109,15 +85,7 @@ public class User extends RightOwner {
         if (comment != null) {
             buff.append(" COMMENT ").append(StringUtils.quoteStringSQL(comment));
         }
-        if (password) {
-            buff.append(" SALT '").
-                    append(StringUtils.convertBytesToHex(salt)).
-                    append("' HASH '").
-                    append(StringUtils.convertBytesToHex(passwordHash)).
-                    append('\'');
-        } else {
-            buff.append(" PASSWORD ''");
-        }
+        buff.append(" PASSWORD ''");
         if (admin) {
             buff.append(" ADMIN");
         }
@@ -186,15 +154,12 @@ public class User extends RightOwner {
                 database.removeDatabaseObject(session, right);
             }
         }
-        salt = null;
-        Arrays.fill(passwordHash, (byte) 0);
-        passwordHash = null;
         invalidate();
     }
 
     @Override
     public void checkRename() {
-        // ok
+
     }
 
     /**
@@ -210,5 +175,14 @@ public class User extends RightOwner {
             }
         }
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 
 }

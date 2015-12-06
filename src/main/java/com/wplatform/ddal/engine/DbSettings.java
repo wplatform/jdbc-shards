@@ -309,7 +309,7 @@ public class DbSettings extends SettingsBase {
      * The default time to execute validation sql.
      */
     public int defaultValidationQueryTimeout = get("DEFAULT_VALIDATION_QUERYT_IMEOUT", -1);
-    
+
 
     private DbSettings(HashMap<String, String> s) {
         super(s);

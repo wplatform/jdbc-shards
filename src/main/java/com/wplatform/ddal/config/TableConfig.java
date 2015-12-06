@@ -30,7 +30,7 @@ public class TableConfig {
     public static final int SCANLEVEL_SHARDINGKEY = 5;
 
     private SchemaConfig schemaConfig;
-    private String name;    
+    private String name;
     private int scanLevel = SCANLEVEL_ANYINDEX;
     private boolean validation;
     private TableNode[] shards;

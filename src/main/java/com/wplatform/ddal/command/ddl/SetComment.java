@@ -46,26 +46,6 @@ public class SetComment extends DefineCommand {
         this.expr = expr;
     }
 
-    public void setObjectName(String objectName) {
-        this.objectName = objectName;
-    }
-
-    public void setObjectType(int objectType) {
-        this.objectType = objectType;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public void setColumn(boolean column) {
-        this.column = column;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.COMMENT;
@@ -75,20 +55,40 @@ public class SetComment extends DefineCommand {
         return schemaName;
     }
 
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
     public String getObjectName() {
         return objectName;
+    }
+
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
     }
 
     public boolean isColumn() {
         return column;
     }
 
+    public void setColumn(boolean column) {
+        this.column = column;
+    }
+
     public String getColumnName() {
         return columnName;
     }
 
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
     public int getObjectType() {
         return objectType;
+    }
+
+    public void setObjectType(int objectType) {
+        this.objectType = objectType;
     }
 
     public Expression getExpr() {

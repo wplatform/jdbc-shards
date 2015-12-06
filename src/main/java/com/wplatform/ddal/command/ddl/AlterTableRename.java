@@ -34,14 +34,6 @@ public class AlterTableRename extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setOldTable(Table table) {
-        oldTable = table;
-    }
-
-    public void setNewTableName(String name) {
-        newTableName = name;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -52,22 +44,29 @@ public class AlterTableRename extends SchemaCommand {
         return CommandInterface.ALTER_TABLE_RENAME;
     }
 
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
-    }
-
     public Table getOldTable() {
         return oldTable;
+    }
+
+    public void setOldTable(Table table) {
+        oldTable = table;
     }
 
     public String getNewTableName() {
         return newTableName;
     }
 
+    public void setNewTableName(String name) {
+        newTableName = name;
+    }
+
     public boolean isHidden() {
         return hidden;
     }
-    
-    
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
 
 }

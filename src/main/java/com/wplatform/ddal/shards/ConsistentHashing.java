@@ -24,7 +24,6 @@ import java.util.TreeMap;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class ConsistentHashing implements LoadBalancingStrategy {
 
@@ -87,7 +86,7 @@ public class ConsistentHashing implements LoadBalancingStrategy {
         return circle.isEmpty();
     }
 
-    
+
     @Override
     public DataSourceMarker next() {
         return get(random.nextInt());

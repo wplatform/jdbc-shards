@@ -42,7 +42,7 @@ import java.util.HashSet;
 /**
  * This is the base class for most tables. A table contains a list of columns
  * and a list of rows.
- * 
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public abstract class Table extends SchemaObjectBase {
@@ -56,13 +56,11 @@ public abstract class Table extends SchemaObjectBase {
      * The table type name for views.
      */
     public static final String VIEW = "VIEW";
-
+    private final HashMap<String, Column> columnMap;
     /**
      * The columns of this table.
      */
     protected Column[] columns;
-
-    private final HashMap<String, Column> columnMap;
     private ArrayList<Sequence> sequences;
     private Row nullRow;
 
@@ -70,6 +68,24 @@ public abstract class Table extends SchemaObjectBase {
         columnMap = schema.getDatabase().newStringMap();
         initSchemaObjectBase(schema, id, name, Trace.TABLE);
         // compareMode = schema.getDatabase().getCompareMode();
+    }
+
+    private static void remove(ArrayList<? extends DbObject> list, DbObject obj) {
+        if (list != null) {
+            int i = list.indexOf(obj);
+            if (i >= 0) {
+                list.remove(i);
+            }
+        }
+    }
+
+    private static <T> ArrayList<T> add(ArrayList<T> list, T obj) {
+        if (list == null) {
+            list = New.arrayList();
+        }
+        // self constraints are two entries in the list
+        list.add(obj);
+        return list;
     }
 
     @Override
@@ -197,32 +213,10 @@ public abstract class Table extends SchemaObjectBase {
         return children;
     }
 
-    protected void setColumns(Column[] columns) {
-        this.columns = columns;
-        if (columnMap.size() > 0) {
-            columnMap.clear();
-        }
-        for (int i = 0; i < columns.length; i++) {
-            Column col = columns[i];
-            int dataType = col.getType();
-            if (dataType == Value.UNKNOWN) {
-                throw DbException.get(ErrorCode.UNKNOWN_DATA_TYPE_1,
-                        col.getSQL());
-            }
-            col.setTable(this, i);
-            String columnName = col.getName();
-            if (columnMap.get(columnName) != null) {
-                throw DbException.get(ErrorCode.DUPLICATE_COLUMN_NAME_1,
-                        columnName);
-            }
-            columnMap.put(columnName, col);
-        }
-    }
-
     /**
      * Rename a column of this table.
      *
-     * @param column the column to rename
+     * @param column  the column to rename
      * @param newName the new column name
      */
     public void renameColumn(Column column, String newName) {
@@ -268,12 +262,12 @@ public abstract class Table extends SchemaObjectBase {
      * references and indexes are dropped.
      *
      * @param session the session
-     * @param col the column
+     * @param col     the column
      * @throws DbException if the column is referenced by multi-column
-     *             constraints or indexes
+     *                     constraints or indexes
      */
     public void dropSingleColumnConstraintsAndIndexes(Session session,
-            Column col) {
+                                                      Column col) {
         ArrayList<Index> indexesToDrop = New.arrayList();
         ArrayList<Index> indexes = getIndexes();
         if (indexes != null) {
@@ -330,6 +324,28 @@ public abstract class Table extends SchemaObjectBase {
         return columns;
     }
 
+    protected void setColumns(Column[] columns) {
+        this.columns = columns;
+        if (columnMap.size() > 0) {
+            columnMap.clear();
+        }
+        for (int i = 0; i < columns.length; i++) {
+            Column col = columns[i];
+            int dataType = col.getType();
+            if (dataType == Value.UNKNOWN) {
+                throw DbException.get(ErrorCode.UNKNOWN_DATA_TYPE_1,
+                        col.getSQL());
+            }
+            col.setTable(this, i);
+            String columnName = col.getName();
+            if (columnMap.get(columnName) != null) {
+                throw DbException.get(ErrorCode.DUPLICATE_COLUMN_NAME_1,
+                        columnName);
+            }
+            columnMap.put(columnName, col);
+        }
+    }
+
     @Override
     public int getType() {
         return DbObject.TABLE_OR_VIEW;
@@ -373,15 +389,15 @@ public abstract class Table extends SchemaObjectBase {
     /**
      * Get the best plan for the given search mask.
      *
-     * @param session the session
-     * @param masks per-column comparison bit masks, null means 'always false',
-     *            see constants in IndexCondition
-     * @param filter the table filter
+     * @param session   the session
+     * @param masks     per-column comparison bit masks, null means 'always false',
+     *                  see constants in IndexCondition
+     * @param filter    the table filter
      * @param sortOrder the sort order
      * @return the plan item
      */
     public PlanItem getBestPlanItem(Session session, int[] masks,
-            TableFilter filter, SortOrder sortOrder) {
+                                    TableFilter filter, SortOrder sortOrder) {
         PlanItem item = new PlanItem();
         item.setIndex(getScanIndex(session));
         item.cost = item.getIndex().getCost(session, null, null, null);
@@ -432,7 +448,7 @@ public abstract class Table extends SchemaObjectBase {
      * default values if required and set the computed column if there are any.
      *
      * @param session the session
-     * @param row the row
+     * @param row     the row
      */
     public void validateConvertUpdateSequence(Session session, Row row) {
         for (int i = 0; i < columns.length; i++) {
@@ -447,15 +463,6 @@ public abstract class Table extends SchemaObjectBase {
             v2 = column.validateConvertUpdateSequence(session, value);
             if (v2 != value) {
                 row.setValue(i, v2);
-            }
-        }
-    }
-
-    private static void remove(ArrayList<? extends DbObject> list, DbObject obj) {
-        if (list != null) {
-            int i = list.indexOf(obj);
-            if (i >= 0) {
-                list.remove(i);
             }
         }
     }
@@ -495,15 +502,6 @@ public abstract class Table extends SchemaObjectBase {
         sequences = add(sequences, sequence);
     }
 
-    private static <T> ArrayList<T> add(ArrayList<T> list, T obj) {
-        if (list == null) {
-            list = New.arrayList();
-        }
-        // self constraints are two entries in the list
-        list.add(obj);
-        return list;
-    }
-
     public boolean isGlobalTemporary() {
         return false;
     }
@@ -534,7 +532,7 @@ public abstract class Table extends SchemaObjectBase {
      * Get or generate a default value for the given column.
      *
      * @param session the session
-     * @param column the column
+     * @param column  the column
      * @return the value
      */
     public Value getDefaultValue(Session session, Column column) {

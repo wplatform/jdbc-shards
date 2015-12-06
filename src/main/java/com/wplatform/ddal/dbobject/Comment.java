@@ -92,15 +92,6 @@ public class Comment extends DbObjectBase {
         DbException.throwInternalError();
     }
 
-    /**
-     * Set the comment text.
-     *
-     * @param comment the text
-     */
-    public void setCommentText(String comment) {
-        this.commentText = comment;
-    }
-
     public int getObjectType() {
         return objectType;
     }
@@ -112,7 +103,15 @@ public class Comment extends DbObjectBase {
     public String getCommentText() {
         return commentText;
     }
-    
-    
+
+    /**
+     * Set the comment text.
+     *
+     * @param comment the text
+     */
+    public void setCommentText(String comment) {
+        this.commentText = comment;
+    }
+
 
 }

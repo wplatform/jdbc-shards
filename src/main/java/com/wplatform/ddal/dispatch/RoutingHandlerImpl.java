@@ -170,7 +170,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
     /**
      * @param table
      */
-    private RoutingResult fixedRoutingResult(TableNode ... tableNode) {
+    private RoutingResult fixedRoutingResult(TableNode... tableNode) {
         RoutingResult result = RoutingResult.fixedResult(tableNode);
         return result;
     }

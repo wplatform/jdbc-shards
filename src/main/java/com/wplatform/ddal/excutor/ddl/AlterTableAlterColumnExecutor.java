@@ -42,6 +42,7 @@ import java.util.ArrayList;
  * ALTER TABLE ALTER COLUMN SET NOT NULL,
  * ALTER TABLE ALTER COLUMN SET NULL,
  * ALTER TABLE DROP COLUMN
+ *
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTableAlterColumn> {
@@ -53,43 +54,43 @@ public class AlterTableAlterColumnExecutor extends DefineCommandExecutor<AlterTa
     @Override
     public int executeUpdate() {
         Table parseTable = prepared.getTable();
-        if(!(parseTable instanceof TableMate)) {
-            DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1,parseTable.getSQL());
+        if (!(parseTable instanceof TableMate)) {
+            DbException.get(ErrorCode.TABLE_OR_VIEW_NOT_FOUND_1, parseTable.getSQL());
         }
-        TableMate table = (TableMate)parseTable;
+        TableMate table = (TableMate) parseTable;
         session.getUser().checkRight(table, Right.ALL);
         TableNode[] tableNodes = table.getPartitionNode();
         Column oldColumn = prepared.getOldColumn();
         int type = prepared.getType();
         switch (type) {
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
-            if (!oldColumn.isNullable()) {
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL: {
+                if (!oldColumn.isNullable()) {
+                    break;
+                }
+            }
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
+                if (oldColumn.isNullable()) {
+                    break;
+                }
+            }
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT:
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE:
+            case CommandInterface.ALTER_TABLE_ADD_COLUMN:
+            case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
+                execute(tableNodes);
+                table.loadMataData(session);
                 break;
             }
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL: {
-            if (oldColumn.isNullable()) {
-                break;
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY: {
+                return 0;//not supported.
             }
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT: 
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE: 
-        case CommandInterface.ALTER_TABLE_ADD_COLUMN: 
-        case CommandInterface.ALTER_TABLE_DROP_COLUMN: {
-            execute(tableNodes);
-            table.loadMataData(session);
-            break;
-        }
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY: {
-            return 0;//not supported.
-        }
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         return 0;
     }
 
-    
+
     @Override
     protected String doTranslate(TableNode node) {
         Column oldColumn = prepared.getOldColumn();

@@ -32,14 +32,6 @@ public class CreateRole extends DefineCommand {
         super(session);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setRoleName(String name) {
-        this.roleName = name;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -54,9 +46,17 @@ public class CreateRole extends DefineCommand {
         return roleName;
     }
 
+    public void setRoleName(String name) {
+        this.roleName = name;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
     }
-    
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
 
 }

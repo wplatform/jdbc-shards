@@ -57,11 +57,11 @@ public class Constant extends SchemaObjectBase {
         this.value = value;
         expression = ValueExpression.get(value);
     }
-    
+
     @Override
     public String toString() {
         return "CREATE CONSTANT " + getSQL() + " VALUE " + value.getSQL();
     }
-    
+
 
 }

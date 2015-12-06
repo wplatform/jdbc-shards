@@ -36,9 +36,8 @@ public class Configuration {
     private final Map<String, ShardConfig> cluster = New.hashMap();
     private final Map<String, Object> ruleAlgorithms = New.hashMap();
     private final Map<String, TableRouter> temporary = New.hashMap();
-    private HashMap<String,String> prop = New.hashMap();
+    private HashMap<String, Object> prop = New.hashMap();
     private SchemaConfig schemaConfig = new SchemaConfig();
-    private DataSourceProvider dataSourceProvider;
 
     public Set<String> getShardNames() {
         return cluster.keySet();
@@ -61,7 +60,7 @@ public class Configuration {
     /**
      * @return
      */
-    public HashMap<String,String> getSettings() {
+    public HashMap<String, Object> getSettings() {
         return this.prop;
     }
 
@@ -162,6 +161,31 @@ public class Configuration {
     }
 
     /**
+     * Get the value of the given property.
+     *
+     * @param setting      the setting id
+     * @param defaultValue the default value
+     * @return the value as an integer
+     */
+    public <T> T getObject(int setting) {
+        String key = SetTypes.getTypeName(setting);
+        return getObject(key);
+    }
+
+    /**
+     * Get the value of the given property.
+     *
+     * @param setting      the setting id
+     * @param defaultValue the default value
+     * @return the value as an integer
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getObject(String key) {
+        T result = (T) prop.get(key);
+        return result;
+    }
+
+    /**
      * Remove a boolean property if it is set and return the value.
      *
      * @param key          the property name
@@ -224,6 +248,30 @@ public class Configuration {
     }
 
     /**
+     * Overwrite a property.
+     *
+     * @param key   the property name
+     * @param value the value
+     */
+    public void setObject(String key, Object value) {
+        // value is null if the value is an object
+        if (value != null) {
+            prop.put(key, value);
+        }
+    }
+
+    /**
+     * Overwrite a property.
+     *
+     * @param key   the property name
+     * @param value the value
+     */
+    public void setObject(int setting, Object value) {
+        String key = SetTypes.getTypeName(setting);
+        setObject(key, value);
+    }
+
+    /**
      * Remove a String property if it is set and return the value.
      *
      * @param key          the property name
@@ -278,20 +326,6 @@ public class Configuration {
             throw new ConfigurationException("Duplicate ruleAlgorithm name " + name);
         }
         ruleAlgorithms.put(name, ruleAlgorithm);
-    }
-
-    /**
-     * @return the dataSourceProvider
-     */
-    public DataSourceProvider getDataSourceProvider() {
-        return dataSourceProvider;
-    }
-
-    /**
-     * @param dataSourceProvider the dataSourceProvider to set
-     */
-    public void setDataSourceProvider(DataSourceProvider dataSourceProvider) {
-        this.dataSourceProvider = dataSourceProvider;
     }
 
 }

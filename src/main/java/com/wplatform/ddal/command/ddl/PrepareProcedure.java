@@ -47,14 +47,6 @@ public class PrepareProcedure extends DefineCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setProcedureName(String name) {
-        this.procedureName = name;
-    }
-
-    public void setPrepared(Prepared prep) {
-        this.prepared = prep;
-    }
-
     @Override
     public ArrayList<Parameter> getParameters() {
         return New.arrayList();
@@ -69,8 +61,16 @@ public class PrepareProcedure extends DefineCommand {
         return procedureName;
     }
 
+    public void setProcedureName(String name) {
+        this.procedureName = name;
+    }
+
     public Prepared getPrepared() {
         return prepared;
+    }
+
+    public void setPrepared(Prepared prep) {
+        this.prepared = prep;
     }
 
 }

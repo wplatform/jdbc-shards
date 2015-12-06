@@ -41,18 +41,6 @@ public class CreateSequence extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setCycle(boolean cycle) {
-        this.cycle = cycle;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -60,26 +48,6 @@ public class CreateSequence extends SchemaCommand {
 
     public void setStartWith(Expression start) {
         this.start = start;
-    }
-
-    public void setIncrement(Expression increment) {
-        this.increment = increment;
-    }
-
-    public void setMinValue(Expression minValue) {
-        this.minValue = minValue;
-    }
-
-    public void setMaxValue(Expression maxValue) {
-        this.maxValue = maxValue;
-    }
-
-    public void setBelongsToTable(boolean belongsToTable) {
-        this.belongsToTable = belongsToTable;
-    }
-
-    public void setCacheSize(Expression cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     @Override
@@ -91,20 +59,40 @@ public class CreateSequence extends SchemaCommand {
         return sequenceName;
     }
 
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
     public boolean isCycle() {
         return cycle;
     }
 
+    public void setCycle(boolean cycle) {
+        this.cycle = cycle;
+    }
+
     public Expression getMinValue() {
         return minValue;
     }
 
+    public void setMinValue(Expression minValue) {
+        this.minValue = minValue;
+    }
+
     public Expression getMaxValue() {
         return maxValue;
+    }
+
+    public void setMaxValue(Expression maxValue) {
+        this.maxValue = maxValue;
     }
 
     public Expression getStart() {
@@ -115,14 +103,25 @@ public class CreateSequence extends SchemaCommand {
         return increment;
     }
 
+    public void setIncrement(Expression increment) {
+        this.increment = increment;
+    }
+
     public Expression getCacheSize() {
         return cacheSize;
+    }
+
+    public void setCacheSize(Expression cacheSize) {
+        this.cacheSize = cacheSize;
     }
 
     public boolean isBelongsToTable() {
         return belongsToTable;
     }
-    
-    
+
+    public void setBelongsToTable(boolean belongsToTable) {
+        this.belongsToTable = belongsToTable;
+    }
+
 
 }

@@ -37,14 +37,6 @@ public class DropAggregate extends DefineCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setIfExists(boolean ifExists) {
-        this.ifExists = ifExists;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.DROP_AGGREGATE;
@@ -54,10 +46,17 @@ public class DropAggregate extends DefineCommand {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean isIfExists() {
         return ifExists;
     }
-    
-    
+
+    public void setIfExists(boolean ifExists) {
+        this.ifExists = ifExists;
+    }
+
 
 }

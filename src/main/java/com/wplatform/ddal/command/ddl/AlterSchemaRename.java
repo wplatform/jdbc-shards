@@ -33,10 +33,6 @@ public class AlterSchemaRename extends DefineCommand {
         super(session);
     }
 
-    public void setOldSchema(Schema schema) {
-        oldSchema = schema;
-    }
-
     public void setNewName(String name) {
         newSchemaName = name;
     }
@@ -55,10 +51,13 @@ public class AlterSchemaRename extends DefineCommand {
         return oldSchema;
     }
 
+    public void setOldSchema(Schema schema) {
+        oldSchema = schema;
+    }
+
     public String getNewSchemaName() {
         return newSchemaName;
     }
-    
-    
+
 
 }

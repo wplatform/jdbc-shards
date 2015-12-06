@@ -32,14 +32,6 @@ public class DropUser extends DefineCommand {
         super(session);
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -59,8 +51,16 @@ public class DropUser extends DefineCommand {
         return ifExists;
     }
 
+    public void setIfExists(boolean b) {
+        ifExists = b;
+    }
+
     public String getUserName() {
         return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
 }

@@ -33,16 +33,15 @@ import java.util.concurrent.Callable;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public abstract class JdbcWorker<T> implements Callable<T> {
     protected final Session session;
     protected final Trace trace;
-    
+
     protected final String shardName;
     protected final String sql;
     protected final List<Value> params;
-    
+
     private Connection rtConn;
     private Statement rtStmt;
     private ResultSet rtRs;
@@ -57,6 +56,18 @@ public abstract class JdbcWorker<T> implements Callable<T> {
 
     }
 
+    /**
+     * Wrap a SQL exception that occurred while accessing a linked table.
+     *
+     * @param sql the SQL statement
+     * @param ex  the exception from the remote database
+     * @return the wrapped exception
+     */
+    protected static DbException wrapException(String sql, Exception ex) {
+        SQLException e = DbException.toSQLException(ex);
+        return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
+    }
+
     public abstract T doWork();
 
     public T call() throws Exception {
@@ -64,28 +75,26 @@ public abstract class JdbcWorker<T> implements Callable<T> {
     }
 
     public void attach(Connection conn) {
-        if(this.rtConn != null) {
+        if (this.rtConn != null) {
             throw new IllegalStateException();
         }
         this.rtConn = conn;
     }
 
     public void attach(Statement stmt) {
-        if(this.rtStmt != null) {
+        if (this.rtStmt != null) {
             throw new IllegalStateException();
         }
         this.rtStmt = stmt;
     }
 
     public void attach(ResultSet rs) {
-        if(this.rtRs != null) {
+        if (this.rtRs != null) {
             throw new IllegalStateException();
         }
         this.rtRs = rs;
     }
-    
-    
-    
+
     /**
      * @return the rtConn
      */
@@ -100,7 +109,6 @@ public abstract class JdbcWorker<T> implements Callable<T> {
         return rtStmt;
     }
 
-    
     /**
      * @return the rtRs
      */
@@ -131,12 +139,12 @@ public abstract class JdbcWorker<T> implements Callable<T> {
 
     public void cancel() {
         try {
-            if(rtStmt == null) {
+            if (rtStmt == null) {
                 return;
             }
             rtStmt.cancel();
         } catch (Exception e) {
-            
+
         }
     }
 
@@ -145,33 +153,20 @@ public abstract class JdbcWorker<T> implements Callable<T> {
         JdbcUtils.closeSilently(rtStmt);
         JdbcUtils.closeSilently(rtConn);
     }
-    
+
     protected void applyQueryTimeout(Statement stmt) throws SQLException {
         //The session timeout of a query in milliseconds
         int queryTimeout = session.getQueryTimeout();
-        if(queryTimeout > 0) {
+        if (queryTimeout > 0) {
             int seconds = queryTimeout / 1000;
             trace.debug("apply {0} query time out from statement.", seconds);
             stmt.setQueryTimeout(seconds);
         }
     }
-    
 
     protected DataSource getDataSource() {
         DataSourceRepository dataSourceRepository = session.getDataSourceRepository();
         DataSource dataSource = dataSourceRepository.getDataSourceByShardName(shardName);
         return dataSource;
-    }
-    
-    /**
-     * Wrap a SQL exception that occurred while accessing a linked table.
-     *
-     * @param sql the SQL statement
-     * @param ex the exception from the remote database
-     * @return the wrapped exception
-     */
-    protected static DbException wrapException(String sql, Exception ex) {
-        SQLException e = DbException.toSQLException(ex);
-        return DbException.get(ErrorCode.ERROR_ACCESSING_DATABASE_TABLE_2, e, sql, e.toString());
     }
 }

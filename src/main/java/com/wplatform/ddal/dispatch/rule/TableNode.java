@@ -79,11 +79,8 @@ public class TableNode implements Serializable {
         }
         return fullName.toString();
     }
-    
-    
-    
 
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
@@ -132,6 +129,5 @@ public class TableNode implements Serializable {
         return getShardName() + "." + getCompositeObjectName();
     }
 
-    
 
 }

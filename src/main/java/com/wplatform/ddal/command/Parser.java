@@ -5586,8 +5586,10 @@ public class Parser {
         read();
         return readTableOrView();
     }
+
     /**
      * added method. parse MySQL style TRANSACTION statements
+     *
      * @return
      */
     private TransactionCommand parseTransactionCommand() {

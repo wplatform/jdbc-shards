@@ -45,6 +45,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected final Database database;
     protected final ThreadPoolExecutor jdbcExecutor;
     protected final List<JdbcWorker<?>> runingWorkers;
+
     /**
      * @param prepared
      */
@@ -66,14 +67,14 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
      */
     @Override
     public LocalResult executeQuery(int maxRows) {
-       return executeQuery(maxRows,null);
+        return executeQuery(maxRows, null);
     }
 
     /**
      * Execute the query, writing the result to the target result.
      *
-     * @param maxRows  the maximum number of rows to return
-     * @param target the target result (null will return the result)
+     * @param maxRows the maximum number of rows to return
+     * @param target  the target result (null will return the result)
      * @return the result set (if the target is not set).
      */
     @Override
@@ -95,11 +96,12 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     protected T getPrepared() {
         return prepared;
     }
-    
+
     /**
      * Gets the current query timeout in MILLISECONDS.
-     * @see Session.getQueryTimeout()
+     *
      * @return query timeout
+     * @see Session.getQueryTimeout()
      */
     protected int getQueryTimeout() {
         return session.getQueryTimeout();
@@ -147,19 +149,19 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
         }
         runingWorkers.clear();
     }
-    
+
     protected <E> void addRuningJdbcWorker(JdbcWorker<E> worker) {
         runingWorkers.add(worker);
     }
-    
+
     protected <E> void addRuningJdbcWorkers(List<JdbcWorker<E>> workers) {
         runingWorkers.addAll(workers);
     }
-    
+
     protected <E> void removeRuningJdbcWorker(JdbcWorker<E> worker) {
         runingWorkers.remove(worker);
     }
-    
+
     protected <E> void removeRuningJdbcWorkers(List<JdbcWorker<E>> workers) {
         runingWorkers.removeAll(workers);
     }
@@ -181,7 +183,7 @@ public abstract class CommonPreparedExecutor<T extends Prepared> implements Prep
     }
 
     protected JdbcWorker<Integer[]> createBatchUpdateWorker(String shardName, String sql, List<List<Value>> array) {
-        return new BatchUpdateWorker(session, shardName, sql, array);
+        return new JdbcBatchUpdateWorker(session, shardName, sql, array);
     }
 
     protected String identifier(String s) {

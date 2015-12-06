@@ -44,6 +44,22 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         super(prepared);
     }
 
+    private static void appendAction(StatementBuilder buff, int action) {
+        switch (action) {
+            case AlterTableAddConstraint.CASCADE:
+                buff.append("CASCADE");
+                break;
+            case AlterTableAddConstraint.SET_DEFAULT:
+                buff.append("SET DEFAULT");
+                break;
+            case AlterTableAddConstraint.SET_NULL:
+                buff.append("SET NULL");
+                break;
+            default:
+                DbException.throwInternalError("action=" + action);
+        }
+    }
+
     @Override
     public int executeUpdate() {
         String tableName = prepared.getTableName();
@@ -52,26 +68,26 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         TableNode[] tableNodes = table.getPartitionNode();
         int type = prepared.getType();
         switch (type) {
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
-            String refTableName = prepared.getRefTableName();
-            TableMate refTable = getTableMate(refTableName);
-            TableNode[] refTableNode = table.getPartitionNode();
-            Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(tableNodes, refTableNode);
-            if (symmetryRelation == null) {
-                throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
-                        "The original table and reference table should be symmetrical.");
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
+                String refTableName = prepared.getRefTableName();
+                TableMate refTable = getTableMate(refTableName);
+                TableNode[] refTableNode = table.getPartitionNode();
+                Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(tableNodes, refTableNode);
+                if (symmetryRelation == null) {
+                    throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
+                            "The original table and reference table should be symmetrical.");
+                }
+                session.getUser().checkRight(refTable, Right.ALL);
             }
-            session.getUser().checkRight(refTable, Right.ALL);
-        }
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY:
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE:
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
-            execute(tableNodes);
-            break;
-        }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY:
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE:
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
+                execute(tableNodes);
+                break;
+            }
 
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
 
         return 0;
@@ -84,38 +100,38 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
         String forTable = tableNode.getCompositeObjectName();
         IndexColumn.mapColumns(prepared.getIndexColumns(), table);
         switch (prepared.getType()) {
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
-            return doBuildUnique(forTable, AlterTableAddConstraint.PRIMARY_KEY);
-        }
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
-            String uniqueType = AlterTableAddConstraint.UNIQUE + " KEY";
-            return doBuildUnique(forTable, uniqueType);
-        }
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY: {
+                return doBuildUnique(forTable, AlterTableAddConstraint.PRIMARY_KEY);
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE: {
+                String uniqueType = AlterTableAddConstraint.UNIQUE + " KEY";
+                return doBuildUnique(forTable, uniqueType);
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK: {
             /*
              * MySQL. The CHECK clause is parsed but ignored by all storage
              * engines.
              */
-            return doBuildCheck(forTable);
-        }
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
+                return doBuildCheck(forTable);
+            }
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL: {
             /*
              * MySQL. The FOREIGN KEY and REFERENCES clauses are supported by
              * the InnoDB and NDB storage engines
              */
-            String refTableName = prepared.getRefTableName();
-            TableMate refTable = getTableMate(refTableName);
-            Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(table.getPartitionNode(),
-                    refTable.getPartitionNode());
-            TableNode relation = symmetryRelation.get(tableNode);
-            if (relation == null) {
-                throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
-                        "The original table and reference table should be symmetrical.");
+                String refTableName = prepared.getRefTableName();
+                TableMate refTable = getTableMate(refTableName);
+                Map<TableNode, TableNode> symmetryRelation = getSymmetryRelation(table.getPartitionNode(),
+                        refTable.getPartitionNode());
+                TableNode relation = symmetryRelation.get(tableNode);
+                if (relation == null) {
+                    throw DbException.get(ErrorCode.CHECK_CONSTRAINT_INVALID,
+                            "The original table and reference table should be symmetrical.");
+                }
+                return doBuildReferences(forTable, relation.getCompositeObjectName());
             }
-            return doBuildReferences(forTable, relation.getCompositeObjectName());
-        }
-        default:
-            throw DbException.throwInternalError("type=" + prepared.getType());
+            default:
+                throw DbException.throwInternalError("type=" + prepared.getType());
 
         }
     }
@@ -186,22 +202,6 @@ public class AlterTableAddConstraintExecutor extends DefineCommandExecutor<Alter
             appendAction(buff, prepared.getDeleteAction());
         }
         return buff.toString();
-    }
-
-    private static void appendAction(StatementBuilder buff, int action) {
-        switch (action) {
-        case AlterTableAddConstraint.CASCADE:
-            buff.append("CASCADE");
-            break;
-        case AlterTableAddConstraint.SET_DEFAULT:
-            buff.append("SET DEFAULT");
-            break;
-        case AlterTableAddConstraint.SET_NULL:
-            buff.append("SET NULL");
-            break;
-        default:
-            DbException.throwInternalError("action=" + action);
-        }
     }
 
 }

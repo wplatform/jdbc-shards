@@ -67,10 +67,6 @@ public class Set extends Prepared {
         this.expression = ValueExpression.get(ValueInt.get(value));
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
-    }
-
     @Override
     public boolean needRecompile() {
         return false;
@@ -89,15 +85,19 @@ public class Set extends Prepared {
     public int getType() {
         return CommandInterface.SET;
     }
-    
-    //getters
-    
+
     public int getSetType() {
         return type;
     }
-    
+
+    //getters
+
     public Expression getExpression() {
         return expression;
+    }
+
+    public void setExpression(Expression expression) {
+        this.expression = expression;
     }
 
     public String getStringValue() {
@@ -108,5 +108,5 @@ public class Set extends Prepared {
         return stringValueList;
     }
 
-    
+
 }

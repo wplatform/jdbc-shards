@@ -47,16 +47,16 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
         String forTable = tableNode.getCompositeObjectName();
         StringBuilder sql = new StringBuilder();
         sql.append("DROP TABLE");
-        if(prepared.isIfExists()) {
+        if (prepared.isIfExists()) {
             sql.append(" IF EXISTS");
         }
         sql.append(" ").append(identifier(forTable));
-        if(prepared.getDropAction() == AlterTableAddConstraint.CASCADE) {
+        if (prepared.getDropAction() == AlterTableAddConstraint.CASCADE) {
             sql.append(" CASCADE");
         }
         return sql.toString();
     }
-    
+
 
     private void prepareDrop(DropTable next) {
         String tableName = next.getTableName();
@@ -86,6 +86,6 @@ public class DropTableExecutor extends DefineCommandExecutor<DropTable> {
             executeDrop(next);
         }
     }
-    
+
 
 }

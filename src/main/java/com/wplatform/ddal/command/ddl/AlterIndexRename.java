@@ -33,14 +33,9 @@ public class AlterIndexRename extends DefineCommand {
         super(session);
     }
 
-    public void setOldIndex(Index index) {
-        oldIndex = index;
-    }
-
     public void setNewName(String name) {
         newIndexName = name;
     }
-
 
     @Override
     public int update() {
@@ -56,11 +51,13 @@ public class AlterIndexRename extends DefineCommand {
         return oldIndex;
     }
 
+    public void setOldIndex(Index index) {
+        oldIndex = index;
+    }
+
     public String getNewIndexName() {
         return newIndexName;
     }
 
-    
-    
 
 }

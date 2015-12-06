@@ -1,7 +1,6 @@
 package com.wplatform.ddal.test.jdbc;
 
 import com.wplatform.ddal.engine.SysProperties;
-import com.wplatform.ddal.jdbc.JdbcStatement;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.test.BaseTestCase;
 import com.wplatform.ddal.util.New;
@@ -151,9 +150,9 @@ public class StatementTestCase extends BaseTestCase {
         assertEquals(ResultSet.CONCUR_READ_ONLY,
                 stat2.getResultSetConcurrency());
         assertEquals(0, stat.getMaxFieldSize());
-        assertTrue(!((JdbcStatement) stat2).isClosed());
+        assertTrue(!stat2.isClosed());
         stat2.close();
-        assertTrue(((JdbcStatement) stat2).isClosed());
+        assertTrue(stat2.isClosed());
 
 
         ResultSet rs;

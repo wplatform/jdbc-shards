@@ -46,15 +46,15 @@ import java.util.List;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class SelectExecutor extends PreparedRoutingExecutor<Select> {
-    
+
+    private final ArrayList<TableFilter> filters;
+    private final ArrayList<TableFilter> topFilters;
     protected Expression limitExpr;
     protected Expression offsetExpr;
     protected Expression sampleSizeExpr;
     protected boolean distinct;
     protected boolean randomAccessResult;
     private TableFilter topTableFilter;
-    private final ArrayList<TableFilter> filters;
-    private final ArrayList<TableFilter> topFilters ;
     private ArrayList<Expression> expressions;
     private Expression[] expressionArray;
     private Expression having;
@@ -140,7 +140,7 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
         topTableFilter.lock(session, isForUpdate, isForUpdate);
         ResultTarget to = result != null ? result : target;
         if (limitRows != 0) {
-            if(isAccordantQuery) {
+            if (isAccordantQuery) {
                 if (isGroupQuery) {
                     queryGroupAccordant(columnCount, to);
                 } else {
@@ -261,7 +261,7 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
     }
 
     private void addGroupSortedRow(Value[] keyValues, int columnCount,
-            ResultTarget result) {
+                                   ResultTarget result) {
         Value[] row = new Value[columnCount];
         for (int j = 0; groupIndex != null && j < groupIndex.length; j++) {
             row[groupIndex[j]] = keyValues[j];
@@ -439,7 +439,7 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
 
 
     private void queryFlatAccordant(int columnCount, ResultTarget result, long limitRows) {
-        
+
     }
 
     private void queryFlat(int columnCount, ResultTarget result, long limitRows) {
@@ -498,8 +498,6 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
         return old != null ? old : new LocalResult(session, expressionArray,
                 visibleColumnCount);
     }
-
-
 
 
     public String getPlanSQL() {

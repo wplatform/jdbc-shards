@@ -38,37 +38,9 @@ public class CreateUser extends DefineCommand {
         super(session);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setPassword(Expression password) {
-        this.password = password;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setSalt(Expression e) {
-        salt = e;
-    }
-
-    public void setHash(Expression e) {
-        hash = e;
-    }
-
-    public void setAdmin(boolean b) {
-        admin = b;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
     @Override
@@ -80,29 +52,57 @@ public class CreateUser extends DefineCommand {
         return userName;
     }
 
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public boolean isAdmin() {
         return admin;
+    }
+
+    public void setAdmin(boolean b) {
+        admin = b;
     }
 
     public Expression getPassword() {
         return password;
     }
 
+    public void setPassword(Expression password) {
+        this.password = password;
+    }
+
     public Expression getSalt() {
         return salt;
+    }
+
+    public void setSalt(Expression e) {
+        salt = e;
     }
 
     public Expression getHash() {
         return hash;
     }
 
+    public void setHash(Expression e) {
+        hash = e;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
     public String getComment() {
         return comment;
     }
-    
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
 
 }

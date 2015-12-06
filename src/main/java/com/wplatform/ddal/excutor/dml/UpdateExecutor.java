@@ -36,7 +36,6 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
 
@@ -46,8 +45,8 @@ public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
     public UpdateExecutor(Update prepared) {
         super(prepared);
     }
-    
-    
+
+
     @Override
     public int executeUpdate() {
         TableFilter tableFilter = prepared.getTableFilter();
@@ -56,7 +55,7 @@ public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
         Map<Column, Expression> valueMap = prepared.getExpressionMap();
         table.check();
         session.getUser().checkRight(table, Right.UPDATE);
-        
+
         Row updateRow = table.getTemplateRow();
         for (int i = 0, size = columns.size(); i < size; i++) {
             Column c = columns.get(i);
@@ -75,7 +74,7 @@ public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
             }
         }
         return updateRow(table, updateRow, tableFilter.getIndexConditions());
-        
+
     }
 
 
@@ -94,7 +93,7 @@ public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
             Column c = columns.get(i);
             buff.appendExceptFirst(", ");
             buff.append(c.getSQL()).append(" = ");
-            
+
             Value v = row.getValue(i);
             buff.appendExceptFirst(", ");
             if (v == null) {
@@ -116,7 +115,6 @@ public class UpdateExecutor extends PreparedRoutingExecutor<Update> {
         }
         return params;
     }
-    
-    
+
 
 }

@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.sql.*;
 import java.util.Collections;
 
@@ -74,20 +73,20 @@ public class CallableStatementTestCase extends BaseTestCase {
                 getSQLXML("a");
 
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setURL(1, (URL) null);
+                setURL(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setRef(1, (Ref) null);
+                setRef(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setRowId(1, (RowId) null);
+                setRowId(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setSQLXML(1, (SQLXML) null);
+                setSQLXML(1, null);
 
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setURL("a", (URL) null);
+                setURL("a", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setRowId("a", (RowId) null);
+                setRowId("a", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, call).
-                setSQLXML("a", (SQLXML) null);
+                setSQLXML("a", null);
 
     }
 

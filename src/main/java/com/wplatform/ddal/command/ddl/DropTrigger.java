@@ -33,14 +33,6 @@ public class DropTrigger extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
-    public void setTriggerName(String triggerName) {
-        this.triggerName = triggerName;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -55,9 +47,17 @@ public class DropTrigger extends SchemaCommand {
         return triggerName;
     }
 
+    public void setTriggerName(String triggerName) {
+        this.triggerName = triggerName;
+    }
+
     public boolean isIfExists() {
         return ifExists;
     }
-    
+
+    public void setIfExists(boolean b) {
+        ifExists = b;
+    }
+
 
 }

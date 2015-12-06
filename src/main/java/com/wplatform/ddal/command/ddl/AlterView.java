@@ -32,10 +32,6 @@ public class AlterView extends DefineCommand {
         super(session);
     }
 
-    public void setView(TableView view) {
-        this.view = view;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -49,7 +45,10 @@ public class AlterView extends DefineCommand {
     public TableView getView() {
         return view;
     }
-    
-    
+
+    public void setView(TableView view) {
+        this.view = view;
+    }
+
 
 }

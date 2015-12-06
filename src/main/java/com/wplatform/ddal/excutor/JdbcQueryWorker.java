@@ -25,18 +25,18 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class JdbcQueryWorker extends JdbcWorker<ResultSet> {
 
     private final int maxrows;
+
     /**
      * @param session
      * @param shardName
      * @param sql
      * @param params
      */
-    public JdbcQueryWorker(Session session, String shardName, String sql, List<Value> params,int maxrows) {
+    public JdbcQueryWorker(Session session, String shardName, String sql, List<Value> params, int maxrows) {
         super(session, shardName, sql, params);
         this.maxrows = maxrows;
     }
@@ -60,7 +60,7 @@ public class JdbcQueryWorker extends JdbcWorker<ResultSet> {
             attach(stmt);
             applyQueryTimeout(stmt);
             applyMaxRows(stmt);
-            
+
             if (params != null) {
                 for (int i = 0, size = params.size(); i < size; i++) {
                     Value v = params.get(i);
@@ -90,8 +90,8 @@ public class JdbcQueryWorker extends JdbcWorker<ResultSet> {
             throw wrapException(sql, e);
         }
     }
-    
-    
+
+
     protected void applyMaxRows(Statement stmt) throws SQLException {
         int maxRows = maxrows > 0 ? maxrows : session.getDatabase().getMaxMemoryRows();
         stmt.setMaxRows(maxRows);

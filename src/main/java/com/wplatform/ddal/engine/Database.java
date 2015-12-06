@@ -81,9 +81,10 @@ public class Database {
     public Database(Configuration configuration) {
         this.configuration = configuration;
         this.compareMode = CompareMode.getInstance(null, 0);
-        this.dbSettings = DbSettings.getInstance(configuration.getSettings());
+        this.dbSettings = DbSettings.getInstance(null);
 
         String sqlMode = configuration.getProperty(SetTypes.MODE, Mode.MY_SQL);
+        maxMemoryRows = configuration.getIntProperty(SetTypes.MAX_MEMORY_ROWS, maxMemoryRows);
         Mode settingMode = Mode.getInstance(sqlMode);
         if (settingMode != null) {
             this.mode = settingMode;
@@ -98,7 +99,7 @@ public class Database {
     private synchronized void openDatabase() {
         User systemUser = new User(this, allocateObjectId(), SYSTEM_USER_NAME);
         systemUser.setAdmin(true);
-        systemUser.setUserPasswordHash(new byte[0]);
+        systemUser.setPassword(SYSTEM_USER_NAME);
         users.put(SYSTEM_USER_NAME, systemUser);
 
         Schema schema = new Schema(this, allocateObjectId(), Constants.SCHEMA_MAIN, systemUser, true);
@@ -149,7 +150,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     *         1 otherwise
+     * 1 otherwise
      */
     public int compare(Value a, Value b) {
         return a.compareTo(b, compareMode);
@@ -162,7 +163,7 @@ public class Database {
      * @param a the first value
      * @param b the second value
      * @return 0 if both values are equal, -1 if the first value is smaller, and
-     *         1 otherwise
+     * 1 otherwise
      */
     public int compareTypeSave(Value a, Value b) {
         return a.compareTypeSave(b, compareMode);
@@ -182,26 +183,26 @@ public class Database {
     private HashMap<String, DbObject> getMap(int type) {
         HashMap<String, ? extends DbObject> result;
         switch (type) {
-        case DbObject.USER:
-            result = users;
-            break;
-        case DbObject.SETTING:
-            result = settings;
-            break;
-        case DbObject.ROLE:
-            result = roles;
-            break;
-        case DbObject.RIGHT:
-            result = rights;
-            break;
-        case DbObject.SCHEMA:
-            result = schemas;
-            break;
-        case DbObject.COMMENT:
-            result = comments;
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case DbObject.USER:
+                result = users;
+                break;
+            case DbObject.SETTING:
+                result = settings;
+                break;
+            case DbObject.ROLE:
+                result = roles;
+                break;
+            case DbObject.RIGHT:
+                result = rights;
+                break;
+            case DbObject.SCHEMA:
+                result = schemas;
+                break;
+            case DbObject.COMMENT:
+                result = comments;
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         return (HashMap<String, DbObject>) result;
     }
@@ -420,7 +421,7 @@ public class Database {
 
     /**
      * Get all tables and views.
-     * 
+     *
      * @return all objects of that type
      */
     public ArrayList<Table> getAllTablesAndViews() {
@@ -470,7 +471,7 @@ public class Database {
      * Rename a schema object.
      *
      * @param session the session
-     * @param obj the object
+     * @param obj     the object
      * @param newName the new name
      */
     public synchronized void renameSchemaObject(Session session, SchemaObject obj, String newName) {
@@ -481,7 +482,7 @@ public class Database {
      * Rename a database object.
      *
      * @param session the session
-     * @param obj the object
+     * @param obj     the object
      * @param newName the new name
      */
     public synchronized void renameDatabaseObject(Session session, DbObject obj, String newName) {
@@ -520,7 +521,7 @@ public class Database {
      * Remove the object from the database.
      *
      * @param session the session
-     * @param obj the object to remove
+     * @param obj     the object to remove
      */
     public synchronized void removeDatabaseObject(Session session, DbObject obj) {
         String objName = obj.getName();
@@ -540,20 +541,20 @@ public class Database {
     /**
      * Get the first table that depends on this object.
      *
-     * @param obj the object to find
+     * @param obj    the object to find
      * @param except the table to exclude (or null)
      * @return the first dependent table, or null
      */
     public Table getDependentTable(SchemaObject obj, Table except) {
         switch (obj.getType()) {
-        case DbObject.COMMENT:
-        case DbObject.CONSTRAINT:
-        case DbObject.INDEX:
-        case DbObject.RIGHT:
-        case DbObject.TRIGGER:
-        case DbObject.USER:
-            return null;
-        default:
+            case DbObject.COMMENT:
+            case DbObject.CONSTRAINT:
+            case DbObject.INDEX:
+            case DbObject.RIGHT:
+            case DbObject.TRIGGER:
+            case DbObject.USER:
+                return null;
+            default:
         }
         HashSet<DbObject> set = New.hashSet();
         for (Table t : getAllTablesAndViews()) {
@@ -575,7 +576,7 @@ public class Database {
      * Remove an object from the system table.
      *
      * @param session the session
-     * @param obj the object to be removed
+     * @param obj     the object to be removed
      */
     public synchronized void removeSchemaObject(Session session, SchemaObject obj) {
         int type = obj.getType();
@@ -690,6 +691,7 @@ public class Database {
 
     /**
      * String to database identifier against dbSettings
+     *
      * @param identifier
      * @return
      */
@@ -727,7 +729,7 @@ public class Database {
     }
 
     public PreparedExecutorFactory getPreparedExecutorFactory() {
-        if(peFactory == null) {
+        if (peFactory == null) {
             peFactory = new ExecutorFactory();
         }
         return peFactory;

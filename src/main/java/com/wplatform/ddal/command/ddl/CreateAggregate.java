@@ -41,26 +41,6 @@ public class CreateAggregate extends DefineCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setSchema(Schema schema) {
-        this.schema = schema;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setJavaClassMethod(String string) {
-        this.javaClassMethod = string;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setForce(boolean force) {
-        this.force = force;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.CREATE_AGGREGATE;
@@ -70,22 +50,41 @@ public class CreateAggregate extends DefineCommand {
         return schema;
     }
 
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getJavaClassMethod() {
         return javaClassMethod;
     }
 
+    public void setJavaClassMethod(String string) {
+        this.javaClassMethod = string;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
     public boolean isForce() {
         return force;
     }
-    
-    
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
 
 }

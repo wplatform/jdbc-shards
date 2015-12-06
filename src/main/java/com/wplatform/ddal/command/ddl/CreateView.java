@@ -40,38 +40,6 @@ public class CreateView extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setViewName(String name) {
-        viewName = name;
-    }
-
-    public void setSelect(Query select) {
-        this.select = select;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
-    public void setSelectSQL(String selectSQL) {
-        this.selectSQL = selectSQL;
-    }
-
-    public void setColumnNames(String[] cols) {
-        this.columnNames = cols;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public void setOrReplace(boolean orReplace) {
-        this.orReplace = orReplace;
-    }
-
-    public void setForce(boolean force) {
-        this.force = force;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -86,34 +54,65 @@ public class CreateView extends SchemaCommand {
         return select;
     }
 
+    public void setSelect(Query select) {
+        this.select = select;
+    }
+
     public String getViewName() {
         return viewName;
+    }
+
+    public void setViewName(String name) {
+        viewName = name;
     }
 
     public boolean isIfNotExists() {
         return ifNotExists;
     }
 
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
     public String getSelectSQL() {
         return selectSQL;
+    }
+
+    public void setSelectSQL(String selectSQL) {
+        this.selectSQL = selectSQL;
     }
 
     public String[] getColumnNames() {
         return columnNames;
     }
 
+    public void setColumnNames(String[] cols) {
+        this.columnNames = cols;
+    }
+
     public String getComment() {
         return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public boolean isOrReplace() {
         return orReplace;
     }
 
+    public void setOrReplace(boolean orReplace) {
+        this.orReplace = orReplace;
+    }
+
     public boolean isForce() {
         return force;
     }
-    
-    
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
 
 }

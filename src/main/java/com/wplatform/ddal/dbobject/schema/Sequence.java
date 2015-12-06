@@ -46,14 +46,14 @@ public class Sequence extends SchemaObjectBase {
     /**
      * Creates a new sequence for an auto-increment column.
      *
-     * @param schema the schema
-     * @param id the object id
-     * @param name the sequence name
+     * @param schema     the schema
+     * @param id         the object id
+     * @param name       the sequence name
      * @param startValue the first value to return
-     * @param increment the increment count
+     * @param increment  the increment count
      */
     public Sequence(Schema schema, int id, String name, long startValue,
-            long increment) {
+                    long increment) {
         this(schema, id, name, startValue, increment, null, null, null, false,
                 true);
     }
@@ -61,21 +61,21 @@ public class Sequence extends SchemaObjectBase {
     /**
      * Creates a new sequence.
      *
-     * @param schema the schema
-     * @param id the object id
-     * @param name the sequence name
-     * @param startValue the first value to return
-     * @param increment the increment count
-     * @param cacheSize the number of entries to pre-fetch
-     * @param minValue the minimum value
-     * @param maxValue the maximum value
-     * @param cycle whether to jump back to the min value if needed
+     * @param schema         the schema
+     * @param id             the object id
+     * @param name           the sequence name
+     * @param startValue     the first value to return
+     * @param increment      the increment count
+     * @param cacheSize      the number of entries to pre-fetch
+     * @param minValue       the minimum value
+     * @param maxValue       the maximum value
+     * @param cycle          whether to jump back to the min value if needed
      * @param belongsToTable whether this sequence belongs to a table (for
-     *            auto-increment columns)
+     *                       auto-increment columns)
      */
     public Sequence(Schema schema, int id, String name, Long startValue,
-            Long increment, Long cacheSize, Long minValue, Long maxValue,
-            boolean cycle, boolean belongsToTable) {
+                    Long increment, Long cacheSize, Long minValue, Long maxValue,
+                    boolean cycle, boolean belongsToTable) {
         initSchemaObjectBase(schema, id, name, Trace.SEQUENCE);
         this.increment = increment != null ?
                 increment : 1;
@@ -99,6 +99,45 @@ public class Sequence extends SchemaObjectBase {
     }
 
     /**
+     * Validates the specified prospective start value, min value, max value and
+     * increment relative to each other, since each of their respective
+     * validities are contingent on the values of the other parameters.
+     *
+     * @param value     the prospective start value
+     * @param minValue  the prospective min value
+     * @param maxValue  the prospective max value
+     * @param increment the prospective increment
+     */
+    private static boolean isValid(long value, long minValue, long maxValue,
+                                   long increment) {
+        return minValue <= value &&
+                maxValue >= value &&
+                maxValue > minValue &&
+                increment != 0 &&
+                // Math.abs(increment) < maxValue - minValue
+                // use BigInteger to avoid overflows when maxValue and minValue
+                // are really big
+                BigInteger.valueOf(increment).abs().compareTo(
+                        BigInteger.valueOf(maxValue).subtract(BigInteger.valueOf(minValue))) < 0;
+    }
+
+    private static long getDefaultMinValue(Long startValue, long increment) {
+        long v = increment >= 0 ? 1 : Long.MIN_VALUE;
+        if (startValue != null && increment >= 0 && startValue < v) {
+            v = startValue;
+        }
+        return v;
+    }
+
+    private static long getDefaultMaxValue(Long startValue, long increment) {
+        long v = increment >= 0 ? Long.MAX_VALUE : -1;
+        if (startValue != null && increment < 0 && startValue > v) {
+            v = startValue;
+        }
+        return v;
+    }
+
+    /**
      * Allows the start value, increment, min value and max value to be updated
      * atomically, including atomic validation. Useful because setting these
      * attributes one after the other could otherwise result in an invalid
@@ -106,12 +145,12 @@ public class Sequence extends SchemaObjectBase {
      * etc).
      *
      * @param startValue the new start value (<code>null</code> if no change)
-     * @param minValue the new min value (<code>null</code> if no change)
-     * @param maxValue the new max value (<code>null</code> if no change)
-     * @param increment the new increment (<code>null</code> if no change)
+     * @param minValue   the new min value (<code>null</code> if no change)
+     * @param maxValue   the new max value (<code>null</code> if no change)
+     * @param increment  the new increment (<code>null</code> if no change)
      */
     public synchronized void modify(Long startValue, Long minValue,
-            Long maxValue, Long increment) {
+                                    Long maxValue, Long increment) {
         if (startValue == null) {
             startValue = this.value;
         }
@@ -138,51 +177,16 @@ public class Sequence extends SchemaObjectBase {
         this.increment = increment;
     }
 
-    /**
-     * Validates the specified prospective start value, min value, max value and
-     * increment relative to each other, since each of their respective
-     * validities are contingent on the values of the other parameters.
-     *
-     * @param value the prospective start value
-     * @param minValue the prospective min value
-     * @param maxValue the prospective max value
-     * @param increment the prospective increment
-     */
-    private static boolean isValid(long value, long minValue, long maxValue,
-            long increment) {
-        return minValue <= value &&
-            maxValue >= value &&
-            maxValue > minValue &&
-            increment != 0 &&
-            // Math.abs(increment) < maxValue - minValue
-                // use BigInteger to avoid overflows when maxValue and minValue
-                // are really big
-            BigInteger.valueOf(increment).abs().compareTo(
-                BigInteger.valueOf(maxValue).subtract(BigInteger.valueOf(minValue))) < 0;
-    }
-
-    private static long getDefaultMinValue(Long startValue, long increment) {
-        long v = increment >= 0 ? 1 : Long.MIN_VALUE;
-        if (startValue != null && increment >= 0 && startValue < v) {
-            v = startValue;
-        }
-        return v;
-    }
-
-    private static long getDefaultMaxValue(Long startValue, long increment) {
-        long v = increment >= 0 ? Long.MAX_VALUE : -1;
-        if (startValue != null && increment < 0 && startValue > v) {
-            v = startValue;
-        }
-        return v;
-    }
-
     private long getDefaultStartValue(long increment) {
         return increment >= 0 ? minValue : maxValue;
     }
 
     public boolean getBelongsToTable() {
         return belongsToTable;
+    }
+
+    public void setBelongsToTable(boolean b) {
+        this.belongsToTable = b;
     }
 
     public long getIncrement() {
@@ -293,16 +297,12 @@ public class Sequence extends SchemaObjectBase {
         return value - increment;
     }
 
-    public void setBelongsToTable(boolean b) {
-        this.belongsToTable = b;
+    public long getCacheSize() {
+        return cacheSize;
     }
 
     public void setCacheSize(long cacheSize) {
         this.cacheSize = Math.max(1, cacheSize);
-    }
-
-    public long getCacheSize() {
-        return cacheSize;
     }
 
 }

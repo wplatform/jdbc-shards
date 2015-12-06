@@ -32,25 +32,25 @@ public class DropSchema extends DefineCommand {
         super(session);
     }
 
-    public void setSchemaName(String name) {
-        this.schemaName = name;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setIfExists(boolean ifExists) {
-        this.ifExists = ifExists;
     }
 
     public String getSchemaName() {
         return schemaName;
     }
 
+    public void setSchemaName(String name) {
+        this.schemaName = name;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
     @Override

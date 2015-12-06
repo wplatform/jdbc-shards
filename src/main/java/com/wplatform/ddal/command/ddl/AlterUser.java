@@ -40,30 +40,6 @@ public class AlterUser extends DefineCommand {
         super(session);
     }
 
-    public void setNewName(String newName) {
-        this.newName = newName;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
-
-    public void setSalt(Expression e) {
-        salt = e;
-    }
-
-    public void setHash(Expression e) {
-        hash = e;
-    }
-
-    public void setPassword(Expression password) {
-        this.password = password;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -82,26 +58,49 @@ public class AlterUser extends DefineCommand {
         return user;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public String getNewName() {
         return newName;
+    }
+
+    public void setNewName(String newName) {
+        this.newName = newName;
     }
 
     public Expression getPassword() {
         return password;
     }
 
+    public void setPassword(Expression password) {
+        this.password = password;
+    }
+
     public Expression getSalt() {
         return salt;
+    }
+
+    public void setSalt(Expression e) {
+        salt = e;
     }
 
     public Expression getHash() {
         return hash;
     }
 
+    public void setHash(Expression e) {
+        hash = e;
+    }
+
     public boolean isAdmin() {
         return admin;
     }
-    
-    
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
 
 }

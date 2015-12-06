@@ -54,7 +54,7 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
      * @throws SQLException
      */
     protected SmartConnection(DataSourceRepository database, SmartDataSource dataSource, String username,
-            String password) {
+                              String password) {
         this(database, dataSource);
         this.username = username;
         this.password = password;
@@ -70,7 +70,7 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
     public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource) {
         InvocationHandler handler = new SmartConnection(database, dataSource);
         ClassLoader cl = Connection.class.getClassLoader();
-        return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);
+        return (Connection) Proxy.newProxyInstance(cl, new Class[]{Connection.class}, handler);
     }
 
     /**
@@ -81,10 +81,10 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
      * @throws SQLException
      */
     public static Connection newInstance(DataSourceRepository database, SmartDataSource dataSource, String username,
-            String password) {
+                                         String password) {
         InvocationHandler handler = new SmartConnection(database, dataSource, username, password);
         ClassLoader cl = Connection.class.getClassLoader();
-        return (Connection) Proxy.newProxyInstance(cl, new Class[] { Connection.class }, handler);
+        return (Connection) Proxy.newProxyInstance(cl, new Class[]{Connection.class}, handler);
     }
 
     @Override

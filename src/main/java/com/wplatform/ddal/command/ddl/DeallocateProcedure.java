@@ -36,10 +36,6 @@ public class DeallocateProcedure extends DefineCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setProcedureName(String name) {
-        this.procedureName = name;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.DEALLOCATE;
@@ -48,6 +44,10 @@ public class DeallocateProcedure extends DefineCommand {
     public String getProcedureName() {
         return procedureName;
     }
-    
+
+    public void setProcedureName(String name) {
+        this.procedureName = name;
+    }
+
 
 }

@@ -31,10 +31,6 @@ public class TruncateTable extends DefineCommand {
         super(session);
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.TRUNCATE_TABLE;
@@ -43,7 +39,10 @@ public class TruncateTable extends DefineCommand {
     public Table getTable() {
         return table;
     }
-    
-    
+
+    public void setTable(Table table) {
+        this.table = table;
+    }
+
 
 }

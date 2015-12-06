@@ -74,7 +74,7 @@ public class SettingsBase {
      * @return the setting
      */
     protected String get(String key, String defaultValue) {
-        StringBuilder buff = new StringBuilder("h2.");
+        StringBuilder buff = new StringBuilder("ddal.");
         boolean nextUpper = false;
         for (char c : key.toCharArray()) {
             if (c == '_') {
@@ -100,7 +100,7 @@ public class SettingsBase {
      * @param k the key
      * @return true if they do
      */
-    protected boolean containsKey(String k) {
+    public boolean containsKey(String k) {
         return settings.containsKey(k);
     }
 

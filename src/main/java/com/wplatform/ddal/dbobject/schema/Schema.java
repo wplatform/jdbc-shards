@@ -58,12 +58,12 @@ public class Schema extends DbObjectBase {
     /**
      * Create a new schema object.
      *
-     * @param database the database
-     * @param id the object id
+     * @param database   the database
+     * @param id         the object id
      * @param schemaName the schema name
-     * @param owner the owner of the schema
-     * @param system if this is a system schema (such a schema can not be
-     *            dropped)
+     * @param owner      the owner of the schema
+     * @param system     if this is a system schema (such a schema can not be
+     *                   dropped)
      */
     public Schema(Database database, int id, String schemaName, User owner, boolean system) {
         tablesAndViews = database.newStringMap();
@@ -150,23 +150,23 @@ public class Schema extends DbObjectBase {
     private HashMap<String, SchemaObject> getMap(int type) {
         HashMap<String, ? extends SchemaObject> result;
         switch (type) {
-        case DbObject.TABLE_OR_VIEW:
-            result = tablesAndViews;
-            break;
-        case DbObject.SEQUENCE:
-            result = sequences;
-            break;
-        case DbObject.INDEX:
-            result = indexes;
-            break;
-        case DbObject.CONSTANT:
-            result = constants;
-            break;
-        case DbObject.FUNCTION_ALIAS:
-            result = functions;
-            break;
-        default:
-            throw DbException.throwInternalError("type=" + type);
+            case DbObject.TABLE_OR_VIEW:
+                result = tablesAndViews;
+                break;
+            case DbObject.SEQUENCE:
+                result = sequences;
+                break;
+            case DbObject.INDEX:
+                result = indexes;
+                break;
+            case DbObject.CONSTANT:
+                result = constants;
+                break;
+            case DbObject.FUNCTION_ALIAS:
+                result = functions;
+                break;
+            default:
+                throw DbException.throwInternalError("type=" + type);
         }
         return (HashMap<String, SchemaObject>) result;
     }
@@ -193,7 +193,7 @@ public class Schema extends DbObjectBase {
     /**
      * Rename an object.
      *
-     * @param obj the object to rename
+     * @param obj     the object to rename
      * @param newName the new name
      */
     public void rename(SchemaObject obj, String newName) {
@@ -221,7 +221,7 @@ public class Schema extends DbObjectBase {
      * returned.
      *
      * @param session the session
-     * @param name the object name
+     * @param name    the object name
      * @return the object or null
      */
     public Table findTableOrView(Session session, String name) {
@@ -237,7 +237,7 @@ public class Schema extends DbObjectBase {
      * object with this name exists.
      *
      * @param session the session
-     * @param name the object name
+     * @param name    the object name
      * @return the object or null
      */
     public Index findIndex(Session session, String name) {
@@ -295,7 +295,7 @@ public class Schema extends DbObjectBase {
     }
 
     private String getUniqueName(DbObject obj, HashMap<String, ? extends SchemaObject> map,
-            String prefix) {
+                                 String prefix) {
         String hash = Integer.toHexString(obj.getName().hashCode()).toUpperCase();
         String name = null;
         synchronized (temporaryUniqueNames) {
@@ -308,7 +308,7 @@ public class Schema extends DbObjectBase {
             }
             if (name == null) {
                 prefix = prefix + hash + "_";
-                for (int i = 0;; i++) {
+                for (int i = 0; ; i++) {
                     name = prefix + i;
                     if (!map.containsKey(name) && !temporaryUniqueNames.contains(name)) {
                         break;
@@ -324,8 +324,8 @@ public class Schema extends DbObjectBase {
      * Create a unique index name.
      *
      * @param session the session
-     * @param table the indexed table
-     * @param prefix the index name prefix
+     * @param table   the indexed table
+     * @param prefix  the index name prefix
      * @return the unique name
      */
     public String getUniqueIndexName(Session session, Table table, String prefix) {
@@ -343,7 +343,7 @@ public class Schema extends DbObjectBase {
      * also returned.
      *
      * @param session the session
-     * @param name the table or view name
+     * @param name    the table or view name
      * @return the table or view
      * @throws DbException if no such object exists
      */

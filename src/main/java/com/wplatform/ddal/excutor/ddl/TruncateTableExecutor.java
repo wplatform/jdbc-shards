@@ -22,7 +22,6 @@ import com.wplatform.ddal.dispatch.rule.TableNode;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class TruncateTableExecutor extends DefineCommandExecutor<TruncateTable> {
 
@@ -32,9 +31,7 @@ public class TruncateTableExecutor extends DefineCommandExecutor<TruncateTable> 
     public TruncateTableExecutor(TruncateTable prepared) {
         super(prepared);
     }
-    
-    
-    
+
 
     @Override
     public int executeUpdate() {
@@ -44,10 +41,8 @@ public class TruncateTableExecutor extends DefineCommandExecutor<TruncateTable> 
         TableNode[] nodes = table.getPartitionNode();
         execute(nodes);
         return 0;
-    
+
     }
-
-
 
 
     @Override

@@ -17,7 +17,6 @@ package com.wplatform.ddal.shards;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public interface LoadBalancingStrategy {
     DataSourceMarker next();

@@ -76,6 +76,7 @@ public class RuleExpression implements Serializable {
     public TableRouter getTableRouter() {
         return tableRouter;
     }
+
     /**
      * @return the function
      */

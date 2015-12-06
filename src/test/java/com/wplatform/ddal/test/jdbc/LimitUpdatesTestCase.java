@@ -14,6 +14,42 @@ import java.sql.SQLException;
 public class LimitUpdatesTestCase extends BaseTestCase {
 
 
+    private static int countWhere(final Connection conn, final int where)
+            throws SQLException {
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            prep = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM TEST WHERE VALUE_ID = ?");
+            prep.setInt(1, where);
+            rs = prep.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (prep != null) {
+                prep.close();
+            }
+        }
+    }
+
+    private static void updateLimit(final Connection conn, final int value,
+                                    final int limit) throws SQLException {
+        PreparedStatement prep = null;
+        try {
+            prep = conn.prepareStatement(
+                    "UPDATE TEST SET VALUE_ID = ? LIMIT ?");
+            prep.setInt(1, value);
+            prep.setInt(2, limit);
+            prep.execute();
+        } finally {
+            if (prep != null) {
+                prep.close();
+            }
+        }
+    }
 
     @Test
     public void test() throws SQLException {
@@ -64,43 +100,6 @@ public class LimitUpdatesTestCase extends BaseTestCase {
             }
             if (conn != null) {
                 conn.close();
-            }
-        }
-    }
-
-    private static int countWhere(final Connection conn, final int where)
-            throws SQLException {
-        PreparedStatement prep = null;
-        ResultSet rs = null;
-        try {
-            prep = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM TEST WHERE VALUE_ID = ?");
-            prep.setInt(1, where);
-            rs = prep.executeQuery();
-            rs.next();
-            return rs.getInt(1);
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (prep != null) {
-                prep.close();
-            }
-        }
-    }
-
-    private static void updateLimit(final Connection conn, final int value,
-            final int limit) throws SQLException {
-        PreparedStatement prep = null;
-        try {
-            prep = conn.prepareStatement(
-                    "UPDATE TEST SET VALUE_ID = ? LIMIT ?");
-            prep.setInt(1, value);
-            prep.setInt(2, limit);
-            prep.execute();
-        } finally {
-            if (prep != null) {
-                prep.close();
             }
         }
     }

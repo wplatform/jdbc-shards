@@ -49,30 +49,30 @@ public class CreateTable extends SchemaCommand {
         super(session, schema);
     }
 
+    public Query getQuery() {
+        return this.asQuery;
+    }
+
     public void setQuery(Query query) {
         this.asQuery = query;
     }
-    
-    public Query getQuery() {
-        return this.asQuery;
+
+    public boolean isTemporary() {
+        return data.temporary;
     }
 
     public void setTemporary(boolean temporary) {
         data.temporary = temporary;
     }
-    
-    public boolean isTemporary() {
-        return data.temporary;
+
+    public String getTableName() {
+        return data.tableName;
     }
 
     public void setTableName(String tableName) {
         data.tableName = tableName;
     }
-    
-    public String getTableName() {
-        return data.tableName;
-    }
-    
+
     public int getColumnCount() {
         return data.columns.size();
     }
@@ -108,14 +108,14 @@ public class CreateTable extends SchemaCommand {
             }
         }
     }
-    
+
     /**
      * @return constraintCommands
      */
     public ArrayList<Column> getColumns() {
         return data.columns;
     }
-    
+
     /**
      * @return constraintCommands
      */
@@ -124,18 +124,19 @@ public class CreateTable extends SchemaCommand {
     }
 
     /**
-     * set the ifNotExists
-     * @param ifNotExists
-     */
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-    
-    /**
      * @return the ifNotExists
      */
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    /**
+     * set the ifNotExists
+     *
+     * @param ifNotExists
+     */
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
     /**
@@ -162,12 +163,12 @@ public class CreateTable extends SchemaCommand {
         return false;
     }
 
-    public void setGlobalTemporary(boolean globalTemporary) {
-        data.globalTemporary = globalTemporary;
-    }
-    
     public boolean isGlobalTemporary() {
         return data.globalTemporary;
+    }
+
+    public void setGlobalTemporary(boolean globalTemporary) {
+        data.globalTemporary = globalTemporary;
     }
 
     /**
@@ -184,36 +185,24 @@ public class CreateTable extends SchemaCommand {
         this.onCommitTruncate = true;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public void setSortedInsertMode(boolean sortedInsertMode) {
-        this.sortedInsertMode = sortedInsertMode;
+    public String getTableEngine() {
+        return data.tableEngine;
     }
 
     public void setTableEngine(String tableEngine) {
         data.tableEngine = tableEngine;
     }
-    
-    public String getTableEngine() {
-        return data.tableEngine;
+
+    public ArrayList<String> getTableEngineParams() {
+        return data.tableEngineParams;
     }
 
     public void setTableEngineParams(ArrayList<String> tableEngineParams) {
         data.tableEngineParams = tableEngineParams;
     }
-    
-    public ArrayList<String> getTableEngineParams() {
-        return data.tableEngineParams;
-    }
 
     public void setHidden(boolean isHidden) {
         data.isHidden = isHidden;
-    }
-
-    public void setCharset(String charset) {
-        this.charset = charset;
     }
 
     @Override
@@ -247,11 +236,19 @@ public class CreateTable extends SchemaCommand {
         return comment;
     }
 
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     /**
      * @return the charset
      */
     public String getCharset() {
         return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 
     /**
@@ -261,7 +258,9 @@ public class CreateTable extends SchemaCommand {
         return sortedInsertMode;
     }
 
-    
-    
+    public void setSortedInsertMode(boolean sortedInsertMode) {
+        this.sortedInsertMode = sortedInsertMode;
+    }
+
 
 }

@@ -2,27 +2,27 @@
 <!DOCTYPE ddal-rule PUBLIC "-//wplatform.com//DTD ddal-rule//EN" "http://wplatform.com/dtd/ddal-rule.dtd">
 <ddal-rule>
 
-	<tableRouter id="order_group">
-		<partition>
-			<table shard="shard0" suffix="_01,_02,_03,_04"/>
-			<table shard="shard1" suffix="_01,_02,_03,_04"/>
-			<table shard="shard2" suffix="_01,_02,_03,_04"/>
-			<table shard="shard3" suffix="_01,_02,_03,_04"/>
-		</partition>
-		<tableRule>
-			<![CDATA[ ${order_id} % 16]]>
-		</tableRule>
-	</tableRouter>
-	
-	<tableRouter id="customer_group">
-		<partition>
-			<table shard="shard0" suffix="_01,_02"/>
-			<table shard="shard1" suffix="_01,_02"/>
-			<table shard="shard2" suffix="_01,_02"/>
-			<table shard="shard3" suffix="_01,_02"/>			
-		</partition>
-		<tableRule>
-			<![CDATA[ ${customer_id} % 8]]>
-		</tableRule>
-	</tableRouter>
+    <tableRouter id="order_group">
+        <partition>
+            <table shard="shard0" suffix="_01,_02,_03,_04"/>
+            <table shard="shard1" suffix="_01,_02,_03,_04"/>
+            <table shard="shard2" suffix="_01,_02,_03,_04"/>
+            <table shard="shard3" suffix="_01,_02,_03,_04"/>
+        </partition>
+        <tableRule>
+            <![CDATA[ ${order_id} % 16]]>
+        </tableRule>
+    </tableRouter>
+
+    <tableRouter id="customer_group">
+        <partition>
+            <table shard="shard0" suffix="_01,_02"/>
+            <table shard="shard1" suffix="_01,_02"/>
+            <table shard="shard2" suffix="_01,_02"/>
+            <table shard="shard3" suffix="_01,_02"/>
+        </partition>
+        <tableRule>
+            <![CDATA[ ${customer_id} % 8]]>
+        </tableRule>
+    </tableRouter>
 </ddal-rule>

@@ -121,16 +121,16 @@ public class Select extends Query {
         return currentGroup;
     }
 
+    public void setCurrentGroup(HashMap<Expression, Object> currentGroup) {
+        this.currentGroup = currentGroup;
+    }
+
     public int getCurrentGroupRowId() {
         return currentGroupRowId;
     }
 
     public void increaseCurrentGroupRowId() {
-        ++ this.currentGroupRowId;
-    }
-
-    public void setCurrentGroup(HashMap<Expression, Object> currentGroup) {
-        this.currentGroup = currentGroup;
+        ++this.currentGroupRowId;
     }
 
     @Override
@@ -174,11 +174,11 @@ public class Select extends Query {
     }
 
     @Override
-    protected LocalResult queryWithoutCache(int maxRows, ResultTarget target)  {
+    protected LocalResult queryWithoutCache(int maxRows, ResultTarget target) {
         session.checkCanceled();
         PreparedExecutorFactory pef = session.getPreparedExecutorFactory();
         PreparedExecutor executor = pef.newExecutor(this);
-        if(executor == null) {
+        if (executor == null) {
             throw DbException.get(ErrorCode.METHOD_ONLY_ALLOWED_FOR_QUERY);
         }
         return executor.executeQuery(maxRows);
@@ -367,32 +367,21 @@ public class Select extends Query {
         if (isGroupQuery && groupIndex == null && havingIndex < 0) {
             isQuickAggregateQuery = true;
         }
-        cost = preparePlan();
-
         TableMate last = null;
-        for (TableFilter filter : filters) {
-            if (!filter.isFromTableMate()) {
-                break;
-            }
-            if(filters.size() == 1) {
-                isAccordantQuery = true;
-                break;
-            }
-            TableMate table = (TableMate)filter.getTable();
-            if(last != null && !last.isRelationSymmetry(table)) {
-                break;
-            }last = table;
+        for (TableFilter out : filters) {
+            
         }
+        cost = preparePlan();
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&
                 !isGroupQuery && filters.size() == 1 &&
                 expressions.size() == 1 && condition == null) {
             //分布式的查询不合适
         }
         if (sort != null && !isGroupQuery) {
-            
+
         }
         if (isGroupQuery && getGroupByExpressionCount() > 0) {
-            
+
         }
         expressionArray = new Expression[expressions.size()];
         expressions.toArray(expressionArray);
@@ -612,11 +601,6 @@ public class Select extends Query {
     }
 
     @Override
-    public void setForUpdate(boolean b) {
-        this.isForUpdate = b;
-    }
-
-    @Override
     public void mapColumns(ColumnResolver resolver, int level) {
         for (Expression e : expressions) {
             e.mapColumns(resolver, level);
@@ -748,7 +732,6 @@ public class Select extends Query {
         return isEverything(ExpressionVisitor.READONLY_VISITOR);
     }
 
-
     @Override
     public boolean isCacheable() {
         return !isForUpdate;
@@ -821,6 +804,10 @@ public class Select extends Query {
         return isForUpdate;
     }
 
+    @Override
+    public void setForUpdate(boolean b) {
+        this.isForUpdate = b;
+    }
 
     public boolean isPrepared() {
         return isPrepared;
@@ -834,6 +821,5 @@ public class Select extends Query {
         return isAccordantQuery;
     }
 
-    
-    
+
 }

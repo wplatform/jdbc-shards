@@ -25,7 +25,6 @@ import com.wplatform.ddal.message.DbException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class ExecutorFactory implements PreparedExecutorFactory {
 
@@ -37,64 +36,64 @@ public class ExecutorFactory implements PreparedExecutorFactory {
     private PreparedExecutor create(Prepared prepared) {
         int type = prepared.getType();
         switch (type) {
-        //dml
-        case CommandInterface.CREATE_TABLE:
-            return new CreateTableExecutor((CreateTable) prepared);
-        case CommandInterface.DROP_TABLE:
-            return new DropTableExecutor((DropTable) prepared);
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE:
-        case CommandInterface.ALTER_TABLE_ADD_COLUMN:
-        case CommandInterface.ALTER_TABLE_DROP_COLUMN:
-        case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY:
-            return new AlterTableAlterColumnExecutor((AlterTableAlterColumn) prepared);
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL:
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY:
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE:
-        case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK:
-            return new AlterTableAddConstraintExecutor((AlterTableAddConstraint) prepared);
-        case CommandInterface.TRUNCATE_TABLE:
-            return new TruncateTableExecutor((TruncateTable) prepared);
-        //ddl    
-        case CommandInterface.INSERT:
-            return new CreateTableExecutor((CreateTable) prepared);
-        case CommandInterface.DELETE:
-            return new DropTableExecutor((DropTable) prepared);
-        case CommandInterface.UPDATE:
-            return new CreateTableExecutor((CreateTable) prepared);
-        case CommandInterface.REPLACE:
-            return new DropTableExecutor((DropTable) prepared);
-        case CommandInterface.MERGE:
-            return new CreateTableExecutor((CreateTable) prepared);
-        case CommandInterface.SELECT: {
-            if(prepared instanceof SelectUnion) {
-                return new SelectUnionExecutor((SelectUnion) prepared);
-            } else {
-                return new SelectExecutor((Select) prepared);
+            //dml
+            case CommandInterface.CREATE_TABLE:
+                return new CreateTableExecutor((CreateTable) prepared);
+            case CommandInterface.DROP_TABLE:
+                return new DropTableExecutor((DropTable) prepared);
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NOT_NULL:
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_NULL:
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_DEFAULT:
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_CHANGE_TYPE:
+            case CommandInterface.ALTER_TABLE_ADD_COLUMN:
+            case CommandInterface.ALTER_TABLE_DROP_COLUMN:
+            case CommandInterface.ALTER_TABLE_ALTER_COLUMN_SELECTIVITY:
+                return new AlterTableAlterColumnExecutor((AlterTableAlterColumn) prepared);
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_REFERENTIAL:
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_PRIMARY_KEY:
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_UNIQUE:
+            case CommandInterface.ALTER_TABLE_ADD_CONSTRAINT_CHECK:
+                return new AlterTableAddConstraintExecutor((AlterTableAddConstraint) prepared);
+            case CommandInterface.TRUNCATE_TABLE:
+                return new TruncateTableExecutor((TruncateTable) prepared);
+            //ddl
+            case CommandInterface.INSERT:
+                return new CreateTableExecutor((CreateTable) prepared);
+            case CommandInterface.DELETE:
+                return new DropTableExecutor((DropTable) prepared);
+            case CommandInterface.UPDATE:
+                return new CreateTableExecutor((CreateTable) prepared);
+            case CommandInterface.REPLACE:
+                return new DropTableExecutor((DropTable) prepared);
+            case CommandInterface.MERGE:
+                return new CreateTableExecutor((CreateTable) prepared);
+            case CommandInterface.SELECT: {
+                if (prepared instanceof SelectUnion) {
+                    return new SelectUnionExecutor((SelectUnion) prepared);
+                } else {
+                    return new SelectExecutor((Select) prepared);
+                }
             }
-        }
-        case CommandInterface.CALL:
-            return new CallExecutor((Call) prepared);
-        case CommandInterface.SET:
-            return new SetExecutor((Set) prepared);
-        case CommandInterface.SET_AUTOCOMMIT_TRUE:
-        case CommandInterface.SET_AUTOCOMMIT_FALSE:
-        case CommandInterface.BEGIN:
-        case CommandInterface.COMMIT:
-        case CommandInterface.ROLLBACK:
-        case CommandInterface.CHECKPOINT:
-        case CommandInterface.SAVEPOINT:
-        case CommandInterface.ROLLBACK_TO_SAVEPOINT:
-        case CommandInterface.COMMIT_TRANSACTION:
-        case CommandInterface.ROLLBACK_TRANSACTION:
-        case CommandInterface.TRANSACTION_ISOLATION:
-        case CommandInterface.TRANSACTION_READONLY_FALSE:
-        case CommandInterface.TRANSACTION_READONLY_TRUE:
-            return new TransactionExecutor((TransactionCommand) prepared);
-        default:
-            throw DbException.getUnsupportedException("statemets type=" + type);
+            case CommandInterface.CALL:
+                return new CallExecutor((Call) prepared);
+            case CommandInterface.SET:
+                return new SetExecutor((Set) prepared);
+            case CommandInterface.SET_AUTOCOMMIT_TRUE:
+            case CommandInterface.SET_AUTOCOMMIT_FALSE:
+            case CommandInterface.BEGIN:
+            case CommandInterface.COMMIT:
+            case CommandInterface.ROLLBACK:
+            case CommandInterface.CHECKPOINT:
+            case CommandInterface.SAVEPOINT:
+            case CommandInterface.ROLLBACK_TO_SAVEPOINT:
+            case CommandInterface.COMMIT_TRANSACTION:
+            case CommandInterface.ROLLBACK_TRANSACTION:
+            case CommandInterface.TRANSACTION_ISOLATION:
+            case CommandInterface.TRANSACTION_READONLY_FALSE:
+            case CommandInterface.TRANSACTION_READONLY_TRUE:
+                return new TransactionExecutor((TransactionCommand) prepared);
+            default:
+                throw DbException.getUnsupportedException("statemets type=" + type);
         }
     }
 

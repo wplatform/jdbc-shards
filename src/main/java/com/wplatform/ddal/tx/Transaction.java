@@ -25,21 +25,21 @@ public interface Transaction {
 
     /**
      * Commit inner database connection.
-     * 
+     *
      * @throws SQLException
      */
     void commit() throws SQLException;
 
     /**
      * Rollback inner database connection.
-     * 
+     *
      * @throws SQLException
      */
     void rollback() throws SQLException;
 
     /**
      * Close inner database connection.
-     * 
+     *
      * @throws SQLException
      */
     void close() throws SQLException;

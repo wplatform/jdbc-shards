@@ -27,7 +27,6 @@ import com.wplatform.ddal.message.ErrorCode;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class SetExecutor extends CommonPreparedExecutor<Set> {
 
@@ -38,106 +37,106 @@ public class SetExecutor extends CommonPreparedExecutor<Set> {
         super(prepared);
     }
 
-    
+
     @Override
     public int executeUpdate() {
         Database database = session.getDatabase();
         String stringValue = prepared.getStringValue();
         int type = prepared.getSetType();
         switch (type) {
-        case SetTypes.QUERY_TIMEOUT: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("QUERY_TIMEOUT",
-                        getIntValue());
+            case SetTypes.QUERY_TIMEOUT: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("QUERY_TIMEOUT",
+                            getIntValue());
+                }
+                int value = getIntValue();
+                session.setQueryTimeout(value);
+                break;
             }
-            int value = getIntValue();
-            session.setQueryTimeout(value);
-            break;
-        }
-        case SetTypes.ALLOW_LITERALS: {
-            session.getUser().checkAdmin();
-            int value = getIntValue();
-            if (value < 0 || value > 2) {
-                throw DbException.getInvalidValueException("ALLOW_LITERALS",
-                        getIntValue());
-            }
-            database.setAllowLiterals(value);
-            break;
-        }
-        case SetTypes.MAX_MEMORY_ROWS: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("MAX_MEMORY_ROWS",
-                        getIntValue());
-            }
-            session.getUser().checkAdmin();
-            database.setMaxMemoryRows(getIntValue());
-            break;
-        }
-        case SetTypes.MODE:
-            Mode mode = Mode.getInstance(stringValue);
-            if (mode == null) {
-                throw DbException.get(ErrorCode.UNKNOWN_MODE_1, stringValue);
-            }
-            if (database.getMode() != mode) {
+            case SetTypes.ALLOW_LITERALS: {
                 session.getUser().checkAdmin();
-                database.setMode(mode);
+                int value = getIntValue();
+                if (value < 0 || value > 2) {
+                    throw DbException.getInvalidValueException("ALLOW_LITERALS",
+                            getIntValue());
+                }
+                database.setAllowLiterals(value);
+                break;
             }
-            break;
-        case SetTypes.SCHEMA: {
-            Schema schema = database.getSchema(stringValue);
-            session.setCurrentSchema(schema);
-            break;
-        }
-        case SetTypes.TRACE_LEVEL_FILE:
-            session.getUser().checkAdmin();
-            database.getTraceSystem().setLevelFile(getIntValue());
-            break;
-        case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
-            session.getUser().checkAdmin();
-            database.getTraceSystem().setLevelSystemOut(getIntValue());
-            break;
-        case SetTypes.THROTTLE: {
-            if (getIntValue() < 0) {
-                throw DbException.getInvalidValueException("THROTTLE",
-                        getIntValue());
+            case SetTypes.MAX_MEMORY_ROWS: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("MAX_MEMORY_ROWS",
+                            getIntValue());
+                }
+                session.getUser().checkAdmin();
+                database.setMaxMemoryRows(getIntValue());
+                break;
             }
-            session.setThrottle(getIntValue());
-            break;
-        }
-        case SetTypes.CACHE_SIZE:
-        case SetTypes.CLUSTER: 
-        case SetTypes.COLLATION: 
-        case SetTypes.BINARY_COLLATION:
-        case SetTypes.COMPRESS_LOB: 
-        case SetTypes.CREATE_BUILD: 
-        case SetTypes.DATABASE_EVENT_LISTENER:
-        case SetTypes.DB_CLOSE_DELAY:
-        case SetTypes.DEFAULT_LOCK_TIMEOUT:
-        case SetTypes.DEFAULT_TABLE_TYPE:
-        case SetTypes.EXCLUSIVE: 
-        case SetTypes.JAVA_OBJECT_SERIALIZER: 
-        case SetTypes.IGNORECASE:
-        case SetTypes.LOCK_MODE:
-        case SetTypes.LOCK_TIMEOUT:
-        case SetTypes.LOG:
-        case SetTypes.MAX_LENGTH_INPLACE_LOB: 
-        case SetTypes.MAX_LOG_SIZE:
-        case SetTypes.MAX_MEMORY_UNDO: 
-        case SetTypes.MAX_OPERATION_MEMORY: 
-        case SetTypes.MULTI_THREADED: 
-        case SetTypes.MVCC: 
-        case SetTypes.OPTIMIZE_REUSE_RESULTS: 
-        case SetTypes.REDO_LOG_BINARY: 
-        case SetTypes.REFERENTIAL_INTEGRITY: 
-        case SetTypes.QUERY_STATISTICS: 
-        case SetTypes.SCHEMA_SEARCH_PATH: 
-        case SetTypes.TRACE_MAX_FILE_SIZE: 
-        case SetTypes.UNDO_LOG: 
-        case SetTypes.VARIABLE: 
-        case SetTypes.WRITE_DELAY: 
-        case SetTypes.RETENTION_TIME:
-        default:
-            DbException.throwInternalError("type="+type);
+            case SetTypes.MODE:
+                Mode mode = Mode.getInstance(stringValue);
+                if (mode == null) {
+                    throw DbException.get(ErrorCode.UNKNOWN_MODE_1, stringValue);
+                }
+                if (database.getMode() != mode) {
+                    session.getUser().checkAdmin();
+                    database.setMode(mode);
+                }
+                break;
+            case SetTypes.SCHEMA: {
+                Schema schema = database.getSchema(stringValue);
+                session.setCurrentSchema(schema);
+                break;
+            }
+            case SetTypes.TRACE_LEVEL_FILE:
+                session.getUser().checkAdmin();
+                database.getTraceSystem().setLevelFile(getIntValue());
+                break;
+            case SetTypes.TRACE_LEVEL_SYSTEM_OUT:
+                session.getUser().checkAdmin();
+                database.getTraceSystem().setLevelSystemOut(getIntValue());
+                break;
+            case SetTypes.THROTTLE: {
+                if (getIntValue() < 0) {
+                    throw DbException.getInvalidValueException("THROTTLE",
+                            getIntValue());
+                }
+                session.setThrottle(getIntValue());
+                break;
+            }
+            case SetTypes.CACHE_SIZE:
+            case SetTypes.CLUSTER:
+            case SetTypes.COLLATION:
+            case SetTypes.BINARY_COLLATION:
+            case SetTypes.COMPRESS_LOB:
+            case SetTypes.CREATE_BUILD:
+            case SetTypes.DATABASE_EVENT_LISTENER:
+            case SetTypes.DB_CLOSE_DELAY:
+            case SetTypes.DEFAULT_LOCK_TIMEOUT:
+            case SetTypes.DEFAULT_TABLE_TYPE:
+            case SetTypes.EXCLUSIVE:
+            case SetTypes.JAVA_OBJECT_SERIALIZER:
+            case SetTypes.IGNORECASE:
+            case SetTypes.LOCK_MODE:
+            case SetTypes.LOCK_TIMEOUT:
+            case SetTypes.LOG:
+            case SetTypes.MAX_LENGTH_INPLACE_LOB:
+            case SetTypes.MAX_LOG_SIZE:
+            case SetTypes.MAX_MEMORY_UNDO:
+            case SetTypes.MAX_OPERATION_MEMORY:
+            case SetTypes.MULTI_THREADED:
+            case SetTypes.MVCC:
+            case SetTypes.OPTIMIZE_REUSE_RESULTS:
+            case SetTypes.REDO_LOG_BINARY:
+            case SetTypes.REFERENTIAL_INTEGRITY:
+            case SetTypes.QUERY_STATISTICS:
+            case SetTypes.SCHEMA_SEARCH_PATH:
+            case SetTypes.TRACE_MAX_FILE_SIZE:
+            case SetTypes.UNDO_LOG:
+            case SetTypes.VARIABLE:
+            case SetTypes.WRITE_DELAY:
+            case SetTypes.RETENTION_TIME:
+            default:
+                DbException.throwInternalError("type=" + type);
         }
         return 0;
     }
@@ -148,5 +147,5 @@ public class SetExecutor extends CommonPreparedExecutor<Set> {
         return expression.getValue(session).getInt();
     }
 
- 
+
 }

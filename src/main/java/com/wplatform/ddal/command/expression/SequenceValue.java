@@ -79,7 +79,7 @@ public class SequenceValue extends Expression {
 
     @Override
     public String getSQL() {
-        return "(NEXT VALUE FOR " + sequence.getSQL() +")";
+        return "(NEXT VALUE FOR " + sequence.getSQL() + ")";
     }
 
     @Override
@@ -89,22 +89,22 @@ public class SequenceValue extends Expression {
 
     @Override
     public boolean isEverything(ExpressionVisitor visitor) {
-        switch(visitor.getType()) {
-        case ExpressionVisitor.EVALUATABLE:
-        case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
-        case ExpressionVisitor.NOT_FROM_RESOLVER:
-        case ExpressionVisitor.GET_COLUMNS:
-            return true;
-        case ExpressionVisitor.DETERMINISTIC:
-        case ExpressionVisitor.READONLY:
-        case ExpressionVisitor.INDEPENDENT:
-        case ExpressionVisitor.QUERY_COMPARABLE:
-            return false;
-        case ExpressionVisitor.GET_DEPENDENCIES:
-            visitor.addDependency(sequence);
-            return true;
-        default:
-            throw DbException.throwInternalError("type="+visitor.getType());
+        switch (visitor.getType()) {
+            case ExpressionVisitor.EVALUATABLE:
+            case ExpressionVisitor.OPTIMIZABLE_MIN_MAX_COUNT_ALL:
+            case ExpressionVisitor.NOT_FROM_RESOLVER:
+            case ExpressionVisitor.GET_COLUMNS:
+                return true;
+            case ExpressionVisitor.DETERMINISTIC:
+            case ExpressionVisitor.READONLY:
+            case ExpressionVisitor.INDEPENDENT:
+            case ExpressionVisitor.QUERY_COMPARABLE:
+                return false;
+            case ExpressionVisitor.GET_DEPENDENCIES:
+                visitor.addDependency(sequence);
+                return true;
+            default:
+                throw DbException.throwInternalError("type=" + visitor.getType());
         }
     }
 

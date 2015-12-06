@@ -216,7 +216,7 @@ public abstract class Prepared {
         session.checkCanceled();
         PreparedExecutorFactory pef = session.getPreparedExecutorFactory();
         PreparedExecutor executor = pef.newExecutor(this);
-        if(executor == null) {
+        if (executor == null) {
             throw DbException.get(ErrorCode.METHOD_NOT_ALLOWED_FOR_QUERY);
         }
         return executor.executeUpdate();
@@ -311,19 +311,19 @@ public abstract class Prepared {
     }
 
     /**
+     * @return the session
+     */
+    public Session getSession() {
+        return session;
+    }
+
+    /**
      * Set the session for this statement.
      *
      * @param currentSession the new session
      */
     public void setSession(Session currentSession) {
         this.session = currentSession;
-    }
-    
-    /**
-     * @return the session
-     */
-    public Session getSession() {
-        return session;
     }
 
     /**

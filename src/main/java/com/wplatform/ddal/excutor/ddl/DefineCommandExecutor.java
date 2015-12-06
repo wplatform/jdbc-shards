@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public abstract class DefineCommandExecutor<T extends DefineCommand> extends CommonPreparedExecutor<T> {
 
@@ -38,49 +37,6 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
         super(prepared);
     }
 
-    /**
-     * execute DDL use default sql translator
-     * 
-     * @param nodes
-     */
-    public void execute(TableNode[] nodes) {
-        session.checkCanceled();
-        List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
-        for (TableNode node : nodes) {
-            String sql = doTranslate(node);
-            List<Parameter> items = getPrepared().getParameters();
-            List<Value> params = New.arrayList(items.size());
-            for (Parameter parameter : items) {
-                params.add(parameter.getParamValue());
-            }
-            workers.add(createUpdateWorker(node.getShardName(), sql, params));
-        }
-        addRuningJdbcWorkers(workers);
-        try {
-            // DDL statement returns nothing.
-            if (workers.size() > 1) {
-                int queryTimeout = getQueryTimeout();//MILLISECONDS
-                if(queryTimeout > 0) {
-                    jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
-                } else {
-                    jdbcExecutor.invokeAll(workers);
-                }    
-            } else if (workers.size() == 1) {
-                workers.get(0).doWork();
-            }
-        } catch (InterruptedException e) {
-            throw DbException.convert(e);
-        } finally {
-            removeRuningJdbcWorkers(workers);
-            for (JdbcWorker<Integer> jdbcWorker : workers) {
-                jdbcWorker.closeResource();
-            }
-        }
-    }
-    
-    protected abstract String doTranslate(TableNode node);
-
-    
     protected static Map<TableNode, TableNode> getSymmetryRelation(TableNode[] n1, TableNode[] n2) {
         if (n1.length != n2.length) {
             return null;
@@ -109,6 +65,48 @@ public abstract class DefineCommandExecutor<T extends DefineCommand> extends Com
         }
         return tableNode;
     }
+
+    /**
+     * execute DDL use default sql translator
+     *
+     * @param nodes
+     */
+    public void execute(TableNode[] nodes) {
+        session.checkCanceled();
+        List<JdbcWorker<Integer>> workers = New.arrayList(nodes.length);
+        for (TableNode node : nodes) {
+            String sql = doTranslate(node);
+            List<Parameter> items = getPrepared().getParameters();
+            List<Value> params = New.arrayList(items.size());
+            for (Parameter parameter : items) {
+                params.add(parameter.getParamValue());
+            }
+            workers.add(createUpdateWorker(node.getShardName(), sql, params));
+        }
+        addRuningJdbcWorkers(workers);
+        try {
+            // DDL statement returns nothing.
+            if (workers.size() > 1) {
+                int queryTimeout = getQueryTimeout();//MILLISECONDS
+                if (queryTimeout > 0) {
+                    jdbcExecutor.invokeAll(workers, queryTimeout, TimeUnit.MILLISECONDS);
+                } else {
+                    jdbcExecutor.invokeAll(workers);
+                }
+            } else if (workers.size() == 1) {
+                workers.get(0).doWork();
+            }
+        } catch (InterruptedException e) {
+            throw DbException.convert(e);
+        } finally {
+            removeRuningJdbcWorkers(workers);
+            for (JdbcWorker<Integer> jdbcWorker : workers) {
+                jdbcWorker.closeResource();
+            }
+        }
+    }
+
+    protected abstract String doTranslate(TableNode node);
 
 
 }

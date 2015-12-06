@@ -37,7 +37,6 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class ReplaceExecutor extends PreparedRoutingExecutor<Replace> {
     /**
@@ -46,15 +45,15 @@ public class ReplaceExecutor extends PreparedRoutingExecutor<Replace> {
     public ReplaceExecutor(Replace prepared) {
         super(prepared);
     }
-    
-    
+
+
     @Override
     public int executeUpdate() {
         Column[] columns = prepared.getColumns();
         TableMate table = castTableMate(prepared.getTable());
         ArrayList<Expression[]> list = prepared.getList();
         table.check();
-        
+
         int count;
         session.getUser().checkRight(table, Right.INSERT);
         session.getUser().checkRight(table, Right.UPDATE);
@@ -106,9 +105,9 @@ public class ReplaceExecutor extends PreparedRoutingExecutor<Replace> {
             rows.close();
         }
         return count;
-    
+
     }
-    
+
 
     private void replace(Row row) {
         TableMate table = castTableMate(prepared.getTable());
@@ -124,7 +123,7 @@ public class ReplaceExecutor extends PreparedRoutingExecutor<Replace> {
             throw DbException.get(ErrorCode.DUPLICATE_KEY_1, table.getSQL());
         }
     }
-    
+
     private int update(Row row) {
         Prepared update = prepared.getUpdate();
         Column[] columns = prepared.getColumns();

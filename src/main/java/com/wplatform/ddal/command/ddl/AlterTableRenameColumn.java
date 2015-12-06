@@ -39,20 +39,20 @@ public class AlterTableRenameColumn extends DefineCommand {
         return table;
     }
 
-    public Column getColumn() {
-        return column;
-    }
-
-    public String getNewName() {
-        return newName;
-    }
-
     public void setTable(Table table) {
         this.table = table;
     }
 
+    public Column getColumn() {
+        return column;
+    }
+
     public void setColumn(Column column) {
         this.column = column;
+    }
+
+    public String getNewName() {
+        return newName;
     }
 
     public void setNewColumnName(String newName) {

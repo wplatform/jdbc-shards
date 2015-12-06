@@ -35,21 +35,9 @@ public class CreateConstant extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setConstantName(String constantName) {
-        this.constantName = constantName;
-    }
-
-    public void setExpression(Expression expr) {
-        this.expression = expr;
     }
 
     @Override
@@ -61,14 +49,25 @@ public class CreateConstant extends SchemaCommand {
         return constantName;
     }
 
+    public void setConstantName(String constantName) {
+        this.constantName = constantName;
+    }
+
     public Expression getExpression() {
         return expression;
+    }
+
+    public void setExpression(Expression expr) {
+        this.expression = expr;
     }
 
     public boolean isIfNotExists() {
         return ifNotExists;
     }
-    
-    
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
 
 }

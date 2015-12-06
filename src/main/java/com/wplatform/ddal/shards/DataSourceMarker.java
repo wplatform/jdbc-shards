@@ -39,8 +39,22 @@ public class DataSourceMarker {
         return uid;
     }
 
+    /**
+     * @param uid the uid to set
+     */
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     public String getShardName() {
         return shardName;
+    }
+
+    /**
+     * @param shardName the shardName to set
+     */
+    public void setShardName(String shardName) {
+        this.shardName = shardName;
     }
 
     /**
@@ -48,6 +62,13 @@ public class DataSourceMarker {
      */
     public DataSource getDataSource() {
         return dataSource;
+    }
+
+    /**
+     * @param dataSource the dataSource to set
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public boolean isReadOnly() {
@@ -83,13 +104,19 @@ public class DataSourceMarker {
         this.wWeight = wWeight;
     }
 
-
     /**
      * @return
      * @see java.util.concurrent.atomic.AtomicInteger#get()
      */
     public final int getFailedCount() {
         return failedCount.get();
+    }
+
+    /**
+     * @param failedCount the failedCount to set
+     */
+    public void setFailedCount(AtomicInteger failedCount) {
+        this.failedCount = failedCount;
     }
 
     /**
@@ -120,35 +147,6 @@ public class DataSourceMarker {
      */
     public void setAbnormal(boolean abnormal) {
         this.abnormal = abnormal;
-    }
-
-
-    /**
-     * @param uid the uid to set
-     */
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    /**
-     * @param shardName the shardName to set
-     */
-    public void setShardName(String shardName) {
-        this.shardName = shardName;
-    }
-
-    /**
-     * @param dataSource the dataSource to set
-     */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    /**
-     * @param failedCount the failedCount to set
-     */
-    public void setFailedCount(AtomicInteger failedCount) {
-        this.failedCount = failedCount;
     }
 
     @Override
@@ -201,9 +199,7 @@ public class DataSourceMarker {
                 return false;
         } else if (!uid.equals(other.uid))
             return false;
-        if (wWeight != other.wWeight)
-            return false;
-        return true;
+        return wWeight == other.wWeight;
     }
 
     @Override
@@ -211,7 +207,5 @@ public class DataSourceMarker {
         return "DataSourceMarker [uid=" + uid + ", shardName=" + shardName + "]";
     }
 
-    
-    
 
 }

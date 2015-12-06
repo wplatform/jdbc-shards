@@ -35,8 +35,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class SmartDataSource implements DataSource, Failover {
-    
-    
+
 
     private final String shardName;
     private final DataSourceRepository database;
@@ -98,13 +97,13 @@ public class SmartDataSource implements DataSource, Failover {
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-    	this.seconds = seconds;
+    public int getLoginTimeout() throws SQLException {
+        return seconds;
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
-        return seconds;
+    public void setLoginTimeout(int seconds) throws SQLException {
+        this.seconds = seconds;
     }
 
     @Override
@@ -147,7 +146,7 @@ public class SmartDataSource implements DataSource, Failover {
     public Connection getConnection(String username, String password) throws SQLException {
         return SmartConnection.newInstance(database, this, username, password);
     }
-    
+
     public DataSourceMarker doRoute(boolean readOnly) {
         DataSourceMarker next;
         if (!readOnly) {
@@ -203,7 +202,6 @@ public class SmartDataSource implements DataSource, Failover {
     public String toString() {
         return "RoutingDataSource [shardName=" + shardName + ", menbers=" + menbers + "]";
     }
-    
-    
+
 
 }

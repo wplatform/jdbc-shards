@@ -20,42 +20,23 @@ import java.sql.SQLException;
  * as direct modification of a byte in a byte array.
  */
 public class ZlotyTestCase extends BaseTestCase {
- 
+
 
     @Test
     public void test() throws SQLException {
         testZloty();
         testModifyBytes();
-        
-    }
-
-    /**
-     * This class overrides BigDecimal and implements some strange comparison
-     * method.
-     */
-    private static class ZlotyBigDecimal extends BigDecimal {
-
-        private static final long serialVersionUID = 1L;
-
-        public ZlotyBigDecimal(String s) {
-            super(s);
-        }
-
-        @Override
-        public int compareTo(BigDecimal bd) {
-            return -super.compareTo(bd);
-        }
 
     }
 
     private void testModifyBytes() throws SQLException {
-        
+
         Connection conn = getConnection();
         conn.createStatement().execute(
                 "CREATE TABLE TEST(ID INT, DATA BINARY)");
         PreparedStatement prep = conn.prepareStatement(
                 "INSERT INTO TEST VALUES(?, ?)");
-        byte[] shared = { 0 };
+        byte[] shared = {0};
         prep.setInt(1, 0);
         prep.setBytes(2, shared);
         prep.execute();
@@ -83,7 +64,7 @@ public class ZlotyTestCase extends BaseTestCase {
      * @author Maciej Wegorkiewicz
      */
     private void testZloty() throws SQLException {
-        
+
         Connection conn = getConnection();
         conn.createStatement().execute("CREATE TABLE TEST(ID INT, AMOUNT DECIMAL)");
         PreparedStatement prep = conn.prepareStatement("INSERT INTO TEST VALUES(?, ?)");
@@ -108,6 +89,25 @@ public class ZlotyTestCase extends BaseTestCase {
                 setBigDecimal(2, value);
 
         conn.close();
+    }
+
+    /**
+     * This class overrides BigDecimal and implements some strange comparison
+     * method.
+     */
+    private static class ZlotyBigDecimal extends BigDecimal {
+
+        private static final long serialVersionUID = 1L;
+
+        public ZlotyBigDecimal(String s) {
+            super(s);
+        }
+
+        @Override
+        public int compareTo(BigDecimal bd) {
+            return -super.compareTo(bd);
+        }
+
     }
 
 }

@@ -36,7 +36,7 @@ public class DropTable extends SchemaCommand {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
                 AlterTableAddConstraint.RESTRICT :
-                    AlterTableAddConstraint.CASCADE;
+                AlterTableAddConstraint.CASCADE;
     }
 
     /**
@@ -52,24 +52,6 @@ public class DropTable extends SchemaCommand {
         }
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-        if (next != null) {
-            next.setIfExists(b);
-        }
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public void setDropAction(int dropAction) {
-        this.dropAction = dropAction;
-        if (next != null) {
-            next.setDropAction(dropAction);
-        }
-    }
-
     @Override
     public int getType() {
         return CommandInterface.DROP_TABLE;
@@ -79,12 +61,30 @@ public class DropTable extends SchemaCommand {
         return ifExists;
     }
 
+    public void setIfExists(boolean b) {
+        ifExists = b;
+        if (next != null) {
+            next.setIfExists(b);
+        }
+    }
+
     public String getTableName() {
         return tableName;
     }
 
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public int getDropAction() {
         return dropAction;
+    }
+
+    public void setDropAction(int dropAction) {
+        this.dropAction = dropAction;
+        if (next != null) {
+            next.setDropAction(dropAction);
+        }
     }
 
     public DropTable getNext() {

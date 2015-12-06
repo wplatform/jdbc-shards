@@ -19,29 +19,34 @@ import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public interface PartitionFunction {
 
-    public void doInit();
+    void doInit();
+
     /**
      * represent the sql condition: column=xx
+     *
      * @param value
      * @return
      */
-    public Integer apply(Value value);
+    Integer apply(Value value);
+
     /**
      * represent the sql condition: column >= xx and column <= xx
+     *
      * @param beginValue
      * @param endValue
      * @return
      */
-    public Integer[] apply(Value beginValue,Value endValue);
+    Integer[] apply(Value beginValue, Value endValue);
+
     /**
      * represent the sql condition: column in (xx)
+     *
      * @param value
      * @return
      */
-    public Integer[] apply(Value ... value);
+    Integer[] apply(Value... value);
 
 }

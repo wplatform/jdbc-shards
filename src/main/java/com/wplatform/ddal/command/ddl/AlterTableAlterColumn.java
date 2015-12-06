@@ -53,22 +53,6 @@ public class AlterTableAlterColumn extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public void setOldColumn(Column oldColumn) {
-        this.oldColumn = oldColumn;
-    }
-
-    public void setAddBefore(String before) {
-        this.addBefore = before;
-    }
-
-    public void setAddAfter(String after) {
-        this.addAfter = after;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -78,14 +62,6 @@ public class AlterTableAlterColumn extends SchemaCommand {
         newSelectivity = selectivity;
     }
 
-    public void setDefaultExpression(Expression defaultExpression) {
-        this.defaultExpression = defaultExpression;
-    }
-
-    public void setNewColumn(Column newColumn) {
-        this.newColumn = newColumn;
-    }
-
     @Override
     public int getType() {
         return type;
@@ -93,10 +69,6 @@ public class AlterTableAlterColumn extends SchemaCommand {
 
     public void setType(int type) {
         this.type = type;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
     }
 
     public void setNewColumns(ArrayList<Column> columnsToAdd) {
@@ -115,16 +87,32 @@ public class AlterTableAlterColumn extends SchemaCommand {
         return table;
     }
 
+    public void setTable(Table table) {
+        this.table = table;
+    }
+
     public Column getOldColumn() {
         return oldColumn;
+    }
+
+    public void setOldColumn(Column oldColumn) {
+        this.oldColumn = oldColumn;
     }
 
     public Column getNewColumn() {
         return newColumn;
     }
 
+    public void setNewColumn(Column newColumn) {
+        this.newColumn = newColumn;
+    }
+
     public Expression getDefaultExpression() {
         return defaultExpression;
+    }
+
+    public void setDefaultExpression(Expression defaultExpression) {
+        this.defaultExpression = defaultExpression;
     }
 
     public Expression getNewSelectivity() {
@@ -135,14 +123,25 @@ public class AlterTableAlterColumn extends SchemaCommand {
         return addBefore;
     }
 
+    public void setAddBefore(String before) {
+        this.addBefore = before;
+    }
+
     public String getAddAfter() {
         return addAfter;
+    }
+
+    public void setAddAfter(String after) {
+        this.addAfter = after;
     }
 
     public boolean isIfNotExists() {
         return ifNotExists;
     }
-    
-    
-    
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
+
 }

@@ -33,21 +33,9 @@ public class CreateSchema extends DefineCommand {
         super(session);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setSchemaName(String name) {
-        this.schemaName = name;
-    }
-
-    public void setAuthorization(String userName) {
-        this.authorization = userName;
     }
 
     @Override
@@ -59,12 +47,24 @@ public class CreateSchema extends DefineCommand {
         return schemaName;
     }
 
+    public void setSchemaName(String name) {
+        this.schemaName = name;
+    }
+
     public String getAuthorization() {
         return authorization;
     }
 
+    public void setAuthorization(String userName) {
+        this.authorization = userName;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
 }

@@ -63,18 +63,6 @@ public class Insert extends Prepared {
         }
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public void setColumns(Column[] columns) {
-        this.columns = columns;
-    }
-
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
     /**
      * Keep a collection of the columns to pass to update if a duplicate key
      * happens, for MySQL-style INSERT ... ON DUPLICATE KEY UPDATE ....
@@ -190,17 +178,9 @@ public class Insert extends Prepared {
         return null;
     }
 
-    public void setSortedInsertMode(boolean sortedInsertMode) {
-        this.sortedInsertMode = sortedInsertMode;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.INSERT;
-    }
-
-    public void setInsertFromSelect(boolean value) {
-        this.insertFromSelect = value;
     }
 
     @Override
@@ -217,16 +197,32 @@ public class Insert extends Prepared {
         return table;
     }
 
+    public void setTable(Table table) {
+        this.table = table;
+    }
+
     public Column[] getColumns() {
         return columns;
+    }
+
+    public void setColumns(Column[] columns) {
+        this.columns = columns;
     }
 
     public Query getQuery() {
         return query;
     }
 
+    public void setQuery(Query query) {
+        this.query = query;
+    }
+
     public boolean isSortedInsertMode() {
         return sortedInsertMode;
+    }
+
+    public void setSortedInsertMode(boolean sortedInsertMode) {
+        this.sortedInsertMode = sortedInsertMode;
     }
 
     public int getRowNumber() {
@@ -237,11 +233,13 @@ public class Insert extends Prepared {
         return insertFromSelect;
     }
 
+    public void setInsertFromSelect(boolean value) {
+        this.insertFromSelect = value;
+    }
+
     public HashMap<Column, Expression> getDuplicateKeyAssignmentMap() {
         return duplicateKeyAssignmentMap;
     }
-    
-    
-    
+
 
 }

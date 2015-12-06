@@ -31,9 +31,9 @@ import java.util.List;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface RoutingHandler {
-    
+
     PartitionFunction getPartitionFunction(TableMate table);
-    
+
     RoutingResult doRoute(TableMate table, SearchRow row);
 
     RoutingResult doRoute(TableMate table, SearchRow stard, SearchRow end);

@@ -37,14 +37,6 @@ public class DropDatabase extends DefineCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setDropAllObjects(boolean b) {
-        this.dropAllObjects = b;
-    }
-
-    public void setDeleteFiles(boolean b) {
-        this.deleteFiles = b;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.DROP_ALL_OBJECTS;
@@ -54,10 +46,17 @@ public class DropDatabase extends DefineCommand {
         return dropAllObjects;
     }
 
+    public void setDropAllObjects(boolean b) {
+        this.dropAllObjects = b;
+    }
+
     public boolean isDeleteFiles() {
         return deleteFiles;
     }
-    
-    
+
+    public void setDeleteFiles(boolean b) {
+        this.deleteFiles = b;
+    }
+
 
 }

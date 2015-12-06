@@ -54,21 +54,21 @@ public class SmartSupport {
             trace.debug(dataSource.toString() + text);
         }
     }
-    
-    
+
+
     protected Connection applyConnection(boolean readOnly) throws SQLException {
         return applyConnection(readOnly, null, null);
     }
-    
-    protected Connection applyConnection(boolean readOnly,String username, String password) throws SQLException {
+
+    protected Connection applyConnection(boolean readOnly, String username, String password) throws SQLException {
         List<DataSourceMarker> tryList = New.arrayList();
         DataSourceMarker selected = dataSource.doRoute(readOnly);
-        while(selected != null) {
+        while (selected != null) {
             try {
                 tryList.add(selected);
                 return (username != null) ? database.getConnection(selected, username, password)
-                        : database.getConnection(selected); 
-            }catch(SQLException e) {
+                        : database.getConnection(selected);
+            } catch (SQLException e) {
                 selected = dataSource.doRoute(readOnly, tryList);
             }
         }

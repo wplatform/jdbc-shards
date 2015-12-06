@@ -22,7 +22,7 @@ package com.wplatform.ddal.excutor;
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class Optional {
-    
+
     public static final int DEFAULT_TRYTIMES = 3;
 
     public int retry = DEFAULT_TRYTIMES;
@@ -70,9 +70,6 @@ public class Optional {
         this.retry = retry;
         return this;
     }
-    
-    
-    
-    
+
 
 }

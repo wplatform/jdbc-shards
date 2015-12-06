@@ -20,14 +20,13 @@ import com.wplatform.ddal.util.StatementBuilder;
 import com.wplatform.ddal.value.Value;
 
 import javax.sql.DataSource;
+import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class JdbcCallWorker extends JdbcWorker<Integer> {
 
@@ -38,7 +37,7 @@ public class JdbcCallWorker extends JdbcWorker<Integer> {
     @Override
     public Integer doWork() {
         Connection conn = null;
-        PreparedStatement stmt = null;
+        CallableStatement stmt = null;
         try {
             DataSource dataSource = getDataSource();
             Optional optional = Optional.build().shardName(shardName).readOnly(false);
@@ -50,7 +49,7 @@ public class JdbcCallWorker extends JdbcWorker<Integer> {
             if (trace.isDebugEnabled()) {
                 trace.debug("{0} Preparing: {1};", shardName, sql);
             }
-            stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareCall(sql);
             attach(stmt);
             applyQueryTimeout(stmt);
             if (params != null) {

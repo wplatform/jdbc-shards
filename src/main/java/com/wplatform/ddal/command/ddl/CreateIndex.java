@@ -37,78 +37,78 @@ public class CreateIndex extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
+    public String getTableName() {
+        return tableName;
     }
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
-
-    public void setIndexColumns(IndexColumn[] columns) {
-        this.indexColumns = columns;
-    }
-
-    public void setPrimaryKey(boolean b) {
-        this.primaryKey = b;
-    }
-
-    public void setUnique(boolean b) {
-        this.unique = b;
-    }
-
-    public void setHash(boolean b) {
-        this.hash = b;
-    }
-
-    public void setSpatial(boolean b) {
-        this.spatial = b;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
     public String getIndexName() {
         return indexName;
+    }
+
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
     }
 
     public IndexColumn[] getIndexColumns() {
         return indexColumns;
     }
 
+    public void setIndexColumns(IndexColumn[] columns) {
+        this.indexColumns = columns;
+    }
+
     public boolean isPrimaryKey() {
         return primaryKey;
+    }
+
+    public void setPrimaryKey(boolean b) {
+        this.primaryKey = b;
     }
 
     public boolean isUnique() {
         return unique;
     }
 
+    public void setUnique(boolean b) {
+        this.unique = b;
+    }
+
     public boolean isHash() {
         return hash;
+    }
+
+    public void setHash(boolean b) {
+        this.hash = b;
     }
 
     public boolean isSpatial() {
         return spatial;
     }
 
+    public void setSpatial(boolean b) {
+        this.spatial = b;
+    }
+
     public boolean isIfNotExists() {
         return ifNotExists;
+    }
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
     }
 
     public String getComment() {
         return comment;
     }
-    
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     @Override
     public int getType() {
         return CommandInterface.CREATE_INDEX;

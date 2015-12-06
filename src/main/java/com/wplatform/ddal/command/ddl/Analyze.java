@@ -52,6 +52,6 @@ public class Analyze extends DefineCommand {
     public int getSampleRows() {
         return sampleRows;
     }
-    
+
 
 }

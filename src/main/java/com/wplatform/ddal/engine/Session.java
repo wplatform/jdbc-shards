@@ -138,7 +138,7 @@ public class Session implements SessionInterface {
     /**
      * Set the value of the given variable for this session.
      *
-     * @param name the name of the variable (may not be null)
+     * @param name  the name of the variable (may not be null)
      * @param value the new value (may not be null)
      */
     public void setVariable(String name, Value value) {
@@ -325,7 +325,7 @@ public class Session implements SessionInterface {
     /**
      * Parse and prepare the given SQL statement.
      *
-     * @param sql the SQL statement
+     * @param sql           the SQL statement
      * @param rightsChecked true if the rights have already been checked
      * @return the prepared statement
      */
@@ -483,7 +483,7 @@ public class Session implements SessionInterface {
     /**
      * Partially roll back the current transaction.
      *
-     * @param savepoint the savepoint to which should be rolled back
+     * @param savepoint  the savepoint to which should be rolled back
      * @param trimToSize if the list should be trimmed
      */
     public void rollbackTo(Savepoint savepoint, boolean trimToSize) {
@@ -601,7 +601,7 @@ public class Session implements SessionInterface {
      * committed.
      *
      * @param logId the transaction log id
-     * @param pos the position of the log entry in the transaction log
+     * @param pos   the position of the log entry in the transaction log
      */
     public void addLogPos(int logId, int pos) {
         if (firstUncommittedLog == Session.LOG_WRITTEN) {
@@ -674,7 +674,7 @@ public class Session implements SessionInterface {
      * Commit or roll back the given transaction.
      *
      * @param transactionName the name of the transaction
-     * @param commit true for commit, false for rollback
+     * @param commit          true for commit, false for rollback
      */
     public void setPreparedTransaction(String transactionName, boolean commit) {
         if (currentTransactionName != null && currentTransactionName.equals(transactionName)) {
@@ -944,7 +944,7 @@ public class Session implements SessionInterface {
      * Set the table this session is waiting for, and the thread that is
      * waiting.
      *
-     * @param waitForLock the table
+     * @param waitForLock       the table
      * @param waitForLockThread the current thread (the one that is waiting)
      */
     public void setWaitForLock(Table waitForLock, Thread waitForLockThread) {
@@ -1011,14 +1011,14 @@ public class Session implements SessionInterface {
 
     public void setTransactionIsolation(int level) {
         switch (level) {
-        case Connection.TRANSACTION_NONE:
-        case Connection.TRANSACTION_READ_UNCOMMITTED:
-        case Connection.TRANSACTION_READ_COMMITTED:
-        case Connection.TRANSACTION_REPEATABLE_READ:
-        case Connection.TRANSACTION_SERIALIZABLE:
-            break;
-        default:
-            throw DbException.getInvalidValueException("transaction isolation", level);
+            case Connection.TRANSACTION_NONE:
+            case Connection.TRANSACTION_READ_UNCOMMITTED:
+            case Connection.TRANSACTION_READ_COMMITTED:
+            case Connection.TRANSACTION_REPEATABLE_READ:
+            case Connection.TRANSACTION_SERIALIZABLE:
+                break;
+            default:
+                throw DbException.getInvalidValueException("transaction isolation", level);
         }
         transactionIsolation = level;
     }
@@ -1051,12 +1051,12 @@ public class Session implements SessionInterface {
     public DataSourceRepository getDataSourceRepository() {
         return database.getDataSourceRepository();
     }
-    
+
     public PreparedExecutorFactory getPreparedExecutorFactory() {
         return database.getPreparedExecutorFactory();
     }
 
-    
+
     /**
      * Represents a savepoint (a position in a transaction to where one can roll
      * back to).

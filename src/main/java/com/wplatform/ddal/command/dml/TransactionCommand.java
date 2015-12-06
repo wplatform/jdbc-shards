@@ -36,10 +36,6 @@ public class TransactionCommand extends Prepared {
         this.type = type;
     }
 
-    public void setSavepointName(String name) {
-        this.savepointName = name;
-    }
-
     @Override
     public boolean isTransactional() {
         return true;
@@ -48,10 +44,6 @@ public class TransactionCommand extends Prepared {
     @Override
     public boolean needRecompile() {
         return false;
-    }
-
-    public void setTransactionName(String string) {
-        this.transactionName = string;
     }
 
     @Override
@@ -68,14 +60,22 @@ public class TransactionCommand extends Prepared {
     public boolean isCacheable() {
         return true;
     }
-    //getter
 
     public String getSavepointName() {
         return savepointName;
     }
 
+    public void setSavepointName(String name) {
+        this.savepointName = name;
+    }
+    //getter
+
     public String getTransactionName() {
         return transactionName;
+    }
+
+    public void setTransactionName(String string) {
+        this.transactionName = string;
     }
 
     public Expression getExpression() {
@@ -85,7 +85,6 @@ public class TransactionCommand extends Prepared {
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
-    
-    
+
 
 }

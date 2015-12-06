@@ -325,15 +325,6 @@ public abstract class Query extends Prepared {
         distinct = b;
     }
 
-    /**
-     * Whether results need to support random access.
-     *
-     * @param b the new value
-     */
-    public void setRandomAccessResult(boolean b) {
-        randomAccessResult = b;
-    }
-
     @Override
     public boolean isQuery() {
         return true;
@@ -525,9 +516,18 @@ public abstract class Query extends Prepared {
         return v.getInt();
     }
 
-    //getters
-
     public boolean isRandomAccessResult() {
         return randomAccessResult;
+    }
+
+    //getters
+
+    /**
+     * Whether results need to support random access.
+     *
+     * @param b the new value
+     */
+    public void setRandomAccessResult(boolean b) {
+        randomAccessResult = b;
     }
 }

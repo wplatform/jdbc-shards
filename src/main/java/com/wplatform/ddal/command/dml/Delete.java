@@ -42,14 +42,6 @@ public class Delete extends Prepared {
         super(session);
     }
 
-    public void setTableFilter(TableFilter tableFilter) {
-        this.tableFilter = tableFilter;
-    }
-
-    public void setCondition(Expression condition) {
-        this.condition = condition;
-    }
-
     @Override
     public String getPlanSQL() {
         StringBuilder buff = new StringBuilder();
@@ -101,14 +93,22 @@ public class Delete extends Prepared {
     public boolean isCacheable() {
         return true;
     }
-    
+
     // getter
     public Expression getCondition() {
         return condition;
     }
 
+    public void setCondition(Expression condition) {
+        this.condition = condition;
+    }
+
     public TableFilter getTableFilter() {
         return tableFilter;
+    }
+
+    public void setTableFilter(TableFilter tableFilter) {
+        this.tableFilter = tableFilter;
     }
 
     public Expression getLimitExpr() {

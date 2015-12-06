@@ -59,14 +59,6 @@ public class Update extends Prepared {
         super(session);
     }
 
-    public void setTableFilter(TableFilter tableFilter) {
-        this.tableFilter = tableFilter;
-    }
-
-    public void setCondition(Expression condition) {
-        this.condition = condition;
-    }
-
     /**
      * Add an assignment of the form column = expression.
      *
@@ -212,8 +204,7 @@ public class Update extends Prepared {
     public boolean isCacheable() {
         return true;
     }
-    
-    
+
     //getter
     public ArrayList<Column> getColumns() {
         return columns;
@@ -227,13 +218,21 @@ public class Update extends Prepared {
         return condition;
     }
 
+    public void setCondition(Expression condition) {
+        this.condition = condition;
+    }
+
     public TableFilter getTableFilter() {
         return tableFilter;
+    }
+
+    public void setTableFilter(TableFilter tableFilter) {
+        this.tableFilter = tableFilter;
     }
 
     public Expression getLimitExpr() {
         return limitExpr;
     }
-    
+
 
 }

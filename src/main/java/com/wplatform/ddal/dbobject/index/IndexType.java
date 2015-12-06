@@ -25,7 +25,8 @@ public class IndexType {
 
     /**
      * Create a primary key index.
-     * @param hash       if a hash index should be used
+     *
+     * @param hash if a hash index should be used
      * @return the index type
      */
     public static IndexType createPrimaryKey(boolean hash) {
@@ -39,7 +40,7 @@ public class IndexType {
     /**
      * Create a unique index.
      *
-     * @param hash       if a hash index should be used
+     * @param hash if a hash index should be used
      * @return the index type
      */
     public static IndexType createUnique(boolean hash) {
@@ -61,8 +62,8 @@ public class IndexType {
     /**
      * Create a non-unique index.
      *
-     * @param hash       if a hash index should be used
-     * @param spatial    if a spatial index should be used
+     * @param hash    if a hash index should be used
+     * @param spatial if a spatial index should be used
      * @return the index type
      */
     public static IndexType createNonUnique(boolean hash,
@@ -86,7 +87,8 @@ public class IndexType {
 
     /**
      * Create a sharding key index.
-     * @param hash       if a hash index should be used
+     *
+     * @param hash if a hash index should be used
      * @return the index type
      */
     public static IndexType createShardingKey(boolean hash) {
@@ -128,6 +130,7 @@ public class IndexType {
     public boolean isShardingKey() {
         return shardingKey;
     }
+
     /**
      * Does this index belong to a primary key constraint?
      *

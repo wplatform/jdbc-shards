@@ -60,6 +60,7 @@ public class TableMate extends Table {
     private Index scanIndex;
 
     private TableRouter tableRouter;
+    private ArrayList<Column> shardingColumns;
     private TableNode[] shards;
     private int scanLevel;
 
@@ -84,6 +85,7 @@ public class TableMate extends Table {
         super(schema, id, name);
         this.globalTemporary = false;
     }
+
     /**
      * @return the tableRouter
      */
@@ -120,18 +122,19 @@ public class TableMate extends Table {
     }
 
     /**
-     * test the table is global table.
-     * @return
-     */
-    public boolean isReplication() {
-        return shards != null && shards.length > 1;
-    }
-
-    /**
      * @param shards the shards to set
      */
     public void setShards(TableNode[] shards) {
         this.shards = shards;
+    }
+
+    /**
+     * test the table is global table.
+     *
+     * @return
+     */
+    public boolean isReplication() {
+        return shards != null && shards.length > 1;
     }
 
     /**
@@ -152,12 +155,14 @@ public class TableMate extends Table {
      */
     private void validationRuleColumn(Column[] columns) {
         if (tableRouter != null) {
+            shardingColumns = New.arrayList();
             for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
                 Column matched = null;
                 for (Column column : columns) {
                     String colName = column.getName();
                     if (colName.equalsIgnoreCase(ruleCol.getName())) {
                         matched = column;
+                        shardingColumns.add(column);
                         break;
                     }
                 }
@@ -288,7 +293,7 @@ public class TableMate extends Table {
      * @param session
      */
     public void readMataData(Session session, TableNode matadataNode) {
-        for (int retry = 0;; retry++) {
+        for (int retry = 0; ; retry++) {
             try {
                 Connection conn = null;
                 String tableName = matadataNode.getCompositeObjectName();
@@ -372,7 +377,7 @@ public class TableMate extends Table {
             if (columnList.size() == 0) {
                 // alternative solution
                 ResultSetMetaData rsMeta = rs.getMetaData();
-                for (i = 0; i < rsMeta.getColumnCount();) {
+                for (i = 0; i < rsMeta.getColumnCount(); ) {
                     String n = rsMeta.getColumnName(i + 1);
                     n = convertColumnName(n);
                     int sqlType = rsMeta.getColumnType(i + 1);
@@ -495,64 +500,6 @@ public class TableMate extends Table {
         return columnName;
     }
 
-    private static long convertPrecision(int sqlType, long precision) {
-        // workaround for an Oracle problem:
-        // for DATE columns, the reported precision is 7
-        // for DECIMAL columns, the reported precision is 0
-        switch (sqlType) {
-        case Types.DECIMAL:
-        case Types.NUMERIC:
-            if (precision == 0) {
-                precision = 65535;
-            }
-            break;
-        case Types.DATE:
-            precision = Math.max(ValueDate.PRECISION, precision);
-            break;
-        case Types.TIMESTAMP:
-            precision = Math.max(ValueTimestamp.PRECISION, precision);
-            break;
-        case Types.TIME:
-            precision = Math.max(ValueTime.PRECISION, precision);
-            break;
-        }
-        return precision;
-    }
-
-    private static int convertScale(int sqlType, int scale) {
-        // workaround for an Oracle problem:
-        // for DECIMAL columns, the reported precision is -127
-        switch (sqlType) {
-        case Types.DECIMAL:
-        case Types.NUMERIC:
-            if (scale < 0) {
-                scale = 32767;
-            }
-            break;
-        }
-        return scale;
-    }
-
-    public boolean isRelationSymmetry(TableMate o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null)  {
-            return false;
-        }
-        if(tableRouter != null) {
-            if(o.tableRouter != null) {
-                return tableRouter.equals(o.tableRouter);
-            } else {
-                return isNodeMatch(getPartitionNode(), o.getPartitionNode());
-            }
-        }  else {
-            return isNodeMatch(getPartitionNode(), o.getPartitionNode());
-        }
-
-    }
-
-
     private void shardingKeyIndex() {
         // create shardingKey index
         if (tableRouter != null) {
@@ -592,7 +539,65 @@ public class TableMate extends Table {
         }
     }
 
-    private static boolean isNodeMatch(TableNode[] nodes1, TableNode[] nodes2) {
+
+    private static long convertPrecision(int sqlType, long precision) {
+        // workaround for an Oracle problem:
+        // for DATE columns, the reported precision is 7
+        // for DECIMAL columns, the reported precision is 0
+        switch (sqlType) {
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                if (precision == 0) {
+                    precision = 65535;
+                }
+                break;
+            case Types.DATE:
+                precision = Math.max(ValueDate.PRECISION, precision);
+                break;
+            case Types.TIMESTAMP:
+                precision = Math.max(ValueTimestamp.PRECISION, precision);
+                break;
+            case Types.TIME:
+                precision = Math.max(ValueTime.PRECISION, precision);
+                break;
+        }
+        return precision;
+    }
+
+    private static int convertScale(int sqlType, int scale) {
+        // workaround for an Oracle problem:
+        // for DECIMAL columns, the reported precision is -127
+        switch (sqlType) {
+            case Types.DECIMAL:
+            case Types.NUMERIC:
+                if (scale < 0) {
+                    scale = 32767;
+                }
+                break;
+        }
+        return scale;
+    }
+
+    public boolean isTableNodeSymmetric(TableMate o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null) {
+            return false;
+        }
+        if (tableRouter != null) {
+            if (o.tableRouter != null) {
+                return tableRouter.equals(o.tableRouter);
+            } else {
+                return isShardMatch(getPartitionNode(), o.getPartitionNode());
+            }
+        } else {
+            return isShardMatch(getPartitionNode(), o.getPartitionNode());
+        }
+
+    }
+
+    private static boolean isShardMatch(TableNode[] nodes1, TableNode[] nodes2) {
         TableNode[] group1 = RoutingResult.fixedResult(nodes1).group();
         TableNode[] group2 = RoutingResult.fixedResult(nodes2).group();
         for (TableNode tableNode1 : group1) {

@@ -34,18 +34,6 @@ public class CreateUserDataType extends DefineCommand {
         super(session);
     }
 
-    public void setTypeName(String name) {
-        this.typeName = name;
-    }
-
-    public void setColumn(Column column) {
-        this.column = column;
-    }
-
-    public void setIfNotExists(boolean ifNotExists) {
-        this.ifNotExists = ifNotExists;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -60,14 +48,25 @@ public class CreateUserDataType extends DefineCommand {
         return typeName;
     }
 
+    public void setTypeName(String name) {
+        this.typeName = name;
+    }
+
     public Column getColumn() {
         return column;
+    }
+
+    public void setColumn(Column column) {
+        this.column = column;
     }
 
     public boolean isIfNotExists() {
         return ifNotExists;
     }
-    
-    
+
+    public void setIfNotExists(boolean ifNotExists) {
+        this.ifNotExists = ifNotExists;
+    }
+
 
 }

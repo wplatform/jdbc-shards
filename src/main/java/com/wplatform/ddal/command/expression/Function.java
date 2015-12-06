@@ -1544,7 +1544,7 @@ public class Function extends Expression implements FunctionCall {
                     result = v1;
                 } else {
                     result = ValueString.get(insert(v0.getString(),
-                                    v1.getInt(), v2.getInt(), v3.getString()),
+                            v1.getInt(), v2.getInt(), v3.getString()),
                             database.getMode().treatEmptyStringsAsNull);
                 }
                 break;
@@ -1583,17 +1583,17 @@ public class Function extends Expression implements FunctionCall {
                 break;
             case LTRIM:
                 result = ValueString.get(StringUtils.trim(v0.getString(),
-                                true, false, v1 == null ? " " : v1.getString()),
+                        true, false, v1 == null ? " " : v1.getString()),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             case TRIM:
                 result = ValueString.get(StringUtils.trim(v0.getString(),
-                                true, true, v1 == null ? " " : v1.getString()),
+                        true, true, v1 == null ? " " : v1.getString()),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             case RTRIM:
                 result = ValueString.get(StringUtils.trim(v0.getString(),
-                                false, true, v1 == null ? " " : v1.getString()),
+                        false, true, v1 == null ? " " : v1.getString()),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             case SUBSTR:
@@ -1624,7 +1624,7 @@ public class Function extends Expression implements FunctionCall {
                 boolean indent = v3 == null ?
                         true : v3.getBoolean();
                 result = ValueString.get(StringUtils.xmlNode(
-                                v0.getString(), attr, content, indent),
+                        v0.getString(), attr, content, indent),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             }
@@ -1646,12 +1646,12 @@ public class Function extends Expression implements FunctionCall {
             }
             case RPAD:
                 result = ValueString.get(StringUtils.pad(v0.getString(),
-                                v1.getInt(), v2 == null ? null : v2.getString(), true),
+                        v1.getInt(), v2 == null ? null : v2.getString(), true),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             case LPAD:
                 result = ValueString.get(StringUtils.pad(v0.getString(),
-                                v1.getInt(), v2 == null ? null : v2.getString(), false),
+                        v1.getInt(), v2 == null ? null : v2.getString(), false),
                         database.getMode().treatEmptyStringsAsNull);
                 break;
             case TO_CHAR:
@@ -1660,8 +1660,8 @@ public class Function extends Expression implements FunctionCall {
                     case Value.DATE:
                     case Value.TIMESTAMP:
                         result = ValueString.get(toChar(v0.getTimestamp(),
-                                        v1 == null ? null : v1.getString(),
-                                        v2 == null ? null : v2.getString()),
+                                v1 == null ? null : v1.getString(),
+                                v2 == null ? null : v2.getString()),
                                 database.getMode().treatEmptyStringsAsNull);
                         break;
                     case Value.SHORT:
@@ -1671,8 +1671,8 @@ public class Function extends Expression implements FunctionCall {
                     case Value.DOUBLE:
                     case Value.FLOAT:
                         result = ValueString.get(toChar(v0.getBigDecimal(),
-                                        v1 == null ? null : v1.getString(),
-                                        v2 == null ? null : v2.getString()),
+                                v1 == null ? null : v1.getString(),
+                                v2 == null ? null : v2.getString()),
                                 database.getMode().treatEmptyStringsAsNull);
                         break;
                     default:
@@ -1715,7 +1715,7 @@ public class Function extends Expression implements FunctionCall {
                     String tz = v3 == null ?
                             null : v3 == ValueNull.INSTANCE ? null : v3.getString();
                     result = ValueString.get(DateTimeUtils.formatDateTime(
-                                    v0.getTimestamp(), v1.getString(), locale, tz),
+                            v0.getTimestamp(), v1.getString(), locale, tz),
                             database.getMode().treatEmptyStringsAsNull);
                 }
                 break;
@@ -1826,11 +1826,11 @@ public class Function extends Expression implements FunctionCall {
             case XMLTEXT:
                 if (v1 == null) {
                     result = ValueString.get(StringUtils.xmlText(
-                                    v0.getString()),
+                            v0.getString()),
                             database.getMode().treatEmptyStringsAsNull);
                 } else {
                     result = ValueString.get(StringUtils.xmlText(
-                                    v0.getString(), v1.getBoolean()),
+                            v0.getString(), v1.getBoolean()),
                             database.getMode().treatEmptyStringsAsNull);
                 }
                 break;

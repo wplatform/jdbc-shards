@@ -45,10 +45,6 @@ public class AlterSequence extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setSequence(Sequence sequence) {
-        this.sequence = sequence;
-    }
-
     @Override
     public boolean isTransactional() {
         return true;
@@ -64,26 +60,6 @@ public class AlterSequence extends SchemaCommand {
 
     public void setStartWith(Expression start) {
         this.start = start;
-    }
-
-    public void setIncrement(Expression increment) {
-        this.increment = increment;
-    }
-
-    public void setCycle(Boolean cycle) {
-        this.cycle = cycle;
-    }
-
-    public void setMinValue(Expression minValue) {
-        this.minValue = minValue;
-    }
-
-    public void setMaxValue(Expression maxValue) {
-        this.maxValue = maxValue;
-    }
-
-    public void setCacheSize(Expression cacheSize) {
-        this.cacheSize = cacheSize;
     }
 
     @Override
@@ -104,6 +80,10 @@ public class AlterSequence extends SchemaCommand {
         return sequence;
     }
 
+    public void setSequence(Sequence sequence) {
+        this.sequence = sequence;
+    }
+
     public Expression getStart() {
         return start;
     }
@@ -112,20 +92,40 @@ public class AlterSequence extends SchemaCommand {
         return increment;
     }
 
+    public void setIncrement(Expression increment) {
+        this.increment = increment;
+    }
+
     public Boolean getCycle() {
         return cycle;
+    }
+
+    public void setCycle(Boolean cycle) {
+        this.cycle = cycle;
     }
 
     public Expression getMinValue() {
         return minValue;
     }
 
+    public void setMinValue(Expression minValue) {
+        this.minValue = minValue;
+    }
+
     public Expression getMaxValue() {
         return maxValue;
     }
 
+    public void setMaxValue(Expression maxValue) {
+        this.maxValue = maxValue;
+    }
+
     public Expression getCacheSize() {
         return cacheSize;
+    }
+
+    public void setCacheSize(Expression cacheSize) {
+        this.cacheSize = cacheSize;
     }
 
 }

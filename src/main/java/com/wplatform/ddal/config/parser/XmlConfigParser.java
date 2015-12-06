@@ -103,8 +103,8 @@ public class XmlConfigParser {
                 String ref = child.getStringAttribute("ref");
                 int wWeight, rWeight;
                 try {
-                    wWeight = child.getIntAttribute("wWeight",1);
-                    rWeight = child.getIntAttribute("rWeight",1);
+                    wWeight = child.getIntAttribute("wWeight", 1);
+                    rWeight = child.getIntAttribute("rWeight", 1);
                 } catch (Exception e) {
                     throw new ParsingException("incorrect wWeight or rWeight 'value for member");
                 }
@@ -114,7 +114,7 @@ public class XmlConfigParser {
                 if (wWeight <= 0 && rWeight <= 0) {
                     throw new ParsingException("member 's weight not be less than zero.");
                 }
-                if(wWeight <= 0) {
+                if (wWeight <= 0) {
                     shardItem.setReadOnly(true);
                 }
                 shardItem.setRef(ref);
@@ -154,7 +154,7 @@ public class XmlConfigParser {
                         "Error parsing ddal-config XML . Cause: datasource attribute 'id' required.");
             }
         }
-        configuration.setDataSourceProvider(provider);
+        configuration.setObject("dataSourceProvider", provider);
     }
 
     private void parseRuleConfig(List<XNode> xNodes) {
@@ -341,7 +341,7 @@ public class XmlConfigParser {
         config.setValidation(validation);
         setTableScanLevel(config, scanLevel);
 
-        
+
         List<String> nodes = New.arrayList();
         if (!StringUtils.isNullOrEmpty(shard)) {
             for (String string : shard.split(",")) {
@@ -355,7 +355,7 @@ public class XmlConfigParser {
             }
             config.setShards(tableNodes);
         }
-        
+
         if (!StringUtils.isNullOrEmpty(router)) {
             TableRouter rawRouter = configuration.getTemporaryTableRouters().get(router);
             if (rawRouter == null) {

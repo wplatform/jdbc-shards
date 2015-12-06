@@ -13,41 +13,15 @@ public class CancelTestCase extends BaseTestCase {
 
     private static int lastVisited;
 
-
     /**
-     * This thread cancels a statement after some time.
+     * This method is called via reflection from the database.
+     *
+     * @param x the value
+     * @return the value
      */
-    static class CancelThread extends Thread {
-        private final Statement cancel;
-        private final int wait;
-        private volatile boolean stop;
-
-        CancelThread(Statement cancel, int wait) {
-            this.cancel = cancel;
-            this.wait = wait;
-        }
-
-        /**
-         * Stop the test now.
-         */
-        public void stopNow() {
-            this.stop = true;
-        }
-
-        @Override
-        public void run() {
-            while (!stop) {
-                try {
-                    Thread.sleep(wait);
-                    cancel.cancel();
-                    Thread.yield();
-                } catch (SQLException e) {
-                    // ignore errors on closed statements
-                } catch (Exception e) {
-                    BaseTestCase.logError("sleep", e);
-                }
-            }
-        }
+    public static int visit(int x) {
+        lastVisited = x;
+        return x;
     }
 
     @Test
@@ -128,17 +102,6 @@ public class CancelTestCase extends BaseTestCase {
         conn.close();
     }
 
-    /**
-     * This method is called via reflection from the database.
-     *
-     * @param x the value
-     * @return the value
-     */
-    public static int visit(int x) {
-        lastVisited = x;
-        return x;
-    }
-
     private void testCancelStatement() throws Exception {
         Connection conn = getConnection();
         Statement stat = conn.createStatement();
@@ -179,6 +142,42 @@ public class CancelTestCase extends BaseTestCase {
             }
         }
         conn.close();
+    }
+
+    /**
+     * This thread cancels a statement after some time.
+     */
+    static class CancelThread extends Thread {
+        private final Statement cancel;
+        private final int wait;
+        private volatile boolean stop;
+
+        CancelThread(Statement cancel, int wait) {
+            this.cancel = cancel;
+            this.wait = wait;
+        }
+
+        /**
+         * Stop the test now.
+         */
+        public void stopNow() {
+            this.stop = true;
+        }
+
+        @Override
+        public void run() {
+            while (!stop) {
+                try {
+                    Thread.sleep(wait);
+                    cancel.cancel();
+                    Thread.yield();
+                } catch (SQLException e) {
+                    // ignore errors on closed statements
+                } catch (Exception e) {
+                    BaseTestCase.logError("sleep", e);
+                }
+            }
+        }
     }
 
 }

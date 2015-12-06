@@ -37,7 +37,6 @@ import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class MergeExecutor extends PreparedRoutingExecutor<Merge> {
 
@@ -151,7 +150,6 @@ public class MergeExecutor extends PreparedRoutingExecutor<Merge> {
         return buildInsert(forTable, columns, row, buff);
 
     }
-
 
 
 }

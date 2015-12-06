@@ -120,25 +120,25 @@ public class ResultSetTestCase extends BaseTestCase {
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
                 getSQLXML("x");
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateRef(1, (Ref) null);
+                updateRef(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateRef("x", (Ref) null);
+                updateRef("x", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateArray(1, (Array) null);
+                updateArray(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateArray("x", (Array) null);
+                updateArray("x", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateRowId(1, (RowId) null);
+                updateRowId(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateRowId("x", (RowId) null);
+                updateRowId("x", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
                 updateNClob(1, (NClob) null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
                 updateNClob("x", (NClob) null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateSQLXML(1, (SQLXML) null);
+                updateSQLXML(1, null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
-                updateSQLXML("x", (SQLXML) null);
+                updateSQLXML("x", null);
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).
                 getCursorName();
         assertThrows(ErrorCode.FEATURE_NOT_SUPPORTED_1, rs).

@@ -55,22 +55,6 @@ public class Replace extends Prepared {
         }
     }
 
-    public void setTable(Table table) {
-        this.table = table;
-    }
-
-    public void setColumns(Column[] columns) {
-        this.columns = columns;
-    }
-
-    public void setKeys(Column[] keys) {
-        this.keys = keys;
-    }
-
-    public void setQuery(Query query) {
-        this.query = query;
-    }
-
     /**
      * Add a row to this replace statement.
      *
@@ -79,7 +63,6 @@ public class Replace extends Prepared {
     public void addRow(Expression[] expr) {
         list.add(expr);
     }
-
 
     @Override
     public String getPlanSQL() {
@@ -200,9 +183,7 @@ public class Replace extends Prepared {
     public boolean isCacheable() {
         return true;
     }
-    
-    //getter
-    
+
     public ArrayList<Expression[]> getList() {
         return list;
     }
@@ -211,16 +192,34 @@ public class Replace extends Prepared {
         return table;
     }
 
+    public void setTable(Table table) {
+        this.table = table;
+    }
+
     public Column[] getColumns() {
         return columns;
+    }
+
+    //getter
+
+    public void setColumns(Column[] columns) {
+        this.columns = columns;
     }
 
     public Column[] getKeys() {
         return keys;
     }
 
+    public void setKeys(Column[] keys) {
+        this.keys = keys;
+    }
+
     public Query getQuery() {
         return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
     }
 
     public Prepared getUpdate() {

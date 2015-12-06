@@ -23,7 +23,6 @@ import com.wplatform.ddal.message.DbException;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class TransactionExecutor extends CommonPreparedExecutor<TransactionCommand> {
 
@@ -38,54 +37,54 @@ public class TransactionExecutor extends CommonPreparedExecutor<TransactionComma
     public int executeUpdate() {
         int type = prepared.getType();
         switch (type) {
-        case CommandInterface.SET_AUTOCOMMIT_TRUE:
-            session.setAutoCommit(true);
-            break;
-        case CommandInterface.SET_AUTOCOMMIT_FALSE:
-            session.setAutoCommit(false);
-            break;
-        case CommandInterface.BEGIN:
-            session.begin();
-            break;
-        case CommandInterface.COMMIT:
-            session.commit(false);
-            break;
-        case CommandInterface.ROLLBACK:
-            session.rollback();
-            break;
-        case CommandInterface.SAVEPOINT:
-            session.addSavepoint(prepared.getSavepointName());
-            break;
-        case CommandInterface.ROLLBACK_TO_SAVEPOINT:
-            session.rollbackToSavepoint(prepared.getSavepointName());
-            break;
-        case CommandInterface.PREPARE_COMMIT:
-            session.prepareCommit(prepared.getTransactionName());
-            break;
-        case CommandInterface.COMMIT_TRANSACTION:
-            session.getUser().checkAdmin();
-            session.setPreparedTransaction(prepared.getTransactionName(), true);
-            break;
-        case CommandInterface.ROLLBACK_TRANSACTION:
-            session.getUser().checkAdmin();
-            session.setPreparedTransaction(prepared.getTransactionName(), false);
-            break;
-        case CommandInterface.TRANSACTION_ISOLATION:
-            session.getUser().checkAdmin();
-            Expression expr = prepared.getExpression();
-            expr = expr.optimize(session);
-            session.setTransactionIsolation(expr.getValue(session).getInt());
-            break;
-        case CommandInterface.TRANSACTION_READONLY_FALSE:
-            session.getUser().checkAdmin();
-            session.setReadOnly(false);
-            break;
-        case CommandInterface.TRANSACTION_READONLY_TRUE:
-            session.getUser().checkAdmin();
-            session.setReadOnly(true);
-            break;
-        default:
-            DbException.throwInternalError("type=" + type);
+            case CommandInterface.SET_AUTOCOMMIT_TRUE:
+                session.setAutoCommit(true);
+                break;
+            case CommandInterface.SET_AUTOCOMMIT_FALSE:
+                session.setAutoCommit(false);
+                break;
+            case CommandInterface.BEGIN:
+                session.begin();
+                break;
+            case CommandInterface.COMMIT:
+                session.commit(false);
+                break;
+            case CommandInterface.ROLLBACK:
+                session.rollback();
+                break;
+            case CommandInterface.SAVEPOINT:
+                session.addSavepoint(prepared.getSavepointName());
+                break;
+            case CommandInterface.ROLLBACK_TO_SAVEPOINT:
+                session.rollbackToSavepoint(prepared.getSavepointName());
+                break;
+            case CommandInterface.PREPARE_COMMIT:
+                session.prepareCommit(prepared.getTransactionName());
+                break;
+            case CommandInterface.COMMIT_TRANSACTION:
+                session.getUser().checkAdmin();
+                session.setPreparedTransaction(prepared.getTransactionName(), true);
+                break;
+            case CommandInterface.ROLLBACK_TRANSACTION:
+                session.getUser().checkAdmin();
+                session.setPreparedTransaction(prepared.getTransactionName(), false);
+                break;
+            case CommandInterface.TRANSACTION_ISOLATION:
+                session.getUser().checkAdmin();
+                Expression expr = prepared.getExpression();
+                expr = expr.optimize(session);
+                session.setTransactionIsolation(expr.getValue(session).getInt());
+                break;
+            case CommandInterface.TRANSACTION_READONLY_FALSE:
+                session.getUser().checkAdmin();
+                session.setReadOnly(false);
+                break;
+            case CommandInterface.TRANSACTION_READONLY_TRUE:
+                session.getUser().checkAdmin();
+                session.setReadOnly(true);
+                break;
+            default:
+                DbException.throwInternalError("type=" + type);
         }
         return 0;
     }

@@ -16,21 +16,15 @@
 package com.wplatform.ddal.jdbc;
 
 import com.wplatform.ddal.command.dml.SetTypes;
-import com.wplatform.ddal.config.Configuration;
 import com.wplatform.ddal.config.DataSourceProvider;
-import com.wplatform.ddal.config.parser.XmlConfigParser;
-import com.wplatform.ddal.dbobject.User;
-import com.wplatform.ddal.engine.Database;
-import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.util.StringUtils;
-import com.wplatform.ddal.util.Utils;
 
 import javax.sql.DataSource;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -46,16 +40,10 @@ public class JdbcDataSource implements DataSource {
 
     private String dbType;
     private int defaultQueryTimeout = -1;
-    private boolean monitorExecution = true;
-    private String validationQuery;
-    private int validationQueryTimeout = -1;
 
-    private int maxMemoryRows = -1;
-    private int maxOperationMemory = -1;
-
-    private String configLocation;
-    private Database database;
     private DataSourceProvider dataSourceProvider;
+
+    private Properties properties = new Properties();
 
     private volatile boolean inited = false;
 
@@ -115,7 +103,7 @@ public class JdbcDataSource implements DataSource {
      */
     @Override
     public Connection getConnection() throws SQLException {
-        return getConnection(Database.SYSTEM_USER_NAME, null);
+        return getJdbcConnection(this.userName, this.password);
     }
 
     /**
@@ -128,11 +116,7 @@ public class JdbcDataSource implements DataSource {
      */
     @Override
     public Connection getConnection(String user, String password) throws SQLException {
-        User userObject = database.getUser(user);
-        SessionInterface session = database.createSession(userObject);
-        JdbcConnection conn = new JdbcConnection(session, user, this.configLocation);
-        return conn;
-
+        return getJdbcConnection(user, password);
     }
 
     /**
@@ -183,6 +167,7 @@ public class JdbcDataSource implements DataSource {
      * @param url the new URL
      */
     public void setURL(String url) {
+        checkState();
         this.url = url;
     }
 
@@ -203,6 +188,7 @@ public class JdbcDataSource implements DataSource {
      * @param url the new URL
      */
     public void setUrl(String url) {
+        checkState();
         this.url = url;
     }
 
@@ -221,6 +207,7 @@ public class JdbcDataSource implements DataSource {
      * @param password the new password.
      */
     public void setPassword(String password) {
+        checkState();
         this.password = password;
     }
 
@@ -239,26 +226,8 @@ public class JdbcDataSource implements DataSource {
      * @param user the new user name
      */
     public void setUserName(String userName) {
+        checkState();
         this.userName = userName;
-    }
-
-    @Override
-    public String toString() {
-        return "DispatcherDataSource [configLocation=" + configLocation + "]";
-    }
-
-    /**
-     * @return the configLocation
-     */
-    public String getConfigLocation() {
-        return configLocation;
-    }
-
-    /**
-     * @param configLocation the configLocation to set
-     */
-    public void setConfigLocation(String configLocation) {
-        this.configLocation = configLocation;
     }
 
     /**
@@ -272,6 +241,7 @@ public class JdbcDataSource implements DataSource {
      * @param dataSourceProvider the dataSourceProvider to set
      */
     public void setDataSourceProvider(DataSourceProvider dataSourceProvider) {
+        checkState();
         this.dataSourceProvider = dataSourceProvider;
     }
 
@@ -286,36 +256,10 @@ public class JdbcDataSource implements DataSource {
      * @param dbType the dbType to set
      */
     public void setDbType(String dbType) {
+        checkState();
         this.dbType = dbType;
     }
 
-    /**
-     * @return the validationQuery
-     */
-    public String getValidationQuery() {
-        return validationQuery;
-    }
-
-    /**
-     * @param validationQuery the validationQuery to set
-     */
-    public void setValidationQuery(String validationQuery) {
-        this.validationQuery = validationQuery;
-    }
-
-    /**
-     * @return the validationQueryTimeout
-     */
-    public int getValidationQueryTimeout() {
-        return validationQueryTimeout;
-    }
-
-    /**
-     * @param validationQueryTimeout the validationQueryTimeout to set
-     */
-    public void setValidationQueryTimeout(int validationQueryTimeout) {
-        this.validationQueryTimeout = validationQueryTimeout;
-    }
 
     /**
      * @return the defaultQueryTimeout
@@ -328,86 +272,46 @@ public class JdbcDataSource implements DataSource {
      * @param defaultQueryTimeout the defaultQueryTimeout to set
      */
     public void setDefaultQueryTimeout(int defaultQueryTimeout) {
+        checkState();
         this.defaultQueryTimeout = defaultQueryTimeout;
     }
 
-    /**
-     * @return the monitorExecution
-     */
-    public boolean isMonitorExecution() {
-        return monitorExecution;
+    private JdbcConnection getJdbcConnection(String user, String password) throws SQLException {
+        if (!inited) {
+            init();
+        }
+        if (!StringUtils.isNullOrEmpty(user)) {
+            properties.setProperty("user", user);
+        }
+        if (!StringUtils.isNullOrEmpty(password)) {
+            properties.setProperty("password", password);
+        }
+        Connection conn = JdbcDriver.load().connect(url, properties);
+        if (conn == null) {
+            throw new SQLException("No suitable driver found for " + url, "08001", 8001);
+        } else if (!(conn instanceof JdbcConnection)) {
+            throw new SQLException("Connecting with old version is not supported: " + url, "08001", 8001);
+        }
+        return (JdbcConnection) conn;
     }
 
-    /**
-     * @param monitorExecution the monitorExecution to set
-     */
-    public void setMonitorExecution(boolean monitorExecution) {
-        this.monitorExecution = monitorExecution;
-    }
 
-    /**
-     * @return the maxMemoryRows
-     */
-    public int getMaxMemoryRows() {
-        return maxMemoryRows;
-    }
-
-    /**
-     * @param maxMemoryRows the maxMemoryRows to set
-     */
-    public void setMaxMemoryRows(int maxMemoryRows) {
-        this.maxMemoryRows = maxMemoryRows;
-    }
-
-    /**
-     * @return the maxOperationMemory
-     */
-    public int getMaxOperationMemory() {
-        return maxOperationMemory;
-    }
-
-    /**
-     * @param maxOperationMemory the maxOperationMemory to set
-     */
-    public void setMaxOperationMemory(int maxOperationMemory) {
-        this.maxOperationMemory = maxOperationMemory;
-    }
-
-    public synchronized void init() {
+    public void init() {
         if (inited) {
             return;
         }
-        if (StringUtils.isNullOrEmpty(this.configLocation)) {
-            throw new IllegalArgumentException("Property configLocation must not be null");
-        }
-        InputStream source = Utils.getResourceAsStream(configLocation);
-        if (source == null) {
-            throw new IllegalArgumentException("Can't load the configLocation resource "
-                    + configLocation);
-        }
-        XmlConfigParser parser = new XmlConfigParser(source);
-        Configuration configuration = parser.parse();
-        configuration.setProperty(SetTypes.MODE, this.dbType);
-        if (this.maxMemoryRows > -1) {
-            configuration.setProperty(SetTypes.MAX_MEMORY_ROWS, this.maxMemoryRows);
-        }
-        if (this.maxOperationMemory > -1) {
-            configuration.setProperty(SetTypes.MAX_OPERATION_MEMORY, this.maxOperationMemory);
-        }
-        
+        properties = new Properties();
+        properties.put(SetTypes.getTypeName(SetTypes.MODE), this.dbType);
         if (this.dataSourceProvider != null) {
-            configuration.setDataSourceProvider(this.dataSourceProvider);
+            properties.put("dataSourceProvider", this.dataSourceProvider);
         }
-
-        this.database = new Database(configuration);
         inited = true;
     }
 
-    public synchronized void close() {
-        if (database == null) {
-            return;
+    private void checkState() {
+        if (inited) {
+            throw new IllegalStateException("");
         }
-        database.close();
-        database = null;
     }
+
 }

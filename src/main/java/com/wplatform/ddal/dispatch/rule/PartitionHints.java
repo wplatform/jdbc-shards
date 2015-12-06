@@ -19,17 +19,15 @@ import com.wplatform.ddal.config.parser.GenericTokenParser;
 import com.wplatform.ddal.config.parser.TokenHandler;
 
 /**
- * 
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class PartitionHints {
-    
-    
-    
+
+
     public static PartitionHints parse(String sql) {
         /* ddal()*/
         GenericTokenParser parser = new GenericTokenParser("/*", "*/", new TokenHandler() {
-            
+
             @Override
             public String handleToken(String content) {
                 // TODO Auto-generated method stub

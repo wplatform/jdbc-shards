@@ -33,14 +33,6 @@ public class DropConstant extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
-    public void setConstantName(String constantName) {
-        this.constantName = constantName;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -55,8 +47,16 @@ public class DropConstant extends SchemaCommand {
         return constantName;
     }
 
+    public void setConstantName(String constantName) {
+        this.constantName = constantName;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean b) {
+        ifExists = b;
     }
 
 }

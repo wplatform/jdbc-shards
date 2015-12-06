@@ -33,20 +33,20 @@ public class DropIndex extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
     public String getIndexName() {
         return indexName;
+    }
+
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
     }
 
     public boolean isIfExists() {
         return ifExists;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
+    public void setIfExists(boolean b) {
+        ifExists = b;
     }
 
     @Override

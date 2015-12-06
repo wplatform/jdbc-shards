@@ -20,7 +20,6 @@ import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class CallExecutor extends CommonPreparedExecutor<Call> {
 

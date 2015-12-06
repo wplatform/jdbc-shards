@@ -17,6 +17,7 @@ package com.wplatform.ddal.jdbc;
 
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.engine.Constants;
+import com.wplatform.ddal.engine.Engine;
 import com.wplatform.ddal.engine.SessionInterface;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
@@ -72,37 +73,14 @@ public class JdbcConnection extends TraceObject implements Connection {
      * INTERNAL
      */
     public JdbcConnection(String url, Properties info) throws SQLException {
-        throw new SQLException("client mode unsupported.");
-    }
-
-    /**
-     * INTERNAL
-     */
-    public JdbcConnection(JdbcConnection clone) {
-        this.session = clone.session;
+        this.session = Engine.getInstance().createSession(url, info);
         trace = session.getTrace();
         int id = getNextId(TraceObject.CONNECTION);
         setTrace(trace, TraceObject.CONNECTION, id);
-        this.user = clone.user;
-        this.url = clone.url;
-        this.catalog = clone.catalog;
-        this.commit = clone.commit;
-        this.getGeneratedKeys = clone.getGeneratedKeys;
-        this.getQueryTimeout = clone.getQueryTimeout;
-        this.rollback = clone.rollback;
-    }
-
-    /**
-     * INTERNAL
-     */
-    public JdbcConnection(SessionInterface session, String user, String url) {
-        this.session = session;
-        trace = session.getTrace();
-        int id = getNextId(TraceObject.CONNECTION);
-        setTrace(trace, TraceObject.CONNECTION, id);
-        this.user = user;
+        this.user = info.getProperty("user");
         this.url = url;
     }
+
 
     private static CommandInterface closeAndSetNull(CommandInterface command) {
         if (command != null) {

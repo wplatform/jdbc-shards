@@ -417,7 +417,7 @@ public class Constants {
     /**
      * The database URL prefix of this database.
      */
-    public static final String START_URL = "jdbc:h2:";
+    public static final String START_URL = "jdbc:ddal:";
 
     /**
      * The file name suffix of all database files.

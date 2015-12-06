@@ -37,17 +37,9 @@ public class AlterTableSet extends SchemaCommand {
         this.value = value;
     }
 
-    public void setCheckExisting(boolean b) {
-        this.checkExisting = b;
-    }
-
     @Override
     public boolean isTransactional() {
         return true;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     @Override
@@ -68,8 +60,16 @@ public class AlterTableSet extends SchemaCommand {
         return tableName;
     }
 
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public boolean isCheckExisting() {
         return checkExisting;
+    }
+
+    public void setCheckExisting(boolean b) {
+        this.checkExisting = b;
     }
 
 }

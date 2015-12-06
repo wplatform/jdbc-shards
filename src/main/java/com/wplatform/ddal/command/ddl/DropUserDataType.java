@@ -32,17 +32,9 @@ public class DropUserDataType extends DefineCommand {
         super(session);
     }
 
-    public void setIfExists(boolean ifExists) {
-        this.ifExists = ifExists;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setTypeName(String name) {
-        this.typeName = name;
     }
 
     @Override
@@ -54,8 +46,16 @@ public class DropUserDataType extends DefineCommand {
         return typeName;
     }
 
+    public void setTypeName(String name) {
+        this.typeName = name;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
 }

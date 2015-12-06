@@ -35,10 +35,6 @@ public class AlterTableDropConstraint extends SchemaCommand {
         this.ifExists = ifExists;
     }
 
-    public void setConstraintName(String string) {
-        constraintName = string;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -56,7 +52,10 @@ public class AlterTableDropConstraint extends SchemaCommand {
     public String getConstraintName() {
         return constraintName;
     }
-    
-    
+
+    public void setConstraintName(String string) {
+        constraintName = string;
+    }
+
 
 }

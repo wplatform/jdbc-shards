@@ -25,6 +25,6 @@ import com.wplatform.ddal.command.Prepared;
  */
 public interface PreparedExecutorFactory {
 
-    public PreparedExecutor newExecutor(Prepared prepared);
+    PreparedExecutor newExecutor(Prepared prepared);
 
 }

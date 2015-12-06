@@ -65,8 +65,8 @@ public class DataSourceRepository {
         this.defaultShardName = configuration.getSchemaConfig().getShard();
         this.validationQuery = database.getSettings().defaultValidationQuery;
         this.validationQueryTimeout = database.getSettings().defaultValidationQueryTimeout;
-        this.dataSourceProvider = configuration.getDataSourceProvider();
-        if(dataSourceProvider == null) {
+        this.dataSourceProvider = configuration.getObject("dataSourceProvider");
+        if (dataSourceProvider == null) {
             throw new IllegalArgumentException();
         }
         this.trace = database.getTrace(Trace.DATASOURCE);
@@ -104,7 +104,7 @@ public class DataSourceRepository {
 
     public DataSource getDataSourceByShardName(String shardName) {
         DataSource dataSource = shardMaping.get(shardName);
-        if(dataSource == null) {
+        if (dataSource == null) {
             throw new IllegalArgumentException(shardName + " DataSource not found.");
         }
         return dataSource;
@@ -112,7 +112,7 @@ public class DataSourceRepository {
 
     public DataSource getDataSourceById(String id) {
         DataSource dataSource = idMapping.get(id);
-        if(dataSource == null) {
+        if (dataSource == null) {
             throw new IllegalArgumentException();
         }
         return dataSource;
@@ -149,24 +149,25 @@ public class DataSourceRepository {
     public Trace getTrace() {
         return trace;
     }
-    
+
     public int shardCount() {
         return this.shardMaping.size();
     }
-    
+
     public String getDefaultShardName() {
         return defaultShardName;
     }
-    
+
     public DataSource getDefaultShardDataSource() {
-        if(StringUtils.isNullOrEmpty(defaultShardName)) {
+        if (StringUtils.isNullOrEmpty(defaultShardName)) {
             return null;
         }
         return shardMaping.get(defaultShardName);
     }
-    
+
     /**
      * TODO configurable
+     *
      * @return the jdbcExecutor
      */
     public ThreadPoolExecutor getJdbcExecutor() {
@@ -185,7 +186,7 @@ public class DataSourceRepository {
         }
         return jdbcExecutor;
     }
-    
+
     public void close() {
         try {
             this.scheduledExecutor.awaitTermination(500, TimeUnit.MILLISECONDS);
@@ -275,8 +276,8 @@ public class DataSourceRepository {
                 monitor.remove(source);
             }
         }
-        
-        
+
+
         private boolean validateAvailable(DataSource dataSource) throws SQLException {
             Connection conn = null;
             try {

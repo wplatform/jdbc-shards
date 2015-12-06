@@ -38,14 +38,6 @@ public class DropFunctionAlias extends SchemaCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
-    public void setAliasName(String name) {
-        this.aliasName = name;
-    }
-
-    public void setIfExists(boolean ifExists) {
-        this.ifExists = ifExists;
-    }
-
     @Override
     public int getType() {
         return CommandInterface.DROP_ALIAS;
@@ -55,8 +47,16 @@ public class DropFunctionAlias extends SchemaCommand {
         return aliasName;
     }
 
+    public void setAliasName(String name) {
+        this.aliasName = name;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
 }

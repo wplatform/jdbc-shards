@@ -251,8 +251,8 @@ public class New {
     public static <T> CopyOnWriteArraySet<T> copyOnWriteArraySet() {
         return new CopyOnWriteArraySet<T>();
     }
-    
-    
+
+
     /**
      * Create a new CopyOnWriteArraySet.
      *
@@ -262,19 +262,18 @@ public class New {
     public static ThreadFactory customThreadFactory(String namePrefix) {
         return new CustomThreadFactory(namePrefix);
     }
-    
-    
-    
+
+
     private static final class CustomThreadFactory implements ThreadFactory {
+        private static final AtomicInteger index = new AtomicInteger(1);
         private final String prefix;
         private final boolean daemon;
         private final ThreadGroup group;
-        private final AtomicInteger index = new AtomicInteger(1);
 
         public CustomThreadFactory(String prefix) {
             this(prefix, false);
         }
-        
+
         private CustomThreadFactory(String prefix, boolean daemon) {
             SecurityManager sm = System.getSecurityManager();
             group = (sm != null) ? sm.getThreadGroup()

@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public abstract class PreparedRoutingExecutor<T extends Prepared> extends CommonPreparedExecutor<T> {
 
@@ -54,6 +53,10 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
     public PreparedRoutingExecutor(T prepared) {
         super(prepared);
         this.routingHandler = database.getRoutingHandler();
+    }
+
+    protected static boolean isNull(Value v) {
+        return v == null || v == ValueNull.INSTANCE;
     }
 
     protected int updateRow(TableMate table, Row row) {
@@ -99,8 +102,8 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
             if (workers.size() > 1) {
                 int queryTimeout = getQueryTimeout();//MILLISECONDS
                 List<Future<Integer[]>> invokeAll;
-                if(queryTimeout > 0) {
-                    invokeAll = jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
+                if (queryTimeout > 0) {
+                    invokeAll = jdbcExecutor.invokeAll(workers, queryTimeout, TimeUnit.MILLISECONDS);
                 } else {
                     invokeAll = jdbcExecutor.invokeAll(workers);
                 }
@@ -131,10 +134,6 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
 
     protected abstract List<Value> doTranslate(TableNode node, SearchRow row, StatementBuilder buff);
 
-    protected static boolean isNull(Value v) {
-        return v == null || v == ValueNull.INSTANCE;
-    }
-
     /**
      * @param result
      * @param row
@@ -154,8 +153,8 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
             if (workers.size() > 1) {
                 int queryTimeout = getQueryTimeout();//MILLISECONDS
                 List<Future<Integer>> invokeAll;
-                if(queryTimeout > 0) {
-                    invokeAll = jdbcExecutor.invokeAll(workers,queryTimeout,TimeUnit.MILLISECONDS);
+                if (queryTimeout > 0) {
+                    invokeAll = jdbcExecutor.invokeAll(workers, queryTimeout, TimeUnit.MILLISECONDS);
                 } else {
                     invokeAll = jdbcExecutor.invokeAll(workers);
                 }
@@ -177,8 +176,10 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
             }
         }
     }
+
     /**
      * build insert statement
+     *
      * @param forTable
      * @param columns
      * @param row

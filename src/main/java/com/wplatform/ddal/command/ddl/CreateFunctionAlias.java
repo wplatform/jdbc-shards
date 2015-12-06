@@ -44,8 +44,21 @@ public class CreateFunctionAlias extends SchemaCommand {
         throw DbException.getUnsupportedException("TODO");
     }
 
+    @Override
+    public int getType() {
+        return CommandInterface.CREATE_ALIAS;
+    }
+
+    public String getAliasName() {
+        return aliasName;
+    }
+
     public void setAliasName(String name) {
         this.aliasName = name;
+    }
+
+    public String getJavaClassMethod() {
+        return javaClassMethod;
     }
 
     /**
@@ -57,16 +70,40 @@ public class CreateFunctionAlias extends SchemaCommand {
         this.javaClassMethod = StringUtils.replaceAll(method, " ", "");
     }
 
+    public boolean isDeterministic() {
+        return deterministic;
+    }
+
+    public void setDeterministic(boolean deterministic) {
+        this.deterministic = deterministic;
+    }
+
+    public boolean isIfNotExists() {
+        return ifNotExists;
+    }
+
     public void setIfNotExists(boolean ifNotExists) {
         this.ifNotExists = ifNotExists;
+    }
+
+    public boolean isForce() {
+        return force;
     }
 
     public void setForce(boolean force) {
         this.force = force;
     }
 
-    public void setDeterministic(boolean deterministic) {
-        this.deterministic = deterministic;
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public boolean isBufferResultSetToLocalTemp() {
+        return bufferResultSetToLocalTemp;
     }
 
     /**
@@ -78,43 +115,5 @@ public class CreateFunctionAlias extends SchemaCommand {
         this.bufferResultSetToLocalTemp = b;
     }
 
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    @Override
-    public int getType() {
-        return CommandInterface.CREATE_ALIAS;
-    }
-
-    public String getAliasName() {
-        return aliasName;
-    }
-
-    public String getJavaClassMethod() {
-        return javaClassMethod;
-    }
-
-    public boolean isDeterministic() {
-        return deterministic;
-    }
-
-    public boolean isIfNotExists() {
-        return ifNotExists;
-    }
-
-    public boolean isForce() {
-        return force;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public boolean isBufferResultSetToLocalTemp() {
-        return bufferResultSetToLocalTemp;
-    }
-    
-    
 
 }

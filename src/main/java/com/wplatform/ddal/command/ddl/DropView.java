@@ -34,19 +34,7 @@ public class DropView extends SchemaCommand {
         super(session, schema);
         dropAction = session.getDatabase().getSettings().dropRestrict ?
                 AlterTableAddConstraint.RESTRICT :
-                    AlterTableAddConstraint.CASCADE;
-    }
-
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
-    public void setDropAction(int dropAction) {
-        this.dropAction = dropAction;
-    }
-
-    public void setViewName(String viewName) {
-        this.viewName = viewName;
+                AlterTableAddConstraint.CASCADE;
     }
 
     @Override
@@ -63,12 +51,24 @@ public class DropView extends SchemaCommand {
         return viewName;
     }
 
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
+    }
+
     public boolean isIfExists() {
         return ifExists;
     }
 
+    public void setIfExists(boolean b) {
+        ifExists = b;
+    }
+
     public int getDropAction() {
         return dropAction;
+    }
+
+    public void setDropAction(int dropAction) {
+        this.dropAction = dropAction;
     }
 
 }

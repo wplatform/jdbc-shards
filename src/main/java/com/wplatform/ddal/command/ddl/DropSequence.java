@@ -33,14 +33,6 @@ public class DropSequence extends SchemaCommand {
         super(session, schema);
     }
 
-    public void setIfExists(boolean b) {
-        ifExists = b;
-    }
-
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
@@ -55,8 +47,16 @@ public class DropSequence extends SchemaCommand {
         return sequenceName;
     }
 
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean b) {
+        ifExists = b;
     }
 
 }

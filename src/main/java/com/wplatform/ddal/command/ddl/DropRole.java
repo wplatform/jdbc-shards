@@ -32,17 +32,9 @@ public class DropRole extends DefineCommand {
         super(session);
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
     @Override
     public int update() {
         throw DbException.getUnsupportedException("TODO");
-    }
-
-    public void setIfExists(boolean ifExists) {
-        this.ifExists = ifExists;
     }
 
     @Override
@@ -54,8 +46,16 @@ public class DropRole extends DefineCommand {
         return roleName;
     }
 
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     public boolean isIfExists() {
         return ifExists;
+    }
+
+    public void setIfExists(boolean ifExists) {
+        this.ifExists = ifExists;
     }
 
 }
