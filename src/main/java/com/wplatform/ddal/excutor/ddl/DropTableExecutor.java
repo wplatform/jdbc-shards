@@ -22,9 +22,9 @@ import com.wplatform.ddal.command.ddl.AlterTableAddConstraint;
 import com.wplatform.ddal.command.ddl.DropTable;
 import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.route.rule.TableNode;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

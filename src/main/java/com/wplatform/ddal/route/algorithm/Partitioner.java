@@ -13,35 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月12日
-// $Id$
+package com.wplatform.ddal.route.algorithm;
 
-package com.wplatform.ddal.excutor.ddl;
+import java.util.List;
 
-import com.wplatform.ddal.command.ddl.DropIndex;
 import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class CreateIndexExecutor extends DefineCommandExecutor<DropIndex> {
+public interface Partitioner {
+
+    void doInit(List<TableNode> tableNodes);
 
     /**
-     * @param session
-     * @param prepared
+     * represent the sql condition: column=xx
+     *
+     * @param value
+     * @return
      */
-    public CreateIndexExecutor(DropIndex prepared) {
-        super(prepared);
-    }
+    Integer partition(Value value);
 
-    @Override
-    public int executeUpdate() {
-        return 0;
-    }
+    /**
+     * represent the sql condition: column >= xx and column <= xx
+     *
+     * @param beginValue
+     * @param endValue
+     * @return
+     */
+    Integer[] partition(Value beginValue, Value endValue);
 
-    @Override
-    protected String doTranslate(TableNode tableNode) {
-        return null;
-    }
+    /**
+     * represent the sql condition: column in (xx)
+     *
+     * @param value
+     * @return
+     */
+    Integer[] partition(Value... values);
+    
+    
 
 }

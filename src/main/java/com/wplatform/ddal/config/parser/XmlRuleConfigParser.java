@@ -18,19 +18,25 @@
 
 package com.wplatform.ddal.config.parser;
 
-import com.wplatform.ddal.config.Configuration;
-import com.wplatform.ddal.dispatch.rule.RuleColumn;
-import com.wplatform.ddal.dispatch.rule.RuleExpression;
-import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.dispatch.rule.TableRouter;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import com.wplatform.ddal.config.AlgorithmConfig;
+import com.wplatform.ddal.config.Configuration;
+import com.wplatform.ddal.route.algorithm.Partitioner;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
 
 public class XmlRuleConfigParser {
 
@@ -47,66 +53,73 @@ public class XmlRuleConfigParser {
         this.parser = parser;
     }
 
-    public static RuleColumn newRuleColumn(String name, String required, String type) {
-        RuleColumn ruleColumn = new RuleColumn();
-        if (StringUtils.isNullOrEmpty(name) || name.contains("=")) {
-            throw new ParsingException(
-                    " Error parsing rule element in rule XML. Cause: the RuleColumn's name is required , and should "
-                            + "in the first place .");
-        } else {
-            ruleColumn.setName(name);
-        }
-        if (!StringUtils.isNullOrEmpty(required)) {
-            ruleColumn.setRequired(Boolean.valueOf(required));
-        }
-        if (!StringUtils.isNullOrEmpty(type)) {
-            //ruleColumn.setType(type.toLowerCase());
-        }
-        return ruleColumn;
-    }
-
-    public void parse() {
-        configurationElement(parser.evalNode("/ddal-rule"));
-    }
-
-    private void configurationElement(XNode context) {
+    public void parse() {        
         try {
-            parseTableRule(context.evalNodes("/ddal-rule/tableRouter"));
+            parsePartitioner(parser.evalNodes("/ddal-rule/partitioner"));
+            parseTableRouter(parser.evalNodes("/ddal-rule/tableRouter"));
         } catch (Exception e) {
             throw new ParsingException("Error parsing ddal-rule XML . Cause: " + e, e);
         }
     }
 
-    private void parseTableRule(List<XNode> list) throws Exception {
+
+    private void parseTableRouter(List<XNode> list) throws Exception {
         for (XNode xNode : list) {
             String id = xNode.getStringAttribute("id");
             if (StringUtils.isNullOrEmpty(id)) {
                 throw new ParsingException(
                         "Error parsing ddal-rule XML . Cause: the id attribute of 'tableRouter' element is required.");
             }
-            TableRouter routeConfig = new TableRouter(null);
+            TableRouter routeConfig = new TableRouter();
             routeConfig.setId(id);
-            parseTableRuleChildrenXNode(routeConfig, xNode.getChildren());
-            configuration.addTemporaryTableRouter(id, routeConfig);
+            parseTableRouterProperties(routeConfig, xNode.getChildren());
+            configuration.addTableRouterTemplate(id, routeConfig);
         }
     }
 
-    // 解析<tableRule>标签下的所有子标签
-    private void parseTableRuleChildrenXNode(TableRouter tableRouter, List<XNode> list) {
-
+    private void parseTableRouterProperties(TableRouter tableRouter, List<XNode> list) {
         for (XNode xNode : list) {
             if ("partition".equals(xNode.getName())) {
                 parsePartition(tableRouter, xNode.getChildren());
             } else if ("tableRule".equals(xNode.getName())) {
-                RuleExpression ruleExpr = parseRuleExpression(xNode);
-                if (ruleExpr.getRuleColumns().isEmpty()) {
-                    throw new ParsingException("The table router '" + tableRouter.getId()
-                            + "' has no sharding column.");
+                for (XNode child : xNode.getChildren()) {
+                    String name = child.getName();
+                    String text = getStringBody(child);
+                    text = text.replaceAll("\\s", "");
+                    if("columns".equals(name)) {
+                        if(StringUtils.isNullOrEmpty(text)) {
+                            throw new ParsingException("The table router '" + tableRouter.getId()
+                            + "' has no rules columns defined.");
+                        }
+                        List<String> columns = parseMoreText(text,",");
+                        tableRouter.setRuleColumns(columns);
+                    } else if("algorithm".equals(name)) {
+                        if(StringUtils.isNullOrEmpty(text)) {
+                            throw new ParsingException("The table router '" + tableRouter.getId()
+                            + "' has no algorithm defined.");
+                        }
+                        tableRouter.setAlgorithm(text);
+                    }
                 }
-                tableRouter.setRuleExpression(ruleExpr);
             }
         }
 
+    }
+
+    /**
+     * @param text
+     * @return
+     */
+    private List<String> parseMoreText(String text,String split) {
+        String[] strings = text.split(split);
+        List<String> columns = New.arrayList(strings.length);
+        for (String column : strings) {
+            if(StringUtils.isNullOrEmpty(column)) {
+                continue;
+            }
+            columns.add(column);
+        }
+        return columns;
     }
 
     private String getStringBody(XNode xNode) {
@@ -127,51 +140,13 @@ public class XmlRuleConfigParser {
         return body;
     }
 
-    // 解析<rule>标签的内容
-    public RuleExpression parseRuleExpression(XNode xNode) {
-        String stringBody = getStringBody(xNode);
-        String text = stringBody.replaceAll("\\s", " ");
-        final List<RuleColumn> ruleColumns = new ArrayList<RuleColumn>();
-        GenericTokenParser parser = new GenericTokenParser("${", "}", new TokenHandler() {
-            @Override
-            public String handleToken(String content) {
-                content = content.replaceAll("\\s", "");
-                String name = null;
-                String required = null;
-                String type = null;
-                if (content.contains(",")) {
-                    String[] properties = content.split(",");
-                    name = properties[0];
-                    for (int j = 1; j < properties.length; j++) {
-                        String propety = properties[j];
-                        if (propety.contains("required=")) {
-                            required = propety.split("required=")[1];
-                        }
-                        if (propety.contains("type=")) {
-                            type = propety.split("type=")[1];
-                        }
-                    }
-                } else {
-                    name = content;
-                }
-                ruleColumns.add(newRuleColumn(name, required, type));
-                return name;
-            }
-        });
-        String expression = parser.parse(text);
-        RuleExpression rule = new RuleExpression(null);
-        rule.setExpression(expression);
-        rule.setRuleColumns(ruleColumns);
-        return rule;
-    }
-
     private void parsePartition(TableRouter tableRouter, List<XNode> list) {
         List<TableNode> tableNodes = New.arrayList();
         for (XNode xNode : list) {
             String shard = xNode.getStringAttribute("shard");
             String suffix = xNode.getStringAttribute("suffix");
-            shard = shard == null ? null : shard.trim();
-            suffix = suffix == null ? null : suffix.trim();
+            shard = shard == null ? null : shard.replaceAll("\\s", "");
+            suffix = suffix == null ? null : suffix.replaceAll("\\s", "");
             if (StringUtils.isNullOrEmpty(shard)) {
                 throw new ParsingException("Error parsing ddal-rule XML. Cause: "
                         + "the shard attribute of 'table' element is required.");
@@ -206,24 +181,73 @@ public class XmlRuleConfigParser {
 
     /**
      * @param items
-     * @param shards
      */
     private List<String> collectItems(String items) {
         List<String> result = New.arrayList();
-        if (!StringUtils.isNullOrEmpty(items)) {
-            for (String string : items.split(",")) {
-                string = string.trim();
-                if (StringUtils.isNullOrEmpty(string)) {
-                    continue;
-                }
-                if (result.contains(string)) {
-                    throw new ParsingException(
-                            "Error parsing ddal-rule XML . Duplicate item '" + items + "'");
-                }
-                result.add(string);
+        if(StringUtils.isNullOrEmpty(items)) {
+            return result;
+        } else if (items.indexOf(",") != -1) {
+            result = parseMoreText(items, ",");
+            if (result.size() == new HashSet<String>(result).size()) {
+                throw new ParsingException(
+                        "Duplicate item " + items);
+            }
+        } else if (items.indexOf("-") != -1) {
+            List<String> list = parseMoreText(items, "-");
+            if (list.size() != 2) {
+                throw new ParsingException(
+                        "Invalid conjunction item'" + items + "'");
             }
         }
         return result;
+    }
+    
+    private void parsePartitioner(List<XNode> xNodes) {
+        for (XNode xNode : xNodes) {
+            AlgorithmConfig config = new AlgorithmConfig();
+            String name = xNode.getStringAttribute("name");
+            String clazz = xNode.getStringAttribute("class");
+            if (StringUtils.isNullOrEmpty(name)) {
+                throw new ParsingException("partitioner attribute 'name' is required.");
+            }
+            if (StringUtils.isNullOrEmpty(clazz)) {
+                throw new ParsingException("partitioner attribute 'class' is required.");
+            }
+            config.setName(name);
+            config.setClazz(clazz);
+            config.setProperties(xNode.getChildrenAsProperties());
+            Partitioner algorithm = constructPartitioner(config);
+            configuration.addPartitioner(name, algorithm);
+        }
+    }
+    
+    private Partitioner constructPartitioner(AlgorithmConfig algorithmConfig) {
+        String clazz = algorithmConfig.getClazz();
+        Properties properties = algorithmConfig.getProperties();
+        Partitioner partitioner = null;
+        try {
+            Object object = Class.forName(clazz).newInstance();
+            Class<?> objectClass = object.getClass();
+            if(!(object instanceof Partitioner)) {
+                throw new ParsingException("invalid class " + objectClass.getName());
+            }
+            partitioner = (Partitioner) object;
+            BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+            for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                String propertyValue = properties.getProperty(propertyDescriptor.getName());
+                if (propertyValue != null) {
+                    XmlConfigParser.setPropertyWithAutomaticType(partitioner, propertyDescriptor, propertyValue);
+                }
+            }
+            return partitioner;
+        } catch (InvocationTargetException e) {
+            throw new ParsingException("There was an error to construct partitioner " + clazz
+                    + " Cause: " + e.getTargetException(), e);
+        } catch (Exception e) {
+            throw new ParsingException(
+                    "There was an error to construct partitioner " + clazz + " Cause: " + e, e);
+        }
     }
 
 }

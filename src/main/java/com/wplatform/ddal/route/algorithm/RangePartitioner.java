@@ -13,34 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月12日
-// $Id$
+package com.wplatform.ddal.route.algorithm;
 
-package com.wplatform.ddal.excutor.ddl;
-
-import com.wplatform.ddal.command.ddl.DropIndex;
-import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
+ *
  */
-public class CreateIndexExecutor extends DefineCommandExecutor<DropIndex> {
+public class RangePartitioner extends CommonPartitioner {
 
-    /**
-     * @param session
-     * @param prepared
-     */
-    public CreateIndexExecutor(DropIndex prepared) {
-        super(prepared);
-    }
 
     @Override
-    public int executeUpdate() {
-        return 0;
-    }
-
-    @Override
-    protected String doTranslate(TableNode tableNode) {
+    public Integer partition(Value value) {
+        // TODO Auto-generated method stub
         return null;
     }
 

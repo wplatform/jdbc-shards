@@ -18,8 +18,8 @@
 
 package com.wplatform.ddal.config;
 
-import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.dispatch.rule.TableRouter;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
 
 public class TableConfig {
 

@@ -40,7 +40,7 @@ public class XmlDataSourceProvider implements DataSourceProvider {
 
     public void addDataNode(String id, DataSource dataSource) {
         if (dataNodes.containsKey(id)) {
-            throw new ConfigurationException("Duplicate datasource id " + id);
+            throw new IllegalArgumentException("Duplicate datasource id " + id);
         }
         dataNodes.put(id, dataSource);
     }

@@ -18,7 +18,7 @@ package com.wplatform.ddal.excutor.ddl;
 import com.wplatform.ddal.command.ddl.TruncateTable;
 import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.dispatch.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableNode;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>

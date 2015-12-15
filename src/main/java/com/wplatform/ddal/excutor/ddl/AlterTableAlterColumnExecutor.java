@@ -24,9 +24,9 @@ import com.wplatform.ddal.dbobject.Right;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.Table;
 import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
+import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.StatementBuilder;
 
 import java.util.ArrayList;

@@ -13,40 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wplatform.ddal.dispatch.function;
+package com.wplatform.ddal.route.rule;
 
-import com.wplatform.ddal.value.Value;
+import com.wplatform.ddal.config.parser.GenericTokenParser;
+import com.wplatform.ddal.config.parser.TokenHandler;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public interface PartitionFunction {
+public class PartitionHints {
 
-    void doInit();
 
-    /**
-     * represent the sql condition: column=xx
-     *
-     * @param value
-     * @return
-     */
-    Integer apply(Value value);
+    public static PartitionHints parse(String sql) {
+        /* ddal()*/
+        GenericTokenParser parser = new GenericTokenParser("/*", "*/", new TokenHandler() {
 
-    /**
-     * represent the sql condition: column >= xx and column <= xx
-     *
-     * @param beginValue
-     * @param endValue
-     * @return
-     */
-    Integer[] apply(Value beginValue, Value endValue);
-
-    /**
-     * represent the sql condition: column in (xx)
-     *
-     * @param value
-     * @return
-     */
-    Integer[] apply(Value... value);
+            @Override
+            public String handleToken(String content) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        });
+        parser.parse(sql);
+        return null;
+    }
 
 }

@@ -17,10 +17,10 @@ package com.wplatform.ddal.excutor.ddl;
 
 import com.wplatform.ddal.command.ddl.DefineCommand;
 import com.wplatform.ddal.command.expression.Parameter;
-import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.excutor.CommonPreparedExecutor;
 import com.wplatform.ddal.excutor.JdbcWorker;
 import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
 

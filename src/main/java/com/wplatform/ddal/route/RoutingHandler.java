@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wplatform.ddal.dispatch.rule;
+// Created on 2015年2月3日
+// $Id$
 
-import com.wplatform.ddal.config.parser.GenericTokenParser;
-import com.wplatform.ddal.config.parser.TokenHandler;
+package com.wplatform.ddal.route;
+
+import java.util.List;
+
+import com.wplatform.ddal.dbobject.index.IndexCondition;
+import com.wplatform.ddal.dbobject.table.TableMate;
+import com.wplatform.ddal.engine.Session;
+import com.wplatform.ddal.result.SearchRow;
+import com.wplatform.ddal.route.rule.RoutingResult;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class PartitionHints {
+public interface RoutingHandler {
 
+    RoutingResult doRoute(TableMate table, SearchRow row);
 
-    public static PartitionHints parse(String sql) {
-        /* ddal()*/
-        GenericTokenParser parser = new GenericTokenParser("/*", "*/", new TokenHandler() {
+    RoutingResult doRoute(TableMate table, SearchRow stard, SearchRow end);
 
-            @Override
-            public String handleToken(String content) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        });
-        parser.parse(sql);
-        return null;
-    }
+    RoutingResult doRoute(TableMate table, Session session, List<IndexCondition> indexConditions);
 
 }

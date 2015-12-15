@@ -13,35 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年4月12日
+// Created on 2014年4月3日
 // $Id$
 
-package com.wplatform.ddal.excutor.ddl;
+package com.wplatform.ddal.route.rule;
 
-import com.wplatform.ddal.command.ddl.DropIndex;
-import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.value.Value;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class CreateIndexExecutor extends DefineCommandExecutor<DropIndex> {
+public interface RoutingCalculator {
 
-    /**
-     * @param session
-     * @param prepared
-     */
-    public CreateIndexExecutor(DropIndex prepared) {
-        super(prepared);
-    }
-
-    @Override
-    public int executeUpdate() {
-        return 0;
-    }
-
-    @Override
-    protected String doTranslate(TableNode tableNode) {
-        return null;
-    }
+    RoutingResult calculate(TableRouter tableRouter, Map<String, List<Value>> columnValue);
 
 }

@@ -39,11 +39,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>ognl</groupId>
-            <artifactId>ognl</artifactId>
-            <version>2.6.9</version>
-        </dependency>
-        <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
             <version>1.0.7</version>
@@ -57,13 +52,7 @@
             <groupId>com.atomikos</groupId>
             <artifactId>transactions-jta</artifactId>
             <version>3.9.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>provided</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

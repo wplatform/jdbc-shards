@@ -15,18 +15,6 @@
  */
 package com.wplatform.ddal.config.parser;
 
-import com.wplatform.ddal.config.*;
-import com.wplatform.ddal.config.ShardConfig.ShardItem;
-import com.wplatform.ddal.dispatch.rule.RuleExpression;
-import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.dispatch.rule.TableRouter;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
-import com.wplatform.ddal.util.Utils;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -35,6 +23,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import com.wplatform.ddal.config.Configuration;
+import com.wplatform.ddal.config.DataNodeConfig;
+import com.wplatform.ddal.config.DataSourceException;
+import com.wplatform.ddal.config.SchemaConfig;
+import com.wplatform.ddal.config.ShardConfig;
+import com.wplatform.ddal.config.ShardConfig.ShardItem;
+import com.wplatform.ddal.route.algorithm.Partitioner;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
+import com.wplatform.ddal.config.TableConfig;
+import com.wplatform.ddal.config.XmlDataSourceProvider;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
+import com.wplatform.ddal.util.Utils;
 
 public class XmlConfigParser {
 
@@ -67,7 +74,6 @@ public class XmlConfigParser {
         parseShards(xNode.evalNodes("/ddal-config/cluster/shard"));
         parseDataSource(xNode.evalNodes("/ddal-config/dataNodes/datasource"));
         parseRuleConfig(xNode.evalNodes("/ddal-config/tableRules/tableRule"));
-        parseRuleAlgorithms(xNode.evalNodes("/ddal-config/ruleAlgorithms/ruleAlgorithm"));
         parseSchemaConfig(xNode.evalNode("/ddal-config/schema"));
     }
 
@@ -173,49 +179,6 @@ public class XmlConfigParser {
 
     }
 
-    private void parseRuleAlgorithms(List<XNode> xNodes) {
-        for (XNode xNode : xNodes) {
-            RuleAlgorithmConfig config = new RuleAlgorithmConfig();
-            String name = xNode.getStringAttribute("name");
-            String clazz = xNode.getStringAttribute("class");
-            if (StringUtils.isNullOrEmpty(name)) {
-                throw new ParsingException("ruleAlgorithm attribute 'name' is required.");
-            }
-            if (StringUtils.isNullOrEmpty(clazz)) {
-                throw new ParsingException("ruleAlgorithm attribute 'clazz' is required.");
-            }
-            config.setName(name);
-            config.setClazz(clazz);
-            config.setProperties(xNode.getChildrenAsProperties());
-            Object ruleAlgorithm = constructAlgorithm(config);
-            configuration.addRuleAlgorithm(name, ruleAlgorithm);
-        }
-    }
-
-    private Object constructAlgorithm(RuleAlgorithmConfig algorithmConfig) {
-        String clazz = algorithmConfig.getClazz();
-        Properties properties = algorithmConfig.getProperties();
-        BeanInfo beanInfo = null;
-        try {
-            Object ruleAlgorithm = Class.forName(clazz).newInstance();
-            beanInfo = Introspector.getBeanInfo(ruleAlgorithm.getClass());
-            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-            for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-                String propertyValue = properties.getProperty(propertyDescriptor.getName());
-                if (propertyValue != null) {
-                    setPropertyWithAutomaticType(ruleAlgorithm, propertyDescriptor, propertyValue);
-                }
-            }
-            return beanInfo;
-        } catch (InvocationTargetException e) {
-            throw new ParsingException("There was an error to construct RuleAlgorithm " + clazz
-                    + " Cause: " + e.getTargetException(), e);
-        } catch (Exception e) {
-            throw new ParsingException(
-                    "There was an error to construct RuleAlgorithm " + clazz + " Cause: " + e, e);
-        }
-    }
-
     /**
      * @param tableConfings
      * @param config
@@ -254,7 +217,7 @@ public class XmlConfigParser {
         }
         dsConfig.setTables(tableConfings);
         configuration.setSchemaConfig(dsConfig);
-        configuration.getTemporaryTableRouters().clear();
+        configuration.getTableRouterTemplates().clear();
 
     }
 
@@ -357,11 +320,11 @@ public class XmlConfigParser {
         }
 
         if (!StringUtils.isNullOrEmpty(router)) {
-            TableRouter rawRouter = configuration.getTemporaryTableRouters().get(router);
+            TableRouter rawRouter = configuration.getTableRouterTemplates().get(router);
             if (rawRouter == null) {
                 throw new ParsingException("The table router '" + router + "' is not found.");
             }
-            TableRouter tableRouter = new TableRouter(configuration);
+            TableRouter tableRouter = new TableRouter();
             List<TableNode> partition = rawRouter.getPartition();
             List<TableNode> inited = New.arrayList(partition.size());
             for (TableNode item : partition) {
@@ -377,11 +340,12 @@ public class XmlConfigParser {
 
             tableRouter.setId(rawRouter.getId());
             tableRouter.setPartition(inited);
-            RuleExpression rawExpression = rawRouter.getRuleExpression();
-            RuleExpression expression = new RuleExpression(tableRouter);
-            expression.setExpression(rawExpression.getExpression());
-            expression.setRuleColumns(rawExpression.getRuleColumns());
-            tableRouter.setRuleExpression(expression);
+            String algorithm = rawRouter.getAlgorithm();
+            tableRouter.setAlgorithm(algorithm);
+            tableRouter.setRuleColumns(rawRouter.getRuleColumns());
+            Partitioner partitioner = configuration.getPartitioner(algorithm);
+            partitioner.doInit(inited);
+            tableRouter.setPartitioner(partitioner);
             config.setTableRouter(tableRouter);
             config.setShards(null);
         }
@@ -447,7 +411,7 @@ public class XmlConfigParser {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private void setPropertyWithAutomaticType(Object ruleAlgorithm, PropertyDescriptor pd,
+    static void setPropertyWithAutomaticType(Object ruleAlgorithm, PropertyDescriptor pd,
                                               String propertyValue) throws IllegalAccessException, InvocationTargetException {
         Class<?> pType = pd.getPropertyType();
         if (pType == Short.class || pType == short.class) {

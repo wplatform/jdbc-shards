@@ -369,7 +369,6 @@ public class Select extends Query {
         }
         TableMate last = null;
         for (TableFilter out : filters) {
-            
         }
         cost = preparePlan();
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&

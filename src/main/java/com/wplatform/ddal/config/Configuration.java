@@ -19,9 +19,10 @@
 package com.wplatform.ddal.config;
 
 import com.wplatform.ddal.command.dml.SetTypes;
-import com.wplatform.ddal.dispatch.rule.TableRouter;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
+import com.wplatform.ddal.route.algorithm.Partitioner;
+import com.wplatform.ddal.route.rule.TableRouter;
 import com.wplatform.ddal.util.New;
 
 import java.util.HashMap;
@@ -34,8 +35,8 @@ import java.util.Set;
 public class Configuration {
 
     private final Map<String, ShardConfig> cluster = New.hashMap();
-    private final Map<String, Object> ruleAlgorithms = New.hashMap();
-    private final Map<String, TableRouter> temporary = New.hashMap();
+    private final Map<String, Partitioner> partitioners = New.hashMap();
+    private final Map<String, TableRouter> tableRouterTemplate = New.hashMap();
     private HashMap<String, Object> prop = New.hashMap();
     private SchemaConfig schemaConfig = new SchemaConfig();
 
@@ -295,37 +296,41 @@ public class Configuration {
      */
     public void addShard(String name, ShardConfig shard) {
         if (cluster.containsKey(name)) {
-            throw new ConfigurationException("Duplicate shard name " + name);
+            throw new IllegalArgumentException("Duplicate shard name " + name);
         }
         cluster.put(name, shard);
     }
 
-    public void addTemporaryTableRouter(String id, TableRouter tableRouter) {
-        if (temporary.containsKey(id)) {
-            throw new ConfigurationException("Duplicate table router id " + id);
+    public void addTableRouterTemplate(String id, TableRouter template) {
+        if (tableRouterTemplate.containsKey(id)) {
+            throw new IllegalArgumentException("Duplicate table router id " + id);
         }
-        temporary.put(id, tableRouter);
+        tableRouterTemplate.put(id, template);
     }
 
     /**
      * @return the tableRules
      */
-    public Map<String, TableRouter> getTemporaryTableRouters() {
-        return temporary;
+    public Map<String, TableRouter> getTableRouterTemplates() {
+        return tableRouterTemplate;
     }
 
     /**
-     * @return the ruleAlgorithms
+     * @return the partitioner
      */
-    public Map<String, Object> getRuleAlgorithms() {
-        return ruleAlgorithms;
+    public Partitioner getPartitioner(String name) {
+        Partitioner partitioner = partitioners.get(name);
+        if (partitioner == null) {
+            throw new IllegalArgumentException("Duplicate partitioner name " + name);
+        }
+        return partitioner;
     }
 
-    public void addRuleAlgorithm(String name, Object ruleAlgorithm) {
-        if (ruleAlgorithms.containsKey(name)) {
-            throw new ConfigurationException("Duplicate ruleAlgorithm name " + name);
+    public void addPartitioner(String name, Partitioner partitioner) {
+        if (partitioners.containsKey(name)) {
+            throw new IllegalArgumentException("Duplicate partitioner name " + name);
         }
-        ruleAlgorithms.put(name, ruleAlgorithm);
+        partitioners.put(name, partitioner);
     }
 
 }

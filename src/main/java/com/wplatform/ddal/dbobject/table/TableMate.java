@@ -17,21 +17,33 @@
 // $Id$
 package com.wplatform.ddal.dbobject.table;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import com.wplatform.ddal.command.ddl.CreateTableData;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
 import com.wplatform.ddal.dbobject.index.IndexType;
 import com.wplatform.ddal.dbobject.schema.Schema;
-import com.wplatform.ddal.dispatch.rule.RoutingResult;
-import com.wplatform.ddal.dispatch.rule.RuleColumn;
-import com.wplatform.ddal.dispatch.rule.TableNode;
-import com.wplatform.ddal.dispatch.rule.TableRouter;
 import com.wplatform.ddal.engine.Constants;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.excutor.Optional;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.result.SortOrder;
+import com.wplatform.ddal.route.rule.RoutingResult;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
 import com.wplatform.ddal.shards.DataSourceRepository;
 import com.wplatform.ddal.util.JdbcUtils;
 import com.wplatform.ddal.util.MathUtils;
@@ -41,12 +53,6 @@ import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.ValueDate;
 import com.wplatform.ddal.value.ValueTime;
 import com.wplatform.ddal.value.ValueTimestamp;
-
-import javax.sql.DataSource;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -99,6 +105,13 @@ public class TableMate extends Table {
     public void setTableRouter(TableRouter tableRouter) {
         this.tableRouter = tableRouter;
     }
+    
+    /**
+     * @return the shardingColumns
+     */
+    public ArrayList<Column> getShardingColumns() {
+        return shardingColumns;
+    }
 
     /**
      * @return the scanLevel
@@ -139,7 +152,7 @@ public class TableMate extends Table {
 
     /**
      * @return
-     * @see com.wplatform.ddal.dispatch.rule.TableRouter#getPartition()
+     * @see com.wplatform.ddal.route.rule.TableRouter#getPartition()
      */
     public TableNode[] getPartitionNode() {
         if (tableRouter != null) {
@@ -156,11 +169,11 @@ public class TableMate extends Table {
     private void validationRuleColumn(Column[] columns) {
         if (tableRouter != null) {
             shardingColumns = New.arrayList();
-            for (RuleColumn ruleCol : tableRouter.getRuleColumns()) {
+            for (String ruleCol : tableRouter.getRuleColumns()) {
                 Column matched = null;
                 for (Column column : columns) {
                     String colName = column.getName();
-                    if (colName.equalsIgnoreCase(ruleCol.getName())) {
+                    if (colName.equalsIgnoreCase(ruleCol)) {
                         matched = column;
                         shardingColumns.add(column);
                         break;
@@ -504,7 +517,7 @@ public class TableMate extends Table {
         // create shardingKey index
         if (tableRouter != null) {
             ArrayList<Index> indexes = getIndexes();
-            List<RuleColumn> ruleColumns = tableRouter.getRuleColumns();
+            List<String> ruleColumns = tableRouter.getRuleColumns();
             boolean isMatch = false;
             for (Index index : indexes) {
                 Column[] columns = index.getColumns();
@@ -514,9 +527,10 @@ public class TableMate extends Table {
                 boolean shardingKeyIndex = true;
                 for (int idx = 0; idx < columns.length; idx++) {
                     String name = columns[idx].getName();
-                    String name1 = ruleColumns.get(idx).getName();
-                    if (!name.equalsIgnoreCase(name1)) {
+                    String rule = ruleColumns.get(idx);
+                    if (!name.equalsIgnoreCase(rule)) {
                         shardingKeyIndex = false;
+                        break;
                     }
                 }
                 if (shardingKeyIndex) {
@@ -526,10 +540,10 @@ public class TableMate extends Table {
             }
             if (!isMatch) {
                 ArrayList<Column> shardCol = New.arrayList();
-                for (RuleColumn ruleCol : ruleColumns) {
+                for (String ruleCol : ruleColumns) {
                     for (Column column : columns) {
                         String colName = column.getName();
-                        if (colName.equalsIgnoreCase(ruleCol.getName())) {
+                        if (colName.equalsIgnoreCase(ruleCol)) {
                             shardCol.add(column);
                         }
                     }

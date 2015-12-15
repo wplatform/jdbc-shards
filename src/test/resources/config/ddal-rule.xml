@@ -10,7 +10,8 @@
             <table shard="shard3" suffix="_01,_02,_03,_04"/>
         </partition>
         <tableRule>
-            <![CDATA[ ${order_id} % 16]]>
+            <columns>id</columns> 
+      		<algorithm>hash</algorithm>
         </tableRule>
     </tableRouter>
 
@@ -22,7 +23,14 @@
             <table shard="shard3" suffix="_01,_02"/>
         </partition>
         <tableRule>
-            <![CDATA[ ${customer_id} % 8]]>
+			<columns>customer_id</columns> 
+      		<algorithm>hash</algorithm>
         </tableRule>
+        
     </tableRouter>
+    
+    <partitioner name="hash" class="">
+    	<property name="username" value="root"/>
+    </partitioner>
+    
 </ddal-rule>

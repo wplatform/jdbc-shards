@@ -22,13 +22,13 @@ import com.wplatform.ddal.dbobject.FunctionAlias;
 import com.wplatform.ddal.dbobject.User;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.table.Table;
-import com.wplatform.ddal.dispatch.rule.TableNode;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.engine.SysProperties;
 import com.wplatform.ddal.message.DbException;
 import com.wplatform.ddal.message.ErrorCode;
 import com.wplatform.ddal.message.Trace;
+import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.New;
 
 import java.util.ArrayList;
