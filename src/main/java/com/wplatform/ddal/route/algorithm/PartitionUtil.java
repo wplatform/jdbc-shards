@@ -15,28 +15,17 @@
  */
 package com.wplatform.ddal.route.algorithm;
 
-import java.util.List;
 
-import com.wplatform.ddal.route.rule.TableNode;
-import com.wplatform.ddal.value.Value;
-
-/**
- * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
- */
-public class HashSlotsPartitioner extends CommonPartitioner {
+public final class PartitionUtil {
 
     // 分区长度:数据段分布定义，其中取模的数一定要是2^n， 因为这里使用x % 2^n == x & (2^n - 1)等式，来优化性能。
     private static final int PARTITION_LENGTH = 1024;
 
     // %转换为&操作的换算数值
     private static final long AND_VALUE = PARTITION_LENGTH - 1;
-    
+
     // 分区线段
     private final int[] segment = new int[PARTITION_LENGTH];
-    
-    protected int[] count;
-    protected int[] length;
 
     /**
      * <pre>
@@ -46,9 +35,7 @@ public class HashSlotsPartitioner extends CommonPartitioner {
      * 约束：1024 = sum((count[i]*length[i])). count和length两个向量的点积恒等于1024
      * </pre>
      */
-    @Override
-    public void doInit(List<TableNode> tableNodes) {
-        super.doInit(tableNodes);
+    public PartitionUtil(int[] count, int[] length) {
         if (count == null || length == null || (count.length != length.length)) {
             throw new RuntimeException("error,check your scope & scopeLength definition.");
         }
@@ -57,6 +44,7 @@ public class HashSlotsPartitioner extends CommonPartitioner {
             segmentLength += count[i];
         }
         int[] ai = new int[segmentLength + 1];
+
         int index = 0;
         for (int i = 0; i < count.length; i++) {
             for (int j = 0; j < count[i]; j++) {
@@ -66,6 +54,7 @@ public class HashSlotsPartitioner extends CommonPartitioner {
         if (ai[ai.length - 1] != PARTITION_LENGTH) {
             throw new RuntimeException("error,check your partitionScope definition.");
         }
+
         // 数据映射操作
         for (int i = 1; i < ai.length; i++) {
             for (int j = ai[i - 1]; j < ai[i]; j++) {
@@ -74,34 +63,8 @@ public class HashSlotsPartitioner extends CommonPartitioner {
         }
     }
 
-
-    public void setPartitionCount(String partitionCount) {
-        this.count = toIntArray(partitionCount);
-    }
-
-    public void setPartitionLength(String partitionLength) {
-        this.length = toIntArray(partitionLength);
-    }
-    
-    private static int[] toIntArray(String string) {
-        String[] strs = string.split(string, ',');
-        int[] ints = new int[strs.length];
-        for (int i = 0; i < strs.length; ++i) {
-            ints[i] = Integer.parseInt(strs[i]);
-        }
-        return ints;
-    }
-
-    
     public int partition(long hash) {
         return segment[(int) (hash & AND_VALUE)];
-    }
-
-
-    @Override
-    public Integer partition(Value value) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

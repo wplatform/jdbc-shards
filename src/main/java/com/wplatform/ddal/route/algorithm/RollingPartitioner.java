@@ -13,21 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2014年4月22日
-// $Id$
+package com.wplatform.ddal.route.algorithm;
 
-package com.wplatform.ddal.route.rule;
-
-import com.wplatform.ddal.util.Utils;
+import com.wplatform.ddal.value.Value;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class MurmurHash {
+public class RollingPartitioner extends CommonPartitioner {
 
-    public long calculate(Object paramObj) {
-        String paramValue = paramObj == null ? "null" : paramObj.toString();
-        long hash = Utils.murmurhash2_64(paramValue);
-        return Math.abs(hash);
+    private String rollingBy;
+    private String shardPattern;
+    private String tablePattern;
+
+    public void setRollingBy(String rollingBy) {
+        this.rollingBy = rollingBy;
+    }
+
+    public void setShardPattern(String shardPattern) {
+        this.shardPattern = shardPattern;
+    }
+
+    public void setTablePattern(String tablePattern) {
+        this.tablePattern = tablePattern;
+    }
+
+
+    @Override
+    public Integer partition(Value value) {
+        return null;
     }
 }

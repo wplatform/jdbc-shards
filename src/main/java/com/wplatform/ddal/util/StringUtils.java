@@ -23,6 +23,7 @@ import com.wplatform.ddal.message.ErrorCode;
 import java.lang.ref.SoftReference;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -120,10 +121,7 @@ public class StringUtils {
      * @return true if start is a prefix of s
      */
     public static boolean startsWithIgnoreCase(String s, String start) {
-        if (s.length() < start.length()) {
-            return false;
-        }
-        return s.substring(0, start.length()).equalsIgnoreCase(start);
+        return s.length() >= start.length() && s.substring(0, start.length()).equalsIgnoreCase(start);
     }
 
     /**
@@ -443,8 +441,7 @@ public class StringUtils {
                 buff[j++] = (byte) ch;
             }
         }
-        String s = new String(buff, 0, j, Constants.UTF8);
-        return s;
+        return new String(buff, 0, j, Constants.UTF8);
     }
 
     /**
@@ -883,7 +880,7 @@ public class StringUtils {
             return s;
         }
         if (s == null) {
-            return s;
+            return null;
         } else if (s.length() == 0) {
             return "";
         }
@@ -916,7 +913,7 @@ public class StringUtils {
             return s;
         }
         if (s == null) {
-            return s;
+            return null;
         } else if (s.length() == 0) {
             return "";
         }
@@ -1062,6 +1059,22 @@ public class StringUtils {
             return pattern;
         }
         return replaceAll(pattern, "\\", "\\\\");
+    }
+
+    /**
+     * @param text
+     * @return
+     */
+    public static List<String> split(String text, String split) {
+        String[] strings = text.split(split);
+        List<String> columns = New.arrayList(strings.length);
+        for (String column : strings) {
+            if (StringUtils.isNullOrEmpty(column)) {
+                continue;
+            }
+            columns.add(column);
+        }
+        return columns;
     }
 
 }

@@ -15,6 +15,18 @@
  */
 package com.wplatform.ddal.config.parser;
 
+import com.wplatform.ddal.config.*;
+import com.wplatform.ddal.config.ShardConfig.ShardItem;
+import com.wplatform.ddal.route.algorithm.Partitioner;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
+import com.wplatform.ddal.util.Utils;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -23,25 +35,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import com.wplatform.ddal.config.Configuration;
-import com.wplatform.ddal.config.DataNodeConfig;
-import com.wplatform.ddal.config.DataSourceException;
-import com.wplatform.ddal.config.SchemaConfig;
-import com.wplatform.ddal.config.ShardConfig;
-import com.wplatform.ddal.config.ShardConfig.ShardItem;
-import com.wplatform.ddal.route.algorithm.Partitioner;
-import com.wplatform.ddal.route.rule.TableNode;
-import com.wplatform.ddal.route.rule.TableRouter;
-import com.wplatform.ddal.config.TableConfig;
-import com.wplatform.ddal.config.XmlDataSourceProvider;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
-import com.wplatform.ddal.util.Utils;
 
 public class XmlConfigParser {
 
@@ -180,15 +173,15 @@ public class XmlConfigParser {
     }
 
     /**
-     * @param tableConfings
+     * @param tableConfigs
      * @param config
      */
-    private void addToListIfNotDuplicate(List<TableConfig> tableConfings, TableConfig config) {
-        if (tableConfings.contains(config)) {
+    private void addToListIfNotDuplicate(List<TableConfig> tableConfigs, TableConfig config) {
+        if (tableConfigs.contains(config)) {
             throw new ParsingException(
                     "Duplicate table name '" + config.getName() + "' in schema.");
         }
-        tableConfings.add(config);
+        tableConfigs.add(config);
     }
 
     private void parseSchemaConfig(XNode xNode) {
@@ -344,7 +337,7 @@ public class XmlConfigParser {
             tableRouter.setAlgorithm(algorithm);
             tableRouter.setRuleColumns(rawRouter.getRuleColumns());
             Partitioner partitioner = configuration.getPartitioner(algorithm);
-            partitioner.doInit(inited);
+            partitioner.initialize(inited);
             tableRouter.setPartitioner(partitioner);
             config.setTableRouter(tableRouter);
             config.setShards(null);

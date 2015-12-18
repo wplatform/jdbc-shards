@@ -15,17 +15,22 @@
  */
 package com.wplatform.ddal.route.algorithm;
 
-import java.util.List;
-
 import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.value.Value;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface Partitioner {
 
-    void doInit(List<TableNode> tableNodes);
+    /**
+     * calling after the properties hash been set.
+     *
+     * @param tableNodes
+     */
+    void initialize(List<TableNode> tableNodes);
 
     /**
      * represent the sql condition: column=xx
@@ -47,7 +52,7 @@ public interface Partitioner {
     /**
      * represent the sql condition: column in (xx)
      *
-     * @param value
+     * @param values
      * @return
      */
     Integer[] partition(Value... values);

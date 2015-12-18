@@ -15,14 +15,15 @@
  */
 package com.wplatform.ddal.route.algorithm;
 
-import java.util.List;
-import java.util.Set;
-
 import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueLong;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -30,7 +31,7 @@ import com.wplatform.ddal.value.ValueLong;
  */
 public abstract class CommonPartitioner implements Partitioner {
 
-    private int defaultNodeIndex;
+    private int defaultNodeIndex = -1;
 
     private List<TableNode> tableNodes;
 
@@ -55,9 +56,9 @@ public abstract class CommonPartitioner implements Partitioner {
         return tableNodes;
     }
 
-    public void doInit(List<TableNode> tableNodes) {
+    public void initialize(List<TableNode> tableNodes) {
         this.tableNodes = tableNodes;
-    };
+    }
 
     @Override
     public Integer[] partition(Value beginValue, Value endValue) {
@@ -116,6 +117,16 @@ public abstract class CommonPartitioner implements Partitioner {
             return null;
         }
 
+    }
+
+    protected static int[] toIntArray(String string) {
+        string = string.replaceAll("\\s", "");
+        List<String> split = StringUtils.split(string, ",");
+        int[] ints = new int[split.size()];
+        for (int i = 0; i < split.size(); ++i) {
+            ints[i] = Integer.parseInt(split.get(i));
+        }
+        return ints;
     }
 
 }

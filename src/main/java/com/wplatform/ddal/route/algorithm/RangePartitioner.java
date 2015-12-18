@@ -15,7 +15,13 @@
  */
 package com.wplatform.ddal.route.algorithm;
 
+import com.wplatform.ddal.route.rule.RuleEvaluateException;
+import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.value.Value;
+import com.wplatform.ddal.value.ValueNull;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -23,11 +29,152 @@ import com.wplatform.ddal.value.Value;
  */
 public class RangePartitioner extends CommonPartitioner {
 
+    private int[] count;
+    private int[] length;
+    private PartitionUtil partitionUtil;
+
+    @Override
+    public void initialize(List<TableNode> tableNodes) {
+        super.initialize(tableNodes);
+        partitionUtil = new PartitionUtil(count, length);
+    }
+
+
+    public void setPartitionCount(String partitionCount) {
+        this.count = toIntArray(partitionCount);
+    }
+
+    public void setPartitionLength(String partitionLength) {
+        this.length = toIntArray(partitionLength);
+    }
+
 
     @Override
     public Integer partition(Value value) {
-        // TODO Auto-generated method stub
-        return null;
+        int type = value.getType();
+        switch (type) {
+            case Value.BYTE:
+            case Value.SHORT:
+            case Value.INT:
+            case Value.LONG:
+                long valueLong = value.getLong();
+                return partitionUtil.partition(valueLong);
+            case Value.FLOAT:
+            case Value.DECIMAL:
+            case Value.DOUBLE:
+                double aDouble = value.getDouble();
+                long round = Math.round(aDouble);
+                return partitionUtil.partition(round);
+            case Value.DATE:
+            case Value.TIME:
+            case Value.TIMESTAMP:
+                long toLong = value.getLong();
+                return partitionUtil.partition(toLong);
+            case Value.STRING:
+            case Value.STRING_FIXED:
+            case Value.STRING_IGNORECASE:
+                String string = value.getString();
+                long hash = hash(string, 0, string.length());
+                return partitionUtil.partition(hash);
+            default:
+                throw new RuleEvaluateException("Invalid type for " + getClass().getName());
+        }
+    }
+
+    @Override
+    public Integer[] partition(Value beginValue, Value endValue) {
+        if (beginValue == null || beginValue == ValueNull.INSTANCE
+                || endValue == null || endValue == ValueNull.INSTANCE) {
+            return allNodes();
+        }
+        if (beginValue.getType() != endValue.getType()) {
+            throw new RuleEvaluateException("Type is not consistent");
+        }
+        long vBegin;
+        long vEnd;
+        int type = beginValue.getType();
+        switch (type) {
+            case Value.BYTE:
+            case Value.SHORT:
+            case Value.INT:
+            case Value.LONG:
+                vBegin = beginValue.getLong();
+                vEnd = endValue.getLong();
+                break;
+            case Value.FLOAT:
+            case Value.DECIMAL:
+            case Value.DOUBLE:
+                double aDouble = beginValue.getDouble();
+                double bDouble = endValue.getDouble();
+                vBegin = Math.round(aDouble);
+                vEnd = Math.round(bDouble);
+                break;
+            case Value.DATE:
+            case Value.TIME:
+            case Value.TIMESTAMP:
+                vBegin = beginValue.getLong();
+                vEnd = endValue.getLong();
+                break;
+            case Value.STRING:
+            case Value.STRING_FIXED:
+            case Value.STRING_IGNORECASE:
+                String str1 = beginValue.getString();
+                String str2 = endValue.getString();
+                vBegin = hash(str1, 0, str1.length());
+                vEnd = hash(str2, 0, str2.length());
+                break;
+            default:
+                throw new RuleEvaluateException("Invalid type for " + getClass().getName());
+
+        }
+        if ((vEnd - vBegin) >= 1023) {
+            return allNodes();
+        } else if ((vEnd - vBegin) < 0) {
+            return new Integer[0];
+        } else {
+            Integer begin = partition(beginValue);
+            Integer end = partition(endValue);
+            int max = Math.max(begin, end);
+            int min = Math.min(begin, end);
+            Integer[] re = new Integer[(max - min) + 1];
+            int idx = 0;
+            for (Integer i = min; i <= max; i++) {
+                re[idx++] = i;
+            }
+            return re;
+        }
+    }
+
+    /**
+     * 字符串hash算法：s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1] <br>
+     * 其中s[]为字符串的字符数组，换算成程序的表达式为：<br>
+     * h = 31*h + s.charAt(i); => h = (h << 5) - h + s.charAt(i); <br>
+     *
+     * @param start hash for s.substring(start, end)
+     * @param end hash for s.substring(start, end)
+     */
+    private static long hash(String s, int start, int end) {
+        if (start < 0) {
+            start = 0;
+        }
+        if (end > s.length()) {
+            end = s.length();
+        }
+        long h = 0;
+        for (int i = start; i < end; ++i) {
+            h = (h << 5) - h + s.charAt(i);
+        }
+        return h;
+    }
+
+
+    public static void main(String[] args) {
+        String[] str = {"abc", "bca", "cab", "cba", "aaa", "111", "232", "112", "ABC"};
+        Arrays.sort(str);
+        for (int i = 0; i < str.length; i++) {
+            System.out.println(str[i]);
+            System.out.println(hash(str[i], 0, str[i].length()));
+        }
     }
 
 }

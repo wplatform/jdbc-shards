@@ -18,6 +18,16 @@
 
 package com.wplatform.ddal.config.parser;
 
+import com.wplatform.ddal.config.AlgorithmConfig;
+import com.wplatform.ddal.config.Configuration;
+import com.wplatform.ddal.route.algorithm.Partitioner;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
+import com.wplatform.ddal.util.New;
+import com.wplatform.ddal.util.StringUtils;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -26,17 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.wplatform.ddal.config.AlgorithmConfig;
-import com.wplatform.ddal.config.Configuration;
-import com.wplatform.ddal.route.algorithm.Partitioner;
-import com.wplatform.ddal.route.rule.TableNode;
-import com.wplatform.ddal.route.rule.TableRouter;
-import com.wplatform.ddal.util.New;
-import com.wplatform.ddal.util.StringUtils;
 
 public class XmlRuleConfigParser {
 
@@ -91,7 +90,7 @@ public class XmlRuleConfigParser {
                             throw new ParsingException("The table router '" + tableRouter.getId()
                             + "' has no rules columns defined.");
                         }
-                        List<String> columns = parseMoreText(text,",");
+                        List<String> columns = StringUtils.split(text, ",");
                         tableRouter.setRuleColumns(columns);
                     } else if("algorithm".equals(name)) {
                         if(StringUtils.isNullOrEmpty(text)) {
@@ -104,22 +103,6 @@ public class XmlRuleConfigParser {
             }
         }
 
-    }
-
-    /**
-     * @param text
-     * @return
-     */
-    private List<String> parseMoreText(String text,String split) {
-        String[] strings = text.split(split);
-        List<String> columns = New.arrayList(strings.length);
-        for (String column : strings) {
-            if(StringUtils.isNullOrEmpty(column)) {
-                continue;
-            }
-            columns.add(column);
-        }
-        return columns;
     }
 
     private String getStringBody(XNode xNode) {
@@ -187,13 +170,13 @@ public class XmlRuleConfigParser {
         if(StringUtils.isNullOrEmpty(items)) {
             return result;
         } else if (items.indexOf(",") != -1) {
-            result = parseMoreText(items, ",");
+            result = StringUtils.split(items, ",");
             if (result.size() == new HashSet<String>(result).size()) {
                 throw new ParsingException(
                         "Duplicate item " + items);
             }
         } else if (items.indexOf("-") != -1) {
-            List<String> list = parseMoreText(items, "-");
+            List<String> list = StringUtils.split(items, "-");
             if (list.size() != 2) {
                 throw new ParsingException(
                         "Invalid conjunction item'" + items + "'");
