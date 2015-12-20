@@ -67,7 +67,7 @@ public abstract class PreparedRoutingExecutor<T extends Prepared> extends Common
 
     protected int updateRow(TableMate table, Row row, List<IndexCondition> where) {
         session.checkCanceled();
-        RoutingResult result = routingHandler.doRoute(table, session, where);
+        RoutingResult result = routingHandler.doRoute(session, table, where);
         return invokeUpdateRow(result, row);
     }
 

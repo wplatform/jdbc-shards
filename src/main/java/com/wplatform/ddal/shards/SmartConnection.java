@@ -39,7 +39,6 @@ public final class SmartConnection extends SmartSupport implements InvocationHan
     /**
      * @param database
      * @param dataSource
-     * @param traceable
      * @throws SQLException
      */
     protected SmartConnection(DataSourceRepository database, SmartDataSource dataSource) {

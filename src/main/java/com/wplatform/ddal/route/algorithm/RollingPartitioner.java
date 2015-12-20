@@ -24,7 +24,7 @@ public class RollingPartitioner extends CommonPartitioner {
 
     private String rollingBy;
     private String shardPattern;
-    private String tablePattern;
+    private String suffixPattern;
 
     public void setRollingBy(String rollingBy) {
         this.rollingBy = rollingBy;
@@ -34,10 +34,9 @@ public class RollingPartitioner extends CommonPartitioner {
         this.shardPattern = shardPattern;
     }
 
-    public void setTablePattern(String tablePattern) {
-        this.tablePattern = tablePattern;
+    public void setSuffixPattern(String suffixPattern) {
+        this.suffixPattern = suffixPattern;
     }
-
 
     @Override
     public Integer partition(Value value) {

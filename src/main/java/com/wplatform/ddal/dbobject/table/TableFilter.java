@@ -973,11 +973,11 @@ public class TableFilter implements ColumnResolver {
      * @param forUpdateRows the rows to lock
      */
     public void lockRows(ArrayList<Row> forUpdateRows) {
-        for (Row row : forUpdateRows) {
-            Row newRow = row.getCopy();
+        //for (Row row : forUpdateRows) {
+            //Row newRow = row.getCopy();
             //table.removeRow(session, row);
             //table.addRow(session, newRow);
-        }
+        //}
     }
 
     public TableFilter getNestedJoin() {

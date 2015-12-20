@@ -18,13 +18,12 @@
 
 package com.wplatform.ddal.route.rule;
 
-import com.wplatform.ddal.route.TableRoutingException;
-import com.wplatform.ddal.util.New;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import com.wplatform.ddal.util.New;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -38,8 +37,8 @@ public class RoutingResult implements Serializable {
     private List<TableNode> selected;
 
     RoutingResult(List<TableNode> all, List<TableNode> selected) {
-        if (selected.isEmpty()) {
-            throw new TableRoutingException("Empty table node.");
+        if (all == null || selected == null) {
+            throw new IllegalArgumentException();
         }
         if (selected.size() > all.size()) {
             throw new IllegalArgumentException();
@@ -48,6 +47,10 @@ public class RoutingResult implements Serializable {
         this.selected = selected;
     }
 
+    public static RoutingResult emptyResult() {
+        List<TableNode> nodes = New.arrayList(0);
+        return new RoutingResult(nodes, nodes);
+    }
 
     public static RoutingResult fixedResult(TableNode tableNode) {
         List<TableNode> nodes = New.arrayList(1);

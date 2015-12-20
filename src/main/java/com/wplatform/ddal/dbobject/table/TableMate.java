@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class TableMate extends Table {
     private Index scanIndex;
 
     private TableRouter tableRouter;
-    private ArrayList<Column> shardingColumns;
+    private Column[] ruleColumns;
     private TableNode[] shards;
     private int scanLevel;
 
@@ -105,12 +106,12 @@ public class TableMate extends Table {
     public void setTableRouter(TableRouter tableRouter) {
         this.tableRouter = tableRouter;
     }
-    
+
     /**
      * @return the shardingColumns
      */
-    public ArrayList<Column> getShardingColumns() {
-        return shardingColumns;
+    public Column[] getRuleColumns() {
+        return ruleColumns;
     }
 
     /**
@@ -168,14 +169,16 @@ public class TableMate extends Table {
      */
     private void validationRuleColumn(Column[] columns) {
         if (tableRouter != null) {
-            shardingColumns = New.arrayList();
-            for (String ruleCol : tableRouter.getRuleColumns()) {
+            List<String> ruleColNames = tableRouter.getRuleColumns();
+            ruleColumns = new Column[ruleColNames.size()];
+            for (int i = 0; i < ruleColNames.size(); i++) {
+                String ruleCol = ruleColNames.get(i);
                 Column matched = null;
                 for (Column column : columns) {
                     String colName = column.getName();
                     if (colName.equalsIgnoreCase(ruleCol)) {
                         matched = column;
-                        shardingColumns.add(column);
+                        ruleColumns[i] = column;
                         break;
                     }
                 }
@@ -515,20 +518,17 @@ public class TableMate extends Table {
 
     private void shardingKeyIndex() {
         // create shardingKey index
-        if (tableRouter != null) {
+        if (ruleColumns != null) {
             ArrayList<Index> indexes = getIndexes();
-            List<String> ruleColumns = tableRouter.getRuleColumns();
             boolean isMatch = false;
             for (Index index : indexes) {
                 Column[] columns = index.getColumns();
-                if (columns.length != ruleColumns.size()) {
+                if (columns.length != ruleColumns.length) {
                     continue;
                 }
                 boolean shardingKeyIndex = true;
                 for (int idx = 0; idx < columns.length; idx++) {
-                    String name = columns[idx].getName();
-                    String rule = ruleColumns.get(idx);
-                    if (!name.equalsIgnoreCase(rule)) {
+                    if (columns[idx] != ruleColumns[idx]) {
                         shardingKeyIndex = false;
                         break;
                     }
@@ -539,16 +539,8 @@ public class TableMate extends Table {
                 }
             }
             if (!isMatch) {
-                ArrayList<Column> shardCol = New.arrayList();
-                for (String ruleCol : ruleColumns) {
-                    for (Column column : columns) {
-                        String colName = column.getName();
-                        if (colName.equalsIgnoreCase(ruleCol)) {
-                            shardCol.add(column);
-                        }
-                    }
-                }
-                addIndex("$shardingKey", shardCol, IndexType.createShardingKey(false));
+                List<Column> asList = Arrays.asList(ruleColumns);
+                addIndex("$shardingKey", New.arrayList(asList), IndexType.createShardingKey(false));
             }
         }
     }

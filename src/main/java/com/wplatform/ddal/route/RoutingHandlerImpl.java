@@ -18,270 +18,113 @@
 
 package com.wplatform.ddal.route;
 
-import com.wplatform.ddal.command.expression.Comparison;
+import java.util.List;
+
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.message.DbException;
-import com.wplatform.ddal.result.ResultInterface;
 import com.wplatform.ddal.result.SearchRow;
-import com.wplatform.ddal.route.algorithm.Partitioner;
-import com.wplatform.ddal.route.rule.*;
+import com.wplatform.ddal.route.rule.RoutingArgument;
+import com.wplatform.ddal.route.rule.RoutingCalculator;
+import com.wplatform.ddal.route.rule.RoutingCalculatorImpl;
+import com.wplatform.ddal.route.rule.RoutingResult;
+import com.wplatform.ddal.route.rule.TableNode;
+import com.wplatform.ddal.route.rule.TableRouter;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
-import com.wplatform.ddal.value.ValueLong;
-import com.wplatform.ddal.value.ValueNull;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public class RoutingHandlerImpl implements RoutingHandler {
 
-    private Database database;
     private RoutingCalculator trc;
 
     public RoutingHandlerImpl(Database database) {
-        this.database = database;
         this.trc = new RoutingCalculatorImpl();
     }
 
     @Override
     public RoutingResult doRoute(TableMate table, SearchRow row) {
         TableRouter tr = table.getTableRouter();
-        if (tr != null) {
-            Map<String, List<Value>> args = getRuleColumnArgs(table, row);
-            RoutingResult rr = trc.calculate(tr, args);
-            if (rr.isMultipleNode()) {
+        if (tr != null)
+            try {
+                return getRoutingResult(table, row);
+            } catch (TableRoutingException e) {
+                throw e;
+            } catch (Exception e) {
                 throw new TableRoutingException(table.getName() + " routing error.");
             }
-            return rr;
-        } else {
+        else {
             return fixedRoutingResult(table.getShards());
         }
 
     }
 
-    @Override
-    public RoutingResult doRoute(TableMate table, SearchRow first, SearchRow last) {
+    private RoutingResult getRoutingResult(TableMate table, SearchRow row) {
         TableRouter tr = table.getTableRouter();
-        if (tr == null) {
-            return fixedRoutingResult(table.getShards());
-        } else {
-            Map<String, List<Value>> routingArgs = New.hashMap();
-            exportRangeArg(table, first, last, routingArgs);
-            RoutingResult rr = trc.calculate(tr, routingArgs);
-            return rr;
+        Column[] ruleCols = table.getRuleColumns();
+        List<RoutingArgument> args = New.arrayList(ruleCols.length);
+        for (Column ruleCol : ruleCols) {
+            Value v = row.getValue(ruleCol.getColumnId());
+            List<Value> value = New.arrayList(1);
+            value.add(v);
+            RoutingArgument arg = new RoutingArgument(value);
+            args.add(arg);
         }
-
+        RoutingResult rr;
+        if (args.size() == 1) {
+            RoutingArgument argument = args.get(0);
+            rr = trc.calculate(tr, argument);
+        } else {
+            rr = trc.calculate(tr, args);
+        }
+        if (rr.isMultipleNode()) {
+            throw new TableRoutingException(table.getName() + " routing error.");
+        }
+        return rr;
     }
 
 
     @Override
-    public RoutingResult doRoute(TableMate table, Session session, List<IndexCondition> indexConditions) {
+    public RoutingResult doRoute(Session session, TableMate table, List<IndexCondition> idxConds) {
         TableRouter tr = table.getTableRouter();
-        if (tr == null) {
-            return fixedRoutingResult(table.getShards());
-        } else {
-            Map<String, List<Value>> routingArgs = New.hashMap();
-            List<String> ruleCols = tr.getRuleColumns();
-            SearchRow start = null, end = null;
-            for (IndexCondition condition : indexConditions) {
-                Column column = condition.getColumn();
-                String colName = column.getName();
-                String matched = null;
-                for (String ruleColumn : ruleCols) {
-                    if (colName.equalsIgnoreCase(ruleColumn)) {
-                        matched = ruleColumn;
-                    }
+        if (tr != null)
+            try {
+                RoutingAnalysor analysor = new RoutingAnalysor(table, idxConds);
+                if (analysor.isAlwaysFalse()) {
+                    return RoutingResult.emptyResult();
                 }
-                if (matched == null) {
-                    continue;
+                Column[] ruleCols = table.getRuleColumns();
+                List<RoutingArgument> args = New.arrayList(ruleCols.length);
+                for (Column ruleCol : ruleCols) {
+                    RoutingArgument arg = analysor.doAnalyse(session, ruleCol);
+                    args.add(arg);
                 }
-                List<Value> values = routingArgs.get(matched);
-                if (values == null) {
-                    values = New.arrayList();
-                    routingArgs.put(matched, values);
-                }
-                if (condition.getCompareType() == Comparison.IN_LIST) {
-                    Value[] inList = condition.getCurrentValueList(session);
-                    for (Value value : inList) {
-                        values.add(value);
-                    }
-                } else if (condition.getCompareType() == Comparison.IN_QUERY) {
-                    ResultInterface result = condition.getCurrentResult();
-                    while (result.next()) {
-                        Value v = result.currentRow()[0];
-                        if (v != ValueNull.INSTANCE) {
-                            v = column.convert(v);
-                            values.add(v);
-                        }
-                    }
+                RoutingResult rr;
+                if (args.size() == 1) {
+                    RoutingArgument argument = args.get(0);
+                    rr = trc.calculate(tr, argument);
                 } else {
-                    int columnId = column.getColumnId();
-                    Value v = condition.getCurrentValue(session);
-                    boolean isStart = condition.isStart();
-                    boolean isEnd = condition.isEnd();
-                    if (isStart) {
-                        start = getSearchRow(table, session, start, columnId, v, true);
-                    }
-                    if (isEnd) {
-                        end = getSearchRow(table, session, end, columnId, v, false);
-                    }
+                    rr = trc.calculate(tr, args);
                 }
+                return rr;
+            } catch (TableRoutingException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new TableRoutingException(table.getName() + " routing error.");
             }
-            exportRangeArg(table, start, end, routingArgs);
-            RoutingResult rr = trc.calculate(tr, routingArgs);
-            return rr;
+        else {
+            return fixedRoutingResult(table.getShards());
         }
 
     }
 
-    private Map<String, List<Value>> getRuleColumnArgs(TableMate table, SearchRow row) {
-        Map<String, List<Value>> args = New.hashMap();
-        ArrayList<Column> shardingColumns = table.getShardingColumns();
-        for (Column column : shardingColumns) {
-            row.getValue(column.getColumnId());
-        }
-        
-        return args;
-    }
-
-    /**
-     * @param table
-     */
     private RoutingResult fixedRoutingResult(TableNode... tableNode) {
         RoutingResult result = RoutingResult.fixedResult(tableNode);
         return result;
     }
 
-    /**
-     * @param table
-     * @param first
-     * @param last
-     * @param routingArgs
-     */
-    private void exportRangeArg(TableMate table, SearchRow first, SearchRow last, Map<String, List<Value>> routingArgs) {
-        TableRouter tr = table.getTableRouter();
-        List<String> ruleCols = tr.getRuleColumns();
-        if (first != null && last != null) {
-            for (int i = 0; first != null && i < first.getColumnCount(); i++) {
-                Value firstV = first.getValue(i);
-                Value listV = last.getValue(i);
-                if (firstV == null || listV == null
-                        || firstV == ValueNull.INSTANCE
-                        || listV == ValueNull.INSTANCE) {
-                    continue;
-                }
-                Column col = table.getColumn(i);
-                String colName = col.getName();
-                String matched = null;
-                for (String ruleColumn : ruleCols) {
-                    if (colName.equalsIgnoreCase(ruleColumn)) {
-                        matched = ruleColumn;
-                    }
-                }
-                if (matched == null) {
-                    continue;
-                }
-                List<Value> values = routingArgs.get(matched);
-                if (values == null) {
-                    values = New.arrayList();
-                    routingArgs.put(matched, values);
-                }
-                int compare = database.compare(firstV, listV);
-                if (compare == 0) {
-                    values.add(firstV);
-                } else if (compare < 0) {
-                    List<Value> enumValue = enumRange(firstV, listV);
-                    if (enumValue != null) {
-                        values.addAll(enumValue);
-                    }
-                } else {
-                    throw new TableRoutingException(table.getName() + " routing error. The conidition "
-                            + matched + " is alwarys false.");
-                }
-
-            }
-        }
-    }
-
-    private List<Value> enumRange(Value firstV, Value listV) {
-        if (firstV.getType() != listV.getType()) {
-            return null;
-        }
-        int type = firstV.getType();
-        switch (type) {
-            case Value.BYTE:
-            case Value.INT:
-            case Value.LONG:
-            case Value.SHORT:
-                if (listV.subtract(firstV).getLong() > 200) {
-                    return null;
-                }
-                List<Value> enumValues = New.arrayList(10);
-                Value enumValue = firstV;
-                while (database.compare(enumValue, listV) <= 0) {
-                    enumValues.add(enumValue);
-                    Value increase = ValueLong.get(1).convertTo(enumValue.getType());
-                    enumValue = enumValue.add(increase);
-                }
-                return enumValues;
-
-            default:
-                return null;
-        }
-
-    }
-
-
-    private SearchRow getSearchRow(TableMate table, Session s, SearchRow row, int columnId, Value v,
-                                   boolean max) {
-        if (row == null) {
-            row = table.getTemplateRow();
-        } else {
-            v = getMax(table, s, row.getValue(columnId), v, max);
-        }
-        if (columnId < 0) {
-            row.setKey(v.getLong());
-        } else {
-            row.setValue(columnId, v);
-        }
-        return row;
-    }
-
-    private Value getMax(TableMate table, Session s, Value a, Value b, boolean bigger) {
-        if (a == null) {
-            return b;
-        } else if (b == null) {
-            return a;
-        }
-        if (s.getDatabase().getSettings().optimizeIsNull) {
-            // IS NULL must be checked later
-            if (a == ValueNull.INSTANCE) {
-                return b;
-            } else if (b == ValueNull.INSTANCE) {
-                return a;
-            }
-        }
-        int comp = a.compareTo(b, table.getDatabase().getCompareMode());
-        if (comp == 0) {
-            return a;
-        }
-        if (a == ValueNull.INSTANCE || b == ValueNull.INSTANCE) {
-            if (s.getDatabase().getSettings().optimizeIsNull) {
-                // column IS NULL AND column <op> <not null> is always false
-                return null;
-            }
-        }
-        if (!bigger) {
-            comp = -comp;
-        }
-        return comp > 0 ? a : b;
-    }
 }

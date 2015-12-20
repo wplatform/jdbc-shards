@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Created on 2015年2月3日
-// $Id$
-
-package com.wplatform.ddal.route;
+package com.wplatform.ddal.route.algorithm;
 
 import java.util.List;
 
-import com.wplatform.ddal.dbobject.index.IndexCondition;
-import com.wplatform.ddal.dbobject.table.TableMate;
-import com.wplatform.ddal.engine.Session;
-import com.wplatform.ddal.result.SearchRow;
-import com.wplatform.ddal.route.rule.RoutingResult;
+import com.wplatform.ddal.route.rule.RoutingArgument;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
+ *
  */
-public interface RoutingHandler {
+public interface MultColumnPartitioner {
 
-    RoutingResult doRoute(TableMate table, SearchRow row);
+    /**
+     * args is order by column
+     * @param args
+     * @return
+     */
+    Integer[] partition(List<RoutingArgument> args);
 
-    RoutingResult doRoute(Session session, TableMate table,  List<IndexCondition> indexConditions);
-
+     
 }

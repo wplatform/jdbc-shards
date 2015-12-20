@@ -28,6 +28,9 @@ import java.util.List;
  */
 public class HashBucketPartitioner extends CommonPartitioner {
 
+    private static final int HASH_BUCKET_SIZE = 1 << 10;
+    private static final long MOD_NUMBER = HASH_BUCKET_SIZE - 1;
+
     private int[] count;
     private int[] length;
     private PartitionUtil partitionUtil;
@@ -63,5 +66,9 @@ public class HashBucketPartitioner extends CommonPartitioner {
         byte[] bytes = value.getBytes();
         long hash64 = MurmurHash.hash64(bytes, bytes.length);
         return partitionUtil.partition(hash64);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(800 | 1024);
     }
 }

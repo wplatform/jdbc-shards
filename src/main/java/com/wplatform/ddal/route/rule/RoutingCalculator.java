@@ -18,16 +18,15 @@
 
 package com.wplatform.ddal.route.rule;
 
-import com.wplatform.ddal.value.Value;
-
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
 public interface RoutingCalculator {
+    
+    RoutingResult calculate(TableRouter tableRouter, RoutingArgument arg);
 
-    RoutingResult calculate(TableRouter tableRouter, Map<String, List<Value>> columnValue);
+    RoutingResult calculate(TableRouter tableRouter, List<RoutingArgument> arguments);
 
 }

@@ -37,7 +37,7 @@ public final class PartitionUtil {
      */
     public PartitionUtil(int[] count, int[] length) {
         if (count == null || length == null || (count.length != length.length)) {
-            throw new RuntimeException("error,check your scope & scopeLength definition.");
+            throw new IllegalArgumentException("error,check your scope & scopeLength definition.");
         }
         int segmentLength = 0;
         for (int i = 0; i < count.length; i++) {
@@ -52,7 +52,7 @@ public final class PartitionUtil {
             }
         }
         if (ai[ai.length - 1] != PARTITION_LENGTH) {
-            throw new RuntimeException("error,check your partitionScope definition.");
+            throw new IllegalArgumentException("error,check your partitionScope definition.");
         }
 
         // 数据映射操作
@@ -64,7 +64,8 @@ public final class PartitionUtil {
     }
 
     public int partition(long hash) {
-        return segment[(int) (hash & AND_VALUE)];
+        int index = (int) (hash & AND_VALUE);
+        return segment[index];
     }
 
 }
