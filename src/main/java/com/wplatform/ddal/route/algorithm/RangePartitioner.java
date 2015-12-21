@@ -19,16 +19,17 @@ import com.wplatform.ddal.route.rule.RuleEvaluateException;
 import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
+import com.wplatform.ddal.value.ValueTimestamp;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
- *
  */
 public class RangePartitioner extends CommonPartitioner {
 
+    private int chunk;
     private int[] count;
     private int[] length;
     private PartitionUtil partitionUtil;
@@ -36,9 +37,15 @@ public class RangePartitioner extends CommonPartitioner {
     @Override
     public void initialize(List<TableNode> tableNodes) {
         super.initialize(tableNodes);
-        partitionUtil = new PartitionUtil(count, length);
+        if ((chunk & chunk - 1) != 0) {
+            throw new IllegalArgumentException("Chunk must be 2^n,such as 256,512,1024...");
+        }
+        partitionUtil = new PartitionUtil(chunk, count, length);
     }
 
+    public void setChunk(int chunk) {
+        this.chunk = chunk;
+    }
 
     public void setPartitionCount(String partitionCount) {
         this.count = toIntArray(partitionCount);
@@ -57,18 +64,16 @@ public class RangePartitioner extends CommonPartitioner {
             case Value.SHORT:
             case Value.INT:
             case Value.LONG:
-                long valueLong = value.getLong();
-                return partitionUtil.partition(valueLong);
             case Value.FLOAT:
             case Value.DECIMAL:
             case Value.DOUBLE:
-                double aDouble = value.getDouble();
-                long round = Math.round(aDouble);
-                return partitionUtil.partition(round);
+                long valueLong = value.getLong();
+                return partitionUtil.partition(valueLong);
             case Value.DATE:
             case Value.TIME:
             case Value.TIMESTAMP:
-                long toLong = value.getLong();
+                ValueTimestamp v = (ValueTimestamp) value.convertTo(Value.TIMESTAMP);
+                long toLong = v.getTimestamp().getTime();
                 return partitionUtil.partition(toLong);
             case Value.STRING:
             case Value.STRING_FIXED:
@@ -127,7 +132,7 @@ public class RangePartitioner extends CommonPartitioner {
                 throw new RuleEvaluateException("Invalid type for " + getClass().getName());
 
         }
-        if ((vEnd - vBegin) >= 1023) {
+        if ((vEnd - vBegin) >= chunk - 1) {
             return allNodes();
         } else if ((vEnd - vBegin) < 0) {
             return new Integer[0];

@@ -18,27 +18,32 @@ package com.wplatform.ddal.route.algorithm;
 
 public final class PartitionUtil {
 
-    // 分区长度:数据段分布定义，其中取模的数一定要是2^n， 因为这里使用x % 2^n == x & (2^n - 1)等式，来优化性能。
-    private static final int PARTITION_LENGTH = 1024;
+    private final int partitionLength;
 
-    // %转换为&操作的换算数值
-    private static final long AND_VALUE = PARTITION_LENGTH - 1;
+    private final long andValue;
 
-    // 分区线段
-    private final int[] segment = new int[PARTITION_LENGTH];
+    private final int[] segment;
 
     /**
-     * <pre>
-     * @param count 表示定义的分区数
-     * @param length 表示对应每个分区的取值长度
-     * 注意：其中count,length两个数组的长度必须是一致的。
-     * 约束：1024 = sum((count[i]*length[i])). count和length两个向量的点积恒等于1024
-     * </pre>
+     * partitionLength must be 2^n
+     * partitionLength = sum((count[i]*length[i]))
+     * @param partitionLength
+     * @param count
+     * @param length
      */
-    public PartitionUtil(int[] count, int[] length) {
+    public PartitionUtil(int partitionLength, int[] count, int[] length) {
+        if (partitionLength < 1 || partitionLength > 32768) {
+            throw new IllegalArgumentException("partitionLength must be between 0 and 32768");
+        }
+        if ((partitionLength & partitionLength - 1) != 0) {
+            throw new IllegalArgumentException("partitionLength must be 2^n");
+        }
         if (count == null || length == null || (count.length != length.length)) {
             throw new IllegalArgumentException("error,check your scope & scopeLength definition.");
         }
+        this.partitionLength = partitionLength;
+        this.andValue = partitionLength - 1;
+        this.segment = new int[partitionLength];
         int segmentLength = 0;
         for (int i = 0; i < count.length; i++) {
             segmentLength += count[i];
@@ -51,10 +56,9 @@ public final class PartitionUtil {
                 ai[++index] = ai[index - 1] + length[i];
             }
         }
-        if (ai[ai.length - 1] != PARTITION_LENGTH) {
+        if (ai[ai.length - 1] != partitionLength) {
             throw new IllegalArgumentException("error,check your partitionScope definition.");
         }
-
         // 数据映射操作
         for (int i = 1; i < ai.length; i++) {
             for (int j = ai[i - 1]; j < ai[i]; j++) {
@@ -63,8 +67,14 @@ public final class PartitionUtil {
         }
     }
 
+    /**
+     * if x is 2^n，x % 2^n == x & (2^n - 1)
+     *
+     * @param hash
+     * @return
+     */
     public int partition(long hash) {
-        int index = (int) (hash & AND_VALUE);
+        int index = (int) (hash & andValue);
         return segment[index];
     }
 

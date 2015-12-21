@@ -23,14 +23,21 @@
             <table shard="shard3" suffix="_01,_02"/>
         </partition>
         <tableRule>
-			<columns>customer_id</columns> 
+			<columns>customer_partitioner</columns>
       		<algorithm>hash</algorithm>
         </tableRule>
         
     </tableRouter>
     
-    <partitioner name="hash" class="">
-    	<property name="username" value="root"/>
+    <partitioner name="customer_partitioner" class="com.wplatform.ddal.route.algorithm.HashBucketPartitioner">
+    	<property name="partitionCount" value="8"/>
+        <property name="partitionLength" value="128"/>
+    </partitioner>
+
+
+    <partitioner name="order_partitioner" class="com.wplatform.ddal.route.algorithm.HashBucketPartitioner">
+        <property name="partitionCount" value="16"/>
+        <property name="partitionLength" value="64"/>
     </partitioner>
     
 </ddal-rule>

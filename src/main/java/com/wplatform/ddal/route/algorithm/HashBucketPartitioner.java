@@ -29,7 +29,7 @@ import java.util.List;
 public class HashBucketPartitioner extends CommonPartitioner {
 
     private static final int HASH_BUCKET_SIZE = 1 << 10;
-    private static final long MOD_NUMBER = HASH_BUCKET_SIZE - 1;
+
 
     private int[] count;
     private int[] length;
@@ -47,7 +47,7 @@ public class HashBucketPartitioner extends CommonPartitioner {
     @Override
     public void initialize(List<TableNode> tableNodes) {
         super.initialize(tableNodes);
-        partitionUtil = new PartitionUtil(count, length);
+        partitionUtil = new PartitionUtil(HASH_BUCKET_SIZE, count, length);
     }
 
     @Override
@@ -69,6 +69,6 @@ public class HashBucketPartitioner extends CommonPartitioner {
     }
 
     public static void main(String[] args) {
-        System.out.println(800 | 1024);
+        System.out.println(1 << 15);
     }
 }
