@@ -21,7 +21,6 @@ import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueNull;
 import com.wplatform.ddal.value.ValueTimestamp;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,10 +28,32 @@ import java.util.List;
  */
 public class RangePartitioner extends CommonPartitioner {
 
-    private int chunk;
+    private int chunk = 1024;
     private int[] count;
     private int[] length;
     private PartitionUtil partitionUtil;
+
+    /**
+     * 字符串hash算法：s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1] <br>
+     * 其中s[]为字符串的字符数组，换算成程序的表达式为：<br>
+     * h = 31*h + s.charAt(i); => h = (h << 5) - h + s.charAt(i); <br>
+     *
+     * @param start hash for s.substring(start, end)
+     * @param end   hash for s.substring(start, end)
+     */
+    private static long hash(String s, int start, int end) {
+        if (start < 0) {
+            start = 0;
+        }
+        if (end > s.length()) {
+            end = s.length();
+        }
+        long h = 0;
+        for (int i = start; i < end; ++i) {
+            h = (h << 5) - h + s.charAt(i);
+        }
+        return h;
+    }
 
     @Override
     public void initialize(List<TableNode> tableNodes) {
@@ -55,9 +76,12 @@ public class RangePartitioner extends CommonPartitioner {
         this.length = toIntArray(partitionLength);
     }
 
-
     @Override
     public Integer partition(Value value) {
+        boolean isNull = checkNull(value);
+        if (isNull) {
+            return getDefaultNodeIndex();
+        }
         int type = value.getType();
         switch (type) {
             case Value.BYTE:
@@ -147,38 +171,6 @@ public class RangePartitioner extends CommonPartitioner {
                 re[idx++] = i;
             }
             return re;
-        }
-    }
-
-    /**
-     * 字符串hash算法：s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1] <br>
-     * 其中s[]为字符串的字符数组，换算成程序的表达式为：<br>
-     * h = 31*h + s.charAt(i); => h = (h << 5) - h + s.charAt(i); <br>
-     *
-     * @param start hash for s.substring(start, end)
-     * @param end hash for s.substring(start, end)
-     */
-    private static long hash(String s, int start, int end) {
-        if (start < 0) {
-            start = 0;
-        }
-        if (end > s.length()) {
-            end = s.length();
-        }
-        long h = 0;
-        for (int i = start; i < end; ++i) {
-            h = (h << 5) - h + s.charAt(i);
-        }
-        return h;
-    }
-
-
-    public static void main(String[] args) {
-        String[] str = {"abc", "bca", "cab", "cba", "aaa", "111", "232", "112", "ABC"};
-        Arrays.sort(str);
-        for (int i = 0; i < str.length; i++) {
-            System.out.println(str[i]);
-            System.out.println(hash(str[i], 0, str[i].length()));
         }
     }
 

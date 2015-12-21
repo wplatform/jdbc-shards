@@ -78,7 +78,6 @@ public class RollingPartitioner extends CommonPartitioner {
             throw new IllegalArgumentException("startBy must be number or string 'day','month','year'.");
         }
 
-
     }
 
     public void setRollingBy(String rollingBy) {
@@ -91,6 +90,10 @@ public class RollingPartitioner extends CommonPartitioner {
 
     @Override
     public Integer partition(Value value) {
+        boolean isNull = checkNull(value);
+        if (isNull) {
+            return getDefaultNodeIndex();
+        }
         switch (rollingType) {
             case NUMBER_TYPE: {
                 int type = value.getType();
@@ -107,7 +110,7 @@ public class RollingPartitioner extends CommonPartitioner {
                         return position;
                     default:
                         throw new RuleEvaluateException("Invalid type for " + getClass().getName());
-                }
+            }
             }
             case DAYS_TYPE: {
                 Calendar calendar = Calendar.getInstance();
@@ -134,6 +137,32 @@ public class RollingPartitioner extends CommonPartitioner {
             default:
                 throw new IllegalStateException("Invalid rollingType");
         }
+    }
+
+
+    @Override
+    public Integer[] partition(Value beginValue, Value endValue) {
+        Integer begin;
+        if (beginValue == null) {
+            begin = 0;
+        } else {
+            begin = partition(beginValue);
+        }
+        Integer end;
+        if (endValue == null) {
+            end = getTableNodes().size() - 1;
+        } else {
+            end = partition(endValue);
+        }
+
+        int max = Math.max(begin, end);
+        int min = Math.min(begin, end);
+        Integer[] re = new Integer[(max - min) + 1];
+        int idx = 0;
+        for (Integer i = min; i <= max; i++) {
+            re[idx++] = i;
+        }
+        return re;
     }
 
     private long getTime(Value value) {

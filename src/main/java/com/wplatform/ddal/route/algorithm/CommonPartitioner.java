@@ -15,12 +15,14 @@
  */
 package com.wplatform.ddal.route.algorithm;
 
+import com.wplatform.ddal.route.rule.RuleEvaluateException;
 import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.util.StringUtils;
 import com.wplatform.ddal.value.CompareMode;
 import com.wplatform.ddal.value.Value;
 import com.wplatform.ddal.value.ValueLong;
+import com.wplatform.ddal.value.ValueNull;
 
 import java.util.List;
 import java.util.Set;
@@ -34,6 +36,16 @@ public abstract class CommonPartitioner implements Partitioner {
     private int defaultNodeIndex = -1;
 
     private List<TableNode> tableNodes;
+
+    protected static int[] toIntArray(String string) {
+        string = string.replaceAll("\\s", "");
+        List<String> split = StringUtils.split(string, ",");
+        int[] ints = new int[split.size()];
+        for (int i = 0; i < split.size(); ++i) {
+            ints[i] = Integer.parseInt(split.get(i));
+        }
+        return ints;
+    }
 
     /**
      * @return the defaultNodeIndex
@@ -119,14 +131,18 @@ public abstract class CommonPartitioner implements Partitioner {
 
     }
 
-    protected static int[] toIntArray(String string) {
-        string = string.replaceAll("\\s", "");
-        List<String> split = StringUtils.split(string, ",");
-        int[] ints = new int[split.size()];
-        for (int i = 0; i < split.size(); ++i) {
-            ints[i] = Integer.parseInt(split.get(i));
+    /**
+     * @param value
+     */
+    protected boolean checkNull(Value value) {
+        if (value == null || value == ValueNull.INSTANCE) {
+            if (getDefaultNodeIndex() == -1) {
+                throw new RuleEvaluateException("Null value.");
+            }
+            return true;
+        } else {
+            return false;
         }
-        return ints;
     }
 
 }

@@ -19,7 +19,6 @@ import com.wplatform.ddal.route.rule.RuleEvaluateException;
 import com.wplatform.ddal.route.rule.TableNode;
 import com.wplatform.ddal.util.MurmurHash;
 import com.wplatform.ddal.value.Value;
-import com.wplatform.ddal.value.ValueNull;
 
 import java.util.List;
 
@@ -28,7 +27,7 @@ import java.util.List;
  */
 public class HashBucketPartitioner extends CommonPartitioner {
 
-    private static final int HASH_BUCKET_SIZE = 1 << 10;
+    private static final int HASH_BUCKET_SIZE = 1024;
 
 
     private int[] count;
@@ -52,7 +51,8 @@ public class HashBucketPartitioner extends CommonPartitioner {
 
     @Override
     public Integer partition(Value value) {
-        if (value == null || value == ValueNull.INSTANCE) {
+        boolean isNull = checkNull(value);
+        if (isNull) {
             return getDefaultNodeIndex();
         }
         int type = value.getType();
@@ -68,7 +68,5 @@ public class HashBucketPartitioner extends CommonPartitioner {
         return partitionUtil.partition(hash64);
     }
 
-    public static void main(String[] args) {
-        System.out.println(1 << 15);
-    }
+
 }

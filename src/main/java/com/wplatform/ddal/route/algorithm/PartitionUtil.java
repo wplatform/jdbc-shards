@@ -56,7 +56,7 @@ public final class PartitionUtil {
                 ai[++index] = ai[index - 1] + length[i];
             }
         }
-        if (ai[ai.length - 1] != partitionLength) {
+        if (ai[ai.length - 1] != this.partitionLength) {
             throw new IllegalArgumentException("error,check your partitionScope definition.");
         }
         // 数据映射操作
