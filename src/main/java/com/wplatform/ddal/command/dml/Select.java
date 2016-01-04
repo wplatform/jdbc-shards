@@ -17,6 +17,7 @@ package com.wplatform.ddal.command.dml;
 
 import com.wplatform.ddal.command.CommandInterface;
 import com.wplatform.ddal.command.expression.*;
+import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.*;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
@@ -364,15 +365,60 @@ public class Select extends Query {
                 }
             }
         }
-        if (isGroupQuery && groupIndex == null && havingIndex < 0) {
+        int tableCount = filters.size();
+        if(tableCount == 1) {
+            isAccordantQuery = true;
+        }
+        if (isGroupQuery && groupIndex == null &&
+                havingIndex < 0 && tableCount == 1) {
             isQuickAggregateQuery = true;
+        }
+        for (TableFilter outer : filters) {
+            if(!outer.isFromTableMate()) {
+                break;
+            }
+            for (TableFilter inner : filters) {
+                if(outer == inner) {
+                    continue;
+                }
+                TableMate table1 = (TableMate) outer.getTable();
+                TableMate table2 = (TableMate) inner.getTable();
+                if (!table1.isTableNodeSymmetric(table2)) {
+                    break;
+                }
+                if(table1.isReplication() || table2.isReplication()) {
+                    continue;
+                }
+                Column[] columns1 = table1.getRuleColumns();
+                Column[] columns2 = table2.getRuleColumns();
+                if(columns1 != null && columns2 != null) {
+                    for (Column column : columns1) {
+                        for (IndexCondition idxCond1 : outer.getIndexConditions()) {
+                            if(idxCond1.getColumn() == column && idxCond1.getCompareType() != Comparison.EQUAL) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+                ArrayList<IndexCondition> cond1 = outer.getIndexConditions();
+                ArrayList<IndexCondition> cond2 = inner.getIndexConditions();
+                for (IndexCondition outerCond : cond1) {
+                    if(outerCond.getCompareType() == Comparison.EQUAL) {
+
+                    }
+                    Column column = outerCond.getColumn();
+                    for (IndexCondition innerCond : cond2) {
+
+                    }
+                }
+            }
         }
         TableMate last = null;
         for (TableFilter out : filters) {
         }
         cost = preparePlan();
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&
-                !isGroupQuery && filters.size() == 1 &&
+                !isGroupQuery && tableCount == 1 &&
                 expressions.size() == 1 && condition == null) {
             //分布式的查询不合适
         }
