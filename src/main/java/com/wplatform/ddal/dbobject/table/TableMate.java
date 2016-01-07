@@ -17,20 +17,6 @@
 // $Id$
 package com.wplatform.ddal.dbobject.table;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import com.wplatform.ddal.command.ddl.CreateTableData;
 import com.wplatform.ddal.dbobject.index.Index;
 import com.wplatform.ddal.dbobject.index.IndexMate;
@@ -54,6 +40,13 @@ import com.wplatform.ddal.value.DataType;
 import com.wplatform.ddal.value.ValueDate;
 import com.wplatform.ddal.value.ValueTime;
 import com.wplatform.ddal.value.ValueTimestamp;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -584,7 +577,7 @@ public class TableMate extends Table {
         return scale;
     }
 
-    public boolean isTableNodeSymmetric(TableMate o) {
+    public boolean isSymmetricTable(TableMate o) {
         if (this == o) {
             return true;
         }

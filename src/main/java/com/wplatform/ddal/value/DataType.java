@@ -439,10 +439,10 @@ public class DataType {
     /**
      * Read a value from the given result set.
      *
-     * @param session     the session
-     * @param rs          the result set
+     * @param session the session
+     * @param rs the result set
      * @param columnIndex the column index (1 based)
-     * @param type        the data type
+     * @param type the data type
      * @return the value
      */
     public static Value readValue(SessionInterface session, ResultSet rs,
@@ -723,7 +723,7 @@ public class DataType {
      * Convert a SQL type to a value type using SQL type name, in order to
      * manage SQL type extension mechanism.
      *
-     * @param sqlType     the SQL type
+     * @param sqlType the SQL type
      * @param sqlTypeName the SQL type name
      * @return the value type
      */
@@ -735,7 +735,7 @@ public class DataType {
      * Get the SQL type from the result set meta data for the given column. This
      * method uses the SQL type and type name.
      *
-     * @param meta        the meta data
+     * @param meta the meta data
      * @param columnIndex the column index (1, 2,...)
      * @return the value type
      */
@@ -886,8 +886,8 @@ public class DataType {
      * Convert a Java object to a value.
      *
      * @param session the session
-     * @param x       the value
-     * @param type    the value type
+     * @param x the value
+     * @param type the value type
      * @return the value
      */
     public static Value convertToValue(SessionInterface session, Object x,
@@ -1080,8 +1080,8 @@ public class DataType {
     /**
      * Convert a value to the specified class.
      *
-     * @param conn       the database connection
-     * @param v          the value
+     * @param conn the database connection
+     * @param v the value
      * @param paramClass the target class
      * @return the converted object
      */

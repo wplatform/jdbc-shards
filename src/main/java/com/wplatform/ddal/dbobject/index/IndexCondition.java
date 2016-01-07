@@ -79,7 +79,7 @@ public class IndexCondition {
 
     /**
      * @param compareType the comparison type, see constants in
-     *                    {@link Comparison}
+     * {@link Comparison}
      */
     private IndexCondition(int compareType, ExpressionColumn column,
                            Expression expression) {
@@ -92,9 +92,9 @@ public class IndexCondition {
      * Create an index condition with the given parameters.
      *
      * @param compareType the comparison type, see constants in
-     *                    {@link Comparison}
-     * @param column      the column
-     * @param expression  the expression
+     * {@link Comparison}
+     * @param column the column
+     * @param expression the expression
      * @return the index condition
      */
     public static IndexCondition get(int compareType, ExpressionColumn column,
@@ -107,7 +107,7 @@ public class IndexCondition {
      * given parameters.
      *
      * @param column the column
-     * @param list   the expression list
+     * @param list the expression list
      * @return the index condition
      */
     public static IndexCondition getInList(ExpressionColumn column,
@@ -122,7 +122,7 @@ public class IndexCondition {
      * given parameters.
      *
      * @param column the column
-     * @param query  the select statement
+     * @param query the select statement
      * @return the index condition
      */
     public static IndexCondition getInQuery(ExpressionColumn column, Query query) {
@@ -345,6 +345,26 @@ public class IndexCondition {
             return true;
         }
         return expressionQuery.isEverything(ExpressionVisitor.EVALUATABLE_VISITOR);
+    }
+
+    /**
+     * Check if the expression can be evaluated.
+     *
+     * @return true if it can be evaluated
+     */
+    public boolean isColumnEquality(Column left, Column right) {
+        if (compareType != Comparison.EQUAL) {
+            return false;
+        } else {
+            if (this.expression instanceof ExpressionColumn) {
+                ExpressionColumn expr = (ExpressionColumn) this.expression;
+                Column column = expr.getColumn();
+                boolean l = left == this.column && right == column;
+                boolean r = right == this.column && left == column;
+                return l || r;
+            }
+            return false;
+        }
     }
 
 }

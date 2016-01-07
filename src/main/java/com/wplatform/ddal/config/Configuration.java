@@ -93,7 +93,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param key          the property key
+     * @param key the property key
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -105,7 +105,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param key          the property key
+     * @param key the property key
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -117,7 +117,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting      the setting id
+     * @param setting the setting id
      * @param defaultValue the default value
      * @return the value as a String
      */
@@ -130,7 +130,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting      the setting id
+     * @param setting the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -147,7 +147,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting      the setting id
+     * @param setting the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -164,7 +164,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting      the setting id
+     * @param setting the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -176,7 +176,7 @@ public class Configuration {
     /**
      * Get the value of the given property.
      *
-     * @param setting      the setting id
+     * @param setting the setting id
      * @param defaultValue the default value
      * @return the value as an integer
      */
@@ -189,7 +189,7 @@ public class Configuration {
     /**
      * Remove a boolean property if it is set and return the value.
      *
-     * @param key          the property name
+     * @param key the property name
      * @param defaultValue the default value
      * @return the value
      */
@@ -201,7 +201,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setProperty(int setting, String value) {
@@ -218,7 +218,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setProperty(int setting, int value) {
@@ -228,7 +228,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setProperty(int setting, boolean value) {
@@ -238,7 +238,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setProperty(String key, String value) {
@@ -251,7 +251,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setObject(String key, Object value) {
@@ -264,7 +264,7 @@ public class Configuration {
     /**
      * Overwrite a property.
      *
-     * @param key   the property name
+     * @param key the property name
      * @param value the value
      */
     public void setObject(int setting, Object value) {
@@ -275,7 +275,7 @@ public class Configuration {
     /**
      * Remove a String property if it is set and return the value.
      *
-     * @param key          the property name
+     * @param key the property name
      * @param defaultValue the default value
      * @return the value
      */
@@ -321,7 +321,8 @@ public class Configuration {
     public Partitioner getPartitioner(String name) {
         Partitioner partitioner = partitioners.get(name);
         if (partitioner == null) {
-            throw new IllegalArgumentException("Duplicate partitioner name " + name);
+            throw new IllegalArgumentException(String.format("partitioner %s is not defined.", name));
+
         }
         return partitioner;
     }

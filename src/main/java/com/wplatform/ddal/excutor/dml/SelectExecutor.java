@@ -142,9 +142,9 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
         if (limitRows != 0) {
             if (isAccordantQuery) {
                 if (isGroupQuery) {
-                    queryGroupAccordant(columnCount, to);
+                    queryAccordantGroup(columnCount, to);
                 } else {
-                    queryFlatAccordant(columnCount, to, limitRows);
+                    queryAccordantFlat(columnCount, to, limitRows);
                 }
             } else {
                 if (isGroupQuery) {
@@ -438,7 +438,7 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
     }
 
 
-    private void queryFlatAccordant(int columnCount, ResultTarget result, long limitRows) {
+    private void queryAccordantFlat(int columnCount, ResultTarget result, long limitRows) {
 
     }
 
@@ -477,7 +477,7 @@ public class SelectExecutor extends PreparedRoutingExecutor<Select> {
         }
     }
 
-    private void queryGroupAccordant(int columnCount, ResultTarget result) {
+    private void queryAccordantGroup(int columnCount, ResultTarget result) {
         Value[] row = new Value[columnCount];
         for (int i = 0; i < columnCount; i++) {
             Expression expr = expressions.get(i);

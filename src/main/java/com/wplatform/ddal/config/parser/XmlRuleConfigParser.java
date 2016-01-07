@@ -169,17 +169,17 @@ public class XmlRuleConfigParser {
         List<String> result = New.arrayList();
         if(StringUtils.isNullOrEmpty(items)) {
             return result;
-        } else if (items.indexOf(",") != -1) {
-            result = StringUtils.split(items, ",");
-            if (result.size() == new HashSet<String>(result).size()) {
-                throw new ParsingException(
-                        "Duplicate item " + items);
-            }
         } else if (items.indexOf("-") != -1) {
             List<String> list = StringUtils.split(items, "-");
             if (list.size() != 2) {
                 throw new ParsingException(
                         "Invalid conjunction item'" + items + "'");
+            }
+        } else {
+            result = StringUtils.split(items, ",");
+            if (result.size() != new HashSet<String>(result).size()) {
+                throw new ParsingException(
+                        "Duplicate item " + items);
             }
         }
         return result;

@@ -10,8 +10,8 @@
             <table shard="shard3" suffix="_01,_02,_03,_04"/>
         </partition>
         <tableRule>
-            <columns>id</columns> 
-      		<algorithm>hash</algorithm>
+            <columns>order_id</columns>
+            <algorithm>order_partitioner</algorithm>
         </tableRule>
     </tableRouter>
 
@@ -23,8 +23,8 @@
             <table shard="shard3" suffix="_01,_02"/>
         </partition>
         <tableRule>
-			<columns>customer_partitioner</columns>
-      		<algorithm>hash</algorithm>
+            <columns>customer_id</columns>
+            <algorithm>customer_partitioner</algorithm>
         </tableRule>
         
     </tableRouter>

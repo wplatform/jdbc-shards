@@ -18,10 +18,10 @@
 
 package com.wplatform.ddal.route.rule;
 
+import com.wplatform.ddal.route.algorithm.Partitioner;
+
 import java.io.Serializable;
 import java.util.List;
-
-import com.wplatform.ddal.route.algorithm.Partitioner;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -113,48 +113,21 @@ public class TableRouter implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((partition == null) ? 0 : partition.hashCode());
-        result = prime * result + ((partitioner == null) ? 0 : partitioner.hashCode());
-        result = prime * result + ((ruleColumns == null) ? 0 : ruleColumns.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TableRouter that = (TableRouter) o;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (algorithm != null ? !algorithm.equals(that.algorithm) : that.algorithm != null) return false;
+        return ruleColumns != null ? ruleColumns.equals(that.ruleColumns) : that.ruleColumns == null;
+
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        TableRouter other = (TableRouter) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        if (partition == null) {
-            if (other.partition != null)
-                return false;
-        } else if (!partition.equals(other.partition))
-            return false;
-        if (partitioner == null) {
-            if (other.partitioner != null)
-                return false;
-        } else if (!partitioner.equals(other.partitioner))
-            return false;
-        if (ruleColumns == null) {
-            if (other.ruleColumns != null)
-                return false;
-        } else if (!ruleColumns.equals(other.ruleColumns))
-            return false;
-        return true;
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (algorithm != null ? algorithm.hashCode() : 0);
+        result = 31 * result + (ruleColumns != null ? ruleColumns.hashCode() : 0);
+        return result;
     }
-    
-    
-
 }

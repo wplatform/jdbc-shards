@@ -18,22 +18,17 @@
 
 package com.wplatform.ddal.route;
 
-import java.util.List;
-
 import com.wplatform.ddal.dbobject.index.IndexCondition;
 import com.wplatform.ddal.dbobject.table.Column;
 import com.wplatform.ddal.dbobject.table.TableMate;
 import com.wplatform.ddal.engine.Database;
 import com.wplatform.ddal.engine.Session;
 import com.wplatform.ddal.result.SearchRow;
-import com.wplatform.ddal.route.rule.RoutingArgument;
-import com.wplatform.ddal.route.rule.RoutingCalculator;
-import com.wplatform.ddal.route.rule.RoutingCalculatorImpl;
-import com.wplatform.ddal.route.rule.RoutingResult;
-import com.wplatform.ddal.route.rule.TableNode;
-import com.wplatform.ddal.route.rule.TableRouter;
+import com.wplatform.ddal.route.rule.*;
 import com.wplatform.ddal.util.New;
 import com.wplatform.ddal.value.Value;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
@@ -93,7 +88,7 @@ public class RoutingHandlerImpl implements RoutingHandler {
         TableRouter tr = table.getTableRouter();
         if (tr != null)
             try {
-                RoutingAnalysor analysor = new RoutingAnalysor(table, idxConds);
+                RoutingAnalyzer analysor = new RoutingAnalyzer(table, idxConds);
                 if (analysor.isAlwaysFalse()) {
                     return RoutingResult.emptyResult();
                 }

@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:jorgie.mail@gmail.com">jorgie li</a>
  */
-public class RoutingAnalysor {
+public class RoutingAnalyzer {
 
 
     private Session session;
@@ -47,7 +47,7 @@ public class RoutingAnalysor {
     private ResultInterface inResult;
     private HashSet<Value> inList;
 
-    public RoutingAnalysor(TableMate table, List<IndexCondition> idxConds) {
+    public RoutingAnalyzer(TableMate table, List<IndexCondition> idxConds) {
         if (idxConds == null) {
             throw new IllegalArgumentException();
         }

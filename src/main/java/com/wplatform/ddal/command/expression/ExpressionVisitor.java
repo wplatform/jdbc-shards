@@ -114,7 +114,7 @@ public class ExpressionVisitor {
     /**
      * Get all referenced columns.
      */
-    public static final int EXPORT_PARAMETER = 9;
+    public static final int COLUMNS_CONDITIONS = 10;
 
     /**
      * The visitor singleton for the type QUERY_COMPARABLE.
@@ -198,11 +198,6 @@ public class ExpressionVisitor {
 
     public static ExpressionVisitor getMaxModificationIdVisitor() {
         return new ExpressionVisitor(SET_MAX_DATA_MODIFICATION_ID, 0, null,
-                null, null, null);
-    }
-
-    public static ExpressionVisitor getExportParameterVisitor() {
-        return new ExpressionVisitor(EXPORT_PARAMETER, 0, null,
                 null, null, null);
     }
 
