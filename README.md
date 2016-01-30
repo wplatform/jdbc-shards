@@ -8,3 +8,7 @@ jdbc-shards是基于关系型数据库集群实现的一个轻量级SQL引擎，
 - 读写分离支持，支持问题数据库隔离和自动恢复
 - 对前端应用透明，屏蔽分布式数据库的复杂逻辑
 - 兼容主流的数据库MySql,PostgreSQL,Oracle,DB2,SQLServer的SQL语法
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/wplatform/jdbc-shards/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
