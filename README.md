@@ -1,5 +1,5 @@
 
-项目已更名为OpenDDAL,代码库移至[https://github.com/openddal/openddal](https://github.com/openddal/openddal)
+项目已更名为OpenDDAL,代码库移至[https://github.com/neradb/openddal](https://github.com/neradb/openddal)
 
 # OpenDDAL概述
 OpenDDAL致力于提供一个简单易用，高性能的分布式数据库访问服务，OpenDDAL内致的分布式SQL引擎能处理各种复杂的SQL，为之选择可靠的执行计划。OpenDDAL提供SQL语句执行计划查询，方便的理解SQL的路由及执行。有助于开发可靠的业务代码。除此之外，OpenDDAL提供了简洁高效的切分实现，数据库隔离及恢复，读写分离等功能。
